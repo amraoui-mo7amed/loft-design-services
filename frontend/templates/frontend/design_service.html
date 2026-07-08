@@ -1,0 +1,207 @@
+{% extends "index.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Design Service — Professional Interior Design" %}{% endblock title %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/design-service.css' %}?v={% now "U" %}">
+{% endblock css %}
+
+
+
+{% block content %}
+<!-- Hero -->
+<section class="design-hero d-flex align-items-center position-relative overflow-hidden">
+    <div class="hero-bg-shape"></div>
+    <div class="container position-relative z-1">
+        <div class="row align-items-center min-vh-60">
+            <div class="col-lg-6" data-aos="fade-up">
+                <span class="badge bg-white text-primary fw-bold px-3 py-2 mb-3 rounded-pill shadow-sm">
+                    <i class="fas fa-magic me-2"></i>{% trans "Professional Design Service" %}
+                </span>
+                <h1 class="display-4 fw-bold text-white mb-3">{% trans "Transform Your Space Into a Masterpiece" %}</h1>
+                <p class="lead text-white-50 mb-4">{% trans "From concept to completion, our expert designers bring your vision to life. Choose your style, select your spaces, and let us handle the rest." %}</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{% url 'design_service' %}" class="btn btn-light btn-lg rounded-3 fw-bold px-5 py-3 shadow">
+                        <i class="fas fa-play me-2"></i>{% trans "Start My Project" %}
+                    </a>
+                    <a href="#how-it-works" class="btn btn-outline-light btn-lg rounded-3 fw-bold px-5 py-3">
+                        {% trans "Learn More" %}
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center" data-aos="fade-left">
+                <div class="hero-image-wrapper">
+                    <div class="hero-image-placeholder bg-white bg-opacity-10 rounded-4 p-5">
+                        <i class="fas fa-drafting-compass display-1 text-white-50"></i>
+                        <p class="text-white-50 mt-3">{% trans "Professional Interior Design" %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits -->
+<section class="py-5 bg-white" id="benefits">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="fw-bold">{% trans "Why Choose Our Design Service?" %}</h2>
+            <p class="text-muted">{% trans "We make professional interior design accessible, affordable, and enjoyable" %}</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4" data-aos="fade-up">
+                <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100">
+                    <div class="display-5 text-primary mb-3"><i class="fas fa-pencil-ruler"></i></div>
+                    <h5 class="fw-bold">{% trans "Expert Designers" %}</h5>
+                    <p class="text-muted small mb-0">{% trans "Work with experienced professional designers who understand your vision." %}</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100">
+                    <div class="display-5 text-primary mb-3"><i class="fas fa-tag"></i></div>
+                    <h5 class="fw-bold">{% trans "Transparent Pricing" %}</h5>
+                    <p class="text-muted small mb-0">{% trans "Know exactly what you pay with our clear, upfront pricing model." %}</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100">
+                    <div class="display-5 text-primary mb-3"><i class="fas fa-clock"></i></div>
+                    <h5 class="fw-bold">{% trans "Fast Delivery" %}</h5>
+                    <p class="text-muted small mb-0">{% trans "Get your designs delivered within your timeline, no endless waiting." %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5 bg-light" id="how-it-works">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="fw-bold">{% trans "How It Works" %}</h2>
+            <p class="text-muted">{% trans "Six simple steps to your dream space" %}</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            {% for step in how_it_works_steps %}
+            <div class="col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|stringformat:'d'|add:'00' }}">
+                <div class="text-center">
+                    <div class="step-circle-lg bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width:60px;height:60px;">
+                        <span class="fw-bold fs-5">{{ forloop.counter }}</span>
+                    </div>
+                    <h6 class="fw-bold">{{ step.title }}</h6>
+                    <p class="small text-muted mb-0">{{ step.desc }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="{% url 'design_service' %}" class="btn btn-primary btn-lg rounded-3 fw-bold px-5 py-3 shadow">
+                <i class="fas fa-arrow-right me-2"></i>{% trans "Start Your Project Now" %}
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing -->
+<section class="py-5 bg-white" id="pricing">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="fw-bold">{% trans "Our Packages" %}</h2>
+            <p class="text-muted">{% trans "Choose the package that suits your needs" %}</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            {% for pkg in packages %}
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|stringformat:'d'|add:'00' }}">
+                <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 {% if forloop.counter == 2 %}border-primary border-2{% endif %}">
+                    {% if forloop.counter == 2 %}
+                    <span class="badge bg-primary position-absolute top-0 start-50 translate-middle rounded-pill px-3 py-2">
+                        {% trans "Most Popular" %}
+                    </span>
+                    {% endif %}
+                    <div class="display-5 text-primary mb-3">
+                        {% if forloop.counter == 1 %}<i class="fas fa-leaf"></i>
+                        {% elif forloop.counter == 2 %}<i class="fas fa-star"></i>
+                        {% else %}<i class="fas fa-crown"></i>{% endif %}
+                    </div>
+                    <h4 class="fw-bold">{{ pkg.name }}</h4>
+                    <p class="text-muted small">{{ pkg.description|truncatewords:12 }}</p>
+                    <div class="bg-light rounded-3 p-3 mb-3">
+                        <span class="text-muted small">{% trans "Multiplier" %}</span>
+                        <div class="fw-bold text-primary fs-2">{{ pkg.price_multiplier }}x</div>
+                    </div>
+                    <div class="mt-auto">
+                        <a href="{% url 'design_service' %}" class="btn btn-outline-primary rounded-3 px-4 fw-bold">
+                            {% trans "Get Started" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Portfolio / Styles -->
+<section class="py-5 bg-light" id="portfolio">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="fw-bold">{% trans "Design Styles We Offer" %}</h2>
+            <p class="text-muted">{% trans "From modern minimalism to classic elegance, find your style" %}</p>
+        </div>
+        <div class="row g-3">
+            {% for style in styles %}
+            <div class="col-md-3 col-6" data-aos="fade-up">
+                <div class="card border-0 shadow-sm rounded-4 p-3 text-center h-100">
+                    <div class="display-6 text-primary mb-2"><i class="fas fa-palette"></i></div>
+                    <h6 class="fw-bold mb-0">{{ style.name }}</h6>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section class="py-5 bg-white" id="faq">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="fw-bold">{% trans "Frequently Asked Questions" %}</h2>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="faqAccordion">
+                    {% for faq in faqs %}
+                    <div class="accordion-item border-0 shadow-sm mb-2 rounded-3" data-aos="fade-up">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button {% if not forloop.first %}collapsed{% endif %} fw-bold rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.counter }}">
+                                {{ faq.question }}
+                            </button>
+                        </h2>
+                        <div id="faq{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">{{ faq.answer }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-5 bg-primary text-white text-center">
+    <div class="container" data-aos="fade-up">
+        <h2 class="fw-bold mb-3">{% trans "Ready to Transform Your Space?" %}</h2>
+        <p class="lead text-white-50 mb-4">{% trans "Start your design journey today. It's free to get started." %}</p>
+        <a href="{% url 'design_service' %}" class="btn btn-light btn-lg rounded-3 fw-bold px-5 py-3 shadow">
+            <i class="fas fa-play me-2"></i>{% trans "Get My Free Quote" %}
+        </a>
+    </div>
+</section>
+{% endblock content %}
+
+{% block js %}
+<script src="{% static 'js/design-service.js' %}?v={% now "U" %}"></script>
+{% endblock js %}

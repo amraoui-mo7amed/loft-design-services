@@ -1,0 +1,121 @@
+{% extends "dash/dash_index.html" %}
+{% load i18n %}
+{% load static %}
+{% load tags %}
+
+{% block dashTitle %}{% trans "Style Categories" %}{% endblock dashTitle %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/project_type_list.css' %}?v={% now "U" %}">
+{% endblock extra_css %}
+
+{% block dashContent %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+        <h5 class="fw-bold mb-0">{% trans "Style Categories" %}</h5>
+        <p class="text-muted small mb-0 pt-section-title">{% trans "Manage interior design style categories" %}</p>
+    </div>
+    <button class="btn btn-primary rounded-3 px-4 fw-bold shadow-sm catalog-create-btn"
+            data-bs-target="#styleModal"
+            data-create-url="{% url 'dash:style_create' %}"
+            data-modal-title="{% trans 'New Style' %}"
+            data-submit-text="{% trans 'Create' %}">
+        <i class="fas fa-plus me-2"></i>{% trans "New Style" %}
+    </button>
+</div>
+
+<div class="row g-4" data-catalog-modal="styleModal">
+    {% for style in styles %}
+    <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm rounded-4 pt-card">
+            <div class="pt-card-body">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="pt-card-icon-wrap">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <div>
+                            <h5>{{ style.name }}</h5>
+                            {% if style.description %}
+                            <p class="small text-muted mb-0" style="font-size:0.78rem;line-height:1.4;">{{ style.description|truncatewords:12 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="pt-actions">
+                        <button class="btn btn-outline-primary rounded-3 catalog-edit-btn"
+                                title="{% trans 'Edit' %}"
+                                data-bs-target="#styleModal"
+                                data-update-url="{% url 'dash:style_update' style.pk %}"
+                                data-modal-title="{% trans 'Edit Style' %}"
+                                data-submit-text="{% trans 'Save' %}"
+                                data-name="{{ style.name }}"
+                                data-description="{{ style.description }}">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button class="btn btn-outline-danger rounded-3 delete_button"
+                                title="{% trans 'Delete' %}"
+                                data-delete-url="{% url 'dash:style_delete' style.pk %}"
+                                data-csrf-token="{{ csrf_token }}"
+                                data-swal-title="{% trans 'Delete Style?' %}"
+                                data-swal-text="{% trans 'This action cannot be undone.' %}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card border-0 shadow-sm p-5 text-center rounded-4">
+            <div class="mb-4"><i class="fas fa-palette fa-4x text-light"></i></div>
+            <h4 class="text-muted fw-bold mb-2">{% trans "No styles yet" %}</h4>
+            <p class="text-muted small mb-0">{% trans "Create your first style to get started." %}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="mt-5">{% render_pagination page_obj %}</div>
+{% endif %}
+
+<!-- Modal -->
+<div class="modal fade" id="styleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content pt-modal-overlay">
+            <div class="pt-modal-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="modal-title"></h5>
+                    <p class="pt-modal-subtitle">{% trans "Configure interior design style category details" %}</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="pt-modal-body">
+                <form method="post" action="" class="form" id="styleForm">
+                    {% csrf_token %}
+                    {% include "partials/errorList.html" with form_id="styleForm" %}
+                    <div class="mb-3">
+                        <label class="pt-modal-label"><i class="fas fa-palette text-primary"></i>{% trans "Name" %}</label>
+                        <input type="text" name="name" class="form-control" data-field="name" data-default="" required placeholder="{% trans 'e.g. Modern' %}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="pt-modal-label"><i class="fas fa-align-left text-info"></i>{% trans "Description" %}</label>
+                        <textarea name="description" class="form-control" rows="3" data-field="description" data-default="" placeholder="{% trans 'Brief description of this style category...' %}"></textarea>
+                    </div>
+                    <div class="pt-modal-footer d-flex gap-2">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i><span class="catalog-submit-text"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock dashContent %}
+
+{% block extra_js %}
+<script src="{% static 'js/catalog_modal.js' %}?v={% now "U" %}"></script>
+{% endblock extra_js %}

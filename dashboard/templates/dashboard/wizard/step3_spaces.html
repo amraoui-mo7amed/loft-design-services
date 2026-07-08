@@ -1,0 +1,55 @@
+{% load i18n %}{% load l10n %}
+<div class="wizard-step" data-step="2">
+  <div class="text-center mb-4">
+    <h2 class="wiz-step-title">{% trans "Select Spaces Per Floor" %}</h2>
+    <p class="wiz-step-sub">{% trans "Choose the rooms and spaces for each floor" %}</p>
+  </div>
+
+  <div class="wiz-subtotal-bar mb-4">
+    <span class="fw-semibold" style="font-size:0.88rem;">{% trans "Subtotal" %}</span>
+    <span class="fw-bold" style="font-size:1.05rem;color:var(--wiz-success);" id="spacesSubtotal">0 DA</span>
+  </div>
+
+  {% for fi in floor_count %}
+  <div class="floor-space-group mb-4" data-floor-index="{{ fi }}">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <h5 class="wiz-section-title mb-0">
+        <i class="fas fa-layer-group"></i>
+        <span class="floor-name-display">{% trans "Floor" %} {{ fi|add:1 }}</span>
+      </h5>
+      <button type="button" class="wiz-btn wiz-btn-outline add-custom-space-btn" style="font-size:0.78rem;padding:0.35rem 0.85rem;">
+        <i class="fas fa-plus me-1"></i>{% trans "Custom Space" %}
+      </button>
+    </div>
+    <div class="row g-2 floor-spaces-grid">
+      {% for space in spaces %}
+      <div class="col-md-4 col-sm-6">
+        <div class="wiz-space-card space-checkbox-card" data-space-id="{{ space.id }}"
+             data-price="{{ space.base_price|unlocalize }}" data-days="{{ space.estimated_days }}">
+          <div class="wiz-space-img">
+            {% if space.image %}
+            <img src="{{ space.image.url }}" alt="{{ space.name }}" class="wiz-space-img">
+            {% else %}
+            <i class="fas fa-door-open"></i>
+            {% endif %}
+          </div>
+          <div class="wiz-space-info">
+            <div class="wiz-space-name">{{ space.name }}</div>
+            <div class="wiz-space-price">{{ space.base_price }} DA</div>
+          </div>
+          <div class="wiz-space-check"><i class="fas fa-check"></i></div>
+          <input type="checkbox" class="d-none space-checkbox">
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="custom-space-inline" style="display:none;">
+      <div class="d-flex align-items-center gap-2 mt-2">
+        <input type="text" class="wiz-form-control custom-space-input" placeholder="{% trans 'Enter space name...' %}" style="max-width:250px;">
+        <button type="button" class="wiz-btn wiz-btn-primary confirm-custom-space" style="padding:0.45rem 0.9rem;"><i class="fas fa-check"></i></button>
+        <button type="button" class="wiz-btn wiz-btn-outline cancel-custom-space" style="padding:0.45rem 0.9rem;"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>

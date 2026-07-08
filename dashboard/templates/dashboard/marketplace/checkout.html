@@ -1,0 +1,82 @@
+{% extends "index.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Checkout" %}{% endblock title %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="fw-bold mb-4">{% trans "Checkout" %}</h2>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <h5 class="fw-bold mb-3">{% trans "Shipping Address" %}</h5>
+                <textarea class="form-control" rows="3" id="shippingAddress" placeholder="{% trans 'Enter your shipping address' %}"></textarea>
+            </div>
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold mb-3">{% trans "Payment Method" %}</h5>
+                <div class="d-flex gap-3 flex-wrap">
+                    <label class="btn btn-outline-primary rounded-3 px-4">
+                        <input type="radio" name="payment_method" value="stripe" hidden> Stripe
+                    </label>
+                    <label class="btn btn-outline-primary rounded-3 px-4">
+                        <input type="radio" name="payment_method" value="paypal" hidden> PayPal
+                    </label>
+                    <label class="btn btn-outline-primary rounded-3 px-4">
+                        <input type="radio" name="payment_method" value="manual" checked hidden> {% trans "Bank Transfer" %}
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold mb-3">{% trans "Order Summary" %}</h5>
+                {% for item in items %}
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="small">{{ item.product.name }} x{{ item.quantity }}</span>
+                    <span class="small fw-bold">{{ item.price_at_time }} DA</span>
+                </div>
+                {% endfor %}
+                <hr>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="fw-bold fs-5">{% trans "Total" %}</span>
+                    <span class="fw-bold fs-5 text-primary">{{ total }} DA</span>
+                </div>
+                <button class="btn btn-success w-100 rounded-3 fw-bold py-2" id="placeOrderBtn">
+                    {% trans "Place Order" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block js %}
+<script>
+document.getElementById('placeOrderBtn')?.addEventListener('click', function() {
+    var btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+    var pm = document.querySelector('input[name="payment_method"]:checked');
+    var fd = new FormData();
+    fd.append('payment_method', pm ? pm.value : 'manual');
+    fd.append('shipping_address', document.getElementById('shippingAddress').value);
+    fetch('/marketplace/checkout/place-order/', {
+        method: 'POST', body: fd,
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.success) {
+            alert(d.message);
+            window.location.href = '/marketplace/orders/';
+        } else {
+            alert(d.errors ? d.errors.join('\n') : 'Error');
+            btn.disabled = false;
+            btn.innerHTML = 'Place Order';
+        }
+    });
+});
+</script>
+{% endblock js %}

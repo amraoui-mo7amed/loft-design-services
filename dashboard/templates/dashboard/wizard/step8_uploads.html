@@ -1,0 +1,30 @@
+{% load i18n %}
+<div class="wizard-step" data-step="7">
+  <div class="text-center mb-4">
+    <h2 class="wiz-step-title">{% trans "Upload Files" %}</h2>
+    <p class="wiz-step-sub">{% trans "Upload plans, photos, or reference documents" %}</p>
+  </div>
+
+  <div class="wiz-upload-zone" id="uploadDropZone">
+    <div class="wiz-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+    <div class="wiz-upload-title">{% trans "Drag & Drop Files Here" %}</div>
+    <p class="wiz-upload-hint mb-3">{% trans "or" %}</p>
+    <button type="button" class="wiz-btn wiz-btn-primary" id="uploadBrowseBtn">
+      <i class="fas fa-folder-open me-2"></i>{% trans "Browse Files" %}
+    </button>
+    <div class="mt-3">
+      <small class="text-muted" style="font-size:0.72rem;">
+        {% trans "Supported: PDF, DWG, DXF, SKP, GLB, Images, Videos, ZIP" %}
+      </small>
+    </div>
+    <input type="file" id="fileInput" class="d-none" multiple accept=".pdf,.dwg,.dxf,.skp,.glb,.zip,image/*,video/*">
+  </div>
+
+  <div class="mt-3" id="uploadPreview" style="display:none;">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="fw-bold" style="font-size:0.9rem;">{% trans "Uploaded Files" %}</span>
+      <span class="text-muted small" id="fileCount">0 {% trans "files" %}</span>
+    </div>
+    <div id="uploadedFilesList"></div>
+  </div>
+</div>

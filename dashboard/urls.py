@@ -1,0 +1,79 @@
+from django.urls import path
+from dashboard.views import dashboard, users, notifications, design, customer, designer, admin_crm, pricing
+
+app_name = "dash"
+
+urlpatterns = [
+    # Dashboard
+    path("home/", dashboard.dash_home, name="dash_home"),
+    # Designers
+    path("designers/", users.designer_list, name="designer_list"),
+    path("designers/<int:pk>/delete/", users.designer_delete, name="designer_delete"),
+    path("designers/<int:pk>/approve/", users.designer_approve, name="designer_approve"),
+    path("designers/add-designer/", users.add_designer, name="add_designer"),
+    path("designers/assign/", users.designer_assign, name="designer_assign"),
+    # Legacy user URLs (backward compat)
+    path("users/", users.user_list, name="user_list"),
+    path("users/<int:pk>/delete/", users.user_delete, name="user_delete"),
+    path("users/<int:pk>/approve/", users.user_approve, name="user_approve"),
+    path("users/add-designer/", users.add_designer, name="add_designer"),
+    # Notifications
+    path("notifications/stream/",notifications.notifications_stream,name="notifications_stream"),
+    path("notifications/unread-count/",notifications.get_unread_count,name="notifications_unread_count"),
+    path("notifications/list/",notifications.get_notifications,name="notifications_list"),
+    path("notifications/<int:notification_id>/read/",notifications.mark_as_read,name="notification_mark_read"),
+    path("notifications/mark-all-read/",notifications.mark_all_as_read,name="notifications_mark_all_read"),
+    path("notifications/<int:notification_id>/delete/",notifications.delete_notification,name="notification_delete"),
+    # Design Catalog - Project Types
+    path("design/project-types/", design.project_type_list, name="project_type_list"),
+    path("design/project-types/create/", design.project_type_create, name="project_type_create"),
+    path("design/project-types/<int:pk>/edit/", design.project_type_update, name="project_type_update"),
+    path("design/project-types/<int:pk>/delete/", design.project_type_delete, name="project_type_delete"),
+    # Design Catalog - Spaces
+    path("design/spaces/", design.space_list, name="space_list"),
+    path("design/spaces/create/", design.space_create, name="space_create"),
+    path("design/spaces/<int:pk>/edit/", design.space_update, name="space_update"),
+    path("design/spaces/<int:pk>/delete/", design.space_delete, name="space_delete"),
+    # Design Catalog - Space Categories
+    path("design/categories/list/", design.space_category_list, name="space_category_list"),
+    path("design/categories/create/", design.space_category_create, name="space_category_create"),
+    path("design/categories/<int:pk>/edit/", design.space_category_update, name="space_category_update"),
+    path("design/categories/<int:pk>/delete/", design.space_category_delete, name="space_category_delete"),
+    # Design Catalog - Packages
+    path("design/packages/", design.package_list, name="package_list"),
+    path("design/packages/create/", design.package_create, name="package_create"),
+    path("design/packages/<int:pk>/edit/", design.package_update, name="package_update"),
+    path("design/packages/<int:pk>/delete/", design.package_delete, name="package_delete"),
+    # Design Catalog - Options
+    path("design/options/", design.option_list, name="option_list"),
+    path("design/options/create/", design.option_create, name="option_create"),
+    path("design/options/<int:pk>/edit/", design.option_update, name="option_update"),
+    path("design/options/<int:pk>/delete/", design.option_delete, name="option_delete"),
+    # Design Catalog - Styles
+    path("design/styles/", design.style_list, name="style_list"),
+    path("design/styles/create/", design.style_create, name="style_create"),
+    path("design/styles/<int:pk>/edit/", design.style_update, name="style_update"),
+    path("design/styles/<int:pk>/delete/", design.style_delete, name="style_delete"),
+    # Design Catalog - Inspirations
+    path("design/inspirations/", design.inspiration_list, name="inspiration_list"),
+    path("design/inspirations/create/", design.inspiration_create, name="inspiration_create"),
+    path("design/inspirations/<int:pk>/edit/", design.inspiration_update, name="inspiration_update"),
+    path("design/inspirations/<int:pk>/delete/", design.inspiration_delete, name="inspiration_delete"),
+    # Pricing
+    path("pricing/", pricing.pricing_settings, name="pricing_settings"),
+    # Customer Dashboard
+    path("my-projects/", customer.my_projects, name="customer_projects"),
+    path("my-projects/<uuid:uuid>/", customer.project_detail, name="customer_project_detail"),
+    path("my-projects/<int:pk>/approve-deliverable/", customer.approve_deliverable, name="approve_deliverable"),
+    # Designer Dashboard
+    path("designer/projects/", designer.designer_projects, name="designer_projects"),
+    path("designer/projects/<uuid:uuid>/", designer.designer_project_detail, name="designer_project_detail"),
+    path("designer/projects/<uuid:uuid>/upload/", designer.upload_deliverable, name="designer_upload_deliverable"),
+    path("designer/projects/<uuid:uuid>/note/", designer.add_note, name="designer_add_note"),
+    # Admin CRM Kanban
+    path("crm/", admin_crm.kanban_view, name="admin_crm"),
+    path("crm/<int:pk>/", admin_crm.project_detail, name="admin_project_detail"),
+    path("crm/update-status/<int:pk>/", admin_crm.update_status, name="crm_update_status"),
+    path("crm/assign-designer/<int:pk>/", admin_crm.assign_designer, name="crm_assign_designer"),
+    path("crm/<int:pk>/delete/", admin_crm.delete_project, name="crm_delete_project"),
+]

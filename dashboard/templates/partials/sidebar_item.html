@@ -1,0 +1,38 @@
+{% load i18n %}
+{% if item.children %}
+<div class="nav-group">
+    <button type="button"
+            class="nav-item nav-group-toggle"
+            data-bs-toggle="collapse"
+            data-bs-target="#submenu-{{ counter }}"
+            aria-expanded="{% if request.resolver_match.url_name in item.children|join:',' %}true{% else %}false{% endif %}">
+        <span class="nav-item-content">
+            <i class="{{ item.icon }} nav-icon"></i>
+            <span class="nav-label">{{ item.title }}</span>
+        </span>
+        <i class="fas fa-chevron-down nav-group-arrow"></i>
+    </button>
+    <div class="collapse{% if request.resolver_match.url_name in item.children|join:',' %} show{% endif %}"
+         id="submenu-{{ counter }}">
+        <div class="nav-group-children">
+            {% for child in item.children %}
+            <a href="{% url child.url_name %}"
+               class="nav-item nav-child-item {% if request.resolver_match.view_name == child.url_name %}active{% endif %}">
+                <span class="nav-item-content">
+                    <span class="nav-child-dot"></span>
+                    <span class="nav-label">{{ child.title }}</span>
+                </span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% else %}
+<a href="{% if item.url_name == '#' %}#{% else %}{% url item.url_name %}{% endif %}"
+   class="nav-item {% if request.resolver_match.view_name == item.url_name %}active{% endif %}">
+    <span class="nav-item-content">
+        <i class="{{ item.icon }} nav-icon"></i>
+        <span class="nav-label">{{ item.title }}</span>
+    </span>
+</a>
+{% endif %}

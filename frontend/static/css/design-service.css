@@ -1,0 +1,53 @@
+.design-hero {
+    min-height: 70vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 4rem 0;
+}
+
+.hero-bg-shape {
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 800px;
+    height: 800px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    pointer-events: none;
+}
+
+[dir="rtl"] .hero-bg-shape {
+    right: auto;
+    left: -20%;
+}
+
+.min-vh-60 {
+    min-height: 60vh;
+}
+
+.step-circle-lg {
+    font-weight: bold;
+}
+
+.card {
+    transition: all 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08) !important;
+}
+
+.accordion-button:not(.collapsed) {
+    background: rgba(102, 126, 234, 0.05);
+    color: inherit;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+[dir="rtl"] .hero-bg-shape {
+    right: auto;
+    left: -20%;
+}

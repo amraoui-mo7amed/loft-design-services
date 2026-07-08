@@ -1,0 +1,62 @@
+services:
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${DB_NAME:-dj_starter_kit}
+      - POSTGRES_USER=${DB_USER:-dj_user}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-dj_password}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-dj_user} -d ${DB_NAME:-dj_starter_kit}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    command: sh -c "python manage.py migrate --noinput && python manage.py init_admin && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - APP_ENV=${APP_ENV:-development}
+      - APP_SECRET=${APP_SECRET}
+      - APP_ALLOWED_HOSTS=${APP_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=${DB_NAME:-dj_starter_kit}
+      - DB_USER=${DB_USER:-dj_user}
+      - DB_PASSWORD=${DB_PASSWORD:-dj_password}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - EMAIL_HOST=${EMAIL_HOST:-}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER:-}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+      - .:/app
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  media_volume:

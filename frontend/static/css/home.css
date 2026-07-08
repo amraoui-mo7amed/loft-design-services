@@ -1,0 +1,509 @@
+.landing-page .main-content {
+    padding: 0 !important;
+    overflow-x: hidden;
+    background: var(--brand-light);
+}
+
+.text-accent {
+    color: var(--brand-accent) !important;
+}
+
+.bg-accent {
+    background-color: var(--brand-accent) !important;
+}
+
+/* === Scroll Reveal === */
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* === Hero === */
+.loft-hero {
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 120px 0 80px;
+    background: linear-gradient(180deg, #fff 0%, var(--brand-light) 100%);
+    overflow: hidden;
+}
+
+.loft-hero-bg {
+    position: absolute;
+    top: -40%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 900px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(42, 90, 90, 0.05), transparent 70%);
+    pointer-events: none;
+}
+
+.loft-badge {
+    display: inline-block;
+    background: rgba(42, 90, 90, 0.08);
+    color: var(--brand-primary);
+    padding: 8px 24px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    animation: fadeSlideDown 0.8s ease both;
+}
+
+@keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.loft-hero-title {
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--brand-dark);
+    margin-bottom: 24px;
+    animation: fadeSlideUp 0.8s ease 0.2s both;
+}
+
+.loft-hero-desc {
+    font-size: 1.15rem;
+    color: #888;
+    max-width: 700px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+    animation: fadeSlideUp 0.8s ease 0.35s both;
+}
+
+.loft-hero .d-flex {
+    animation: fadeSlideUp 0.8s ease 0.5s both;
+}
+
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* === Section === */
+.loft-section {
+    padding: 80px 0;
+}
+
+.loft-section-title {
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    font-weight: 900;
+    color: var(--brand-dark);
+    margin-bottom: 12px;
+}
+
+.loft-section-sub {
+    color: #999;
+    font-size: 1rem;
+    max-width: 550px;
+    margin: 0 auto;
+}
+
+/* === Card Grid === */
+.loft-card-grid {
+    max-width: 840px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+}
+
+.loft-card-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 960px;
+    gap: 32px;
+}
+
+.loft-card-center {
+    text-align: center;
+}
+
+[dir="rtl"] .loft-card-center {
+    text-align: center;
+}
+
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* === Card === */
+.loft-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 28px 24px;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.loft-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 48px rgba(42, 90, 90, 0.1);
+}
+
+/* plain cards (stats / tags) */
+.loft-card-plain {
+    padding: 32px;
+}
+
+.loft-card-plain:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.05);
+    border-color: var(--brand-primary);
+}
+
+.loft-card-plain::before {
+    display: none;
+}
+
+.loft-card-h {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+[dir="rtl"] .loft-card-h {
+    text-align: right;
+}
+
+/* === Card Icon === */
+.loft-card-icon {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--brand-light);
+    border-radius: 14px;
+    font-size: 1.2rem;
+    color: var(--brand-primary);
+    flex-shrink: 0;
+    transition: transform 0.35s ease, background 0.35s ease, color 0.35s ease;
+}
+
+.loft-card:hover .loft-card-icon {
+    transform: scale(1.08) rotate(-4deg);
+    background: var(--brand-primary);
+    color: #fff;
+}
+
+.loft-card-icon-sm {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(212, 123, 90, 0.08);
+    border-radius: 12px;
+    font-size: 1rem;
+    color: var(--brand-accent);
+    flex-shrink: 0;
+    transition: transform 0.35s ease, background 0.35s ease, color 0.35s ease;
+}
+
+.loft-card:hover .loft-card-icon-sm {
+    transform: scale(1.08) rotate(4deg);
+    background: var(--brand-accent);
+    color: #fff;
+}
+
+.loft-card-num {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--brand-primary);
+    color: #fff;
+    border-radius: 50%;
+    font-weight: 900;
+    font-size: 1rem;
+    flex-shrink: 0;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.loft-card:hover .loft-card-num {
+    transform: scale(1.12);
+    box-shadow: 0 6px 20px rgba(42, 90, 90, 0.25);
+}
+
+/* === Card Body === */
+.loft-card-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.loft-card-body h3 {
+    font-weight: 800;
+    font-size: 1.05rem;
+    margin-bottom: 6px;
+    color: var(--brand-dark);
+}
+
+.loft-card-body p {
+    color: #999;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+/* === Stats Row === */
+.loft-stats-row {
+    display: flex;
+    justify-content: space-around;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.loft-stat {
+    text-align: center;
+    padding: 8px 16px;
+    transition: transform 0.3s ease;
+}
+
+.loft-stat:hover {
+    transform: translateY(-4px);
+}
+
+.loft-stat-num {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--brand-primary);
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.loft-stat-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #999;
+    font-weight: 600;
+}
+
+/* === Tags === */
+.loft-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.loft-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 22px;
+    background: var(--brand-light);
+    border: 1px solid #eee;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--brand-dark);
+    transition: all 0.25s ease;
+    cursor: default;
+}
+
+.loft-tag:hover {
+    background: var(--brand-primary);
+    color: #fff;
+    border-color: var(--brand-primary);
+    transform: translateY(-2px);
+}
+
+.loft-tag i {
+    color: var(--brand-accent);
+}
+
+.loft-tag:hover i {
+    color: #fff;
+}
+
+/* === FAQ Accordion === */
+.accordion-card {
+    padding: 0;
+    overflow: hidden;
+    margin-bottom: 20px;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.accordion-card:last-child {
+    margin-bottom: 0;
+}
+
+.accordion-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.05);
+    border-color: var(--brand-primary);
+}
+
+.accordion-card::before {
+    display: none;
+}
+
+.loft-accordion-btn {
+    width: 100%;
+    padding: 20px 24px;
+    border: none;
+    background: none;
+    text-align: inherit;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--brand-dark);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: color 0.25s ease;
+}
+
+.loft-accordion-btn::after {
+    content: "\f078";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    font-size: 0.8rem;
+    color: var(--brand-primary);
+    transition: transform 0.35s ease;
+    flex-shrink: 0;
+}
+
+[dir="rtl"] .loft-accordion-btn::after {
+    margin-right: 12px;
+}
+
+.loft-accordion-btn:not(.collapsed)::after {
+    transform: rotate(180deg);
+}
+
+.loft-accordion-btn:hover {
+    color: var(--brand-primary);
+}
+
+.loft-accordion-body {
+    padding: 0 24px 20px;
+    color: #888;
+    font-size: 0.93rem;
+    line-height: 1.7;
+}
+
+/* === CTA Card === */
+.loft-card-cta {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 48px 40px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.loft-card-cta::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
+}
+
+.loft-card-cta:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.07);
+    border-color: var(--brand-primary);
+}
+
+.loft-card-cta h2 {
+    color: var(--brand-dark);
+}
+
+/* === Pricing card button animation === */
+.loft-card .btn-outline-primary {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.loft-card:hover .btn-outline-primary {
+    background: var(--brand-primary);
+    color: #fff;
+    border-color: var(--brand-primary);
+    transform: scale(1.05);
+}
+
+/* === Pricing badge === */
+.badge-popular {
+    background: var(--brand-primary);
+    color: #fff;
+    padding: 4px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+    .loft-card {
+        padding: 20px;
+    }
+    .loft-card-h {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+    [dir="rtl"] .loft-card-h {
+        text-align: center;
+    }
+    .loft-card-icon,
+    .loft-card-icon-sm,
+    .loft-card-num {
+        margin: 0 auto;
+    }
+    .loft-stat-num {
+        font-size: 2.2rem;
+    }
+    .loft-stats-row {
+        gap: 16px;
+    }
+    .loft-card-cta {
+        padding: 32px 24px;
+    }
+    .loft-card-grid {
+        grid-template-columns: 1fr;
+    }
+    .loft-card-grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .loft-hero {
+        min-height: auto;
+        padding: 100px 0 60px;
+    }
+    .loft-section {
+        padding: 48px 0;
+    }
+    .loft-card-grid-3 {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,79 @@
+.profile-edit-container {
+    padding: 1.5rem 0;
+}
+
+.profile-card {
+    overflow: hidden;
+}
+
+.profile-card-header {
+    background: linear-gradient(135deg, var(--brand-primary, #0d6efd) 0%, #1a4040 100%);
+    min-height: 100px;
+}
+
+.profile-avatar-area {
+    flex-shrink: 0;
+}
+
+.profile-avatar {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    backdrop-filter: blur(4px);
+    border: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.avatar-overlay {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 28px;
+    height: 28px;
+    background: var(--brand-primary, #0d6efd);
+    color: #fff;
+    font-size: 0.65rem;
+    cursor: pointer;
+    border: 2px solid #fff;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.avatar-overlay:hover {
+    transform: scale(1.1);
+    background: #1a4040;
+}
+
+.profile-avatar-img {
+    border: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.profile-card .form-control {
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    border: 1.5px solid #e2e8f0;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.profile-card .form-control:focus {
+    border-color: var(--brand-primary, #0d6efd);
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+.profile-card textarea.form-control {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.profile-card .form-label {
+    font-size: 0.82rem;
+    color: #4a5568;
+    margin-bottom: 0.4rem;
+}
+
+[dir="rtl"] .profile-card .form-label i {
+    margin-left: 0.25rem;
+    margin-right: 0;
+}
+
+[dir="ltr"] .profile-card .form-label i {
+    margin-right: 0.25rem;
+}

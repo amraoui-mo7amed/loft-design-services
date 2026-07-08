@@ -1,0 +1,12 @@
+.git
+.gitignore
+.venv
+.env
+*.sqlite3
+media/*
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+AGENTS.md
+README.md

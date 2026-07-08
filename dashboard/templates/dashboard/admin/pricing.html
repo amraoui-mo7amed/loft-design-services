@@ -1,0 +1,42 @@
+{% extends "dash/dash_index.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block dashTitle %}{% trans "Pricing Rules" %}{% endblock dashTitle %}
+
+{% block dashContent %}
+<div class="container-fluid">
+    <div class="mb-4">
+        <h5 class="fw-bold mb-0">{% trans "Pricing Rules" %}</h5>
+        <p class="text-muted small mb-0">{% trans "Configure pricing defaults for design requests" %}</p>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4" style="max-width:600px;">
+        <div class="card-body p-4">
+            <form method="post" action="{% url 'dash:pricing_settings' %}" class="form" id="pricingForm">
+                {% csrf_token %}
+                {% include "partials/errorList.html" with form_id="pricingForm" %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{% trans "Tax Rate (%)" %}</label>
+                    <input type="number" name="tax_rate" class="form-control" value="{{ config.tax_rate }}" step="0.01" min="0" max="100" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{% trans "Default Revision Count" %}</label>
+                    <input type="number" name="default_revision_count" class="form-control" value="{{ config.default_revision_count }}" min="0" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{% trans "Currency Symbol" %}</label>
+                    <input type="text" name="currency_symbol" class="form-control" value="{{ config.currency_symbol }}" maxlength="10" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">{% trans "Default Delivery Days" %}</label>
+                    <input type="number" name="default_delivery_days" class="form-control" value="{{ config.default_delivery_days }}" min="1" required>
+                </div>
+                <button type="submit" class="btn btn-primary rounded-3 px-4 fw-bold">
+                    <i class="fas fa-save me-2"></i>{% trans "Save Settings" %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock dashContent %}

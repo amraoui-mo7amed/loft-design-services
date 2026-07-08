@@ -1,0 +1,30 @@
+{% load i18n %}
+<div class="wizard-step" data-step="0">
+  <div class="text-center mb-4">
+    <h2 class="wiz-step-title">{% trans "Choose Your Project Type" %}</h2>
+    <p class="wiz-step-sub">{% trans "Select the type of property you want to design" %}</p>
+  </div>
+
+  <div class="row g-3" id="projectTypeGrid">
+    {% for pt in project_types %}
+    <div class="col-md-4 col-sm-6">
+      <div class="wiz-card p-4 text-center project-type-card" data-slug="{{ pt.slug }}" data-name="{{ pt.name }}">
+        <div class="wiz-card-badge"><i class="fas fa-check"></i></div>
+        <div class="wiz-card-icon mb-3">
+          {% if forloop.counter == 1 %}
+          <i class="fas fa-home"></i>
+          {% elif forloop.counter == 2 %}
+          <i class="fas fa-building"></i>
+          {% elif forloop.counter == 3 %}
+          <i class="fas fa-store"></i>
+          {% else %}
+          <i class="fas fa-city"></i>
+          {% endif %}
+        </div>
+        <div class="wiz-card-title mb-1">{{ pt.name }}</div>
+        <p class="wiz-card-desc mb-0">{{ pt.description|truncatewords:10 }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>

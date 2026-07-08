@@ -1,0 +1,49 @@
+{% extends "dash/dash_index.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block dashTitle %}{{ form_title }}{% endblock dashTitle %}
+
+{% block dashContent %}
+<div class="container">
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+            <form method="post" enctype="multipart/form-data" class="form">
+                {% csrf_token %}
+                {% include "partials/errorList.html" with form_id="inspirationForm" %}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">{% trans "Space" %}</label>
+                        {% include "components/custom_select.html" with id="spaceSelect" name="space_id" choices=space_choices value=object.space_id|default:"" select_title=_("Select Space") extra_attrs='required' %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">{% trans "Style" %}</label>
+                        {% include "components/custom_select.html" with id="styleSelect" name="style_id" choices=style_choices value=object.style_category_id|default:"" select_title=_("Select Style") extra_attrs='required' %}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{% trans "Title" %}</label>
+                    <input type="text" name="title" class="form-control" value="{{ object.title|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">{% trans "Image" %}</label>
+                    {% if object and object.image %}
+                    <div class="mb-2">
+                        <img src="{{ object.image.url }}" alt="{{ object.title }}" style="max-height: 150px; border-radius: 8px;">
+                    </div>
+                    {% endif %}
+                    <input type="file" name="image" class="form-control" accept="image/*" {% if not object %}required{% endif %}>
+                </div>
+                <div class="mb-4 form-check">
+                    <input type="checkbox" name="active" class="form-check-input" id="activeCheck" {% if object.active or not object %}checked{% endif %}>
+                    <label class="form-check-label fw-bold" for="activeCheck">{% trans "Active" %}</label>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary rounded-3 px-4 fw-bold"><i class="fas fa-save me-2"></i>{% trans "Save" %}</button>
+                    <a href="{% url 'dash:inspiration_list' %}" class="btn btn-light rounded-3 px-4 fw-bold">{% trans "Cancel" %}</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock dashContent %}

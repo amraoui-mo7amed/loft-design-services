@@ -1,0 +1,263 @@
+{% extends "dash/dash_index.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block dashTitle %}{{ project.project_name }}{% endblock dashTitle %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/kanban.css' %}?v={% now "U" %}">
+{% endblock extra_css %}
+
+{% block dashContent %}
+<div class="container-fluid">
+    <div class="crm-detail-hero rounded-4 p-4 mb-4" data-status="{{ project.status }}">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <a href="{% url 'dash:admin_crm' %}" class="crm-detail-back">
+                    <i class="fas fa-arrow-left me-1"></i>{% trans "Back to Projects" %}
+                </a>
+                <h4 class="fw-bold text-white mb-0 mt-1">{{ project.project_name }}</h4>
+                <div class="d-flex align-items-center gap-2 mt-1">
+                    <span class="text-white-50 small">{{ project.project_number }}</span>
+                    <span class="text-white-50">•</span>
+                    <span class="text-white-50 small">{{ project.created_at|date:"d M Y" }}</span>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge crm-detail-badge bg-{{ project.status }}">{{ project.get_status_display }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4">
+                    <i class="fas fa-info-circle text-primary"></i>
+                    <h6 class="fw-bold mb-0 text-dark">{% trans "Project Info" %}</h6>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div class="row g-4">
+                        <div class="col-6 col-md-3">
+                            <div class="crm-stat">
+                                <div class="crm-stat-icon" style="background:rgba(13,110,253,0.1);color:#0d6efd;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>
+                                    <div class="crm-stat-value">{{ project.client.get_full_name|default:project.client.username }}</div>
+                                    <div class="crm-stat-label">{% trans "Client" %}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% if project.designer %}
+                        <div class="col-6 col-md-3">
+                            <div class="crm-stat">
+                                <div class="crm-stat-icon" style="background:rgba(111,66,193,0.1);color:#6f42c1;">
+                                    <i class="fas fa-paint-brush"></i>
+                                </div>
+                                <div>
+                                    <div class="crm-stat-value">{{ project.designer.get_full_name|default:project.designer.username }}</div>
+                                    <div class="crm-stat-label">{% trans "Designer" %}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if project.project_type %}
+                        <div class="col-6 col-md-3">
+                            <div class="crm-stat">
+                                <div class="crm-stat-icon" style="background:rgba(23,162,184,0.1);color:#17a2b8;">
+                                    <i class="fas fa-tag"></i>
+                                </div>
+                                <div>
+                                    <div class="crm-stat-value">{{ project.project_type.name }}</div>
+                                    <div class="crm-stat-label">{% trans "Type" %}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if project.package %}
+                        <div class="col-6 col-md-3">
+                            <div class="crm-stat">
+                                <div class="crm-stat-icon" style="background:rgba(40,167,69,0.1);color:#28a745;">
+                                    <i class="fas fa-box"></i>
+                                </div>
+                                <div>
+                                    <div class="crm-stat-value">{{ project.package.name }}</div>
+                                    <div class="crm-stat-label">{% trans "Package" %}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="col-6 col-md-3">
+                            <div class="crm-stat">
+                                <div class="crm-stat-icon" style="background:rgba(255,193,7,0.1);color:#ffc107;">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                                <div>
+                                    <div class="crm-stat-value">{{ project.budget|default:"--" }} DA</div>
+                                    <div class="crm-stat-label">{% trans "Budget" %}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="crm-stat">
+                                <div class="crm-stat-icon" style="background:rgba(42,90,90,0.1);color:var(--brand-primary);">
+                                    <i class="fas fa-receipt"></i>
+                                </div>
+                                <div>
+                                    <div class="crm-stat-value crm-stat-total">{{ project.total }} DA</div>
+                                    <div class="crm-stat-label">{% trans "Total" %}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% if project.delivery_date %}
+                        <div class="col-6 col-md-3">
+                            <div class="crm-stat">
+                                <div class="crm-stat-icon" style="background:rgba(220,53,69,0.1);color:#dc3545;">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div>
+                                    <div class="crm-stat-value">{{ project.delivery_date|date:"d M Y" }}</div>
+                                    <div class="crm-stat-label">{% trans "Delivery" %}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="col-6 col-md-3">
+                            <div class="crm-stat">
+                                <div class="crm-stat-icon" style="background:rgba(108,117,125,0.1);color:#6c757d;">
+                                    <i class="fas fa-sync-alt"></i>
+                                </div>
+                                <div>
+                                    <div class="crm-stat-value">{{ project.revision_count }}</div>
+                                    <div class="crm-stat-label">{% trans "Revisions" %}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if spaces %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4">
+                    <i class="fas fa-door-open text-info"></i>
+                    <h6 class="fw-bold mb-0 text-dark">{% trans "Spaces" %}</h6>
+                    <span class="badge bg-info bg-opacity-10 text-info rounded-pill ms-auto">{{ spaces|length }}</span>
+                </div>
+                <div class="card-body px-0 pb-0">
+                    <div class="table-responsive">
+                        <table class="table crm-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Space" %}</th>
+                                    <th>{% trans "Floor" %}</th>
+                                    <th class="text-end">{% trans "Price" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for s in spaces %}
+                                <tr>
+                                    <td class="fw-semibold">{{ s.custom_name|default:s.space.name }}</td>
+                                    <td><span class="badge bg-light text-muted rounded-pill">{{ s.floor.name }}</span></td>
+                                    <td class="text-end fw-bold">{{ s.price_at_time }} <small class="text-muted fw-normal">DA</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if options %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4">
+                    <i class="fas fa-plus-circle text-success"></i>
+                    <h6 class="fw-bold mb-0 text-dark">{% trans "Options" %}</h6>
+                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill ms-auto">{{ options|length }}</span>
+                </div>
+                <div class="card-body px-0 pb-0">
+                    <div class="table-responsive">
+                        <table class="table crm-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Option" %}</th>
+                                    <th class="text-end">{% trans "Price" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for opt in options %}
+                                <tr>
+                                    <td class="fw-semibold">{{ opt.option.name }}</td>
+                                    <td class="text-end fw-bold">{{ opt.price_at_time }} <small class="text-muted fw-normal">DA</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4">
+                    <i class="fas fa-sticky-note text-warning"></i>
+                    <h6 class="fw-bold mb-0 text-dark">{% trans "Notes" %}</h6>
+                    <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill ms-auto">{{ notes|length }}</span>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    {% for note in notes %}
+                    <div class="crm-note-item">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="crm-note-avatar">{{ note.author.get_full_name|default:note.author.username|first|upper }}</div>
+                                <div>
+                                    <small class="fw-semibold d-block">{{ note.author.get_full_name|default:note.author.username }}</small>
+                                    <small class="text-muted" style="font-size:0.65rem;">{{ note.created_at|date:"d M Y" }}</small>
+                                </div>
+                            </div>
+                            {% if note.is_internal %}
+                            <span class="badge crm-note-badge-internal">{% trans "Internal" %}</span>
+                            {% endif %}
+                        </div>
+                        <p class="crm-note-text">{{ note.note }}</p>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-sticky-note fa-2x text-light mb-2"></i>
+                        <p class="small text-muted mb-0">{% trans "No notes yet." %}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if files %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4">
+                    <i class="fas fa-paperclip text-secondary"></i>
+                    <h6 class="fw-bold mb-0 text-dark">{% trans "Files" %}</h6>
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill ms-auto">{{ files|length }}</span>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    {% for f in files %}
+                    <a href="{{ f.file.url }}" target="_blank" class="crm-file-item">
+                        <div class="crm-file-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="crm-file-info">
+                            <span class="crm-file-name">{{ f.file.name|cut:"design-requests/files/" }}</span>
+                            <small class="text-muted">{{ f.uploaded_at|date:"d M Y" }}</small>
+                        </div>
+                        <i class="fas fa-download text-muted"></i>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock dashContent %}

@@ -1,0 +1,127 @@
+{% load i18n %}
+<div class="wizard-step" data-step="6">
+  <div class="text-center mb-4">
+    <h2 class="wiz-step-title">{% trans "Project Questionnaire" %}</h2>
+    <p class="wiz-step-sub">{% trans "Help us understand your project better" %}</p>
+  </div>
+
+  <div class="wiz-question-card">
+    <h5 class="wiz-section-title"><i class="fas fa-user"></i>{% trans "Personal Information" %}</h5>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="wiz-form-label">{% trans "Full Name" %}</label>
+        <input type="text" name="full_name" class="wiz-form-control" value="{{ request.user.get_full_name }}" required>
+      </div>
+      <div class="col-md-6">
+        <label class="wiz-form-label">{% trans "Email" %}</label>
+        <input type="email" name="email" class="wiz-form-control" value="{{ request.user.email }}" required>
+      </div>
+      <div class="col-md-6">
+        <label class="wiz-form-label">{% trans "Phone" %}</label>
+        <input type="tel" name="phone" class="wiz-form-control" value="{{ request.user.profile.phone_number }}">
+      </div>
+      <div class="col-md-6">
+        <label class="wiz-form-label">{% trans "WhatsApp" %}</label>
+        <input type="tel" name="whatsapp" class="wiz-form-control">
+      </div>
+      <div class="col-md-4">
+        <label class="wiz-form-label">{% trans "Country" %}</label>
+        <input type="text" name="country" class="wiz-form-control">
+      </div>
+      <div class="col-md-4">
+        <label class="wiz-form-label">{% trans "City" %}</label>
+        <input type="text" name="city" class="wiz-form-control">
+      </div>
+      <div class="col-md-4">
+        <label class="wiz-form-label">{% trans "Company" %}</label>
+        <input type="text" name="company" class="wiz-form-control">
+      </div>
+      <div class="col-12">
+        <label class="wiz-form-label">{% trans "Address" %}</label>
+        <input type="text" name="address" class="wiz-form-control">
+      </div>
+    </div>
+  </div>
+
+  <div class="wiz-question-card">
+    <h5 class="wiz-section-title"><i class="fas fa-project-diagram"></i>{% trans "Project Details" %}</h5>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="wiz-form-label">{% trans "Project Name" %}</label>
+        <input type="text" name="project_name" class="wiz-form-control" placeholder="{% trans 'e.g. My Dream Villa' %}">
+      </div>
+      <div class="col-md-6">
+        <label class="wiz-form-label">{% trans "Budget (DA)" %}</label>
+        <input type="number" name="budget" class="wiz-form-control" placeholder="{% trans 'Estimated budget' %}">
+      </div>
+      <div class="col-md-6">
+        <label class="wiz-form-label">{% trans "Timeline" %}</label>
+        {% include "components/custom_select.html" with id="timelineSelect" name="timeline" choices=timeline_choices select_title=_("Select timeline") %}
+      </div>
+      <div class="col-md-6">
+        <label class="wiz-form-label">{% trans "Property Type" %}</label>
+        {% include "components/custom_select.html" with id="propertyTypeSelect" name="property_type" choices=property_type_choices select_title=_("Select type") %}
+      </div>
+    </div>
+  </div>
+
+  <div class="wiz-question-card">
+    <h5 class="wiz-section-title"><i class="fas fa-question-circle"></i>{% trans "Additional Questions" %}</h5>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="wiz-check-label">
+          <input type="checkbox" name="custom_furniture">
+          <span class="wiz-check-label-text">{% trans "Need custom furniture?" %}</span>
+        </label>
+      </div>
+      <div class="col-md-6">
+        <label class="wiz-check-label">
+          <input type="checkbox" name="shopping_assistance">
+          <span class="wiz-check-label-text">{% trans "Need shopping assistance?" %}</span>
+        </label>
+      </div>
+      <div class="col-md-6">
+        <label class="wiz-check-label">
+          <input type="checkbox" name="need_contractor">
+          <span class="wiz-check-label-text">{% trans "Need a contractor?" %}</span>
+        </label>
+      </div>
+      <div class="col-md-6">
+        <label class="wiz-check-label">
+          <input type="checkbox" name="need_supervision">
+          <span class="wiz-check-label-text">{% trans "Need supervision?" %}</span>
+        </label>
+      </div>
+      <div class="col-md-6">
+        <label class="wiz-form-label">{% trans "Preferred Colors" %}</label>
+        <input type="text" name="preferred_colors" class="wiz-form-control" placeholder="{% trans 'e.g. Neutral, Earth tones...' %}">
+      </div>
+      <div class="col-md-6">
+        <label class="wiz-form-label">{% trans "Preferred Materials" %}</label>
+        <input type="text" name="preferred_materials" class="wiz-form-control" placeholder="{% trans 'e.g. Wood, Marble...' %}">
+      </div>
+      <div class="col-md-4">
+        <label class="wiz-check-label">
+          <input type="checkbox" name="has_pets">
+          <span class="wiz-check-label-text">{% trans "Pets" %}</span>
+        </label>
+      </div>
+      <div class="col-md-4">
+        <label class="wiz-check-label">
+          <input type="checkbox" name="has_children">
+          <span class="wiz-check-label-text">{% trans "Children" %}</span>
+        </label>
+      </div>
+      <div class="col-md-4">
+        <label class="wiz-check-label">
+          <input type="checkbox" name="accessibility">
+          <span class="wiz-check-label-text">{% trans "Accessibility Needs" %}</span>
+        </label>
+      </div>
+      <div class="col-12">
+        <label class="wiz-form-label">{% trans "Additional Comments" %}</label>
+        <textarea name="comments" class="wiz-form-control" rows="3" placeholder="{% trans 'Any other details you want to share...' %}"></textarea>
+      </div>
+    </div>
+  </div>
+</div>

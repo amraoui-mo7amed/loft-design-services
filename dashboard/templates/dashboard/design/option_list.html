@@ -1,0 +1,152 @@
+{% extends "dash/dash_index.html" %}
+{% load i18n %}
+{% load static %}
+{% load l10n %}
+{% load tags %}
+
+{% block dashTitle %}{% trans "Design Options" %}{% endblock dashTitle %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/project_type_list.css' %}?v={% now "U" %}">
+{% endblock extra_css %}
+
+{% block dashContent %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+        <h5 class="fw-bold mb-0">{% trans "Design Options" %}</h5>
+        <p class="text-muted small mb-0 pt-section-title">{% trans "Manage extra design options and their prices" %}</p>
+    </div>
+    <button class="btn btn-primary rounded-3 px-4 fw-bold shadow-sm catalog-create-btn"
+            data-bs-target="#optionModal"
+            data-create-url="{% url 'dash:option_create' %}"
+            data-modal-title="{% trans 'New Option' %}"
+            data-submit-text="{% trans 'Create' %}">
+        <i class="fas fa-plus me-2"></i>{% trans "New Option" %}
+    </button>
+</div>
+
+<div class="row g-4" data-catalog-modal="optionModal">
+    {% for opt in options %}
+    <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm rounded-4 pt-card">
+            <div class="pt-card-body">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="pt-card-icon-wrap">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <div>
+                            <h5>{{ opt.name }}</h5>
+                            <span class="fw-bold text-success" style="font-size:0.85rem;">{{ opt.price }} DA</span>
+                        </div>
+                    </div>
+                    <div class="pt-actions">
+                        <button class="btn btn-outline-primary rounded-3 catalog-edit-btn"
+                                title="{% trans 'Edit' %}"
+                                data-bs-target="#optionModal"
+                                data-update-url="{% url 'dash:option_update' opt.pk %}"
+                                data-modal-title="{% trans 'Edit Option' %}"
+                                data-submit-text="{% trans 'Save' %}"
+                                data-name="{{ opt.name }}"
+                                data-description="{{ opt.description }}"
+                                data-price="{{ opt.price|unlocalize }}"
+                                data-category="{{ opt.category }}"
+                                data-active="{{ opt.active|yesno:'true,false' }}">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button class="btn btn-outline-danger rounded-3 delete_button"
+                                title="{% trans 'Delete' %}"
+                                data-delete-url="{% url 'dash:option_delete' opt.pk %}"
+                                data-csrf-token="{{ csrf_token }}"
+                                data-swal-title="{% trans 'Delete Option?' %}"
+                                data-swal-text="{% trans 'This action cannot be undone.' %}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <p class="small text-muted mb-2">{{ opt.description|truncatewords:12 }}</p>
+                <div class="d-flex align-items-center gap-2 pt-meta">
+                    <span class="badge pt-badge rounded-pill bg-info">{{ opt.category|default:_("General") }}</span>
+                    <span class="badge pt-badge rounded-pill {% if opt.active %}bg-success{% else %}bg-secondary{% endif %}">
+                        {% if opt.active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card border-0 shadow-sm p-5 text-center rounded-4">
+            <div class="mb-4"><i class="fas fa-plus-circle fa-4x text-light"></i></div>
+            <h4 class="text-muted fw-bold mb-2">{% trans "No options yet" %}</h4>
+            <p class="text-muted small mb-0">{% trans "Create your first option to get started." %}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="mt-5">{% render_pagination page_obj %}</div>
+{% endif %}
+
+<!-- Modal -->
+<div class="modal fade" id="optionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content pt-modal-overlay">
+            <div class="pt-modal-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="modal-title"></h5>
+                    <p class="pt-modal-subtitle">{% trans "Configure design option details, pricing and availability" %}</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="pt-modal-body">
+                <form method="post" action="" class="form" id="optionForm">
+                    {% csrf_token %}
+                    {% include "partials/errorList.html" with form_id="optionForm" %}
+                    <div class="mb-3">
+                        <label class="pt-modal-label"><i class="fas fa-tag text-primary"></i>{% trans "Name" %}</label>
+                        <input type="text" name="name" class="form-control" data-field="name" data-default="" required placeholder="{% trans 'e.g. Extra Rendering' %}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="pt-modal-label"><i class="fas fa-align-left text-info"></i>{% trans "Description" %}</label>
+                        <textarea name="description" class="form-control" rows="2" data-field="description" data-default="" placeholder="{% trans 'Brief description of this option...' %}"></textarea>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label class="pt-modal-label"><i class="fas fa-dollar-sign text-success"></i>{% trans "Price" %} (DA)</label>
+                            <input type="number" step="0.01" name="price" class="form-control" data-field="price" data-default="0" value="0" placeholder="0">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="pt-modal-label"><i class="fas fa-folder text-secondary"></i>{% trans "Category" %}</label>
+                            <input type="text" name="category" class="form-control" data-field="category" data-default="" placeholder="{% trans 'e.g. Visualization' %}">
+                        </div>
+                    </div>
+                    <div class="pt-modal-card">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="form-check mb-0">
+                                    <input type="checkbox" name="active" class="form-check-input" id="optActive" data-field="active" data-default="true" checked>
+                                    <label class="form-check-label fw-bold" for="optActive">{% trans "Active" %}</label>
+                                </div>
+                            </div>
+                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill status-badge" style="font-size:0.65rem;">{% trans "Published" %}</span>
+                        </div>
+                        <small class="text-muted d-block mt-2" style="font-size:0.7rem;">{% trans "Available for selection in new design requests" %}</small>
+                    </div>
+                    <div class="pt-modal-footer d-flex gap-2">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i><span class="catalog-submit-text"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock dashContent %}
+
+{% block extra_js %}
+<script src="{% static 'js/catalog_modal.js' %}?v={% now "U" %}"></script>
+{% endblock extra_js %}

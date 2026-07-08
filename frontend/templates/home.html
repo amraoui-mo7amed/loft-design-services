@@ -1,0 +1,296 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block body_class %}landing-page{% endblock body_class %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static "css/home.css" %}?v={% now "U" %}">
+{% endblock extra_css %}
+
+
+{% block nav %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-transparent py-4 fixed-top" id="landingNav">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <i class="fas fa-drafting-compass text-primary"></i>
+                <span class="fw-black fs-4 text-dark">
+                    {% if IS_RTL %}{{ site_config.ar_name }}{% else %}{{ site_config.name }}{% endif %}
+                </span>
+            </a>
+            <div class="ms-auto d-flex align-items-center gap-3">
+                {% include 'partials/language_switcher.html' %}
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dash:dash_home' %}" class="btn btn-dark rounded-pill px-4 fw-bold">{% trans "Dashboard" %}</a>
+                {% else %}
+                    <a href="{% url 'user_auth:login' %}" class="btn btn-link text-dark fw-bold text-decoration-none d-none d-md-block">{% trans "Login" %}</a>
+                    <a href="{% url 'user_auth:signup' %}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">{% trans "Get Started" %}</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+{% endblock nav %}
+
+{% block sidebar %}{% endblock sidebar %}
+
+{% block content %}
+    <!-- Hero -->
+    <section class="loft-hero">
+        <div class="loft-hero-bg"></div>
+        <div class="container position-relative z-1">
+            <div class="row justify-content-center text-center">
+                <div class="col-lg-8">
+                    <span class="loft-badge">
+                        <i class="fas fa-magic me-2"></i>{{ site_config.tagline }}
+                    </span>
+                    <h1 class="loft-hero-title">
+                        {% if IS_RTL %}
+                            حول مساحتك إلى <span class="text-accent">تحفة فنية</span>
+                        {% else %}
+                            Transform Your Space Into a <span class="text-accent">Masterpiece</span>
+                        {% endif %}
+                    </h1>
+                    <p class="loft-hero-desc">
+                        {{ site_config.seo.description }}
+                    </p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="{% url 'design_service' %}" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-lg">
+                            {% trans "Start My Project" %}
+                        </a>
+                        <a href="#features" class="btn btn-outline-dark btn-lg rounded-pill px-5 fw-bold">
+                            {% trans "Explore" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="loft-section" id="features">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="loft-section-title reveal">{% trans "Why Loft Design?" %}</h2>
+                <p class="loft-section-sub reveal">{% trans "We reimagine the interior design experience from the ground up" %}</p>
+            </div>
+            <div class="loft-card-grid">
+                <div class="loft-card reveal">
+                    <div class="loft-card-icon"><i class="fas fa-pencil-ruler"></i></div>
+                    <div class="loft-card-body">
+                        <h3>{% trans "Expert Designers" %}</h3>
+                        <p>{% trans "Work with vetted professionals who understand your vision and bring it to life with precision." %}</p>
+                    </div>
+                </div>
+                <div class="loft-card reveal reveal-delay-1">
+                    <div class="loft-card-icon"><i class="fas fa-tag"></i></div>
+                    <div class="loft-card-body">
+                        <h3>{% trans "Transparent Pricing" %}</h3>
+                        <p>{% trans "Know exactly what you pay before you start. No hidden fees, no surprises." %}</p>
+                    </div>
+                </div>
+                <div class="loft-card reveal reveal-delay-2">
+                    <div class="loft-card-icon"><i class="fas fa-clock"></i></div>
+                    <div class="loft-card-body">
+                        <h3>{% trans "Fast Delivery" %}</h3>
+                        <p>{% trans "Get your completed designs within your timeline with regular progress updates." %}</p>
+                    </div>
+                </div>
+                <div class="loft-card reveal reveal-delay-3">
+                    <div class="loft-card-icon"><i class="fas fa-sync-alt"></i></div>
+                    <div class="loft-card-body">
+                        <h3>{% trans "Unlimited Revisions" %}</h3>
+                        <p>{% trans "We revise until you love it. Your satisfaction is guaranteed." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="loft-section">
+        <div class="container">
+            <div class="loft-card loft-card-plain reveal">
+                <div class="loft-stats-row">
+                    <div class="loft-stat">
+                        <div class="loft-stat-num">500+</div>
+                        <div class="loft-stat-label">{% trans "Projects Delivered" %}</div>
+                    </div>
+                    <div class="loft-stat">
+                        <div class="loft-stat-num">50+</div>
+                        <div class="loft-stat-label">{% trans "Expert Designers" %}</div>
+                    </div>
+                    <div class="loft-stat">
+                        <div class="loft-stat-num">98%</div>
+                        <div class="loft-stat-label">{% trans "Client Satisfaction" %}</div>
+                    </div>
+                    <div class="loft-stat">
+                        <div class="loft-stat-num">4.9★</div>
+                        <div class="loft-stat-label">{% trans "Average Rating" %}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="loft-section" id="how-it-works">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="loft-section-title reveal">{% trans "How It Works" %}</h2>
+                <p class="loft-section-sub reveal">{% trans "Six simple steps to your dream space" %}</p>
+            </div>
+            <div class="loft-card-grid loft-card-grid-3">
+                {% for step in how_it_works_steps %}
+                <div class="loft-card loft-card-center reveal reveal-delay-{{ forloop.counter0 }}">
+                    <div class="loft-card-num mx-auto mb-3">{{ forloop.counter }}</div>
+                    <div class="loft-card-body text-center">
+                        <h3>{{ step.title }}</h3>
+                        <p>{{ step.desc }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="text-center mt-5 reveal">
+                <a href="{% url 'design_service' %}" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-lg">
+                    {% trans "Start Your Project Now" %}
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="loft-section" id="pricing">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="loft-section-title reveal">{% trans "Our Packages" %}</h2>
+                <p class="loft-section-sub reveal">{% trans "Choose the package that suits your project" %}</p>
+            </div>
+            <div class="loft-card-grid loft-card-grid-3">
+                {% for pkg in packages %}
+                <div class="loft-card loft-card-h reveal reveal-delay-{{ forloop.counter0 }}">
+                    <div class="loft-card-icon-sm">
+                        {% if forloop.counter == 1 %}<i class="fas fa-leaf"></i>
+                        {% elif forloop.counter == 2 %}<i class="fas fa-star"></i>
+                        {% else %}<i class="fas fa-crown"></i>{% endif %}
+                    </div>
+                    <div class="loft-card-body">
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                            <h3 class="mb-0">{{ pkg.name }}</h3>
+                            <span class="badge-popular">{{ pkg.price_multiplier }}x</span>
+                            {% if forloop.counter == 2 %}
+                            <span class="badge-popular">{% trans "Popular" %}</span>
+                            {% endif %}
+                        </div>
+                        <p>{{ pkg.description|truncatewords:15 }}</p>
+                    </div>
+                    <a href="{% url 'design_service' %}" class="btn btn-outline-primary rounded-pill px-3 fw-bold flex-shrink-0">
+                        {% trans "Choose" %}
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Design Styles -->
+    <section class="loft-section" id="styles">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="loft-section-title reveal">{% trans "Design Styles" %}</h2>
+                <p class="loft-section-sub reveal">{% trans "From modern minimalism to classic elegance — find your inspiration" %}</p>
+            </div>
+            <div class="loft-card loft-card-plain reveal">
+                <div class="loft-tags">
+                    {% for style in styles %}
+                    <span class="loft-tag">
+                        <i class="fas fa-palette me-2"></i>{{ style.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="loft-section" id="faq">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="loft-section-title reveal">{% trans "Frequently Asked Questions" %}</h2>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="accordion" id="faqAccordion">
+                        {% for faq in faqs %}
+                        <div class="loft-card accordion-card">
+                            <h2 class="accordion-header">
+                                <button class="loft-accordion-btn {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.counter }}">
+                                    {{ faq.question }}
+                                </button>
+                            </h2>
+                            <div id="faq{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
+                                <div class="loft-accordion-body">{{ faq.answer }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="loft-section">
+        <div class="container">
+            <div class="loft-card-cta text-center reveal">
+                <h2 class="display-4 fw-black mb-3">{% trans "Ready to Transform Your Space?" %}</h2>
+                <p class="fs-5 text-muted mb-4">{% trans "Start your design journey today. It's free to get started." %}</p>
+                <a href="{% url 'design_service' %}" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-lg">
+                    <i class="fas fa-play me-2"></i>{% trans "Get My Free Quote" %}
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock content %}
+
+{% block footer %}
+    <footer class="bg-white py-5 border-top">
+        <div class="container text-center">
+            <p class="mb-2 fw-bold text-dark">
+                <i class="fas fa-drafting-compass text-primary me-2"></i>
+                {% if IS_RTL %}{{ site_config.ar_name }}{% else %}{{ site_config.name }}{% endif %}
+            </p>
+            <p class="text-muted small mb-0">
+                &copy; {% now "Y" %}. {% trans "All rights reserved." %}
+            </p>
+        </div>
+    </footer>
+{% endblock footer %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('scroll', function () {
+        var nav = document.getElementById('landingNav');
+        if (window.scrollY > 50) {
+            nav.classList.add('bg-white', 'shadow-sm');
+            nav.classList.remove('bg-transparent');
+        } else {
+            nav.classList.remove('bg-white', 'shadow-sm');
+            nav.classList.add('bg-transparent');
+        }
+    });
+
+    (function () {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.reveal').forEach(function (el) {
+            observer.observe(el);
+        });
+    })();
+</script>
+{% endblock extra_js %}

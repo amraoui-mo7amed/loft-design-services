@@ -1,0 +1,184 @@
+{% extends "dash/dash_index.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block dashTitle %}{{ project.project_number }}{% endblock dashTitle %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/users.css' %}?v={% now "U" %}">
+{% endblock extra_css %}
+
+{% block dashContent %}
+<div class="container-fluid">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <!-- Project Info -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h4 class="fw-bold mb-1">{{ project.project_name }}</h4>
+                        <p class="text-muted small mb-0">{{ project.project_number }}</p>
+                    </div>
+                    <span class="badge bg-primary rounded-pill px-3 py-2 fs-6">{{ project.get_status_display }}</span>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">{% trans "Client" %}</small>
+                        <span class="fw-bold">{{ project.client.get_full_name|default:project.client.username }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">{% trans "Email" %}</small>
+                        <span class="fw-bold small">{{ project.client.email }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">{% trans "Phone" %}</small>
+                        <span class="fw-bold">{{ project.client.profile.phone_number|default:"—" }}</span>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">{% trans "Total" %}</small>
+                        <span class="fw-bold text-primary">{{ project.total }} DA</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deliverables Upload -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <h5 class="fw-bold mb-3"><i class="fas fa-upload text-primary me-2"></i>{% trans "Upload Deliverable" %}</h5>
+                <form method="post" enctype="multipart/form-data" class="form deliverable-upload-form" action="{% url 'dash:designer_upload_deliverable' project.uuid %}">
+                    {% csrf_token %}
+                    {% include "partials/errorList.html" with form_id="uploadDeliverableForm" %}
+                    <div class="mb-3">
+                        <input type="text" name="title" class="form-control" placeholder="{% trans 'Deliverable title' %}" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="file" name="file" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary rounded-3 fw-bold">
+                        <i class="fas fa-upload me-2"></i>{% trans "Upload" %}
+                    </button>
+                </form>
+                {% if deliverables %}
+                <hr>
+                <h6 class="fw-bold mt-3">{% trans "Previous Deliverables" %}</h6>
+                {% for d in deliverables %}
+                <div class="d-flex justify-content-between align-items-center py-1">
+                    <span>{{ d.title }} v{{ d.version }}</span>
+                    <small class="text-muted">{{ d.created_at|date:"d M, Y" }}</small>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Internal Notes -->
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold mb-3"><i class="fas fa-sticky-note text-primary me-2"></i>{% trans "Internal Notes" %}</h5>
+                <form method="post" class="form note-form" action="{% url 'dash:designer_add_note' project.uuid %}">
+                    {% csrf_token %}
+                    {% include "partials/errorList.html" with form_id="noteForm" %}
+                    <div class="mb-3">
+                        <textarea name="note" class="form-control" rows="2" placeholder="{% trans 'Add a note...' %}"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary rounded-3 btn-sm fw-bold">
+                        <i class="fas fa-plus me-1"></i>{% trans "Add Note" %}
+                    </button>
+                </form>
+                {% if notes %}
+                <div class="mt-3">
+                    {% for note in notes %}
+                    <div class="bg-light rounded-3 p-3 mb-2">
+                        <div class="d-flex justify-content-between">
+                            <small class="fw-bold">{{ note.author.get_full_name|default:note.author.username }}</small>
+                            <small class="text-muted">{{ note.created_at|date:"d M, H:i" }}</small>
+                        </div>
+                        <p class="small mb-0 mt-1">{{ note.note }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <h5 class="fw-bold mb-3"><i class="fas fa-info-circle text-primary me-2"></i>{% trans "Client Info" %}</h5>
+                <p class="small mb-1"><strong>{% trans "Name" %}:</strong> {{ project.client.get_full_name|default:project.client.username }}</p>
+                <p class="small mb-1"><strong>{% trans "Email" %}:</strong> {{ project.client.email }}</p>
+                <p class="small mb-1"><strong>{% trans "Phone" %}:</strong> {{ project.client.profile.phone_number|default:"—" }}</p>
+                <p class="small mb-0"><strong>{% trans "Address" %}:</strong> {{ project.client.profile.address|default:"—" }}</p>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold mb-3">{% trans "Revisions" %}</h5>
+                {% if revisions %}
+                {% for rev in revisions %}
+                <div class="d-flex justify-content-between align-items-center py-1">
+                    <span class="small">#{{ rev.revision_number }}</span>
+                    <span class="badge bg-warning rounded-pill">{{ rev.get_status_display }}</span>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted small mb-0">{% trans "No revisions requested." %}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock dashContent %}
+
+{% block js %}
+<script>
+document.querySelectorAll('.deliverable-upload-form').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = this.querySelector('button[type="submit"]');
+        var list = this.querySelector('#errorList');
+        if (list) list.innerHTML = '';
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
+        var fd = new FormData(this);
+        fetch(this.action, { method: 'POST', body: fd, headers: {'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value} })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-upload me-2"></i>Upload';
+            if (data.success) { setTimeout(function () { location.reload(); }, 5000); }
+            else {
+                var errors = data.errors || [data.message || 'Upload failed'];
+                if (list) {
+                    errors.forEach(function(msg) {
+                        var li = document.createElement('li');
+                        li.textContent = msg;
+                        list.appendChild(li);
+                    });
+                }
+            }
+        });
+    });
+});
+document.querySelectorAll('.note-form').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var btn = this.querySelector('button[type="submit"]');
+        var list = this.querySelector('#errorList');
+        if (list) list.innerHTML = '';
+        var fd = new FormData(this);
+        fetch(this.action, { method: 'POST', body: fd, headers: {'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value} })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) { setTimeout(function () { location.reload(); }, 5000); }
+            else {
+                var errors = data.errors || [data.message || 'Error'];
+                if (list) {
+                    errors.forEach(function(msg) {
+                        var li = document.createElement('li');
+                        li.textContent = msg;
+                        list.appendChild(li);
+                    });
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock js %}
