@@ -1,12 +1,12 @@
 :root {
-  --wiz-bg: #f0ede8;
+  --wiz-bg: #f5f3f0;
   --wiz-surface: #ffffff;
-  --wiz-primary: #1a3a3a;
-  --wiz-primary-light: rgba(26, 58, 58, 0.06);
-  --wiz-primary-mid: rgba(26, 58, 58, 0.12);
-  --wiz-accent: #c8a27a;
-  --wiz-accent-light: rgba(200, 162, 122, 0.15);
-  --wiz-success: #4a7a5a;
+  --wiz-primary: #FFD65A;
+  --wiz-primary-light: rgba(255, 214, 90, 0.1);
+  --wiz-primary-mid: rgba(255, 214, 90, 0.22);
+  --wiz-accent: #212121;
+  --wiz-accent-light: rgba(33, 33, 33, 0.08);
+  --wiz-success: #28a745;
   --wiz-text: #1a1a1a;
   --wiz-text-muted: #8a8580;
   --wiz-border: rgba(0, 0, 0, 0.06);
@@ -21,7 +21,7 @@
 }
 
 .wizard-header {
-  background: var(--wiz-primary);
+  background: var(--wiz-accent);
   padding: 0;
   position: sticky;
   top: 0;
@@ -239,7 +239,7 @@
 
 .wiz-card.selected {
   border-color: var(--wiz-primary) !important;
-  box-shadow: 0 8px 32px rgba(26, 58, 58, 0.1) !important;
+  box-shadow: 0 8px 32px rgba(255, 214, 90, 0.15) !important;
 }
 
 .wiz-card.selected::before {
@@ -257,7 +257,7 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--wiz-primary);
+  background: #212121;
   color: #fff;
   display: none;
   align-items: center;
@@ -330,7 +330,7 @@
 .wiz-opt-card.selected .wiz-opt-check {
   border-color: var(--wiz-primary);
   background: var(--wiz-primary);
-  color: #fff;
+  color: var(--wiz-accent);
 }
 
 .wiz-opt-name {
@@ -451,17 +451,18 @@
 
 .wiz-btn-primary {
   background: var(--wiz-primary);
-  color: #fff;
+  color: var(--wiz-accent);
 }
 
 .wiz-btn-primary:hover {
-  background: #0f2a2a;
+  background: #e6c04a;
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(26, 58, 58, 0.2);
+  box-shadow: 0 4px 16px rgba(255, 214, 90, 0.35);
 }
 
 .wiz-btn-primary:disabled {
-  opacity: 0.5;
+  background: #d4c48a;
+  color: rgba(33, 33, 33, 0.5);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -486,7 +487,7 @@
 .wiz-btn-success:hover {
   background: #3a6a4a;
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(74, 122, 90, 0.25);
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.25);
 }
 
 .wiz-btn-accent {
@@ -525,7 +526,7 @@
 .wiz-price-display {
   font-weight: 700;
   font-size: 1rem;
-  color: var(--wiz-primary);
+  color: var(--wiz-accent);
 }
 
 .wiz-price-detail {
@@ -770,7 +771,7 @@
 
 .wiz-inspo-card.selected {
   border-color: var(--wiz-primary);
-  box-shadow: 0 8px 28px rgba(26, 58, 58, 0.15);
+  box-shadow: 0 8px 28px rgba(255, 214, 90, 0.2);
 }
 
 .wiz-inspo-img {
@@ -783,7 +784,7 @@
 .wiz-inspo-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(26, 58, 58, 0.3);
+  background: rgba(33, 33, 33, 0.3);
   display: none;
   align-items: center;
   justify-content: center;
@@ -799,27 +800,74 @@
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.wiz-style-tab {
-  font-size: 0.78rem;
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1.5px solid var(--wiz-border);
-  background: transparent;
-  color: var(--wiz-text-muted);
-  font-weight: 500;
+.wiz-category-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.2rem 0.8rem;
+  border-radius: 4px;
+  background: var(--wiz-accent);
+  color: #fff;
+}
+
+.wiz-role-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.5rem 2.5rem;
+  border: 2px solid var(--wiz-border);
+  border-radius: var(--wiz-radius);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s;
+  min-width: 180px;
+  background: var(--wiz-surface);
 }
-
-.wiz-style-tab:hover {
-  border-color: var(--wiz-primary-mid);
-  color: var(--wiz-primary);
+.wiz-role-card:hover {
+  border-color: var(--wiz-accent);
+  box-shadow: 0 4px 16px rgba(255, 214, 90, 0.15);
 }
-
-.wiz-style-tab.active {
+.wiz-role-card:has(input:checked) {
+  border-color: var(--wiz-primary);
+  background: #fff9e6;
+  box-shadow: 0 4px 20px rgba(255, 214, 90, 0.25);
+}
+.wiz-role-icon {
+  font-size: 1.8rem;
+  color: var(--wiz-accent);
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--wiz-primary-light);
+}
+.wiz-role-card:has(input:checked) .wiz-role-icon {
   background: var(--wiz-primary);
   color: #fff;
-  border-color: var(--wiz-primary);
+}
+.wiz-role-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--wiz-text);
+}
+.wiz-role-desc {
+  font-size: 0.75rem;
+  color: var(--wiz-text-muted);
+  max-width: 140px;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.wiz-questionnaire-body {
+  animation: wizFadeSlideIn 0.4s ease;
+}
+@keyframes wizFadeSlideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .wiz-summary-card {
@@ -855,7 +903,7 @@
 }
 
 .wiz-summary-total {
-  background: linear-gradient(135deg, var(--wiz-primary) 0%, #0f2a2a 100%);
+  background: var(--wiz-accent);
   border-radius: var(--wiz-radius);
   padding: 1.25rem;
   color: #fff;
@@ -876,7 +924,7 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: rgba(74, 122, 90, 0.1);
+  background: rgba(40, 167, 69, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -891,7 +939,7 @@
 .wiz-confirm-number {
   font-size: 1.8rem;
   font-weight: 800;
-  color: var(--wiz-primary);
+  color: var(--wiz-accent);
   letter-spacing: -0.5px;
 }
 
@@ -985,4 +1033,137 @@
   box-shadow: var(--wiz-shadow);
   border: 1px solid var(--wiz-border);
   margin-bottom: 1rem;
+}
+
+/* Package Cards */
+.pkg-card {
+  position: relative;
+  background: var(--wiz-surface);
+  border-radius: var(--wiz-radius);
+  box-shadow: var(--wiz-shadow);
+  border: 2px solid transparent;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+}
+.pkg-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+.pkg-card.selected {
+  border-color: var(--wiz-accent);
+  box-shadow: 0 0 0 3px var(--wiz-accent-light);
+}
+.pkg-card.selected .pkg-card-btn {
+  background: var(--wiz-accent);
+  color: #fff;
+  border-color: var(--wiz-accent);
+}
+.pkg-card-badge {
+  position: absolute;
+  top: 10px;
+  inset-inline-end: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--wiz-primary);
+  color: var(--wiz-accent);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.pkg-card.selected .pkg-card-badge {
+  display: flex;
+}
+.pkg-card-head {
+  position: relative;
+  padding: 1.25rem 1rem 1rem;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.pkg-card-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 0.2rem;
+}
+.pkg-card-desc {
+  font-size: 0.72rem;
+  opacity: 0.85;
+  line-height: 1.3;
+  max-width: 180px;
+}
+.pkg-card-body {
+  padding: 1.25rem 1rem 1rem;
+}
+.pkg-card-price-wrap {
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+.pkg-card-price {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--wiz-accent);
+}
+.pkg-card-currency {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--wiz-text-muted);
+  margin-left: 2px;
+}
+.pkg-card-stat-num {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.pkg-card-stat-label {
+  font-size: 0.65rem;
+  color: var(--wiz-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.pkg-card-features-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--wiz-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+.pkg-card-feature {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  padding: 0.25rem 0;
+  color: var(--wiz-text);
+}
+.pkg-card-feature i {
+  color: var(--wiz-success);
+  font-size: 0.5rem;
+  flex-shrink: 0;
+}
+.pkg-card-more {
+  font-size: 0.7rem;
+  color: var(--wiz-text-muted);
+  margin-top: 0.25rem;
+}
+.pkg-card-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 0.6rem;
+  border-radius: var(--wiz-radius-sm);
+  border: 2px solid var(--wiz-border);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pkg-card-btn:hover {
+  border-color: var(--wiz-accent);
+  background: var(--wiz-accent-light);
 }

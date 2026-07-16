@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="wizard-step" data-step="8">
+<div class="wizard-step" data-step="5">
   <div class="text-center mb-4">
     <h2 class="wiz-step-title">{% trans "Review & Submit" %}</h2>
     <p class="wiz-step-sub">{% trans "Review your selections before submitting" %}</p>
@@ -40,26 +40,10 @@
   </div>
 
   <div class="wiz-summary-card d-flex align-items-center gap-3">
-    <div class="wiz-summary-icon"><i class="fas fa-plus-circle"></i></div>
-    <div class="flex-grow-1">
-      <div class="wiz-summary-title">{% trans "Options" %}</div>
-      <div class="wiz-summary-value" id="summaryOptions">{% trans "No options selected" %}</div>
-    </div>
-  </div>
-
-  <div class="wiz-summary-card d-flex align-items-center gap-3">
     <div class="wiz-summary-icon"><i class="fas fa-images"></i></div>
     <div class="flex-grow-1">
       <div class="wiz-summary-title">{% trans "Inspirations" %}</div>
       <div class="wiz-summary-value" id="summaryInspirations">{% trans "No inspirations selected" %}</div>
-    </div>
-  </div>
-
-  <div class="wiz-summary-card d-flex align-items-center gap-3">
-    <div class="wiz-summary-icon"><i class="fas fa-file"></i></div>
-    <div class="flex-grow-1">
-      <div class="wiz-summary-title">{% trans "Uploads" %}</div>
-      <div class="wiz-summary-value" id="summaryUploads">{% trans "No files uploaded" %}</div>
     </div>
   </div>
 

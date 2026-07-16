@@ -17,16 +17,18 @@ from ..price_engine import calculate_full_price
 
 def wizard_container(request):
     project_types = ProjectType.objects.filter(active=True)
-    packages = DesignPackage.objects.filter(active=True)
+    packages = DesignPackage.objects.filter(active=True).prefetch_related("package_services__option__category")
     options = DesignOption.objects.filter(active=True)
     styles = StyleCategory.objects.all()
+    project_type_choices = [("", _("Choose project type"))] + [(pt.slug, pt.name) for pt in project_types]
     step_labels = [
-        _("Project Type"), _("Floors"), _("Spaces"), _("Package"),
-        _("Options"), _("Inspirations"), _("Questionnaire"),
-        _("Uploads"), _("Summary"), _("Confirmation"),
+        _("Project & Floors"), _("Spaces"), _("Package"),
+        _("Inspirations"), _("Questionnaire"),
+        _("Summary"), _("Confirmation"),
     ]
     return render(request, "dashboard/wizard/container.html", {
         "project_types": project_types,
+        "project_type_choices": project_type_choices,
         "packages": packages,
         "options": options,
         "styles": styles,
@@ -36,13 +38,11 @@ def wizard_container(request):
 
 def step_project_type(request):
     project_types = ProjectType.objects.filter(active=True)
+    project_type_choices = [("", _("Choose project type"))] + [(pt.slug, pt.name) for pt in project_types]
     return render(request, "dashboard/wizard/step1_project_type.html", {
         "project_types": project_types,
+        "project_type_choices": project_type_choices,
     })
-
-
-def step_floors(request):
-    return render(request, "dashboard/wizard/step2_floors.html")
 
 
 def step_spaces(request):
@@ -60,16 +60,17 @@ def step_spaces(request):
 
 
 def step_packages(request):
-    packages = DesignPackage.objects.filter(active=True)
+    packages = DesignPackage.objects.filter(active=True).prefetch_related("package_services__option__category")
+    package_data = []
+    for pkg in packages:
+        total = sum(ps.price for ps in pkg.package_services.all())
+        package_data.append({
+            "pkg": pkg,
+            "total_price": total,
+        })
     return render(request, "dashboard/wizard/step4_packages.html", {
         "packages": packages,
-    })
-
-
-def step_options(request):
-    options = DesignOption.objects.filter(active=True)
-    return render(request, "dashboard/wizard/step5_options.html", {
-        "options": options,
+        "package_data": package_data,
     })
 
 
@@ -77,10 +78,29 @@ def step_inspirations(request):
     spaces_list = Space.objects.filter(active=True)
     styles = StyleCategory.objects.all()
     inspirations = InspirationImage.objects.filter(active=True).select_related("space", "style_category")
+
+    insp_by_space_cat = {}
+    for img in inspirations:
+        sid = img.space_id
+        cid = img.style_category_id
+        if sid not in insp_by_space_cat:
+            insp_by_space_cat[sid] = {}
+        if cid not in insp_by_space_cat[sid]:
+            insp_by_space_cat[sid][cid] = {
+                "category": img.style_category,
+                "images": [],
+            }
+        insp_by_space_cat[sid][cid]["images"].append(img)
+
+    for space_id, cats in insp_by_space_cat.items():
+        for cid, data in cats.items():
+            data["images"] = data["images"][-6:]
+
     return render(request, "dashboard/wizard/step6_inspirations.html", {
         "spaces_list": spaces_list,
         "styles": styles,
         "inspirations": inspirations,
+        "insp_by_space_cat": insp_by_space_cat,
     })
 
 
@@ -103,10 +123,6 @@ def step_questionnaire(request):
         "timeline_choices": timeline_choices,
         "property_type_choices": property_type_choices,
     })
-
-
-def step_uploads(request):
-    return render(request, "dashboard/wizard/step8_uploads.html")
 
 
 def step_summary(request):
@@ -153,14 +169,6 @@ def submit_design_request(request):
                 DesignRequestSpace.objects.create(
                     design_request=design_request, floor=floor, space=space,
                     price_at_time=space.base_price
-                )
-
-        option_ids = json.loads(data.get("options", "[]"))
-        for oid in option_ids:
-            opt = DesignOption.objects.filter(id=oid).first()
-            if opt:
-                DesignRequestOption.objects.create(
-                    design_request=design_request, option=opt, price_at_time=opt.price
                 )
 
         insp_data = json.loads(data.get("inspirations", "{}"))

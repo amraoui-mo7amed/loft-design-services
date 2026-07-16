@@ -42,13 +42,16 @@ urlpatterns = [
     # Design Catalog - Packages
     path("design/packages/", design.package_list, name="package_list"),
     path("design/packages/create/", design.package_create, name="package_create"),
+    path("design/packages/<int:pk>/", design.package_detail, name="package_detail"),
     path("design/packages/<int:pk>/edit/", design.package_update, name="package_update"),
     path("design/packages/<int:pk>/delete/", design.package_delete, name="package_delete"),
-    # Design Catalog - Options
-    path("design/options/", design.option_list, name="option_list"),
-    path("design/options/create/", design.option_create, name="option_create"),
-    path("design/options/<int:pk>/edit/", design.option_update, name="option_update"),
-    path("design/options/<int:pk>/delete/", design.option_delete, name="option_delete"),
+    path("design/packages/<int:pk>/options/add/", design.package_option_add, name="package_option_add"),
+    path("design/packages/<int:pk>/options/<int:opt_pk>/delete/", design.package_option_delete, name="package_option_delete"),
+    # Design Catalog - Service Categories
+    path("design/service-categories/list/", design.service_category_list, name="service_category_list"),
+    path("design/service-categories/create/", design.service_category_create, name="service_category_create"),
+    path("design/service-categories/<int:pk>/edit/", design.service_category_update, name="service_category_update"),
+    path("design/service-categories/<int:pk>/delete/", design.service_category_delete, name="service_category_delete"),
     # Design Catalog - Styles
     path("design/styles/", design.style_list, name="style_list"),
     path("design/styles/create/", design.style_create, name="style_create"),

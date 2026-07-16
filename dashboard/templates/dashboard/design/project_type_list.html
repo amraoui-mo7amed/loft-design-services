@@ -102,14 +102,12 @@
 <div class="modal fade" id="projectTypeModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
-            <div class="p-4" style="background:linear-gradient(135deg,var(--brand-primary),#1a4040);">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h5 class="modal-title fw-bold text-white mb-1"></h5>
-                        <p class="text-white-50 small mb-0">{% trans "Configure project type details, image and availability" %}</p>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="pt-modal-header d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 class="modal-title fw-bold mb-1"></h5>
+                    <p class="pt-modal-subtitle">{% trans "Configure project type details, image and availability" %}</p>
                 </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="p-4">
                 <form method="post" action="" enctype="multipart/form-data" class="form" id="projectTypeForm">
@@ -126,7 +124,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                                    <i class="fas fa-align-left text-info" style="font-size:0.8rem;"></i>
+                                    <i class="fas fa-align-left text-muted" style="font-size:0.8rem;"></i>
                                     {% trans "Description" %}
                                 </label>
                                 <textarea name="description" class="form-control" data-field="description" data-default="" rows="3" placeholder="{% trans 'Brief description of this project type...' %}"></textarea>
@@ -134,7 +132,7 @@
                             <div class="row g-3">
                                 <div class="col-sm-6">
                                     <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                                        <i class="fas fa-sort-numeric-down text-secondary" style="font-size:0.8rem;"></i>
+                                        <i class="fas fa-sort-numeric-down text-muted" style="font-size:0.8rem;"></i>
                                         {% trans "Sort Order" %}
                                     </label>
                                     <input type="number" name="sort_order" class="form-control" data-field="sort_order" data-default="0" min="0">
@@ -144,7 +142,7 @@
                         <div class="col-md-5">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                                    <i class="fas fa-image text-warning" style="font-size:0.8rem;"></i>
+                                    <i class="fas fa-image text-primary" style="font-size:0.8rem;"></i>
                                     {% trans "Project Type Image" %}
                                 </label>
                                 <div class="catalog-image-upload border rounded-3 p-3 text-center" style="background:#f8f9fa;cursor:pointer;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed #dee2e6 !important;">

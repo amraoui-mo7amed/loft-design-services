@@ -1,43 +1,35 @@
-{% load i18n %}
-<div class="wizard-step" data-step="5">
+{% load i18n tags %}
+<div class="wizard-step" data-step="3">
   <div class="text-center mb-4">
     <h2 class="wiz-step-title">{% trans "Style Inspirations" %}</h2>
     <p class="wiz-step-sub">{% trans "Select inspiration images for each space to guide your designer" %}</p>
   </div>
 
   {% for space in spaces_list %}
+  {% with cats=insp_by_space_cat|get_item:space.id %}
+  {% if cats %}
   <div class="inspiration-space-group mb-4" data-space-id="{{ space.id }}">
     <h5 class="wiz-section-title">
       <i class="fas fa-image"></i>{{ space.name }}
     </h5>
-    <div class="d-flex gap-2 flex-wrap mb-3 inspiration-style-tabs" role="tablist">
-      {% for style in styles %}
-      <button class="wiz-style-tab {% if forloop.first %}active{% endif %}"
-              data-bs-toggle="pill"
-              data-space-id="{{ space.id }}"
-              data-style-id="{{ style.id }}"
-              type="button">
-        {{ style.name }}
-      </button>
-      {% endfor %}
+    {% for cid, data in cats.items %}
+    <div class="mb-3">
+      <span class="wiz-category-badge">{{ data.category.name }}</span>
     </div>
-    <div class="row g-2 inspiration-gallery" data-space-id="{{ space.id }}">
-      {% for img in inspirations %}
-      {% if img.space_id == space.id %}
-      <div class="col-4 col-md-3 inspiration-item"
-           data-style-id="{{ img.style_category_id }}"
-           data-img-id="{{ img.id }}"
-           data-img-url="{{ img.image.url }}"
-           style="{% if not forloop.parentloop.first %}display:none;{% endif %}">
+    <div class="row g-2 inspiration-gallery mb-3" data-space-id="{{ space.id }}">
+      {% for img in data.images %}
+      <div class="col-4 col-md-2 inspiration-item" data-style-id="{{ img.style_category_id }}" data-img-id="{{ img.id }}" data-img-url="{{ img.image.url }}">
         <div class="wiz-inspo-card inspiration-card">
           <img src="{{ img.image.url }}" alt="{{ img.title }}" class="wiz-inspo-img">
           <div class="wiz-inspo-overlay"><i class="fas fa-check-circle"></i></div>
         </div>
       </div>
-      {% endif %}
       {% endfor %}
     </div>
+    {% endfor %}
   </div>
+  {% endif %}
+  {% endwith %}
   {% empty %}
   <p class="text-muted text-center py-4" style="font-size:0.9rem;">{% trans "No inspiration images available yet." %}</p>
   {% endfor %}

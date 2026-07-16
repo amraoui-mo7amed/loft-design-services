@@ -27,13 +27,13 @@ def _get_site_config():
             ),
         },
         "branding": {
-            "primary_color": "#2a5a5a",
-            "secondary_color": "#b8946b",
-            "accent_color": "#d47b5a",
-            "success_color": "#5a7a5a",
-            "danger_color": "#a84444",
-            "dark_color": "#2c2c3a",
-            "light_color": "#f5f0ea",
+                 "primary_color": "#FFD65A",
+                "secondary_color": "#212121",
+                "accent_color": "#FFFFFF",
+                "success_color": "#28a745",
+                "danger_color": "#dc3545",
+                "dark_color": "#1a1a1a",
+                "light_color": "#f8f9fa",
         },
     }
 

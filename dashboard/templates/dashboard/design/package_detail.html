@@ -1,0 +1,203 @@
+{% extends "dash/dash_index.html" %}
+{% load i18n %}
+{% load static %}
+{% load l10n %}
+
+{% block dashTitle %}{{ pkg.name }}{% endblock dashTitle %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/project_type_list.css' %}?v={% now "U" %}">
+    <link rel="stylesheet" href="{% static 'css/package_detail.css' %}?v={% now "U" %}">
+{% endblock extra_css %}
+
+{% block dashContent %}
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-2">
+        <a href="{% url 'dash:package_list' %}" class="btn btn-outline-secondary rounded-2 d-flex align-items-center justify-content-center" title="{% trans 'Back to Packages' %}" style="width:36px;height:36px;padding:0;flex-shrink:0;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h5 class="fw-bold mb-0">{{ pkg.name }}</h5>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary btn-sm rounded-2 catalog-edit-btn"
+                data-bs-target="#editPackageModal"
+                data-update-url="{% url 'dash:package_update' pkg.pk %}"
+                data-modal-title="{% trans 'Edit Package' %}"
+                data-submit-text="{% trans 'Save' %}"
+                data-name="{{ pkg.name }}"
+                data-description="{{ pkg.description }}"
+                data-active="{{ pkg.active|yesno:'true,false' }}">
+            <i class="fas fa-pen me-1"></i>{% trans "Edit Package" %}
+        </button>
+        <button class="btn btn-outline-danger btn-sm rounded-2 delete_button"
+                data-delete-url="{% url 'dash:package_delete' pkg.pk %}"
+                data-csrf-token="{{ csrf_token }}"
+                data-swal-title="{% trans 'Delete Package?' %}"
+                data-swal-text="{% trans 'This action cannot be undone.' %}">
+            <i class="fas fa-trash me-1"></i>{% trans "Delete" %}
+        </button>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left: Package Info -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3" style="font-size:0.85rem;">{% trans "Package Details" %}</h6>
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="small text-muted">{% trans "Status" %}</span>
+                    <span class="badge rounded-pill" style="font-size:0.65rem;background:{% if pkg.active %}rgba(25,135,84,0.1);color:#198754{% else %}rgba(108,117,125,0.1);color:#6c757d{% endif %};">{% if pkg.active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}</span>
+                </div>
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="small text-muted">{% trans "Delivery" %}</span>
+                    <span class="small fw-semibold" id="totalDelivery">{{ pkg.total_delivery_days }} {% trans "days" %}</span>
+                </div>
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="small text-muted">{% trans "Options" %}</span>
+                    <span class="small fw-semibold" id="optCountBadge">{{ pkg.package_services.count }}</span>
+                </div>
+                {% if pkg.description %}
+                <hr style="opacity:0.5;">
+                <p class="small text-muted mb-0" style="font-size:0.78rem;">{{ pkg.description }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <!-- Right: Options -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="fw-bold mb-0" style="font-size:0.85rem;">{% trans "Service Options" %}</h6>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-2" data-bs-toggle="modal" data-bs-target="#addOptionModal">
+                        <i class="fas fa-plus me-1"></i>{% trans "Add Option" %}
+                    </button>
+                </div>
+                <div id="optionsList"
+                     class="d-flex flex-column gap-2"
+                     data-delete-url="{% url 'dash:package_option_delete' pkg.pk 0 %}"
+                     data-days-text="{% trans 'days' %}"
+                     data-empty-text="{% trans 'No options yet. Add one to get started.' %}"
+                     data-remove-confirm="{% trans 'Remove this option?' %}"
+                     data-csrf="{{ csrf_token }}">
+                    {% for ps in pkg.package_services.all %}
+                    <div class="border rounded-2 p-3 option-card" data-opt-id="{{ ps.option_id }}">
+                        <div class="d-flex align-items-start justify-content-between gap-2">
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold" style="font-size:0.85rem;">{{ ps.option.name }}</div>
+                                <div class="d-flex align-items-center gap-3 mt-1">
+                                    {% if ps.option.category %}
+                                    <span class="small" style="font-size:0.72rem;color:#868e96;"><i class="fas fa-tag me-1"></i>{{ ps.option.category.name }}</span>
+                                    {% endif %}
+                                    <span class="small" style="font-size:0.72rem;color:#868e96;"><i class="fas fa-dollar-sign me-1"></i>{{ ps.price|unlocalize }}</span>
+                                    <span class="small" style="font-size:0.72rem;color:#868e96;"><i class="fas fa-clock me-1"></i>{{ ps.option.delivery_time_days }} {% trans "days" %}</span>
+                                    {% if ps.option.description %}
+                                    <span class="small" style="font-size:0.72rem;color:#868e96;"><i class="fas fa-align-left me-1"></i>{{ ps.option.description }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm option-delete-btn flex-shrink-0" title="{% trans 'Remove' %}" style="border:1px solid #e9ecef;color:#adb5bd;background:#fff;border-radius:4px;padding:0.2rem 0.45rem;font-size:0.65rem;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4" id="emptyOptions">
+                        <p class="small text-muted mb-0">{% trans "No options yet. Add one to get started." %}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Package Modal -->
+<div class="modal fade" id="editPackageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-3 shadow-sm">
+            <form method="post" action="" class="form" id="editPackageForm">
+                {% csrf_token %}
+                {% include "partials/errorList.html" with form_id="editPackageForm" %}
+                <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
+                    <h6 class="modal-title fw-bold mb-0" style="font-size:0.95rem;"></h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold mb-1" style="font-size:0.82rem;">{% trans "Package Name" %}</label>
+                        <input type="text" name="name" class="form-control" data-field="name" data-default="" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold mb-1" style="font-size:0.82rem;">{% trans "Description" %}</label>
+                        <textarea name="description" class="form-control" rows="3" data-field="description" data-default=""></textarea>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input type="checkbox" name="active" class="form-check-input" role="switch" id="detailPkgActive" data-field="active" data-default="true" checked>
+                        <label class="form-check-label" for="detailPkgActive" style="font-size:0.82rem;font-weight:500;">{% trans "Active" %}</label>
+                    </div>
+                </div>
+                <div class="px-4 py-3 d-flex gap-2 justify-content-end border-top">
+                    <button type="button" class="btn btn-sm px-3 rounded-2" data-bs-dismiss="modal" style="border:1px solid #dee2e6;color:#495057;background:#fff;">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-sm px-3 rounded-2" style="background:var(--brand-primary);color:var(--brand-secondary);font-weight:600;border:none;">
+                        <i class="fas fa-check me-1"></i><span class="catalog-submit-text"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Option Modal -->
+<div class="modal fade" id="addOptionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-3 shadow-sm">
+            <form method="post" action="{% url 'dash:package_option_add' pkg.pk %}" id="addOptionForm">
+                {% csrf_token %}
+                {% include "partials/errorList.html" with form_id="addOptionForm" %}
+                <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
+                    <h6 class="fw-bold mb-0" style="font-size:0.95rem;">{% trans "Add Option" %}</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="p-4">
+                    <div class="mb-3">
+                        <label class="d-block mb-1 opt-label">{% trans "Name" %}</label>
+                        <input type="text" name="name" class="form-control" required placeholder="{% trans 'e.g. Logo Design' %}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="d-block mb-1 opt-label">{% trans "Price" %}</label>
+                        <input type="number" step="0.01" min="0" name="price" class="form-control" placeholder="{% trans '0.00' %}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="d-block mb-1 opt-label">{% trans "Delivery Time" %}</label>
+                        <div class="input-group input-group-sm">
+                            <input type="number" name="delivery_time_days" class="form-control" value="1" min="1">
+                            <span class="input-group-text">{% trans "days" %}</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="d-block mb-1 opt-label">{% trans "Category" %}</label>
+                        {% include "components/custom_select.html" with id="addOptCat" name="category_id" choices=category_choices value="" select_title=_("Select") %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="d-block mb-1 opt-label">{% trans "Description" %}</label>
+                        <input type="text" name="description" class="form-control" placeholder="{% trans 'Short description' %}">
+                    </div>
+                </div>
+                <div class="px-4 py-3 d-flex gap-2 justify-content-end border-top">
+                    <button type="button" class="btn btn-sm px-3 rounded-2" data-bs-dismiss="modal" style="border:1px solid #dee2e6;color:#495057;background:#fff;">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-sm px-3 rounded-2" style="background:var(--brand-primary);color:var(--brand-secondary);font-weight:600;border:none;">
+                        <i class="fas fa-plus me-1"></i>{% trans "Add" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock dashContent %}
+
+{% block extra_js %}
+<script src="{% static 'js/catalog_modal.js' %}?v={% now "U" %}"></script>
+<script src="{% static 'js/package_detail.js' %}?v={% now "U" %}"></script>
+{% endblock extra_js %}

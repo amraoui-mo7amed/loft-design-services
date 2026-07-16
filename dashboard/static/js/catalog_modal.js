@@ -1,3 +1,5 @@
+var _optRowCounter = 0;
+
 function syncCustomSelectDisplay(form) {
     form.querySelectorAll(".custom-select-wrapper").forEach(function (wrapper) {
         var input = wrapper.querySelector('input[type="hidden"]');
@@ -14,7 +16,58 @@ function syncCustomSelectDisplay(form) {
     });
 }
 
+function addOptionRow(container, data) {
+    var template = container.querySelector("[data-template-row]");
+    if (!template) return;
+    var row = template.cloneNode(true);
+    row.classList.remove("d-none");
+    row.removeAttribute("data-template-row");
+    _optRowCounter++;
+    var uid = "optCat_" + _optRowCounter;
+    var catWrapper = row.querySelector(".custom-select-wrapper");
+    if (catWrapper) {
+        catWrapper.id = uid;
+        var hiddenInput = catWrapper.querySelector('input[type="hidden"]');
+        if (hiddenInput) {
+            hiddenInput.id = uid + "_input";
+            var val = data && data.category_id ? String(data.category_id) : "";
+            hiddenInput.value = val;
+        }
+    }
+    // Populate fields
+    var idInput = row.querySelector("input[name='option_ids']");
+    if (idInput) idInput.value = (data && data.id) || "";
+    var nameInput = row.querySelector("input[name='option_names']");
+    if (nameInput) nameInput.value = (data && data.name) || "";
+    var priceInput = row.querySelector("input[name='option_prices']");
+    if (priceInput) priceInput.value = (data && data.price) || "";
+    var descInput = row.querySelector("input[name='option_descriptions']");
+    if (descInput) descInput.value = (data && data.description) || "";
+    // Remove button
+    var removeBtn = row.querySelector(".remove-option-row");
+    if (removeBtn) {
+        removeBtn.addEventListener("click", function () { row.remove(); });
+    }
+    container.appendChild(row);
+    // Initialize custom selects in this row
+    if (window.initCustomSelects) window.initCustomSelects();
+    if (catWrapper) syncCustomSelectDisplay(row);
+}
+
+function clearOptionsContainer(container) {
+    var rows = container.querySelectorAll(".pkg-option-row:not([data-template-row])");
+    rows.forEach(function (r) { r.remove(); });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+    // Add Option button
+    document.addEventListener("click", function (e) {
+        if (e.target.closest("#addOptionRow")) {
+            var container = document.getElementById("optionsContainer");
+            if (container) addOptionRow(container, null);
+        }
+    });
+
     // Create buttons
     document.querySelectorAll(".catalog-create-btn").forEach(function (btn) {
         var targetId = btn.getAttribute("data-bs-target");
@@ -32,6 +85,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (el.type === "checkbox") el.checked = el.dataset.default === "true";
                 else el.value = el.dataset.default || "";
             });
+            var container = document.getElementById("optionsContainer");
+            if (container) {
+                clearOptionsContainer(container);
+                addOptionRow(container, null);
+            }
             if (window.initCustomSelects) window.initCustomSelects();
             syncCustomSelectDisplay(form);
             var list = form.querySelector("#errorList");
@@ -78,6 +136,26 @@ document.addEventListener("DOMContentLoaded", function () {
             } else {
                 delete modal.dataset.existingImage;
             }
+            // Restore inline options
+            var container = document.getElementById("optionsContainer");
+            if (container) {
+                clearOptionsContainer(container);
+                var optsData = this.dataset.options;
+                if (optsData) {
+                    try {
+                        var opts = JSON.parse(optsData);
+                        if (opts.length === 0) {
+                            addOptionRow(container, null);
+                        } else {
+                            opts.forEach(function (o) { addOptionRow(container, o); });
+                        }
+                    } catch (e) {
+                        addOptionRow(container, null);
+                    }
+                } else {
+                    addOptionRow(container, null);
+                }
+            }
             if (window.initCustomSelects) window.initCustomSelects();
             syncCustomSelectDisplay(form);
             var list = form.querySelector("#errorList");
@@ -86,7 +164,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Catalog image upload: click zone → hidden input + preview
+    // Catalog image upload: click zone to hidden input
     document.addEventListener("click", function (e) {
         var zone = e.target.closest(".catalog-image-upload");
         if (zone) {
@@ -104,7 +182,7 @@ document.addEventListener("DOMContentLoaded", function () {
         reader.onload = function (ev) {
             preview.innerHTML = '<img src="' + ev.target.result + '" style="max-height:120px;border-radius:8px;object-fit:cover;width:100%;">';
         };
-        reader.readAsDataURL(fileInput.files[0]);
+        reader.readAsDataURL(this.files[0]);
     });
 
     // Reset preview + sync status badge on modal show
@@ -118,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     '<p class="small text-muted" style="font-size:0.7rem;">PNG, JPG up to 5MB</p>';
             });
             this.querySelectorAll(".form-check-input[data-field='active']").forEach(function (cb) {
-                var badge = cb.closest(".card, .d-flex, .pt-modal-body").querySelector(".insp-status-badge, .status-badge");
+                var badge = cb.closest("form").querySelector("#pkgStatusBadge, .insp-status-badge, .status-badge");
                 if (badge) {
                     badge.textContent = cb.checked ? "Published" : "Draft";
                     badge.className = "badge rounded-pill " + (cb.checked ? "bg-success bg-opacity-10 text-success" : "bg-secondary bg-opacity-10 text-secondary");
@@ -131,7 +209,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.addEventListener("change", function (e) {
         var cb = e.target.closest(".form-check-input[data-field='active']");
         if (!cb) return;
-        var badge = cb.closest(".card, .d-flex, .pt-modal-body, .p-4").querySelector(".insp-status-badge, .status-badge");
+        var badge = cb.closest("form").querySelector("#pkgStatusBadge, .insp-status-badge, .status-badge");
         if (badge) {
             badge.textContent = cb.checked ? "Published" : "Draft";
             badge.className = "badge rounded-pill " + (cb.checked ? "bg-success bg-opacity-10 text-success" : "bg-secondary bg-opacity-10 text-secondary");

@@ -133,7 +133,7 @@
    ======================================== */
 
 .crm-detail-hero {
-    background: linear-gradient(135deg, var(--brand-primary) 0%, #0d2538 100%);
+    background: var(--brand-primary);
     position: relative;
     overflow: hidden;
 }
@@ -262,7 +262,7 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: linear-gradient(135deg, var(--brand-primary), #1a4040);
+    background: var(--brand-primary);
     color: #fff;
     display: flex;
     align-items: center;

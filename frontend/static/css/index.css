@@ -3,14 +3,14 @@ Starter Kit Brand Variables
 ==========================*/
 :root {
   /* Brand Primary Colors - Mapped from HTML injection with fallbacks */
-  --brand-primary: var(--primary-color, #0d6efd);
-  --brand-secondary: var(--secondary-color, #6c757d);
-  --brand-accent: var(--accent-color, #ffc107);
+  --brand-primary: var(--primary-color, #FFD65A);
+  --brand-secondary: var(--secondary-color, #212121);
+  --brand-accent: var(--accent-color, #FFFFFF);
   
   /* Functional Colors */
-  --brand-success: var(--success-color, #198754);
+  --brand-success: var(--success-color, #28a745);
   --brand-danger: var(--danger-color, #dc3545);
-  --brand-dark: var(--dark-color, #212529);
+  --brand-dark: var(--dark-color, #1a1a1a);
   --brand-light: var(--light-color, #f8f9fa);
 
   /* Layout Variables */
@@ -310,58 +310,195 @@ body {
 }
 
 /* Button Styles */
+.btn {
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 10px 24px;
+  transition: all 0.25s ease;
+  position: relative;
+}
+
 .btn-primary {
   background-color: var(--brand-primary);
   border-color: var(--brand-primary);
+  color: var(--brand-secondary);
   position: relative;
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
   overflow: hidden;
-  transition: transform 0.2s;
 }
 
 .btn-primary:hover,
 .btn-primary:focus,
-.btn-primary:focus-visible,
+.btn-primary:focus-visible {
+  background-color: #e6c04a !important;
+  border-color: #e6c04a !important;
+  color: var(--brand-secondary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 214, 90, 0.35);
+}
+
 .btn-primary:active {
+  background-color: #d4b043 !important;
+  border-color: #d4b043 !important;
+  color: var(--brand-secondary) !important;
+  transform: translateY(0);
+}
+
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+  pointer-events: none;
+}
+
+.btn-primary:hover::before {
+  left: 150%;
+}
+
+.btn-primary:disabled,
+.btn-primary.disabled {
+  background-color: #d4c48a !important;
+  border-color: #d4c48a !important;
+  color: rgba(33, 33, 33, 0.5) !important;
+  opacity: 0.65;
+  pointer-events: none;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-primary:disabled::before,
+.btn-primary.disabled::before {
+  display: none;
+}
+
+.btn-outline-primary {
+  color: #6c757d;
+  border-color: #d4d4d4;
+  background: transparent;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:focus-visible {
   background-color: var(--brand-primary) !important;
-  background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)) !important;
-  border-color: rgba(0,0,0,0.1) !important;
-  transform: translateY(-1px) !important;
+  border-color: var(--brand-primary) !important;
+  color: var(--brand-secondary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 214, 90, 0.25);
+}
+
+.btn-outline-primary:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-outline-primary:disabled,
+.btn-outline-primary.disabled {
+  border-color: #d4c48a !important;
+  color: #d4c48a !important;
+  opacity: 0.65;
+  pointer-events: none;
+  background: transparent !important;
+}
+
+.btn-secondary {
+  background-color: var(--brand-secondary);
+  border-color: var(--brand-secondary);
+  color: #fff;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus,
+.btn-secondary:focus-visible {
+  background-color: #000 !important;
+  border-color: #000 !important;
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(33, 33, 33, 0.3);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-secondary:disabled,
+.btn-secondary.disabled {
+  background-color: rgba(33, 33, 33, 0.5) !important;
+  border-color: rgba(33, 33, 33, 0.5) !important;
+  opacity: 0.65;
+  pointer-events: none;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-outline-secondary {
+  color: var(--brand-secondary);
+  border-color: var(--brand-secondary);
+  background: transparent;
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus,
+.btn-outline-secondary:focus-visible {
+  background-color: var(--brand-secondary) !important;
+  border-color: var(--brand-secondary) !important;
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(33, 33, 33, 0.2);
+}
+
+.btn-outline-secondary:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-outline-secondary:disabled,
+.btn-outline-secondary.disabled {
+  border-color: rgba(33, 33, 33, 0.4) !important;
+  color: rgba(33, 33, 33, 0.4) !important;
+  opacity: 0.65;
+  pointer-events: none;
+  background: transparent !important;
+}
+
+.btn-light {
+  background-color: var(--brand-light);
+  border-color: var(--brand-light);
+  color: var(--brand-dark);
+}
+
+.btn-light:hover,
+.btn-light:focus,
+.btn-light:focus-visible {
+  background-color: #e2e6ea !important;
+  border-color: #e2e6ea !important;
+  color: var(--brand-dark) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.btn-light:active {
+  transform: translateY(0);
+}
+
+.btn-light:disabled,
+.btn-light.disabled {
+  opacity: 0.55;
+  pointer-events: none;
+  transform: none;
+  box-shadow: none;
 }
 
 .btn:disabled,
 .btn.disabled,
 fieldset:disabled .btn {
-  --bs-btn-disabled-opacity: 0.5;
   cursor: not-allowed;
-  pointer-events: none;
-}
-
-.btn-primary:disabled,
-.btn-primary.disabled {
-  --bs-btn-disabled-bg: var(--brand-primary);
-  background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1));
-  border-color: rgba(0,0,0,0.1);
-}
-
-.btn-outline-primary:disabled,
-.btn-outline-primary.disabled {
-  --bs-btn-disabled-bg: var(--brand-primary);
-  --bs-btn-disabled-color: #fff;
-  border-color: var(--brand-primary);
-}
-
-.btn-outline-primary {
-  color: var(--brand-primary);
-  border-color: var(--brand-primary);
-}
-
-.btn-outline-primary:hover,
-.btn-outline-primary:focus,
-.btn-outline-primary:focus-visible,
-.btn-outline-primary:active {
-  background-color: var(--brand-primary) !important;
-  border-color: var(--brand-primary) !important;
-  color: white !important;
 }
 
 /* Nav Links & Items */

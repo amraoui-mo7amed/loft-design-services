@@ -1,6 +1,6 @@
 from .notification import Notification
 from .base import ProjectType, Space, SpaceCategory, ProjectTypeSpace
-from .catalog import DesignPackage, DesignOption, StyleCategory, InspirationImage
+from .catalog import DesignPackage, PackageService, ServiceCategory, DesignOption, StyleCategory, InspirationImage
 from .requests import (
     DesignRequest,
     DesignRequestFloor,
@@ -36,6 +36,8 @@ __all__ = [
     "Space",
     "ProjectTypeSpace",
     "DesignPackage",
+    "PackageService",
+    "ServiceCategory",
     "DesignOption",
     "StyleCategory",
     "InspirationImage",

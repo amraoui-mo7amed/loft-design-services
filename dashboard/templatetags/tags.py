@@ -21,6 +21,11 @@ def render_pagination(context, page_obj):
 
 
 @register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+
+@register.filter
 def humanize_number(value):
     """
     Converts a large number into a human-readable format with k, M, B, etc.

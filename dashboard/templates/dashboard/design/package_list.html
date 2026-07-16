@@ -14,15 +14,27 @@
 <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
     <div>
         <h5 class="fw-bold mb-0">{% trans "Design Packages" %}</h5>
-        <p class="text-muted small mb-0 pt-section-title">{% trans "Manage design packages and pricing multipliers" %}</p>
+        <p class="text-muted small mb-0 pt-section-title">{% trans "Manage design packages, options and pricing" %}</p>
     </div>
-    <button class="btn btn-primary rounded-3 px-4 fw-bold shadow-sm catalog-create-btn"
-            data-bs-target="#packageModal"
-            data-create-url="{% url 'dash:package_create' %}"
-            data-modal-title="{% trans 'New Package' %}"
-            data-submit-text="{% trans 'Create' %}">
-        <i class="fas fa-plus me-2"></i>{% trans "New Package" %}
-    </button>
+    <div class="d-flex gap-2">
+        <div class="dropdown">
+            <button class="btn btn-outline-primary rounded-3 px-3 fw-bold shadow-sm dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="fas fa-tags me-2"></i>{% trans "Categories" %}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#categoryListModal"><i class="fas fa-list me-2"></i>{% trans "View Categories" %}</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#addCategoryModal"><i class="fas fa-plus me-2"></i>{% trans "Add Category" %}</a></li>
+            </ul>
+        </div>
+        <button class="btn btn-primary rounded-3 px-4 fw-bold shadow-sm catalog-create-btn"
+                data-bs-target="#packageModal"
+                data-create-url="{% url 'dash:package_create' %}"
+                data-modal-title="{% trans 'New Package' %}"
+                data-submit-text="{% trans 'Create' %}">
+            <i class="fas fa-plus me-2"></i>{% trans "New Package" %}
+        </button>
+    </div>
 </div>
 
 <div class="row g-4" data-catalog-modal="packageModal">
@@ -36,25 +48,18 @@
                             <i class="fas fa-box"></i>
                         </div>
                         <div>
-                            <h5>{{ pkg.name }}</h5>
+                            <a href="{% url 'dash:package_detail' pkg.pk %}" class="text-decoration-none" style="color:inherit;">
+                                <h5 class="mb-0">{{ pkg.name }}</h5>
+                            </a>
                             <span class="badge pt-badge rounded-pill {% if pkg.active %}bg-success{% else %}bg-secondary{% endif %}">
                                 {% if pkg.active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
                             </span>
                         </div>
                     </div>
                     <div class="pt-actions">
-                        <button class="btn btn-outline-primary rounded-3 catalog-edit-btn"
-                                title="{% trans 'Edit' %}"
-                                data-bs-target="#packageModal"
-                                data-update-url="{% url 'dash:package_update' pkg.pk %}"
-                                data-modal-title="{% trans 'Edit Package' %}"
-                                data-submit-text="{% trans 'Save' %}"
-                                data-name="{{ pkg.name }}"
-                                data-description="{{ pkg.description }}"
-                                data-price_multiplier="{{ pkg.price_multiplier|unlocalize }}"
-                                data-active="{{ pkg.active|yesno:'true,false' }}">
-                            <i class="fas fa-pen"></i>
-                        </button>
+                        <a href="{% url 'dash:package_detail' pkg.pk %}" class="btn btn-outline-primary rounded-3" title="{% trans 'Manage' %}">
+                            <i class="fas fa-cog"></i>
+                        </a>
                         <button class="btn btn-outline-danger rounded-3 delete_button"
                                 title="{% trans 'Delete' %}"
                                 data-delete-url="{% url 'dash:package_delete' pkg.pk %}"
@@ -65,10 +70,13 @@
                         </button>
                     </div>
                 </div>
-                <p class="small text-muted mb-2">{{ pkg.description|truncatewords:15 }}</p>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted small">{% trans "Delivery" %}</span>
+                    <span class="fw-bold">{{ pkg.total_delivery_days }} {% trans "days" %}</span>
+                </div>
+                <p class="small text-muted mb-2">{{ pkg.description|truncatewords:12 }}</p>
                 <div class="d-flex align-items-center gap-2 pt-meta">
-                    <i class="fas fa-times-circle text-muted" style="font-size:0.7rem;"></i>
-                    <small class="text-muted">{% trans "Multiplier" %}: <strong>{{ pkg.price_multiplier }}x</strong></small>
+                    <span class="small text-muted">{{ pkg.package_services.count }} {% trans "options" %}</span>
                 </div>
             </div>
         </div>
@@ -88,54 +96,148 @@
 <div class="mt-5">{% render_pagination page_obj %}</div>
 {% endif %}
 
-<!-- Modal -->
+<!-- Package Modal -->
 <div class="modal fade" id="packageModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-md">
-        <div class="modal-content pt-modal-overlay">
-            <div class="pt-modal-header d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="modal-title"></h5>
-                    <p class="pt-modal-subtitle">{% trans "Configure package details, pricing and availability" %}</p>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-3 shadow-sm">
+            <form method="post" action="" class="form" id="packageForm">
+                {% csrf_token %}
+                {% include "partials/errorList.html" with form_id="packageForm" %}
+                <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center justify-content-center rounded-2" style="width:32px;height:32px;background:#f0f2f5;">
+                            <i class="fas fa-box" style="font-size:0.75rem;color:#495057;"></i>
+                        </div>
+                        <h6 class="modal-title fw-bold mb-0" style="font-size:0.95rem;"></h6>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="pt-modal-body">
-                <form method="post" action="" class="form" id="packageForm">
-                    {% csrf_token %}
-                    {% include "partials/errorList.html" with form_id="packageForm" %}
+                <div class="p-4">
                     <div class="mb-3">
-                        <label class="pt-modal-label"><i class="fas fa-tag text-primary"></i>{% trans "Name" %}</label>
+                        <label class="form-label fw-semibold mb-1" style="font-size:0.82rem;">
+                            <i class="fas fa-tag me-1" style="font-size:0.7rem;color:var(--brand-primary);"></i>
+                            {% trans "Package Name" %}
+                        </label>
                         <input type="text" name="name" class="form-control" data-field="name" data-default="" required placeholder="{% trans 'e.g. Premium Design' %}">
                     </div>
                     <div class="mb-3">
-                        <label class="pt-modal-label"><i class="fas fa-align-left text-info"></i>{% trans "Description" %}</label>
-                        <textarea name="description" class="form-control" rows="3" data-field="description" data-default="" placeholder="{% trans 'Brief description of this package...' %}"></textarea>
+                        <label class="form-label fw-semibold mb-1" style="font-size:0.82rem;">
+                            <i class="fas fa-align-left me-1" style="font-size:0.7rem;color:#adb5bd;"></i>
+                            {% trans "Description" %}
+                        </label>
+                        <textarea name="description" class="form-control" rows="3" data-field="description" data-default="" placeholder="{% trans 'Brief description...' %}"></textarea>
+                    </div>
+                    <div class="p-3 rounded-2" style="background:#f8f9fa;">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span style="font-size:0.78rem;font-weight:600;">{% trans "Status" %}</span>
+                            <span class="badge rounded-pill" id="pkgStatusBadge" style="font-size:0.6rem;background:rgba(25,135,84,0.1);color:#198754;">{% trans "Published" %}</span>
+                        </div>
+                        <div class="form-check form-switch mb-1">
+                            <input type="checkbox" name="active" class="form-check-input" role="switch" id="pkgActive" data-field="active" data-default="true" checked>
+                            <label class="form-check-label" for="pkgActive" style="font-size:0.82rem;font-weight:500;">{% trans "Active" %}</label>
+                        </div>
+                        <small style="font-size:0.68rem;color:#adb5bd;">{% trans "Visible for selection in new design requests" %}</small>
+                    </div>
+                </div>
+                <div class="px-4 py-3 d-flex gap-2 justify-content-end border-top">
+                    <button type="button" class="btn btn-sm px-3 rounded-2" data-bs-dismiss="modal" style="border:1px solid #dee2e6;color:#495057;background:#fff;">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-sm px-3 rounded-2" style="background:var(--brand-primary);color:var(--brand-secondary);font-weight:600;border:none;">
+                        <i class="fas fa-check me-1"></i><span class="catalog-submit-text"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Category List Modal -->
+<div class="modal fade" id="categoryListModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold">{% trans "Service Categories" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Name" %}</th>
+                                <th>{% trans "Description" %}</th>
+                                <th class="text-center">{% trans "Options" %}</th>
+                                <th class="text-end">{% trans "Actions" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoryTableBody">
+                            <tr><td colspan="4" class="text-center text-muted py-3">{% trans "Loading..." %}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans "Close" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold">{% trans "New Category" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'dash:service_category_create' %}" id="addCategoryForm">
+                {% csrf_token %}
+                {% include "partials/errorList.html" with form_id="addCategoryForm" %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{% trans "Name" %}</label>
+                        <input type="text" name="name" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="pt-modal-label"><i class="fas fa-times-circle text-warning"></i>{% trans "Price Multiplier" %}</label>
-                        <input type="number" step="0.01" name="price_multiplier" class="form-control" data-field="price_multiplier" data-default="1.0" value="1.0" placeholder="1.0">
-                        <small class="text-muted" style="font-size:0.72rem;">{% trans "Multiplied by the subtotal of selected spaces" %}</small>
+                        <label class="form-label fw-semibold">{% trans "Description" %}</label>
+                        <textarea name="description" class="form-control" rows="2"></textarea>
                     </div>
-                    <div class="pt-modal-card">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="form-check mb-0">
-                                    <input type="checkbox" name="active" class="form-check-input" id="pkgActive" data-field="active" data-default="true" checked>
-                                    <label class="form-check-label fw-bold" for="pkgActive">{% trans "Active" %}</label>
-                                </div>
-                            </div>
-                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill status-badge" style="font-size:0.65rem;">{% trans "Published" %}</span>
-                        </div>
-                        <small class="text-muted d-block mt-2" style="font-size:0.7rem;">{% trans "Available for selection in new design requests" %}</small>
-                    </div>
-                    <div class="pt-modal-footer d-flex gap-2">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i><span class="catalog-submit-text"></span>
-                        </button>
-                    </div>
-                </form>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-primary px-4">{% trans "Create" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="fw-bold">{% trans "Edit Category" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+            <form method="post" id="editCategoryForm">
+                {% csrf_token %}
+                {% include "partials/errorList.html" with form_id="editCategoryForm" %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{% trans "Name" %}</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{% trans "Description" %}</label>
+                        <textarea name="description" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-primary px-4">{% trans "Save" %}</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -143,4 +245,5 @@
 
 {% block extra_js %}
 <script src="{% static 'js/catalog_modal.js' %}?v={% now "U" %}"></script>
+<script src="{% static 'js/service_categories.js' %}?v={% now "U" %}"></script>
 {% endblock extra_js %}

@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic.base import RedirectView
 from user_auth import views as user_views
 import django_eventstream
 from dashboard.views import wizard, wizard_api, chat, file_manager, marketplace
@@ -11,7 +12,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("auth/", include("user_auth.urls", namespace="user_auth")),
     path("dashboard/", include("dashboard.urls", namespace="dash")),
-    path("", include("frontend.urls", namespace="frontend")),
+    path("", RedirectView.as_view(pattern_name="design_service", permanent=False)),
     path("", include("frontend.urls_design")),
     path("i18n/", include("django.conf.urls.i18n")),
     path("events/", include(django_eventstream.urls)),

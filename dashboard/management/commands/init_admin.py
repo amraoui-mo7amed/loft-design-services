@@ -6,7 +6,7 @@ from user_auth.models import UserProfile
 
 
 class Command(BaseCommand):
-    help = "Creates or updates the admin superuser from .env settings"
+    help = "Creates the admin superuser from .env settings if it does not exist"
 
     def handle(self, *args, **options):
         username = config("ADMIN_USERNAME", default="admin")
@@ -16,7 +16,7 @@ class Command(BaseCommand):
         last_name = config("ADMIN_LAST_NAME", default="Loft")
 
         with transaction.atomic():
-            user, created = User.objects.update_or_create(
+            user, created = User.objects.get_or_create(
                 username=username,
                 defaults={
                     "email": email,
@@ -29,16 +29,15 @@ class Command(BaseCommand):
             if created:
                 user.set_password(password)
                 user.save()
-
-            UserProfile.objects.update_or_create(
-                user=user,
-                defaults={
-                    "role": UserProfile.Role.ADMIN,
-                    "is_approved": True,
-                },
-            )
+                UserProfile.objects.get_or_create(
+                    user=user,
+                    defaults={
+                        "role": UserProfile.Role.ADMIN,
+                        "is_approved": True,
+                    },
+                )
 
         if created:
             self.stdout.write(self.style.SUCCESS(f"Admin '{username}' created successfully."))
         else:
-            self.stdout.write(self.style.SUCCESS(f"Admin '{username}' updated successfully."))
+            self.stdout.write(self.style.WARNING(f"Admin '{username}' already exists. Skipping."))

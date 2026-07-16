@@ -1,0 +1,11 @@
+.option-card {
+    transition: box-shadow 0.15s ease;
+}
+.option-card:hover {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.opt-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #868e96;
+}

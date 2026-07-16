@@ -3,27 +3,22 @@
 
   const stepUrls = [
     "/request/step/project-type/",
-    "/request/step/floors/",
     "/request/step/spaces/",
     "/request/step/packages/",
-    "/request/step/options/",
     "/request/step/inspirations/",
     "/request/step/questionnaire/",
-    "/request/step/uploads/",
     "/request/step/summary/",
   ];
 
-  const TOTAL_STEPS = stepUrls.length;
+  const TOTAL_STEPS = 7;
   let currentStep = 0;
   const wizardData = {
     projectTypeSlug: null,
     floors: [],
     spaces: [],
     packageId: null,
-    optionIds: [],
     inspirations: {},
     questionnaire: {},
-    files: [],
   };
 
   const priceUrl = "/api/design/calculate-price/";
@@ -57,7 +52,7 @@
         updateNav(index);
         bindStepEvents(index);
         if (window.initCustomSelects) window.initCustomSelects();
-        if (index > 2) updatePriceSummary();
+        if (index > 1) updatePriceSummary();
       })
       .catch(function () {
         content.innerHTML =
@@ -80,7 +75,7 @@
     var prev = document.getElementById("prevBtn");
     var next = document.getElementById("nextBtn");
     prev.disabled = index === 0;
-    if (index === TOTAL_STEPS - 1) {
+    if (index === TOTAL_STEPS - 2) {
       next.innerHTML = '<i class="fas fa-check me-2"></i> Submit';
       next.className = "wiz-btn wiz-btn-success";
     } else {
@@ -95,83 +90,92 @@
         bindProjectTypeStep();
         break;
       case 1:
-        bindFloorsStep();
-        break;
-      case 2:
         bindSpacesStep();
         break;
-      case 3:
+      case 2:
         bindPackagesStep();
         break;
-      case 4:
-        bindOptionsStep();
-        break;
-      case 5:
+      case 3:
         bindInspirationsStep();
         break;
-      case 7:
-        bindUploadsStep();
+      case 4:
+        bindQuestionnaireStep();
         break;
-      case 8:
+      case 5:
         bindSummaryStep();
         break;
     }
   }
 
-  function bindProjectTypeStep() {
-    document.querySelectorAll(".project-type-card").forEach(function (card) {
+  function bindQuestionnaireStep() {
+    var roleCards = document.querySelectorAll(".wiz-role-card");
+    var body = document.querySelector(".wiz-questionnaire-body");
+    var normalRadio = document.getElementById("ctypeNormal");
+    var profRadio = document.getElementById("ctypeProfessional");
+    var normalFields = document.getElementById("normalFields");
+    var profFields = document.getElementById("professionalFields");
+    var togglesBound = false;
+    if (!roleCards.length || !body) return;
+
+    function toggleFields() {
+      var showProf = profRadio.checked;
+      normalFields.style.display = showProf ? "none" : "block";
+      profFields.style.display = showProf ? "block" : "none";
+      document.querySelectorAll(".wiz-professional-only").forEach(function (el) {
+        el.style.display = showProf ? "block" : "none";
+      });
+    }
+
+    function revealForm() {
+      body.style.display = "block";
+      body.style.animation = "none";
+      void body.offsetWidth;
+      body.style.animation = "wizFadeSlideIn 0.4s ease";
+      if (!togglesBound) {
+        if (normalRadio && profRadio && normalFields && profFields) {
+          normalRadio.addEventListener("change", toggleFields);
+          profRadio.addEventListener("change", toggleFields);
+          togglesBound = true;
+        }
+      }
+      toggleFields();
+    }
+
+    // If a role was already selected (navigating back)
+    if (normalRadio && normalRadio.checked) {
+      revealForm();
+      return;
+    }
+    if (profRadio && profRadio.checked) {
+      revealForm();
+      return;
+    }
+
+    roleCards.forEach(function (card) {
       card.addEventListener("click", function () {
-        document
-          .querySelectorAll(".project-type-card")
-          .forEach(function (c) {
-            c.classList.remove("selected");
+        var inp = card.querySelector("input[type='radio']");
+        if (inp) {
+          roleCards.forEach(function (c) {
+            c.querySelector("input[type='radio']").checked = false;
           });
-        card.classList.add("selected");
-        wizardData.projectTypeSlug = card.dataset.slug;
+          inp.checked = true;
+          revealForm();
+        }
       });
     });
   }
 
-  function bindFloorsStep() {
-    var container = document.getElementById("floorsContainer");
-    var addBtn = document.getElementById("addFloorBtn");
-    var dupBtn = document.getElementById("duplicateFloorBtn");
-
-    function addFloor(name, index) {
-      var div = document.createElement("div");
-      div.className = "wiz-floor-item";
-      div.dataset.floorIndex = index;
-      div.innerHTML =
-        '<div class="wiz-floor-grip"><i class="fas fa-grip-vertical"></i></div><div class="flex-grow-1"><input type="text" class="wiz-floor-input" value="' +
-        name +
-        '"></div><button type="button" class="wiz-floor-remove"><i class="fas fa-times"></i></button>';
-      container.appendChild(div);
-      div
-        .querySelector(".wiz-floor-remove")
-        .addEventListener("click", function () {
-          div.remove();
+  function bindProjectTypeStep() {
+    wizardData.projectTypeSlug = null;
+    var wrapper = document.getElementById("projectTypeSelect");
+    if (wrapper) {
+      var hidden = wrapper.querySelector('input[type="hidden"]');
+      if (hidden) {
+        hidden.addEventListener("change", function () {
+          wizardData.projectTypeSlug = this.value || null;
         });
-    }
-
-    container.querySelectorAll(".wiz-floor-remove").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        btn.closest(".wiz-floor-item").remove();
-      });
-    });
-
-    addBtn.addEventListener("click", function () {
-      var items = container.querySelectorAll(".wiz-floor-item");
-      addFloor("Floor " + (items.length + 1), items.length);
-    });
-
-    dupBtn.addEventListener("click", function () {
-      var items = container.querySelectorAll(".wiz-floor-item");
-      if (items.length > 0) {
-        var last = items[items.length - 1];
-        var name = last.querySelector(".wiz-floor-input").value;
-        addFloor(name + " (Copy)", items.length);
       }
-    });
+    }
   }
 
   function bindSpacesStep() {
@@ -280,166 +284,38 @@
     });
   }
 
-  function bindOptionsStep() {
-    document.querySelectorAll(".option-checkbox-card").forEach(function (card) {
-      card.addEventListener("click", function () {
-        card.classList.toggle("selected");
-        var cb = card.querySelector(".option-checkbox");
-        cb.checked = !cb.checked;
-        updateOptionsTotal();
-      });
-    });
-  }
-
-  function updateOptionsTotal() {
-    var total = 0;
-    document
-      .querySelectorAll(".option-checkbox-card.selected")
-      .forEach(function (c) {
-        total += parseFloat(c.dataset.price) || 0;
-      });
-    var el = document.getElementById("optionsTotal");
-    if (el) el.textContent = total.toLocaleString() + " DA";
-    updatePriceSummary();
-  }
-
   function bindInspirationsStep() {
     document.querySelectorAll(".inspiration-card").forEach(function (card) {
       card.addEventListener("click", function () {
         card.classList.toggle("selected");
       });
     });
-
-    document
-      .querySelectorAll(".inspiration-style-tabs button")
-      .forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          var spaceId = btn.dataset.spaceId;
-          var styleId = btn.dataset.styleId;
-          document
-            .querySelectorAll(
-              ".inspiration-gallery[data-space-id='" +
-                spaceId +
-                "'] .inspiration-item"
-            )
-            .forEach(function (item) {
-              item.style.display =
-                item.dataset.styleId === styleId ? "block" : "none";
-            });
-          document
-            .querySelectorAll(
-              ".inspiration-style-tabs button[data-space-id='" +
-                spaceId +
-                "']"
-            )
-            .forEach(function (b) {
-              b.classList.remove("active");
-            });
-          btn.classList.add("active");
-        });
-      });
-  }
-
-  function bindUploadsStep() {
-    var zone = document.getElementById("uploadDropZone");
-    var fileInput = document.getElementById("fileInput");
-    var browseBtn = document.getElementById("uploadBrowseBtn");
-
-    zone.addEventListener("dragover", function (e) {
-      e.preventDefault();
-      zone.classList.add("dragover");
-    });
-    zone.addEventListener("dragleave", function () {
-      zone.classList.remove("dragover");
-    });
-    zone.addEventListener("drop", function (e) {
-      e.preventDefault();
-      zone.classList.remove("dragover");
-      handleFiles(e.dataTransfer.files);
-    });
-    browseBtn.addEventListener("click", function () {
-      fileInput.click();
-    });
-    fileInput.addEventListener("change", function () {
-      handleFiles(fileInput.files);
-    });
-  }
-
-  function handleFiles(files) {
-    var preview = document.getElementById("uploadPreview");
-    preview.style.display = "block";
-    for (var i = 0; i < files.length; i++) {
-      wizardData.files.push(files[i]);
-      addFileItem(files[i]);
-    }
-    document.getElementById("fileCount").textContent =
-      wizardData.files.length + " files";
-  }
-
-  function addFileItem(file) {
-    var list = document.getElementById("uploadedFilesList");
-    var div = document.createElement("div");
-    div.className = "wiz-file-item";
-    var icon = "fa-file";
-    if (file.type.startsWith("image/")) icon = "fa-file-image";
-    else if (file.name.endsWith(".pdf")) icon = "fa-file-pdf";
-    else if (file.name.endsWith(".dwg") || file.name.endsWith(".dxf"))
-      icon = "fa-file-archive";
-    else if (file.type.startsWith("video/")) icon = "fa-file-video";
-    div.innerHTML =
-      '<div class="wiz-file-icon"><i class="fas ' +
-      icon +
-      '"></i></div><div class="wiz-file-info"><div class="wiz-file-name">' +
-      file.name +
-      '</div><div class="wiz-file-size">' +
-      formatSize(file.size) +
-      '</div><div class="wiz-file-progress"><div class="wiz-file-progress-fill" style="width:0%"></div></div></div><button type="button" class="wiz-file-remove"><i class="fas fa-times"></i></button>';
-    list.appendChild(div);
-    div
-      .querySelector(".wiz-file-remove")
-      .addEventListener("click", function () {
-        var idx = wizardData.files.indexOf(file);
-        if (idx > -1) wizardData.files.splice(idx, 1);
-        div.remove();
-        var count = wizardData.files.length;
-        document.getElementById("fileCount").textContent = count + " files";
-        if (count === 0) {
-          document.getElementById("uploadPreview").style.display = "none";
-        }
-      });
-    setTimeout(function () {
-      div.querySelector(".wiz-file-progress-fill").style.width = "100%";
-    }, 300);
-  }
-
-  function formatSize(bytes) {
-    if (bytes < 1024) return bytes + " B";
-    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
-    return (bytes / 1048576).toFixed(1) + " MB";
   }
 
   function bindSummaryStep() {
     var pt = document.getElementById("summaryProjectType");
-    if (wizardData.projectTypeSlug && pt) {
-      var card = document.querySelector(
-        ".project-type-card[data-slug='" + wizardData.projectTypeSlug + "']"
-      );
-      pt.textContent = card ? card.dataset.name : wizardData.projectTypeSlug;
+    if (pt) {
+      if (wizardData.projectTypeSlug) {
+        var wrapper = document.getElementById("projectTypeSelect");
+        if (wrapper) {
+          var hidden = wrapper.querySelector('input[type="hidden"]');
+          if (hidden) {
+            var li = wrapper.querySelector('li[data-value="' + hidden.value + '"]');
+            pt.textContent = li ? li.textContent : wizardData.projectTypeSlug;
+          }
+        }
+      }
     }
     var floorsEl = document.getElementById("summaryFloors");
     if (floorsEl) {
-      var names = [];
-      document
-        .querySelectorAll("#floorsContainer .wiz-floor-input")
-        .forEach(function (inp) {
-          names.push(inp.value);
-        });
-      if (names.length)
-        floorsEl.innerHTML = names
-          .map(function (n) {
-            return "<li>" + n + "</li>";
-          })
-          .join("");
+      var names = wizardData.floors.length
+        ? wizardData.floors
+        : ["Ground Floor"];
+      floorsEl.innerHTML = names
+        .map(function (n) {
+          return "<li>" + n + "</li>";
+        })
+        .join("");
     }
     var spacesEl = document.getElementById("summarySpaces");
     if (spacesEl) {
@@ -462,15 +338,13 @@
         ? pkgCard.querySelector(".wiz-pkg-name").textContent
         : "Selected";
     }
-    var optsEl = document.getElementById("summaryOptions");
-    if (optsEl) {
-      var names3 = [];
-      document
-        .querySelectorAll(".option-checkbox-card.selected .wiz-opt-name")
-        .forEach(function (el) {
-          names3.push(el.textContent);
-        });
-      optsEl.textContent = names3.length ? names3.join(", ") : "None";
+    var inspEl = document.getElementById("summaryInspirations");
+    if (inspEl) {
+      var count = 0;
+      Object.keys(wizardData.inspirations).forEach(function (key) {
+        count += wizardData.inspirations[key].length;
+      });
+      inspEl.textContent = count ? count + " images selected" : "None selected";
     }
     updateSummaryPrice();
   }
@@ -478,7 +352,6 @@
   function updateSummaryPrice() {
     var subtotal = 0;
     var packagePrice = 0;
-    var optionsTotal = 0;
     document
       .querySelectorAll(".space-checkbox-card.selected")
       .forEach(function (c) {
@@ -489,12 +362,7 @@
       var mult = parseFloat(pkgCard.dataset.multiplier) || 1;
       packagePrice = subtotal * mult;
     }
-    document
-      .querySelectorAll(".option-checkbox-card.selected")
-      .forEach(function (c) {
-        optionsTotal += parseFloat(c.dataset.price) || 0;
-      });
-    var taxable = subtotal + packagePrice + optionsTotal;
+    var taxable = subtotal + packagePrice;
     var tax = taxable * 0.19;
     var total = taxable + tax;
     var elTotal = document.getElementById("summaryTotal");
@@ -524,12 +392,6 @@
         if (id && id !== "custom") params.append("space_ids[]", id);
       });
     if (wizardData.packageId) params.set("package_id", wizardData.packageId);
-    document
-      .querySelectorAll(".option-checkbox-card.selected")
-      .forEach(function (c) {
-        var id = c.dataset.optionId;
-        if (id) params.append("option_ids[]", id);
-      });
     if (!params.has("space_ids[]")) {
       bar.style.display = "none";
       return;
@@ -546,43 +408,56 @@
           Math.round(data.subtotal).toLocaleString();
         document.getElementById("pricePackage").textContent =
           Math.round(data.package_price).toLocaleString();
-        document.getElementById("priceOptions").textContent =
-          Math.round(data.options_total).toLocaleString();
       })
       .catch(function () {});
   }
 
   function collectStepData() {
-    wizardData.floors = [];
-    document
-      .querySelectorAll("#floorsContainer .wiz-floor-input")
-      .forEach(function (inp) {
-        wizardData.floors.push(inp.value);
-      });
+    // Project type from custom_select
+    var wrapper = document.getElementById("projectTypeSelect");
+    if (wrapper) {
+      var hidden = wrapper.querySelector('input[type="hidden"]');
+      if (hidden && hidden.value) {
+        wizardData.projectTypeSlug = hidden.value;
+      }
+    }
+
+    // Floors (generated from count input)
+    var countInput = document.querySelector("[name='floor_count']");
+    var count = countInput ? parseInt(countInput.value) : 1;
+    if (count > 0) {
+      var floorNames = [
+        "Ground Floor", "First Floor", "Second Floor", "Third Floor",
+        "Fourth Floor", "Fifth Floor", "Sixth Floor", "Seventh Floor",
+        "Eighth Floor", "Ninth Floor", "Tenth Floor", "Eleventh Floor",
+        "Twelfth Floor", "Thirteenth Floor", "Fourteenth Floor", "Fifteenth Floor",
+        "Sixteenth Floor", "Seventeenth Floor", "Eighteenth Floor", "Nineteenth Floor",
+        "Twentieth Floor"
+      ];
+      wizardData.floors = [];
+      for (var i = 0; i < count; i++) {
+        wizardData.floors.push(floorNames[i] || "Floor " + (i + 1));
+      }
+    }
+
+    // Spaces
     wizardData.spaces = [];
-    document
-      .querySelectorAll(".floor-space-group")
-      .forEach(function (group) {
-        var fi = parseInt(group.dataset.floorIndex);
-        group
-          .querySelectorAll(".space-checkbox-card.selected")
-          .forEach(function (card) {
-            var sid = card.dataset.spaceId;
-            if (sid && sid !== "custom") {
-              wizardData.spaces.push({
-                floorIndex: fi,
-                spaceId: parseInt(sid),
-              });
-            }
-          });
-      });
-    wizardData.optionIds = [];
-    document
-      .querySelectorAll(".option-checkbox-card.selected")
-      .forEach(function (card) {
-        var oid = card.dataset.optionId;
-        if (oid) wizardData.optionIds.push(parseInt(oid));
-      });
+    document.querySelectorAll(".floor-space-group").forEach(function (group) {
+      var fi = parseInt(group.dataset.floorIndex);
+      group
+        .querySelectorAll(".space-checkbox-card.selected")
+        .forEach(function (card) {
+          var sid = card.dataset.spaceId;
+          if (sid && sid !== "custom") {
+            wizardData.spaces.push({
+              floorIndex: fi,
+              spaceId: parseInt(sid),
+            });
+          }
+        });
+    });
+
+    // Inspirations
     wizardData.inspirations = {};
     document
       .querySelectorAll(".inspiration-card.selected")
@@ -596,19 +471,30 @@
           parseInt(card.dataset.imgId)
         );
       });
-    var qForm = document.querySelector(".wizard-step[data-step='6']");
-    if (qForm) {
-      wizardData.questionnaire = {};
-      qForm
-        .querySelectorAll("input, select, textarea")
-        .forEach(function (el) {
-          if (el.type === "checkbox") {
-            wizardData.questionnaire[el.name] = el.checked;
-          } else if (el.name) {
-            wizardData.questionnaire[el.name] = el.value;
-          }
-        });
+
+    // Questionnaire (step 4)
+    var qBody = document.querySelector(".wiz-questionnaire-body");
+    wizardData.questionnaire = {};
+    var ctypeNormal = document.getElementById("ctypeNormal");
+    var ctypeProf = document.getElementById("ctypeProfessional");
+    if (ctypeNormal && ctypeNormal.checked) {
+      wizardData.questionnaire.customer_type = "normal";
+      document.querySelectorAll("#normalFields [name]").forEach(function (el) {
+        wizardData.questionnaire[el.name] = el.value;
+      });
+    } else if (ctypeProf && ctypeProf.checked) {
+      wizardData.questionnaire.customer_type = "professional";
+      document.querySelectorAll("#professionalFields [name]").forEach(function (el) {
+        wizardData.questionnaire[el.name] = el.value;
+      });
     }
+    document.querySelectorAll(".wiz-professional-only input, .wiz-professional-only select, .wiz-professional-only textarea").forEach(function (el) {
+      if (el.type === "checkbox") {
+        wizardData.questionnaire[el.name] = el.checked;
+      } else if (el.name) {
+        wizardData.questionnaire[el.name] = el.value;
+      }
+    });
   }
 
   function prevStep() {
@@ -619,6 +505,8 @@
   }
 
   function nextStep() {
+    collectStepData();
+
     if (currentStep === 0) {
       if (!wizardData.projectTypeSlug) {
         var msg = document.createElement("div");
@@ -630,15 +518,32 @@
         setTimeout(function () { msg.remove(); }, 2500);
         return;
       }
+      var countInput = document.querySelector("[name='floor_count']");
+      var floorCount = countInput ? parseInt(countInput.value) : 1;
+      if (!floorCount || floorCount < 1) {
+        var msg2 = document.createElement("div");
+        msg2.className = "alert alert-warning text-center py-2 mb-3";
+        msg2.style.cssText = "font-size:0.85rem;border-radius:10px;";
+        msg2.textContent = "Please enter at least 1 floor.";
+        var title2 = document.querySelector(".wiz-step-title");
+        if (title2) title2.parentNode.insertBefore(msg2, title2.nextSibling);
+        setTimeout(function () { msg2.remove(); }, 2500);
+        return;
+      }
     }
-    if (currentStep === TOTAL_STEPS - 1) {
+
+    if (currentStep === TOTAL_STEPS - 2) {
       submitRequest();
       return;
     }
-    collectStepData();
+
     var params = null;
-    if (currentStep + 1 === 2) {
-      params = { floor_count: wizardData.floors.length || 1 };
+    if (currentStep === 0) {
+      var floorCount2 = document.querySelector("[name='floor_count']");
+      params = {
+        floor_count: floorCount2 ? parseInt(floorCount2.value) : 1,
+        project_type: wizardData.projectTypeSlug || "",
+      };
     }
     loadStep(currentStep + 1, params);
   }
@@ -667,7 +572,6 @@
       package_id: wizardData.packageId,
       floors: JSON.stringify(wizardData.floors),
       spaces: JSON.stringify(wizardData.spaces),
-      options: JSON.stringify(wizardData.optionIds),
       inspirations: JSON.stringify(wizardData.inspirations),
       questionnaire: JSON.stringify(wizardData.questionnaire),
       total: document.getElementById("summaryTotal")
@@ -717,8 +621,8 @@
           errDiv.className = "alert alert-danger text-center py-2 mb-3";
           errDiv.style.cssText = "font-size:0.85rem;border-radius:10px;";
           errDiv.innerHTML = errMsg;
-          var summaryTotal = document.querySelector(".wiz-summary-total");
-          if (summaryTotal) summaryTotal.parentNode.insertBefore(errDiv, summaryTotal.nextSibling);
+          var summaryTotal2 = document.querySelector(".wiz-summary-total");
+          if (summaryTotal2) summaryTotal2.parentNode.insertBefore(errDiv, summaryTotal2.nextSibling);
           btn.disabled = false;
           btn.innerHTML = "Submit";
         }
@@ -728,8 +632,8 @@
         errDiv2.className = "alert alert-danger text-center py-2 mb-3";
         errDiv2.style.cssText = "font-size:0.85rem;border-radius:10px;";
         errDiv2.textContent = "An error occurred. Please try again.";
-        var summaryTotal2 = document.querySelector(".wiz-summary-total");
-        if (summaryTotal2) summaryTotal2.parentNode.insertBefore(errDiv2, summaryTotal2.nextSibling);
+        var summaryTotal3 = document.querySelector(".wiz-summary-total");
+        if (summaryTotal3) summaryTotal3.parentNode.insertBefore(errDiv2, summaryTotal3.nextSibling);
         btn.disabled = false;
         btn.innerHTML = "Submit";
       });

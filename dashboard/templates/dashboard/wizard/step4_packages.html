@@ -1,38 +1,65 @@
-{% load i18n %}
-<div class="wizard-step" data-step="3">
+{% load i18n %}{% load l10n %}
+<div class="wizard-step" data-step="2">
   <div class="text-center mb-4">
     <h2 class="wiz-step-title">{% trans "Choose a Package" %}</h2>
     <p class="wiz-step-sub">{% trans "Select the service package that fits your needs" %}</p>
   </div>
 
   <div class="row g-3">
-    {% for pkg in packages %}
-    <div class="col-md-4">
-      <div class="wiz-card wiz-pkg-card package-card" data-package-id="{{ pkg.id }}" data-multiplier="{{ pkg.price_multiplier }}">
-        <div class="wiz-card-badge"><i class="fas fa-check"></i></div>
-        <div class="wiz-pkg-icon">
-          {% if forloop.counter == 1 %}
-          <i class="fas fa-seedling" style="color:var(--wiz-success);"></i>
-          {% elif forloop.counter == 2 %}
-          <i class="fas fa-star" style="color:var(--wiz-accent);"></i>
-          {% else %}
-          <i class="fas fa-crown" style="color:#d4a853;"></i>
+    {% for item in package_data %}
+    {% with pkg=item.pkg total_price=item.total_price %}
+    {% with tier=forloop.counter %}
+    <div class="col-md-3 d-flex">
+      <div class="pkg-card package-card d-flex flex-column w-100" data-package-id="{{ pkg.id }}" data-multiplier="{{ pkg.price_multiplier|unlocalize }}">
+
+        <div class="pkg-card-head" style="background:{% if tier == 1 %}var(--wiz-success){% elif tier == 2 %}var(--wiz-accent){% else %}#8b5cf6{% endif %};">
+          <div class="pkg-card-badge"><i class="fas fa-check"></i></div>
+          <div class="pkg-card-name">{{ pkg.name }}</div>
+        </div>
+
+        <div class="pkg-card-body d-flex flex-column flex-grow-1">
+          <div class="pkg-card-price-wrap">
+            <span class="pkg-card-price">{{ total_price|unlocalize }}</span>
+            <span class="pkg-card-currency">DA</span>
+          </div>
+
+          <div class="d-flex justify-content-around mb-3 py-2" style="border-bottom:1px solid #f0f0f0;">
+            <div class="text-center">
+              <div class="pkg-card-stat-num">{{ pkg.total_delivery_days }}</div>
+              <div class="pkg-card-stat-label">{% trans "Days" %}</div>
+            </div>
+            <div class="text-center">
+              <div class="pkg-card-stat-num">{{ pkg.package_services.count }}</div>
+              <div class="pkg-card-stat-label">{% trans "Services" %}</div>
+            </div>
+          </div>
+
+          {% with services=pkg.package_services.all %}
+          {% if services %}
+          <div class="flex-grow-1">
+            <div class="pkg-card-features-label">{% trans "What's included" %}</div>
+            {% for ps in services|slice:":6" %}
+            <div class="pkg-card-feature">
+              <i class="fas fa-check-circle"></i>
+              <span>{{ ps.option.name }}</span>
+            </div>
+            {% endfor %}
+            {% if services|length > 6 %}
+            <div class="pkg-card-more">+{{ services|length|add:"-6" }} {% trans "more" %}</div>
+            {% endif %}
+          </div>
           {% endif %}
-        </div>
-        <div class="wiz-pkg-name">{{ pkg.name }}</div>
-        <p class="wiz-pkg-desc">{{ pkg.description|truncatewords:12 }}</p>
-        <div class="wiz-pkg-multiplier mb-2">
-          <div class="wiz-pkg-multiplier-label">{% trans "Multiplier" %}</div>
-          <div class="wiz-pkg-multiplier-value">{{ pkg.price_multiplier }}x</div>
-        </div>
-        <div>
-          <input type="radio" name="package" value="{{ pkg.id }}" class="d-none package-radio" id="pkg{{ pkg.id }}">
-          <label class="wiz-btn wiz-btn-outline d-inline-block" for="pkg{{ pkg.id }}" style="cursor:pointer;font-size:0.82rem;">
-            {% trans "Select" %}
-          </label>
+          {% endwith %}
+
+          <div class="mt-auto pt-3">
+            <input type="radio" name="package" value="{{ pkg.id }}" class="d-none package-radio" id="pkg{{ pkg.id }}">
+            <label class="pkg-card-btn" for="pkg{{ pkg.id }}">{% trans "Choose" %} {% if tier == 1 %}{% trans "Basic" %}{% elif tier == 2 %}{% trans "Pro" %}{% else %}{% trans "Premium" %}{% endif %}</label>
+          </div>
         </div>
       </div>
     </div>
+    {% endwith %}
+    {% endwith %}
     {% endfor %}
   </div>
 </div>

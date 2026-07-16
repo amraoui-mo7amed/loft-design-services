@@ -43,7 +43,6 @@ def _build_menu(is_admin, is_designer, is_customer):
                         {"title": _("Project Types"), "url_name": "dash:project_type_list"},
                         {"title": _("Spaces"), "url_name": "dash:space_list"},
                         {"title": _("Packages"), "url_name": "dash:package_list"},
-                        {"title": _("Design Options"), "url_name": "dash:option_list"},
                         {"title": _("Style Categories"), "url_name": "dash:style_list"},
                         {"title": _("Inspiration Images"), "url_name": "dash:inspiration_list"},
                     ],

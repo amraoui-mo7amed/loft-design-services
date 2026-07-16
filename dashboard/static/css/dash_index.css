@@ -4,13 +4,13 @@
 
 :root {
   --sidebar-width: 280px;
-  --sidebar-bg: var(--brand-dark, #2c2c3a);
+  --sidebar-bg: var(--brand-dark, #1a1a1a);
   --sidebar-surface: rgba(255, 255, 255, 0.04);
   --sidebar-border: rgba(255, 255, 255, 0.06);
   --sidebar-text: rgba(255, 255, 255, 0.55);
   --sidebar-text-hover: rgba(255, 255, 255, 0.9);
-  --sidebar-active-bg: rgba(42, 90, 90, 0.25);
-  --sidebar-active-border: #2a5a5a;
+  --sidebar-active-bg: rgba(255, 214, 90, 0.15);
+  --sidebar-active-border: var(--brand-primary, #FFD65A);
   --sidebar-icon-size: 20px;
   --header-height: 64px;
   --dropdown-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -88,7 +88,7 @@
   letter-spacing: 0.5px;
   margin: 0;
   line-height: 1.2;
-  background: linear-gradient(135deg, #fff 60%, rgba(255, 255, 255, 0.7));
+  background: linear-gradient(135deg, var(--brand-primary) 60%, rgba(255, 255, 255, 0.6));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -286,8 +286,8 @@
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--sidebar-active-border), #3a7a7a);
-  color: #fff;
+  background: linear-gradient(135deg, var(--sidebar-active-border), var(--brand-secondary));
+  color: var(--brand-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -383,7 +383,7 @@
   margin: 0;
   font-size: 1.15rem;
   font-weight: 800;
-  color: var(--brand-primary, #2a5a5a);
+  color: var(--brand-primary, #FFD65A);
   letter-spacing: -0.3px;
 }
 
@@ -414,8 +414,8 @@
   transition: all 0.2s ease;
 }
 .dropdown-item:hover {
-  background: rgba(0, 0, 0, 0.04);
-  color: var(--brand-primary, #2a5a5a);
+  background: rgba(255, 214, 90, 0.1);
+  color: var(--brand-primary, #FFD65A);
 }
 
 /* ---------- User Dropdown Trigger ---------- */
@@ -434,12 +434,122 @@
 .avatar-circle {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   border: 2px solid #fff;
-  background: var(--brand-primary, #2a5a5a) !important;
+  background: var(--brand-primary, #FFD65A) !important;
+  color: var(--brand-secondary) !important;
   color: #fff;
 }
 .leading-tight { line-height: 1.25; }
 .opacity-10 { opacity: 0.1; }
 .no-caret::after { display: none !important; }
+
+/* ========================================
+   Dashboard Button Styles (brand-aligned)
+   ======================================== */
+
+.dash-btn {
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 10px 24px;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.dash-btn-primary {
+  background-color: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: var(--brand-secondary);
+}
+
+.dash-btn-primary:hover {
+  background-color: #e6c04a !important;
+  border-color: #e6c04a !important;
+  color: var(--brand-secondary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 214, 90, 0.35);
+}
+
+.dash-btn-secondary {
+  background-color: var(--brand-secondary);
+  border-color: var(--brand-secondary);
+  color: #fff;
+}
+
+.dash-btn-secondary:hover {
+  background-color: #000 !important;
+  border-color: #000 !important;
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(33, 33, 33, 0.3);
+}
+
+.dash-btn-outline {
+  background: transparent;
+  color: var(--brand-primary);
+  border: 2px solid var(--brand-primary);
+}
+
+.dash-btn-outline:hover {
+  background-color: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+  color: var(--brand-secondary) !important;
+  transform: translateY(-2px);
+}
+
+.dash-btn-sm {
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  border-radius: 8px;
+}
+
+.dash-btn-lg {
+  padding: 14px 32px;
+  font-size: 1.1rem;
+  border-radius: 12px;
+}
+
+/* ========================================
+   Dashboard Modal Styles - white bg, dark text
+   ======================================== */
+
+.dash-modal .modal-content,
+.modal-content.pt-modal-overlay {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.modal-header,
+.pt-modal-header {
+    background: #fff;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.modal-header .modal-title,
+.pt-modal-header .modal-title {
+    font-weight: 700;
+    color: var(--brand-dark, #1a1a1a);
+    font-size: 1.1rem;
+}
+
+.pt-modal-subtitle {
+    color: #6c757d;
+    font-size: 0.78rem;
+    margin-bottom: 0;
+}
+
+.modal-header .btn-close,
+.pt-modal-header .btn-close {
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.modal-header .btn-close:hover,
+.pt-modal-header .btn-close:hover {
+    opacity: 1;
+}
 
 /* ========================================
    Responsive: Tablet & Mobile (overlay)
@@ -561,9 +671,9 @@
 
 .pagination-item.active .pagination-link {
   background: var(--brand-primary);
-  color: #fff;
+  color: var(--brand-secondary);
   border-color: var(--brand-primary);
-  box-shadow: 0 4px 12px rgba(42, 90, 90, 0.25);
+  box-shadow: 0 4px 12px rgba(255, 214, 90, 0.3);
 }
 
 .pagination-item.disabled .pagination-link {
