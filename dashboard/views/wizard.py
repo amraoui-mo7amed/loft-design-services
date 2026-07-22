@@ -22,9 +22,23 @@ def wizard_container(request):
     styles = StyleCategory.objects.all()
     project_type_choices = [("", _("Choose project type"))] + [(pt.slug, pt.name) for pt in project_types]
     step_labels = [
-        _("Project & Floors"), _("Spaces"), _("Package"),
-        _("Inspirations"), _("Questionnaire"),
-        _("Summary"), _("Confirmation"),
+        _("Project & Spaces"), _("Package"),
+        _("Inspirations"), _("Contact"),
+        _("Summary"),
+    ]
+    timeline_choices = [
+        ("", _("Select timeline")),
+        ("urgent", _("ASAP (Within 2 weeks)")),
+        ("normal", _("Normal (1-2 months)")),
+        ("relaxed", _("Relaxed (2-3 months)")),
+        ("flexible", _("Flexible (No deadline)")),
+    ]
+    property_type_choices = [
+        ("", _("Select type")),
+        ("new", _("New Construction")),
+        ("renovation", _("Renovation")),
+        ("occupied", _("Occupied")),
+        ("vacant", _("Vacant")),
     ]
     return render(request, "dashboard/wizard/container.html", {
         "project_types": project_types,
@@ -33,27 +47,19 @@ def wizard_container(request):
         "options": options,
         "styles": styles,
         "step_labels": step_labels,
+        "timeline_choices": timeline_choices,
+        "property_type_choices": property_type_choices,
     })
 
 
-def step_project_type(request):
+def step_combined(request):
     project_types = ProjectType.objects.filter(active=True)
     project_type_choices = [("", _("Choose project type"))] + [(pt.slug, pt.name) for pt in project_types]
-    return render(request, "dashboard/wizard/step1_project_type.html", {
+    spaces = Space.objects.filter(active=True)
+    floor_count = int(request.GET.get("floor_count", 1))
+    return render(request, "dashboard/wizard/step1_combined.html", {
         "project_types": project_types,
         "project_type_choices": project_type_choices,
-    })
-
-
-def step_spaces(request):
-    project_type_slug = request.GET.get("project_type")
-    floor_count = int(request.GET.get("floor_count", 1))
-    spaces = Space.objects.filter(active=True)
-    if project_type_slug:
-        pt = get_object_or_404(ProjectType, slug=project_type_slug)
-        space_ids = pt.default_spaces.values_list("space_id", flat=True)
-        spaces = spaces.filter(id__in=space_ids)
-    return render(request, "dashboard/wizard/step3_spaces.html", {
         "spaces": spaces,
         "floor_count": range(floor_count),
     })
@@ -75,65 +81,43 @@ def step_packages(request):
 
 
 def step_inspirations(request):
-    spaces_list = Space.objects.filter(active=True)
-    styles = StyleCategory.objects.all()
-    inspirations = InspirationImage.objects.filter(active=True).select_related("space", "style_category")
+    space_ids_param = request.GET.get("space_ids")
+    spaces_qs = Space.objects.filter(active=True)
+    if space_ids_param:
+        ids = [int(x) for x in space_ids_param.split(",") if x]
+        if ids:
+            spaces_qs = spaces_qs.filter(id__in=ids)
+    spaces_list = list(spaces_qs)
+    selected_ids = {s.id for s in spaces_list}
+    inspirations = InspirationImage.objects.filter(
+        active=True, space_id__in=selected_ids
+    )
 
-    insp_by_space_cat = {}
+    insp_by_space = {}
     for img in inspirations:
         sid = img.space_id
-        cid = img.style_category_id
-        if sid not in insp_by_space_cat:
-            insp_by_space_cat[sid] = {}
-        if cid not in insp_by_space_cat[sid]:
-            insp_by_space_cat[sid][cid] = {
-                "category": img.style_category,
-                "images": [],
-            }
-        insp_by_space_cat[sid][cid]["images"].append(img)
+        if sid not in insp_by_space:
+            insp_by_space[sid] = []
+        insp_by_space[sid].append(img)
 
-    for space_id, cats in insp_by_space_cat.items():
-        for cid, data in cats.items():
-            data["images"] = data["images"][-6:]
+    for sid in insp_by_space:
+        insp_by_space[sid] = insp_by_space[sid][-3:]
 
     return render(request, "dashboard/wizard/step6_inspirations.html", {
         "spaces_list": spaces_list,
-        "styles": styles,
-        "inspirations": inspirations,
-        "insp_by_space_cat": insp_by_space_cat,
+        "insp_by_space": insp_by_space,
     })
 
 
 def step_questionnaire(request):
-    timeline_choices = [
-        ("", _("Select timeline")),
-        ("urgent", _("ASAP (Within 2 weeks)")),
-        ("normal", _("Normal (1-2 months)")),
-        ("relaxed", _("Relaxed (2-3 months)")),
-        ("flexible", _("Flexible (No deadline)")),
-    ]
-    property_type_choices = [
-        ("", _("Select type")),
-        ("new", _("New Construction")),
-        ("renovation", _("Renovation")),
-        ("occupied", _("Occupied")),
-        ("vacant", _("Vacant")),
-    ]
-    return render(request, "dashboard/wizard/step7_questionnaire.html", {
-        "timeline_choices": timeline_choices,
-        "property_type_choices": property_type_choices,
-    })
+    return render(request, "dashboard/wizard/step7_questionnaire.html")
 
 
 def step_summary(request):
     return render(request, "dashboard/wizard/step9_summary.html")
 
 
-def step_confirmation(request):
-    return render(request, "dashboard/wizard/step10_confirmation.html")
 
-
-@login_required
 @require_POST
 def submit_design_request(request):
     try:
@@ -146,12 +130,23 @@ def submit_design_request(request):
         package_id = data.get("package_id")
         package = DesignPackage.objects.filter(id=package_id).first() if package_id else None
 
+        questionnaire = json.loads(data.get("questionnaire", "{}"))
+
+        first_name = questionnaire.get("first_name", "")
+        last_name = questionnaire.get("last_name", "")
+        email = questionnaire.get("email", "")
+        phone = questionnaire.get("phone", "")
+        project_name = (first_name + " " + last_name).strip() or "Design Request"
+
         design_request = DesignRequest.objects.create(
-            client=request.user,
-            project_name=data.get("project_name", "My Project"),
+            client=request.user if request.user.is_authenticated else None,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone=phone,
+            project_name=project_name,
             project_type=project_type,
             package=package,
-            budget=data.get("budget"),
             total=data.get("total", 0),
         )
 
@@ -183,11 +178,6 @@ def submit_design_request(request):
                         DesignRequestInspiration.objects.create(
                             design_request_space=drs, inspiration_image=img
                         )
-
-        questionnaire = json.loads(data.get("questionnaire", "{}"))
-        design_request.project_name = questionnaire.get("project_name", design_request.project_name)
-        design_request.budget = questionnaire.get("budget") or design_request.budget
-        design_request.save(update_fields=["project_name", "budget"])
 
     return JsonResponse({
         "success": True,

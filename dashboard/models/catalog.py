@@ -114,9 +114,6 @@ class InspirationImage(models.Model):
     space = models.ForeignKey(
         Space, on_delete=models.CASCADE, related_name="inspiration_images", verbose_name=_("Space")
     )
-    style_category = models.ForeignKey(
-        StyleCategory, on_delete=models.CASCADE, related_name="inspiration_images", verbose_name=_("Style Category")
-    )
     image = models.ImageField(upload_to="inspirations/", verbose_name=_("Image"))
     title = models.CharField(max_length=200, blank=True, verbose_name=_("Title"))
     active = models.BooleanField(default=True, verbose_name=_("Active"))

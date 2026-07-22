@@ -1,36 +1,59 @@
 {% load i18n tags %}
 <div class="wizard-step" data-step="3">
   <div class="text-center mb-4">
-    <h2 class="wiz-step-title">{% trans "Style Inspirations" %}</h2>
-    <p class="wiz-step-sub">{% trans "Select inspiration images for each space to guide your designer" %}</p>
+    <h2 class="wiz-step-title">{% trans "Choose Inspiration Images" %}</h2>
+    <p class="wiz-step-sub">{% trans "Select images for each space to guide your designer" %}</p>
   </div>
 
-  {% for space in spaces_list %}
-  {% with cats=insp_by_space_cat|get_item:space.id %}
-  {% if cats %}
-  <div class="inspiration-space-group mb-4" data-space-id="{{ space.id }}">
-    <h5 class="wiz-section-title">
-      <i class="fas fa-image"></i>{{ space.name }}
-    </h5>
-    {% for cid, data in cats.items %}
-    <div class="mb-3">
-      <span class="wiz-category-badge">{{ data.category.name }}</span>
-    </div>
-    <div class="row g-2 inspiration-gallery mb-3" data-space-id="{{ space.id }}">
-      {% for img in data.images %}
-      <div class="col-4 col-md-2 inspiration-item" data-style-id="{{ img.style_category_id }}" data-img-id="{{ img.id }}" data-img-url="{{ img.image.url }}">
-        <div class="wiz-inspo-card inspiration-card">
-          <img src="{{ img.image.url }}" alt="{{ img.title }}" class="wiz-inspo-img">
-          <div class="wiz-inspo-overlay"><i class="fas fa-check-circle"></i></div>
+  <div class="row g-3" id="inspirationSpacesGrid">
+    {% for space in spaces_list %}
+    {% with images=insp_by_space|get_item:space.id %}
+    {% if images %}
+    <div class="col-md-6 col-lg-4">
+      <div class="inspo-space-card" data-space-id="{{ space.id }}" data-completed="false">
+        <div class="inspo-card-header">
+          {% if space.image %}
+          <img src="{{ space.image.url }}" alt="{{ space.name }}" class="inspo-card-cover">
+          {% else %}
+          <div class="inspo-card-icon-wrap">
+            <i class="fas fa-couch"></i>
+          </div>
+          {% endif %}
+          <div class="inspo-card-badge">
+            <i class="fas fa-check"></i>
+          </div>
+        </div>
+
+        <div class="inspo-card-body">
+          <h6 class="inspo-card-name inspo-space-name">{{ space.name }}</h6>
+          <span class="inspo-card-meta">{{ images|length }} {% trans "inspiration images" %}</span>
+        </div>
+
+        <div class="inspo-card-footer">
+          <button type="button" class="inspo-select-btn select-inspo-btn" data-space-id="{{ space.id }}">
+            <i class="fas fa-images"></i>
+            <span>{% trans "Select Inspiration" %}</span>
+          </button>
+        </div>
+
+        <div class="inspiration-data d-none">
+          {% for img in images %}
+          <div class="inspiration-item" data-img-id="{{ img.id }}" data-img-url="{{ img.image.url }}">
+            <div class="wiz-inspo-card inspiration-card">
+              <img src="{{ img.image.url }}" alt="{{ img.title }}" class="wiz-inspo-img" loading="lazy">
+              <div class="wiz-inspo-overlay"><i class="fas fa-check-circle"></i></div>
+            </div>
+          </div>
+          {% endfor %}
         </div>
       </div>
-      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% empty %}
+    <div class="col-12">
+      <p class="text-muted text-center py-4 wiz-text-md">{% trans "No inspiration images available." %}</p>
     </div>
     {% endfor %}
   </div>
-  {% endif %}
-  {% endwith %}
-  {% empty %}
-  <p class="text-muted text-center py-4" style="font-size:0.9rem;">{% trans "No inspiration images available yet." %}</p>
-  {% endfor %}
 </div>

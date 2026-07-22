@@ -46,7 +46,6 @@
                         <h6 class="fw-bold mb-1">{{ img.title|default:_("Untitled") }}</h6>
                         <div class="d-flex gap-1 mb-1">
                             <span class="badge pt-badge rounded-pill bg-primary" style="font-size:0.65rem;">{{ img.space.name }}</span>
-                            <span class="badge pt-badge rounded-pill bg-info" style="font-size:0.65rem;">{{ img.style_category.name }}</span>
                         </div>
                     </div>
                     <div class="pt-actions flex-shrink-0">
@@ -58,7 +57,6 @@
                                 data-submit-text="{% trans 'Save' %}"
                                 data-title="{{ img.title }}"
                                 data-space_id="{{ img.space_id }}"
-                                data-style_id="{{ img.style_category_id }}"
                                 data-active="{{ img.active|yesno:'true,false' }}"
                                 {% if img.image %}data-image_url="{{ img.image.url }}"{% endif %}>
                             <i class="fas fa-pen"></i>
@@ -114,13 +112,6 @@
                                     {% trans "Space" %}
                                 </label>
                                 {% include "components/custom_select.html" with id="inspSpaceSelect" name="space_id" choices=space_choices select_title=_("Select a space") extra_attrs='data-field="space_id" data-default="" required' %}
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                                    <i class="fas fa-palette text-primary" style="font-size:0.8rem;"></i>
-                                    {% trans "Style" %}
-                                </label>
-                                {% include "components/custom_select.html" with id="inspStyleSelect" name="style_id" choices=style_choices select_title=_("Select a style") extra_attrs='data-field="style_id" data-default="" required' %}
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold d-flex align-items-center gap-2">

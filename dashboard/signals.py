@@ -8,9 +8,7 @@ from .models import DesignRequest, DesignMessage, DesignDeliverable, DesignPayme
 from .utils import notify_user
 from .email_service import (
     send_project_submitted_email,
-    send_quote_ready_email,
-    send_designer_assigned_email,
-    send_project_delivered_email,
+    send_status_update_email,
 )
 
 
@@ -19,17 +17,18 @@ def handle_design_request_created(sender, instance, created, **kwargs):
     if created:
         DesignActivityLog.objects.create(
             design_request=instance,
-            actor=instance.client,
+            actor=instance.client if instance.client else None,
             action=_("Project Created"),
             description=_("Design request submitted"),
         )
-        notify_user(
-            instance.client,
-            _("Project Submitted"),
-            _("Your design request has been submitted successfully."),
-            "success",
-            link=f"/dashboard/my-projects/{instance.uuid}/",
-        )
+        if instance.client:
+            notify_user(
+                instance.client,
+                _("Project Submitted"),
+                _("Your design request has been submitted successfully."),
+                "success",
+                link=f"/dashboard/my-projects/{instance.uuid}/",
+            )
         User = get_user_model()
         for admin in User.objects.filter(is_superuser=True):
             notify_user(
@@ -48,11 +47,7 @@ def handle_design_request_created(sender, instance, created, **kwargs):
         return
 
     if old.status != instance.status:
-        new_status = instance.status
-        if new_status == DesignRequest.Status.DELIVERED:
-            send_project_delivered_email(instance)
-        elif new_status == DesignRequest.Status.QUOTE_SENT:
-            send_quote_ready_email(instance)
+        send_status_update_email(instance)
 
 
 @receiver(post_save, sender=DesignMessage)

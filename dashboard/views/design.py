@@ -457,15 +457,12 @@ def style_delete(request, pk):
 @admin_required
 @with_pagination(per_page=12, template="dashboard/design/inspiration_list", queryset_name="inspirations")
 def inspiration_list(request):
-    queryset = InspirationImage.objects.select_related("space", "style_category").all()
+    queryset = InspirationImage.objects.select_related("space").all()
     spaces_qs = Space.objects.filter(active=True)
-    styles_qs = StyleCategory.objects.all()
     return {
         "inspirations": queryset,
         "spaces": spaces_qs,
-        "styles": styles_qs,
         "space_choices": [("", _("Select Space"))] + [(s.pk, s.name) for s in spaces_qs],
-        "style_choices": [("", _("Select Style"))] + [(s.pk, s.name) for s in styles_qs],
     }
 
 
@@ -473,27 +470,23 @@ def inspiration_list(request):
 def inspiration_create(request):
     if request.method == "POST":
         space_id = request.POST.get("space_id")
-        style_id = request.POST.get("style_id")
         title = request.POST.get("title", "")
         active = request.POST.get("active") == "on"
         image = request.FILES.get("image")
-        if not space_id or not style_id or not image:
-            return JsonResponse({"success": False, "errors": [_("Space, style, and image are required.")]})
+        if not space_id or not image:
+            return JsonResponse({"success": False, "errors": [_("Space and image are required.")]})
         try:
             InspirationImage.objects.create(
-                space_id=space_id, style_category_id=style_id, title=title, image=image, active=active
+                space_id=space_id, title=title, image=image, active=active
             )
             return JsonResponse({"success": True, "message": _("Inspiration image created successfully."), "redirect_url": reverse("dash:inspiration_list")})
         except Exception as e:
             return JsonResponse({"success": False, "errors": humanize_error(e)})
     spaces_qs = Space.objects.filter(active=True)
-    styles_qs = StyleCategory.objects.all()
     return render(request, "dashboard/design/inspiration_form.html", {
         "form_title": _("New Inspiration Image"),
         "spaces": spaces_qs,
-        "styles": styles_qs,
         "space_choices": [("", _("Select Space"))] + [(s.pk, s.name) for s in spaces_qs],
-        "style_choices": [("", _("Select Style"))] + [(s.pk, s.name) for s in styles_qs],
     })
 
 
@@ -502,7 +495,6 @@ def inspiration_update(request, pk):
     obj = get_object_or_404(InspirationImage, pk=pk)
     if request.method == "POST":
         obj.space_id = request.POST.get("space_id", obj.space_id)
-        obj.style_category_id = request.POST.get("style_id", obj.style_category_id)
         obj.title = request.POST.get("title", obj.title)
         obj.active = request.POST.get("active") == "on"
         if request.FILES.get("image"):
@@ -513,14 +505,11 @@ def inspiration_update(request, pk):
         except Exception as e:
             return JsonResponse({"success": False, "errors": humanize_error(e)})
     spaces_qs = Space.objects.filter(active=True)
-    styles_qs = StyleCategory.objects.all()
     return render(request, "dashboard/design/inspiration_form.html", {
         "form_title": _("Edit Inspiration Image"),
         "object": obj,
         "spaces": spaces_qs,
-        "styles": styles_qs,
         "space_choices": [("", _("Select Space"))] + [(s.pk, s.name) for s in spaces_qs],
-        "style_choices": [("", _("Select Style"))] + [(s.pk, s.name) for s in styles_qs],
     })
 
 

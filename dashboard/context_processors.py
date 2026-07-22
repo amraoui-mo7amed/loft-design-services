@@ -54,6 +54,12 @@ def _build_menu(is_admin, is_designer, is_customer):
                     "admin_only": True,
                 },
                 {
+                    "title": _("Inquiries"),
+                    "icon": "fas fa-inbox",
+                    "url_name": "dash:inquiry_list",
+                    "admin_only": True,
+                },
+                {
                     "title": _("Pricing Rules"),
                     "icon": "fas fa-dollar-sign",
                     "url_name": "dash:pricing_settings",

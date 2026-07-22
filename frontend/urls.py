@@ -1,8 +1,9 @@
 from django.urls import path
-from frontend.views import design_service
+from frontend.views import main
 
 app_name = "frontend"
 
 urlpatterns = [
-    path("", design_service.landing_view, name="home"),
+    path("", main.home_view, name="home"),
+    path("order/", main.order_view, name="order"),
 ]

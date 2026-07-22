@@ -5,25 +5,48 @@
     <p class="wiz-step-sub">{% trans "Select the service package that fits your needs" %}</p>
   </div>
 
+  <div class="wiz-summary-card mb-4" id="estimateCard">
+    <div class="d-flex align-items-center mb-3">
+      <div class="wiz-summary-icon me-3"><i class="fas fa-calculator"></i></div>
+      <div>
+        <div class="wiz-summary-title">{% trans "Your Estimate" %}</div>
+        <div class="wiz-text-sm text-muted">{% trans "Based on your selected spaces" %}</div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-between align-items-center py-1">
+      <span class="wiz-text-muted-light">{% trans "Base price (selected spaces)" %}</span>
+      <span class="fw-bold" id="estSubtotal" style="color:var(--wiz-text);">—</span>
+    </div>
+    <div class="d-flex justify-content-between align-items-center py-1">
+      <span class="wiz-text-muted-light">{% trans "Package" %}</span>
+      <span class="fw-bold" id="estPackagePrice" style="color:var(--wiz-text);">—</span>
+    </div>
+    <hr class="my-2" style="border-color:var(--wiz-border);opacity:0.6;">
+    <div class="d-flex justify-content-between align-items-center py-1">
+      <span class="fw-bold">{% trans "Estimated Total" %}</span>
+      <span id="estTotal" style="font-size:1.3rem;font-weight:800;color:var(--wiz-accent);">—</span>
+    </div>
+  </div>
+
   <div class="row g-3">
     {% for item in package_data %}
-    {% with pkg=item.pkg total_price=item.total_price %}
+    {% with pkg=item.pkg %}
     {% with tier=forloop.counter %}
     <div class="col-md-3 d-flex">
-      <div class="pkg-card package-card d-flex flex-column w-100" data-package-id="{{ pkg.id }}" data-multiplier="{{ pkg.price_multiplier|unlocalize }}">
+      <div class="pkg-card package-card d-flex flex-column w-100" data-package-id="{{ pkg.id }}" data-price="{{ item.total_price|unlocalize }}">
 
-        <div class="pkg-card-head" style="background:{% if tier == 1 %}var(--wiz-success){% elif tier == 2 %}var(--wiz-accent){% else %}#8b5cf6{% endif %};">
+        <div class="pkg-card-head {% if tier == 1 %}pkg-card-head-tier1{% elif tier == 2 %}pkg-card-head-tier2{% else %}pkg-card-head-tier3{% endif %}">
           <div class="pkg-card-badge"><i class="fas fa-check"></i></div>
           <div class="pkg-card-name">{{ pkg.name }}</div>
         </div>
 
         <div class="pkg-card-body d-flex flex-column flex-grow-1">
           <div class="pkg-card-price-wrap">
-            <span class="pkg-card-price">{{ total_price|unlocalize }}</span>
+            <span class="pkg-card-price pkg-dynamic-price">—</span>
             <span class="pkg-card-currency">DA</span>
           </div>
 
-          <div class="d-flex justify-content-around mb-3 py-2" style="border-bottom:1px solid #f0f0f0;">
+          <div class="d-flex justify-content-around mb-3 py-2 pkg-card-stats-divider">
             <div class="text-center">
               <div class="pkg-card-stat-num">{{ pkg.total_delivery_days }}</div>
               <div class="pkg-card-stat-label">{% trans "Days" %}</div>
@@ -31,6 +54,10 @@
             <div class="text-center">
               <div class="pkg-card-stat-num">{{ pkg.package_services.count }}</div>
               <div class="pkg-card-stat-label">{% trans "Services" %}</div>
+            </div>
+            <div class="text-center">
+              <div class="pkg-card-stat-num" style="font-size:0.85rem;">{{ item.total_price|unlocalize }}</div>
+              <div class="pkg-card-stat-label">{% trans "Price" %}</div>
             </div>
           </div>
 

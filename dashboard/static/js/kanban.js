@@ -12,6 +12,38 @@
             });
         });
 
+        document.querySelectorAll(".quick-status-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var pk = this.dataset.projectId;
+                var status = this.dataset.status;
+                var url = this.dataset.url;
+                var shouldReload = this.dataset.reload === "true";
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-CSRFToken": getCsrfToken(),
+                    },
+                    body: "status=" + encodeURIComponent(status),
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        if (shouldReload) {
+                            location.reload();
+                        }
+                        showToast(data.message || "Status updated.", "success");
+                    } else {
+                        showToast(data.errors ? data.errors.join(", ") : "Failed to update.", "error");
+                    }
+                })
+                .catch(function () {
+                    showToast("Network error.", "error");
+                });
+            });
+        });
+
         document.querySelectorAll(".crm-status-option").forEach(function (opt) {
             opt.addEventListener("click", function () {
                 var dropdown = this.closest(".crm-status-dropdown");

@@ -79,4 +79,7 @@ urlpatterns = [
     path("crm/update-status/<int:pk>/", admin_crm.update_status, name="crm_update_status"),
     path("crm/assign-designer/<int:pk>/", admin_crm.assign_designer, name="crm_assign_designer"),
     path("crm/<int:pk>/delete/", admin_crm.delete_project, name="crm_delete_project"),
+    # Inquiries
+    path("inquiries/", admin_crm.inquiry_list, name="inquiry_list"),
+    path("inquiries/<int:pk>/", admin_crm.inquiry_detail, name="inquiry_detail"),
 ]

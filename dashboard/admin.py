@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import (
+    Inquiry,
     Notification,
     ProjectType,
     SpaceCategory,
@@ -30,6 +31,14 @@ from .models import (
     Order,
     OrderItem,
 )
+
+
+@admin.register(Inquiry)
+class InquiryAdmin(admin.ModelAdmin):
+    list_display = ["first_name", "last_name", "email", "phone", "total", "status", "is_read", "created_at"]
+    list_filter = ["status", "is_read", "created_at"]
+    search_fields = ["first_name", "last_name", "email", "phone"]
+    readonly_fields = ["created_at", "spaces"]
 
 
 @admin.register(Notification)
@@ -89,15 +98,15 @@ class StyleCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(InspirationImage)
 class InspirationImageAdmin(admin.ModelAdmin):
-    list_display = ["title", "space", "style_category", "active"]
-    list_filter = ["space", "style_category", "active"]
+    list_display = ["title", "space", "active"]
+    list_filter = ["space", "active"]
 
 
 @admin.register(DesignRequest)
 class DesignRequestAdmin(admin.ModelAdmin):
-    list_display = ["project_number", "client", "project_type", "status", "total", "designer", "created_at"]
+    list_display = ["project_number", "client", "first_name", "last_name", "email", "project_type", "status", "total", "created_at"]
     list_filter = ["status", "project_type", "created_at"]
-    search_fields = ["client__username", "client__email", "project_name"]
+    search_fields = ["client__username", "client__email", "first_name", "last_name", "email", "project_name"]
     readonly_fields = ["uuid", "created_at", "updated_at"]
 
 

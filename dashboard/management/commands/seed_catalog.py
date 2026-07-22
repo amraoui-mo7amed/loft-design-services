@@ -35,6 +35,16 @@ SPACES = [
     ("Home Office", "Interior", 5000, 4),
     ("Garden", "Exterior", 15000, 14),
     ("Terrace", "Exterior", 10000, 10),
+    ("Balcony", "Exterior", 4000, 3),
+    ("Corridor", "Interior", 3000, 2),
+    ("Kids Room", "Interior", 6500, 6),
+    ("Guest Room", "Interior", 7000, 6),
+    ("Laundry Room", "Interior", 3500, 3),
+    ("Storage Room", "Interior", 2500, 2),
+    ("Rooftop", "Exterior", 18000, 16),
+    ("Entrance Hall", "Interior", 5500, 5),
+    ("Study Room", "Interior", 6000, 5),
+    ("Pool Area", "Exterior", 22000, 20),
 ]
 
 PROJECT_TYPES = [

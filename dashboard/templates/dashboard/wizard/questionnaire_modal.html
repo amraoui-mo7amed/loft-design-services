@@ -1,0 +1,188 @@
+{% load i18n %}
+<div class="modal fade" id="questionnaireModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content border-0 rounded-4 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="fw-bold">{% trans "Project Questionnaire" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-4 wiz-text-md">{% trans "Help us understand your project better" %}</p>
+
+        <div class="wiz-question-card text-center mb-3">
+          <div class="py-3">
+            <p class="fw-semibold mb-4 wiz-text-lg">{% trans "First, tell us who you are" %}</p>
+            <div class="d-flex justify-content-center gap-4" id="customerTypeGroup">
+              <label class="wiz-role-card" data-role="normal">
+                <input type="radio" class="d-none" name="customer_type" id="ctypeNormal" value="normal" checked>
+                <div class="wiz-role-icon"><i class="fas fa-user"></i></div>
+                <span class="wiz-role-label">{% trans "Normal Customer" %}</span>
+                <small class="wiz-role-desc">{% trans "Individual looking for design services" %}</small>
+              </label>
+              <label class="wiz-role-card" data-role="professional">
+                <input type="radio" class="d-none" name="customer_type" id="ctypeProfessional" value="professional">
+                <div class="wiz-role-icon"><i class="fas fa-briefcase"></i></div>
+                <span class="wiz-role-label">{% trans "Professional Customer" %}</span>
+                <small class="wiz-role-desc">{% trans "Company or contractor needing design services" %}</small>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="wiz-questionnaire-body">
+          <div class="wiz-question-card mb-3">
+            <div id="normalFields">
+              <h5 class="wiz-section-title"><i class="fas fa-user"></i>{% trans "Personal Details" %}</h5>
+              <div class="row g-3">
+                <div class="col-md-3">
+                  <label class="wiz-form-label">{% trans "First Name" %}</label>
+                  <input type="text" name="first_name" class="wiz-form-control" value="{{ request.user.first_name }}" required>
+                </div>
+                <div class="col-md-3">
+                  <label class="wiz-form-label">{% trans "Last Name" %}</label>
+                  <input type="text" name="last_name" class="wiz-form-control" value="{{ request.user.last_name }}" required>
+                </div>
+                <div class="col-md-3">
+                  <label class="wiz-form-label">{% trans "Email" %}</label>
+                  <input type="email" name="email" class="wiz-form-control" value="{{ request.user.email }}" required>
+                </div>
+                <div class="col-md-3">
+                  <label class="wiz-form-label">{% trans "Phone" %}</label>
+                  <input type="tel" name="phone" class="wiz-form-control" value="{{ request.user.profile.phone_number }}">
+                </div>
+              </div>
+            </div>
+
+            <div id="professionalFields" class="wiz-hidden">
+              <h5 class="wiz-section-title"><i class="fas fa-user"></i>{% trans "Personal Information" %}</h5>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="wiz-form-label">{% trans "Full Name" %}</label>
+                  <input type="text" name="full_name_pro" class="wiz-form-control" value="{{ request.user.get_full_name }}" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="wiz-form-label">{% trans "Email" %}</label>
+                  <input type="email" name="email_pro" class="wiz-form-control" value="{{ request.user.email }}" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="wiz-form-label">{% trans "Phone" %}</label>
+                  <input type="tel" name="phone_pro" class="wiz-form-control" value="{{ request.user.profile.phone_number }}">
+                </div>
+                <div class="col-md-6">
+                  <label class="wiz-form-label">{% trans "WhatsApp" %}</label>
+                  <input type="tel" name="whatsapp" class="wiz-form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="wiz-form-label">{% trans "Country" %}</label>
+                  <input type="text" name="country" class="wiz-form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="wiz-form-label">{% trans "City" %}</label>
+                  <input type="text" name="city" class="wiz-form-control">
+                </div>
+                <div class="col-md-4">
+                  <label class="wiz-form-label">{% trans "Company" %}</label>
+                  <input type="text" name="company" class="wiz-form-control">
+                </div>
+                <div class="col-12">
+                  <label class="wiz-form-label">{% trans "Address" %}</label>
+                  <input type="text" name="address" class="wiz-form-control">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wiz-professional-only">
+            <div class="wiz-question-card">
+              <h5 class="wiz-section-title"><i class="fas fa-project-diagram"></i>{% trans "Project Details" %}</h5>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="wiz-form-label">{% trans "Project Name" %}</label>
+                  <input type="text" name="project_name" class="wiz-form-control" placeholder="{% trans 'e.g. My Dream Villa' %}">
+                </div>
+                <div class="col-md-6">
+                  <label class="wiz-form-label">{% trans "Budget (DA)" %}</label>
+                  <input type="number" name="budget" class="wiz-form-control" placeholder="{% trans 'Estimated budget' %}">
+                </div>
+                <div class="col-md-6">
+                  <label class="wiz-form-label">{% trans "Timeline" %}</label>
+                  {% include "components/custom_select.html" with id="timelineSelect" name="timeline" choices=timeline_choices select_title=_("Select timeline") %}
+                </div>
+                <div class="col-md-6">
+                  <label class="wiz-form-label">{% trans "Property Type" %}</label>
+                  {% include "components/custom_select.html" with id="propertyTypeSelect" name="property_type" choices=property_type_choices select_title=_("Select type") %}
+                </div>
+              </div>
+            </div>
+
+            <div class="wiz-question-card">
+              <h5 class="wiz-section-title"><i class="fas fa-question-circle"></i>{% trans "Additional Questions" %}</h5>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="wiz-check-label">
+                    <input type="checkbox" name="custom_furniture">
+                    <span class="wiz-check-label-text">{% trans "Need custom furniture?" %}</span>
+                  </label>
+                </div>
+                <div class="col-md-6">
+                  <label class="wiz-check-label">
+                    <input type="checkbox" name="shopping_assistance">
+                    <span class="wiz-check-label-text">{% trans "Need shopping assistance?" %}</span>
+                  </label>
+                </div>
+                <div class="col-md-6">
+                  <label class="wiz-check-label">
+                    <input type="checkbox" name="need_contractor">
+                    <span class="wiz-check-label-text">{% trans "Need a contractor?" %}</span>
+                  </label>
+                </div>
+                <div class="col-md-6">
+                  <label class="wiz-check-label">
+                    <input type="checkbox" name="need_supervision">
+                    <span class="wiz-check-label-text">{% trans "Need supervision?" %}</span>
+                  </label>
+                </div>
+                <div class="col-md-6">
+                  <label class="wiz-form-label">{% trans "Preferred Colors" %}</label>
+                  <input type="text" name="preferred_colors" class="wiz-form-control" placeholder="{% trans 'e.g. Neutral, Earth tones...' %}">
+                </div>
+                <div class="col-md-6">
+                  <label class="wiz-form-label">{% trans "Preferred Materials" %}</label>
+                  <input type="text" name="preferred_materials" class="wiz-form-control" placeholder="{% trans 'e.g. Wood, Marble...' %}">
+                </div>
+                <div class="col-md-4">
+                  <label class="wiz-check-label">
+                    <input type="checkbox" name="has_pets">
+                    <span class="wiz-check-label-text">{% trans "Pets" %}</span>
+                  </label>
+                </div>
+                <div class="col-md-4">
+                  <label class="wiz-check-label">
+                    <input type="checkbox" name="has_children">
+                    <span class="wiz-check-label-text">{% trans "Children" %}</span>
+                  </label>
+                </div>
+                <div class="col-md-4">
+                  <label class="wiz-check-label">
+                    <input type="checkbox" name="accessibility">
+                    <span class="wiz-check-label-text">{% trans "Accessibility Needs" %}</span>
+                  </label>
+                </div>
+                <div class="col-12">
+                  <label class="wiz-form-label">{% trans "Additional Comments" %}</label>
+                  <textarea name="comments" class="wiz-form-control" rows="3" placeholder="{% trans 'Any other details you want to share...' %}"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+        <button type="button" class="wiz-btn wiz-btn-primary" id="qSaveBtn">
+          <i class="fas fa-check me-2"></i>{% trans "Save & Continue" %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

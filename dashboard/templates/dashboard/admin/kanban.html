@@ -16,32 +16,28 @@
             <h5 class="fw-bold mb-0">{% trans "Projects" %}</h5>
             <p class="text-muted small mb-0">{% trans "Manage and track all design projects" %}</p>
         </div>
-        <button class="btn btn-outline-primary rounded-3 px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#crmFilterModal">
-            <i class="fas fa-filter me-2"></i>{% trans "Filters" %}
-            {% if active_status or active_client or active_designer %}
-            <span class="badge bg-danger ms-1">!</span>
-            {% endif %}
-        </button>
+        <div class="d-flex gap-2">
+            <form method="get" class="d-flex gap-2">
+                <div class="input-group input-group-sm" style="max-width:260px;">
+                    <input type="text" name="q" class="form-control" placeholder="{% trans 'Search...' %}" value="{{ active_search }}">
+                    <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
+                </div>
+            </form>
+            <button class="btn btn-outline-primary rounded-3 px-3 fw-bold shadow-sm btn-sm" data-bs-toggle="modal" data-bs-target="#crmFilterModal">
+                <i class="fas fa-filter me-2"></i>{% trans "Filters" %}
+                {% if active_status %}
+                <span class="badge bg-danger ms-1">!</span>
+                {% endif %}
+            </button>
+        </div>
     </div>
 
-    {% if active_status or active_client or active_designer %}
+    {% if active_status %}
     <div class="d-flex gap-2 mb-3 flex-wrap">
         <small class="text-muted">{% trans "Active filters:" %}</small>
-        {% if active_status %}
-        <a href="?{% if active_client %}client={{ active_client }}&{% endif %}{% if active_designer %}designer={{ active_designer }}{% endif %}" class="badge bg-light text-dark text-decoration-none rounded-pill d-flex align-items-center gap-1">
+        <a href="?{% if active_search %}q={{ active_search }}{% endif %}" class="badge bg-light text-dark text-decoration-none rounded-pill d-flex align-items-center gap-1">
             {% trans "Status" %}: {{ active_status }} <i class="fas fa-times ms-1"></i>
         </a>
-        {% endif %}
-        {% if active_client %}
-        <a href="?{% if active_status %}status={{ active_status }}&{% endif %}{% if active_designer %}designer={{ active_designer }}{% endif %}" class="badge bg-light text-dark text-decoration-none rounded-pill d-flex align-items-center gap-1">
-            {% trans "Client" %}: {{ active_client }} <i class="fas fa-times ms-1"></i>
-        </a>
-        {% endif %}
-        {% if active_designer %}
-        <a href="?{% if active_status %}status={{ active_status }}&{% endif %}{% if active_client %}client={{ active_client }}{% endif %}" class="badge bg-light text-dark text-decoration-none rounded-pill d-flex align-items-center gap-1">
-            {% trans "Designer" %}: {{ active_designer }} <i class="fas fa-times ms-1"></i>
-        </a>
-        {% endif %}
         <a href="{% url 'dash:admin_crm' %}" class="badge bg-danger text-white text-decoration-none rounded-pill">{% trans "Clear all" %}</a>
     </div>
     {% endif %}
@@ -77,21 +73,18 @@
                         </div>
                     </div>
                     <div class="crm-meta mb-3">
-                        <div><span class="label">{% trans "Client" %}</span> <span class="value">{{ project.client.get_full_name|default:project.client.username }}</span></div>
+                        <div><span class="label">{% trans "Client" %}</span> <span class="value">{% if project.client %}{{ project.client.get_full_name|default:project.client.username }}{% elif project.first_name %}{{ project.first_name }} {{ project.last_name }}{% else %}{% trans "Anonymous" %}{% endif %}</span></div>
                         <div><span class="label">{% trans "Date" %}</span> <span class="value">{{ project.created_at|date:"d M Y" }}</span></div>
-                        {% if project.designer %}
-                        <div><span class="label">{% trans "Designer" %}</span> <span class="value">{{ project.designer.get_full_name|default:project.designer.username }}</span></div>
-                        {% endif %}
                         {% if project.project_type %}
                         <div><span class="label">{% trans "Type" %}</span> <span class="value">{{ project.project_type.name }}</span></div>
+                        {% endif %}
+                        {% if project.package %}
+                        <div><span class="label">{% trans "Package" %}</span> <span class="value">{{ project.package.name }}</span></div>
                         {% endif %}
                     </div>
                     <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                         <div>
                             <span class="fw-bold" style="color:var(--brand-primary);">{{ project.total }} DA</span>
-                            {% if project.budget %}
-                            <small class="text-muted ms-1">/ {{ project.budget }} DA</small>
-                            {% endif %}
                         </div>
                         <div class="d-flex gap-1">
                             <a href="{% url 'dash:admin_project_detail' project.pk %}" class="btn btn-sm btn-outline-primary rounded-3 fw-semibold">
@@ -140,14 +133,9 @@
                         <label class="form-label fw-semibold">{% trans "Status" %}</label>
                         {% include "components/custom_select.html" with id="statusFilter" name="status" choices=status_choices value=active_status select_title=_("All Statuses") %}
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">{% trans "Client" %}</label>
-                        <input type="text" name="client" class="form-control" placeholder="{% trans 'Search by username...' %}" value="{{ active_client }}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">{% trans "Designer" %}</label>
-                        {% include "components/custom_select.html" with id="designerFilter" name="designer" choices=designer_choices value=active_designer select_title=_("All Designers") %}
-                    </div>
+                    {% if active_search %}
+                    <input type="hidden" name="q" value="{{ active_search }}">
+                    {% endif %}
                 </div>
                 <div class="modal-footer border-0">
                     <a href="{% url 'dash:admin_crm' %}" class="btn btn-light">{% trans "Reset" %}</a>

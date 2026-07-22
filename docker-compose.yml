@@ -25,7 +25,7 @@ services:
 
   web:
     build: .
-    command: sh -c "python manage.py migrate --noinput && python manage.py init_admin && python manage.py seed_catalog && python manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python manage.py makemigrations user_auth dashboard && python manage.py migrate --noinput && python manage.py init_admin && python manage.py seed_catalog && python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
     depends_on:

@@ -25,7 +25,7 @@
           <span>{% trans "Design Service" %}</span>
         </div>
       </div>
-      <div style="position:relative;">
+      <div class="wiz-stepper-wrap">
         <div class="wiz-stepper" id="stepper">
           {% with step_labels as steps %}
           {% for label in steps %}
@@ -51,7 +51,7 @@
       <div class="row justify-content-center">
         <div class="col-lg-12 col-xl-11">
 
-          <div id="priceSummaryBar" class="wiz-price-sticky" style="display:none;">
+          <div id="priceSummaryBar" class="wiz-price-sticky wiz-hidden">
             <div class="wiz-total-bar">
               <div>
                 <div class="wiz-total-label">{% trans "Estimated Total" %}</div>
@@ -66,8 +66,8 @@
 
           <div class="wiz-content" id="stepContent">
             <div class="text-center py-5">
-              <div class="spinner-border text-secondary" role="status" style="width:2.5rem;height:2.5rem;"></div>
-              <p class="mt-3 text-muted" style="font-size:0.9rem;">{% trans "Loading..." %}</p>
+              <div class="spinner-border text-secondary wiz-spinner" role="status"></div>
+              <p class="mt-3 text-muted wiz-text-md">{% trans "Loading..." %}</p>
             </div>
           </div>
 
@@ -89,8 +89,52 @@
     </div>
   </div>
 </div>
-{% endblock content %}
 
+<div class="modal fade" id="inspirationGalleryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content border-0 rounded-4 overflow-hidden" style="background:var(--wiz-bg);">
+      <div class="modal-header border-0 pb-0" style="background:var(--wiz-bg);">
+        <h5 class="modal-title fw-bold" id="inspirationModalTitle" style="color:var(--wiz-text);"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="inspirationModalBody">
+        <p class="text-muted mb-3 wiz-text-sm">{% trans "Click images to select. Submit when done." %}</p>
+        <div class="row g-3" id="inspirationModalGrid"></div>
+      </div>
+      <div class="modal-footer border-0 pt-0" style="background:var(--wiz-bg);">
+        <button type="button" class="btn btn-sm btn-outline-secondary rounded-3 px-4" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+        <button type="button" class="btn btn-sm wiz-btn-primary rounded-3 px-4" id="inspirationSubmitBtn">{% trans "Submit" %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 rounded-4 text-center p-4" style="background:var(--wiz-bg);">
+      <div class="py-3">
+        <div class="wiz-confirm-icon mx-auto mb-3">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h4 class="fw-bold mb-2" style="color:var(--wiz-text);">{% trans "Request Under Review" %}</h4>
+        <p class="text-muted wiz-text-md mb-3">{% trans "Your design request has been submitted and is now under review." %}</p>
+        <div class="d-inline-block px-4 py-2 rounded-3 mb-3" style="background:var(--wiz-primary-light);">
+          <div class="wiz-text-sm text-muted mb-1">{% trans "Project Number" %}</div>
+          <div class="fw-bold" id="confirmProjectNumber" style="font-size:1.4rem;color:var(--wiz-accent);">—</div>
+        </div>
+        <div class="mb-3">
+          <div class="wiz-text-sm text-muted mb-1">{% trans "Estimated Total" %}</div>
+          <div class="fw-bold" id="confirmTotal" style="font-size:1.2rem;color:var(--wiz-success);">—</div>
+        </div>
+        <p class="wiz-text-sm text-muted mb-4">{% trans "You will receive an email with your project number and next steps." %}</p>
+        <a href="/" class="btn wiz-btn-primary rounded-3 px-4">
+          <i class="fas fa-home me-2"></i>{% trans "Back to Home" %}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
 {% block js %}
 <script src="{% static 'js/wizard.js' %}?v={% now "U" %}"></script>
 {% endblock js %}

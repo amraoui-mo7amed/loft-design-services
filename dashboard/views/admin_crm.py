@@ -4,17 +4,14 @@ from django.urls import reverse
 from django.core.paginator import Paginator
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
+from django.db import models
+from django.core.mail import send_mail
+from django.conf import settings
 
 from ..decorator import admin_required
-from ..models import DesignRequest
+from ..models import DesignRequest, Inquiry
 from ..utils import notify_user
-from user_auth.models import UserProfile
-
-
-STATUS_ORDER = [
-    "new", "qualified", "quote_sent", "waiting_payment",
-    "design", "revision", "delivered", "completed", "cancelled",
-]
+from ..email_service import send_status_update_email
 
 
 @admin_required
@@ -25,13 +22,15 @@ def kanban_view(request):
     if status_filter in dict(DesignRequest.Status.choices):
         qs = qs.filter(status=status_filter)
 
-    client_query = request.GET.get("client", "").strip()
-    if client_query:
-        qs = qs.filter(client__username__icontains=client_query)
-
-    designer_id = request.GET.get("designer", "")
-    if designer_id.isdigit():
-        qs = qs.filter(designer_id=designer_id)
+    search_query = request.GET.get("q", "").strip()
+    if search_query:
+        qs = qs.filter(
+            models.Q(first_name__icontains=search_query)
+            | models.Q(last_name__icontains=search_query)
+            | models.Q(email__icontains=search_query)
+            | models.Q(project_name__icontains=search_query)
+            | models.Q(pk__icontains=search_query)
+        )
 
     projects = qs.order_by("-created_at")
 
@@ -42,19 +41,12 @@ def kanban_view(request):
     except Exception:
         page_obj = paginator.page(1)
 
-    designer_ids = UserProfile.objects.filter(role=UserProfile.Role.DESIGNER).values_list("user_id", flat=True)
-    designers_qs = get_user_model().objects.filter(id__in=designer_ids).values("id", "username")
-    designer_choices = [("", _("All Designers"))] + [(d["id"], d["username"]) for d in designers_qs]
-
     return render(request, "dashboard/admin/kanban.html", {
         "page_obj": page_obj,
         "projects": page_obj,
         "status_choices": DesignRequest.Status.choices,
-        "designers": designers_qs,
-        "designer_choices": designer_choices,
         "active_status": status_filter,
-        "active_client": client_query,
-        "active_designer": designer_id,
+        "active_search": search_query,
     })
 
 
@@ -64,9 +56,15 @@ def update_status(request, pk):
         project = get_object_or_404(DesignRequest, pk=pk)
         new_status = request.POST.get("status")
         if new_status in dict(DesignRequest.Status.choices):
+            old_status = project.status
             project.status = new_status
             project.save(update_fields=["status"])
-            return JsonResponse({"success": True, "message": _("Status updated.")})
+
+            if new_status != old_status:
+                send_status_update_email(project)
+
+            status_label = dict(DesignRequest.Status.choices).get(new_status, new_status)
+            return JsonResponse({"success": True, "message": _("Status updated to %(status)s.") % {"status": status_label}})
         return JsonResponse({"success": False, "errors": [_("Invalid status.")]})
     return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
 
@@ -77,17 +75,24 @@ def project_detail(request, pk):
         DesignRequest.objects.select_related("client", "project_type", "designer", "package"),
         pk=pk,
     )
+    floors = project.floors.prefetch_related("spaces__space").all()
     spaces = project.spaces.select_related("space", "floor").all()
     options = project.options.select_related("option").all()
+    inspirations = project.spaces.prefetch_related("inspirations__inspiration_image").all()
     files = project.files.all()
     notes = project.notes.select_related("author").order_by("-created_at")
+    activity = project.activity_logs.select_related("actor").order_by("-created_at")
 
     return render(request, "dashboard/admin/project_detail.html", {
         "project": project,
+        "floors": floors,
         "spaces": spaces,
         "options": options,
+        "inspirations": inspirations,
         "notes": notes,
         "files": files,
+        "activity": activity,
+        "status_choices": DesignRequest.Status.choices,
     })
 
 
@@ -121,12 +126,96 @@ def assign_designer(request, pk):
                 _(f"You have been assigned to project {project.project_number}"),
                 "success",
             )
-            notify_user(
-                project.client,
-                _("Designer Assigned"),
-                _(f"Designer {designer.get_full_name()} has been assigned to your project"),
-                "info",
-            )
+            if project.client:
+                notify_user(
+                    project.client,
+                    _("Designer Assigned"),
+                    _(f"Designer {designer.get_full_name()} has been assigned to your project"),
+                    "info",
+                )
             return JsonResponse({"success": True, "message": _("Designer assigned.")})
         return JsonResponse({"success": False, "errors": [_("Designer not specified.")]})
     return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
+
+
+@admin_required
+def inquiry_list(request):
+    qs = Inquiry.objects.all()
+
+    status_filter = request.GET.get("status", "")
+    if status_filter in dict(Inquiry.Status.choices):
+        qs = qs.filter(status=status_filter)
+
+    search_query = request.GET.get("q", "").strip()
+    if search_query:
+        qs = qs.filter(
+            models.Q(first_name__icontains=search_query)
+            | models.Q(last_name__icontains=search_query)
+            | models.Q(email__icontains=search_query)
+            | models.Q(phone__icontains=search_query)
+        )
+
+    paginator = Paginator(qs, 12)
+    page_number = request.GET.get("page", 1)
+    try:
+        page_obj = paginator.page(page_number)
+    except Exception:
+        page_obj = paginator.page(1)
+
+    return render(request, "dashboard/admin/inquiry_list.html", {
+        "page_obj": page_obj,
+        "inquiries": page_obj,
+        "status_choices": Inquiry.Status.choices,
+        "active_status": status_filter,
+        "active_search": search_query,
+    })
+
+
+@admin_required
+def inquiry_detail(request, pk):
+    inquiry = get_object_or_404(Inquiry, pk=pk)
+
+    if not inquiry.is_read:
+        inquiry.is_read = True
+        inquiry.save(update_fields=["is_read"])
+
+    if request.method == "POST":
+        new_status = request.POST.get("status")
+        if new_status in dict(Inquiry.Status.choices):
+            old_status = inquiry.status
+            inquiry.status = new_status
+            inquiry.save(update_fields=["status"])
+
+            try:
+                space_names = ", ".join(s.get("name", "") for s in inquiry.spaces or [])
+                subject = _("Inquiry Status Update - %(name)s") % {"name": inquiry.first_name + " " + inquiry.last_name}
+                message = _(
+                    "Dear %(name)s,\n\n"
+                    "Your design inquiry status has been updated from %(old)s to %(new)s.\n\n"
+                    "Selected Spaces: %(spaces)s\n"
+                    "Total Estimate: %(total)s DZD\n\n"
+                    "Thank you for choosing Loft Design."
+                ) % {
+                    "name": inquiry.first_name,
+                    "old": dict(Inquiry.Status.choices).get(old_status, old_status),
+                    "new": dict(Inquiry.Status.choices).get(new_status, new_status),
+                    "spaces": space_names,
+                    "total": inquiry.total,
+                }
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL or "noreply@loftdesign.com",
+                    [inquiry.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+
+            return JsonResponse({"success": True, "message": _("Status updated.")})
+        return JsonResponse({"success": False, "errors": [_("Invalid status.")]})
+
+    return render(request, "dashboard/admin/inquiry_detail.html", {
+        "inquiry": inquiry,
+        "status_choices": Inquiry.Status.choices,
+    })

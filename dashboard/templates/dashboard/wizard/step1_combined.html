@@ -1,0 +1,75 @@
+{% load i18n %}{% load l10n %}
+<div class="wizard-step" data-step="0">
+  <div class="text-center mb-4">
+    <h2 class="wiz-step-title">{% trans "Project Details & Spaces" %}</h2>
+    <p class="wiz-step-sub">{% trans "Tell us about your project and select the spaces you need" %}</p>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="wiz-question-card h-100">
+        <h5 class="wiz-section-title"><i class="fas fa-building"></i>{% trans "Project Type" %}</h5>
+        {% include "components/custom_select.html" with id="projectTypeSelect" name="project_type" choices=project_type_choices select_title=_("Choose project type") %}
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="wiz-question-card h-100">
+        <h5 class="wiz-section-title"><i class="fas fa-layer-group"></i>{% trans "Number of Floors" %}</h5>
+        <div class="mt-2">
+          <input type="number" name="floor_count" class="wiz-form-control wiz-text-xl fw-bold text-center" value="1" min="1" max="20" id="floorCountInput">
+        </div>
+        <small class="text-muted mt-2 d-block wiz-text-sm">{% trans "Specify how many floors your project covers" %}</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="wiz-subtotal-bar mb-4">
+    <span class="wiz-subtotal-label wiz-text-md">{% trans "Subtotal" %}</span>
+    <span class="wiz-subtotal-value" id="spacesSubtotal">0 DA</span>
+  </div>
+
+  <div id="floorSpacesContainer">
+    {% for fi in floor_count %}
+    <div class="floor-space-group mb-4" data-floor-index="{{ fi }}">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h5 class="wiz-section-title mb-0">
+          <i class="fas fa-layer-group"></i>
+          <span class="floor-name-display">{% trans "Floor" %} {{ fi|add:1 }}</span>
+        </h5>
+        <button type="button" class="wiz-btn wiz-btn-outline wiz-btn-xs add-custom-space-btn">
+          <i class="fas fa-plus me-1"></i>{% trans "Custom Space" %}
+        </button>
+      </div>
+      <div class="row g-2 floor-spaces-grid">
+        {% for space in spaces %}
+        <div class="col-md-4 col-sm-6">
+          <div class="wiz-space-card space-checkbox-card" data-space-id="{{ space.id }}"
+               data-price="{{ space.base_price|unlocalize }}" data-days="{{ space.estimated_days }}">
+            <div class="wiz-space-img">
+              {% if space.image %}
+              <img src="{{ space.image.url }}" alt="{{ space.name }}">
+              {% else %}
+              <i class="fas fa-door-open"></i>
+              {% endif %}
+            </div>
+            <div class="wiz-space-info">
+              <div class="wiz-space-name">{{ space.name }}</div>
+              <div class="wiz-space-price">{{ space.base_price }} DA</div>
+            </div>
+            <div class="wiz-space-check"><i class="fas fa-check"></i></div>
+            <input type="checkbox" class="d-none space-checkbox">
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="custom-space-inline wiz-hidden">
+        <div class="d-flex align-items-center gap-2 mt-2">
+          <input type="text" class="wiz-form-control custom-space-input wiz-max-w-xs" placeholder="{% trans 'Enter space name...' %}">
+          <button type="button" class="wiz-btn wiz-btn-primary wiz-btn-sm confirm-custom-space"><i class="fas fa-check"></i></button>
+          <button type="button" class="wiz-btn wiz-btn-outline wiz-btn-sm cancel-custom-space"><i class="fas fa-times"></i></button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>

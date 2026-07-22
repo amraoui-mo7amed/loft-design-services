@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
 from django.utils.translation import gettext as _
+from django.utils import translation
 import logging
 
 logger = logging.getLogger(__name__)
@@ -30,39 +31,27 @@ def send_email(template_name, context, to_email, subject):
 
 def send_project_submitted_email(design_request):
     subject = _("Design Request Submitted - %(number)s") % {"number": design_request.project_number}
+    to_email = design_request.email or (design_request.client.email if design_request.client else None)
+    if not to_email:
+        return False
     return send_email(
         "dashboard/email/project_submitted.html",
         {"project": design_request},
-        design_request.client.email,
+        to_email,
         subject,
     )
 
 
-def send_quote_ready_email(design_request):
-    subject = _("Your Quote is Ready - %(number)s") % {"number": design_request.project_number}
+def send_status_update_email(design_request):
+    to_email = design_request.email or (design_request.client.email if design_request.client else None)
+    if not to_email:
+        return False
+
+    subject = _("Project Status Update - %(number)s") % {"number": design_request.project_number}
+
     return send_email(
-        "dashboard/email/quote_ready.html",
+        "dashboard/email/status_update.html",
         {"project": design_request},
-        design_request.client.email,
-        subject,
-    )
-
-
-def send_designer_assigned_email(design_request):
-    subject = _("Designer Assigned - %(number)s") % {"number": design_request.project_number}
-    return send_email(
-        "dashboard/email/designer_assigned.html",
-        {"project": design_request},
-        design_request.client.email,
-        subject,
-    )
-
-
-def send_project_delivered_email(design_request):
-    subject = _("Project Delivered - %(number)s") % {"number": design_request.project_number}
-    return send_email(
-        "dashboard/email/project_delivered.html",
-        {"project": design_request},
-        design_request.client.email,
+        to_email,
         subject,
     )

@@ -12,26 +12,24 @@ userModel = get_user_model()
 
 class DesignRequest(models.Model):
     class Status(models.TextChoices):
-        NEW = "new", _("New")
-        QUALIFIED = "qualified", _("Qualified")
-        QUOTE_SENT = "quote_sent", _("Quote Sent")
-        WAITING_PAYMENT = "waiting_payment", _("Waiting Payment")
-        DESIGN = "design", _("Design")
-        REVISION = "revision", _("Revision")
-        DELIVERED = "delivered", _("Delivered")
-        COMPLETED = "completed", _("Completed")
-        CANCELLED = "cancelled", _("Cancelled")
+        PENDING = "pending", _("Pending")
+        APPROVED = "approved", _("Approved")
+        DECLINED = "declined", _("Declined")
 
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, verbose_name=_("UUID"))
     client = models.ForeignKey(
-        userModel, on_delete=models.CASCADE, related_name="design_requests", verbose_name=_("Client")
+        userModel, on_delete=models.SET_NULL, null=True, blank=True, related_name="design_requests", verbose_name=_("Client")
     )
+    first_name = models.CharField(max_length=100, blank=True, verbose_name=_("First Name"))
+    last_name = models.CharField(max_length=100, blank=True, verbose_name=_("Last Name"))
+    email = models.EmailField(blank=True, verbose_name=_("Email"))
+    phone = models.CharField(max_length=30, blank=True, verbose_name=_("Phone"))
     project_name = models.CharField(max_length=200, verbose_name=_("Project Name"))
     project_type = models.ForeignKey(
         ProjectType, on_delete=models.SET_NULL, null=True, related_name="requests", verbose_name=_("Project Type")
     )
     status = models.CharField(
-        max_length=20, choices=Status.choices, default=Status.NEW, verbose_name=_("Status")
+        max_length=20, choices=Status.choices, default=Status.PENDING, verbose_name=_("Status")
     )
     budget = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name=_("Budget"))
     total = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name=_("Total"))

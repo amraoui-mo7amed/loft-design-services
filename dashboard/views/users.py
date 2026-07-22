@@ -52,7 +52,7 @@ def designer_list(request):
     ]
     role_choices = UserProfile.Role.choices
 
-    unassigned = DesignRequest.objects.filter(designer__isnull=True).exclude(status__in=["completed", "cancelled"])
+    unassigned = DesignRequest.objects.filter(designer__isnull=True, status=DesignRequest.Status.PENDING)
     project_choices = [("", _("Select a project..."))] + [(p.pk, f"{p.project_number} — {p.project_name}") for p in unassigned]
 
     return render(request, "users/designer_list.html", {

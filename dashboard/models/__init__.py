@@ -1,4 +1,5 @@
 from .notification import Notification
+from .inquiry import Inquiry
 from .base import ProjectType, Space, SpaceCategory, ProjectTypeSpace
 from .catalog import DesignPackage, PackageService, ServiceCategory, DesignOption, StyleCategory, InspirationImage
 from .requests import (
@@ -29,6 +30,7 @@ from .marketplace import (
 )
 
 __all__ = [
+    "Inquiry",
     "PricingConfig",
     "Notification",
     "ProjectType",

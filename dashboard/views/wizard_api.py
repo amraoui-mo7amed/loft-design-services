@@ -51,12 +51,9 @@ def api_options(request):
 
 def api_inspirations(request):
     space_id = request.GET.get("space_id")
-    style_id = request.GET.get("style_id")
-    qs = InspirationImage.objects.filter(active=True).select_related("space", "style_category")
+    qs = InspirationImage.objects.filter(active=True)
     if space_id:
         qs = qs.filter(space_id=space_id)
-    if style_id:
-        qs = qs.filter(style_category_id=style_id)
     data = []
     for img in qs:
         data.append({
@@ -65,8 +62,6 @@ def api_inspirations(request):
             "image_url": img.image.url if img.image else "",
             "space_id": img.space_id,
             "space_name": img.space.name,
-            "style_id": img.style_category_id,
-            "style_name": img.style_category.name,
         })
     return JsonResponse({"data": data})
 

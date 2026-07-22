@@ -2,17 +2,17 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic.base import RedirectView
 from user_auth import views as user_views
 import django_eventstream
 from dashboard.views import wizard, wizard_api, chat, file_manager, marketplace
+from frontend.views import inquiry
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("auth/", include("user_auth.urls", namespace="user_auth")),
     path("dashboard/", include("dashboard.urls", namespace="dash")),
-    path("", RedirectView.as_view(pattern_name="design_service", permanent=False)),
+    path("", include("frontend.urls")),
     path("", include("frontend.urls_design")),
     path("i18n/", include("django.conf.urls.i18n")),
     path("events/", include(django_eventstream.urls)),
@@ -22,6 +22,7 @@ urlpatterns = [
     path("api/design/packages/", wizard_api.api_packages, name="api_packages"),
     path("api/design/options/", wizard_api.api_options, name="api_options"),
     path("api/design/inspirations/", wizard_api.api_inspirations, name="api_inspirations"),
+    path("api/design/inquiries/", inquiry.submit_inquiry, name="api_submit_inquiry"),
     path("api/design/calculate-price/", wizard_api.api_calculate_price, name="api_calculate_price"),
     path("api/design/requests/", wizard.submit_design_request, name="api_submit_request"),
     # Chat API
