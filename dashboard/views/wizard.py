@@ -23,8 +23,7 @@ def wizard_container(request):
     project_type_choices = [("", _("Choose project type"))] + [(pt.slug, pt.name) for pt in project_types]
     step_labels = [
         _("Project & Spaces"), _("Package"),
-        _("Inspirations"), _("Contact"),
-        _("Summary"),
+        _("Contact"), _("Summary"),
     ]
     timeline_choices = [
         ("", _("Select timeline")),
@@ -158,8 +157,8 @@ def submit_design_request(request):
 
         spaces_data = json.loads(data.get("spaces", "[]"))
         for item in spaces_data:
-            floor = design_request.floors.filter(order=item.get("floor_index", 0)).first()
-            space = Space.objects.filter(id=item.get("space_id")).first()
+            floor = design_request.floors.filter(order=item.get("floorIndex", 0)).first()
+            space = Space.objects.filter(id=item.get("spaceId")).first()
             if floor and space:
                 DesignRequestSpace.objects.create(
                     design_request=design_request, floor=floor, space=space,

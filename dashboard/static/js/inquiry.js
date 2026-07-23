@@ -20,6 +20,13 @@ document.addEventListener("DOMContentLoaded", function () {
             cancelButtonText: form.dataset.cancelBtn || "Cancel",
         }).then(function (result) {
             if (result.isConfirmed) {
+                Swal.fire({
+                    title: "Updating Status...",
+                    html: '<div class="d-flex flex-column align-items-center gap-2"><div class="spinner-border text-primary" role="status"></div><p class="text-muted small mb-0">Sending notification email...</p></div>',
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                });
+
                 var formData = new FormData(form);
                 fetch(window.location.pathname, {
                     method: "POST",
@@ -38,7 +45,14 @@ document.addEventListener("DOMContentLoaded", function () {
                             timer: 2000,
                             confirmButtonColor: "#FFD65A",
                         });
+                    } else {
+                        select.value = select.dataset.originalValue || "";
+                        Swal.fire({ icon: "error", title: "Update Failed", text: response.errors ? response.errors.join(", ") : "Failed to update status." });
                     }
+                })
+                .catch(function () {
+                    select.value = select.dataset.originalValue || "";
+                    Swal.fire({ icon: "error", title: "Connection Failed", text: "Could not reach the server." });
                 });
             } else {
                 select.value = select.dataset.originalValue || "";

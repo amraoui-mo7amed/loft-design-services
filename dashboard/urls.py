@@ -82,4 +82,5 @@ urlpatterns = [
     # Inquiries
     path("inquiries/", admin_crm.inquiry_list, name="inquiry_list"),
     path("inquiries/<int:pk>/", admin_crm.inquiry_detail, name="inquiry_detail"),
+    path("inquiries/<int:pk>/delete/", admin_crm.delete_inquiry, name="inquiry_delete"),
 ]

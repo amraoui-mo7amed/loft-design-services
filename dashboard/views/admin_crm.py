@@ -4,14 +4,12 @@ from django.urls import reverse
 from django.core.paginator import Paginator
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
-from django.db import models
-from django.core.mail import send_mail
-from django.conf import settings
+from django.db import models, transaction
 
 from ..decorator import admin_required
 from ..models import DesignRequest, Inquiry
 from ..utils import notify_user
-from ..email_service import send_status_update_email
+from ..email_service import send_status_update_email, send_inquiry_status_update_email
 
 
 @admin_required
@@ -57,11 +55,14 @@ def update_status(request, pk):
         new_status = request.POST.get("status")
         if new_status in dict(DesignRequest.Status.choices):
             old_status = project.status
-            project.status = new_status
-            project.save(update_fields=["status"])
-
-            if new_status != old_status:
-                send_status_update_email(project)
+            try:
+                with transaction.atomic():
+                    project.status = new_status
+                    project.save(update_fields=["status"])
+                    if new_status != old_status:
+                        send_status_update_email(project)
+            except RuntimeError:
+                return JsonResponse({"success": False, "errors": [_("Status update failed. Email could not be sent.")]})
 
             status_label = dict(DesignRequest.Status.choices).get(new_status, new_status)
             return JsonResponse({"success": True, "message": _("Status updated to %(status)s.") % {"status": status_label}})
@@ -182,35 +183,13 @@ def inquiry_detail(request, pk):
     if request.method == "POST":
         new_status = request.POST.get("status")
         if new_status in dict(Inquiry.Status.choices):
-            old_status = inquiry.status
-            inquiry.status = new_status
-            inquiry.save(update_fields=["status"])
-
             try:
-                space_names = ", ".join(s.get("name", "") for s in inquiry.spaces or [])
-                subject = _("Inquiry Status Update - %(name)s") % {"name": inquiry.first_name + " " + inquiry.last_name}
-                message = _(
-                    "Dear %(name)s,\n\n"
-                    "Your design inquiry status has been updated from %(old)s to %(new)s.\n\n"
-                    "Selected Spaces: %(spaces)s\n"
-                    "Total Estimate: %(total)s DZD\n\n"
-                    "Thank you for choosing Loft Design."
-                ) % {
-                    "name": inquiry.first_name,
-                    "old": dict(Inquiry.Status.choices).get(old_status, old_status),
-                    "new": dict(Inquiry.Status.choices).get(new_status, new_status),
-                    "spaces": space_names,
-                    "total": inquiry.total,
-                }
-                send_mail(
-                    subject,
-                    message,
-                    settings.DEFAULT_FROM_EMAIL or "noreply@loftdesign.com",
-                    [inquiry.email],
-                    fail_silently=True,
-                )
-            except Exception:
-                pass
+                with transaction.atomic():
+                    inquiry.status = new_status
+                    inquiry.save(update_fields=["status"])
+                    send_inquiry_status_update_email(inquiry)
+            except RuntimeError:
+                return JsonResponse({"success": False, "errors": [_("Status update failed. Email could not be sent.")]})
 
             return JsonResponse({"success": True, "message": _("Status updated.")})
         return JsonResponse({"success": False, "errors": [_("Invalid status.")]})
@@ -219,3 +198,16 @@ def inquiry_detail(request, pk):
         "inquiry": inquiry,
         "status_choices": Inquiry.Status.choices,
     })
+
+
+@admin_required
+def delete_inquiry(request, pk):
+    inquiry = get_object_or_404(Inquiry, pk=pk)
+    if request.method == "POST":
+        name = inquiry.first_name + " " + inquiry.last_name
+        inquiry.delete()
+        return JsonResponse({
+            "success": True,
+            "message": _("Inquiry %(name)s deleted.") % {"name": name},
+        })
+    return redirect("dash:inquiry_list")

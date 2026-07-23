@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
@@ -11,6 +13,8 @@ from .email_service import (
     send_status_update_email,
 )
 
+logger = logging.getLogger(__name__)
+
 
 @receiver(post_save, sender=DesignRequest)
 def handle_design_request_created(sender, instance, created, **kwargs):
@@ -21,14 +25,6 @@ def handle_design_request_created(sender, instance, created, **kwargs):
             action=_("Project Created"),
             description=_("Design request submitted"),
         )
-        if instance.client:
-            notify_user(
-                instance.client,
-                _("Project Submitted"),
-                _("Your design request has been submitted successfully."),
-                "success",
-                link=f"/dashboard/my-projects/{instance.uuid}/",
-            )
         User = get_user_model()
         for admin in User.objects.filter(is_superuser=True):
             notify_user(
@@ -47,7 +43,10 @@ def handle_design_request_created(sender, instance, created, **kwargs):
         return
 
     if old.status != instance.status:
-        send_status_update_email(instance)
+        try:
+            send_status_update_email(instance)
+        except RuntimeError as e:
+            logger.warning(f"Failed to send status email from signal: {e}")
 
 
 @receiver(post_save, sender=DesignMessage)

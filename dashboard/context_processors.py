@@ -29,12 +29,6 @@ def _build_menu(is_admin, is_designer, is_customer):
             _("Management"),
             [
                 {
-                    "title": _("Designers"),
-                    "icon": "fas fa-users-cog",
-                    "url_name": "dash:designer_list",
-                    "admin_only": True,
-                },
-                {
                     "title": _("Design Catalog"),
                     "icon": "fas fa-pencil-ruler",
                     "url_name": "#",
@@ -57,12 +51,6 @@ def _build_menu(is_admin, is_designer, is_customer):
                     "title": _("Inquiries"),
                     "icon": "fas fa-inbox",
                     "url_name": "dash:inquiry_list",
-                    "admin_only": True,
-                },
-                {
-                    "title": _("Pricing Rules"),
-                    "icon": "fas fa-dollar-sign",
-                    "url_name": "dash:pricing_settings",
                     "admin_only": True,
                 },
             ],

@@ -76,6 +76,25 @@
         </div>
     </section>
 
+    <!-- Inspiration Gallery Modal -->
+    <div class="modal fade" id="inspirationGalleryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; background: #fff;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="inspirationModalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="inspirationModalBody">
+                    <p class="text-muted mb-3 inspo-hint">{% trans "Click images you like to select them." %}</p>
+                    <div class="row g-3" id="inspirationModalGrid"></div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-sm btn-dark rounded-3 px-4" id="inspirationSubmitBtn">{% trans "Continue" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock content %}
 
 {% block footer %}
@@ -89,7 +108,7 @@
                 </div>
                 <div class="floating-actions">
                     <a href="{% url 'design_service' %}" class="btn btn-outline-dark rounded-pill px-4 fw-bold">{% trans "Create a custom project" %}</a>
-                    <a href="#" class="btn btn-primary rounded-pill px-4 fw-bold shadow" id="continueBtn">{% trans "Continue" %}</a>
+                    <button class="btn btn-primary rounded-pill px-4 fw-bold shadow" id="continueBtn">{% trans "Continue" %}</button>
                 </div>
             </div>
         </div>

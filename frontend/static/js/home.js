@@ -46,13 +46,131 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    // ── Inspiration Modals ──
+
+    function showSequentialModals(spacesData, index) {
+        if (index >= spacesData.length) {
+            var ids = getSelectedSpaces();
+            window.location.href = "/order/?spaces=" + ids.join(",");
+            return;
+        }
+
+        var space = spacesData[index];
+        var isLast = index === spacesData.length - 1;
+
+        var modalEl = document.getElementById("inspirationGalleryModal");
+        var modalTitle = document.getElementById("inspirationModalTitle");
+        var modalGrid = document.getElementById("inspirationModalGrid");
+        var modalBody = document.getElementById("inspirationModalBody");
+        var submitBtn = document.getElementById("inspirationSubmitBtn");
+
+        modalTitle.textContent = space.name;
+        modalGrid.innerHTML = "";
+
+        space.images.forEach(function (img) {
+            var col = document.createElement("div");
+            col.className = "col-6";
+            var card = document.createElement("div");
+            card.className = "inspo-card inspo-card--modal";
+            card.dataset.imgId = img.imgId;
+            card.innerHTML =
+                '<img src="' + img.imgUrl + '" alt="" class="inspo-card-img" loading="lazy">' +
+                '<div class="inspo-card-overlay"><i class="fas fa-check-circle"></i></div>';
+            card.addEventListener("click", function () { this.classList.toggle("selected"); });
+            col.appendChild(card);
+            modalGrid.appendChild(col);
+        });
+
+        var oldHint = modalBody.querySelector(".inspo-hint");
+        if (oldHint) {
+            oldHint.textContent = isLast
+                ? "Select images, then Submit to continue."
+                : "Select images, then Next for the next space.";
+        }
+
+        submitBtn.textContent = isLast ? "Submit & Continue" : "Next Space";
+
+        var newBtn = submitBtn.cloneNode(true);
+        submitBtn.parentNode.replaceChild(newBtn, submitBtn);
+        submitBtn = newBtn;
+
+        submitBtn.addEventListener("click", function () {
+            modalGrid.querySelectorAll(".inspo-card.selected").forEach(function (c) {
+                addInspiration(space.spaceId, parseInt(c.dataset.imgId));
+            });
+            var bsModal = bootstrap.Modal.getInstance(modalEl);
+            if (bsModal) bsModal.hide();
+            showSequentialModals(spacesData, index + 1);
+        });
+
+        var bsModal = new bootstrap.Modal(modalEl, { backdrop: "static", keyboard: false });
+        bsModal.show();
+    }
+
+    function addInspiration(spaceId, imgId) {
+        // Store selected inspiration data (used by the order page later)
+        var stored = JSON.parse(sessionStorage.getItem("homeInspirations") || "{}");
+        if (!stored[spaceId]) stored[spaceId] = [];
+        if (stored[spaceId].indexOf(imgId) === -1) stored[spaceId].push(imgId);
+        sessionStorage.setItem("homeInspirations", JSON.stringify(stored));
+    }
+
     continueBtn.addEventListener("click", function (e) {
         e.preventDefault();
         var ids = getSelectedSpaces();
-        if (ids.length > 0) {
-            window.location.href = "/order/?spaces=" + ids.join(",");
+        if (ids.length === 0) {
+            Swal.fire({
+                icon: "warning",
+                title: "No spaces selected",
+                text: "Please select at least one space to continue.",
+                confirmButtonColor: "var(--brand-primary)",
+                confirmButtonText: "OK",
+            });
+            return;
         }
+
+        continueBtn.disabled = true;
+        continueBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Loading...';
+
+        fetch("/request/step/inspirations/?space_ids=" + ids.join(","))
+            .then(function (r) { return r.text(); })
+            .then(function (html) {
+                continueBtn.disabled = false;
+                continueBtn.innerHTML = "Continue";
+
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(html, "text/html");
+                var spaceCards = doc.querySelectorAll(".inspo-space-card");
+                var spacesData = [];
+                spaceCards.forEach(function (card) {
+                    var sid = card.dataset.spaceId;
+                    var nameEl = card.querySelector(".inspo-space-name");
+                    var items = card.querySelectorAll(".inspiration-item");
+                    var images = [];
+                    items.forEach(function (item) {
+                        images.push({
+                            imgId: parseInt(item.dataset.imgId),
+                            imgUrl: item.dataset.imgUrl,
+                        });
+                    });
+                    spacesData.push({ spaceId: sid, name: nameEl.textContent.trim(), images: images });
+                });
+
+                if (spacesData.length === 0) {
+                    window.location.href = "/order/?spaces=" + ids.join(",");
+                    return;
+                }
+
+                showSequentialModals(spacesData, 0);
+            })
+            .catch(function () {
+                continueBtn.disabled = false;
+                continueBtn.innerHTML = "Continue";
+                window.location.href = "/order/?spaces=" + ids.join(",");
+            });
     });
+
+    // ── Scroll Reveal ──
 
     (function () {
         var observer = new IntersectionObserver(function (entries) {

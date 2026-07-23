@@ -452,3 +452,69 @@
         margin-bottom: 24px;
     }
 }
+
+/* ── Inspiration Modal ── */
+
+#inspirationGalleryModal .modal-content {
+    border-radius: 20px;
+    border: none;
+}
+
+#inspirationGalleryModal .modal-body {
+    padding: 1rem 1.25rem 0.5rem;
+}
+
+.inspo-card--modal {
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border: 3px solid transparent;
+    transition: all 0.25s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.inspo-card--modal:hover {
+    transform: scale(1.03);
+}
+
+.inspo-card--modal.selected {
+    border-color: var(--brand-primary);
+    box-shadow: 0 8px 28px rgba(255, 214, 90, 0.25);
+}
+
+.inspo-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.inspo-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(33, 33, 33, 0.3);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.inspo-card--modal.selected .inspo-card-overlay {
+    display: flex;
+}
+
+.inspo-card-overlay i {
+    font-size: 1.8rem;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 576px) {
+    #inspirationGalleryModal .modal-dialog {
+        margin: 0.5rem;
+    }
+    #inspirationGalleryModal .modal-body {
+        max-height: 70vh;
+    }
+}

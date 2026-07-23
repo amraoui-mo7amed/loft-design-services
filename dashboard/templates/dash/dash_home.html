@@ -4,7 +4,7 @@
 {% load i18n %}
 
 {% block dashTitle %}
-    {% trans "Overview" %}
+    {% trans "Dashboard" %}
 {% endblock dashTitle %}
 
 {% block extra_css %}
@@ -12,177 +12,219 @@
 {% endblock extra_css %}
 
 {% block dashContent %}
-    <div class="container-fluid py-4">
-        <!-- ======= Welcome Section ======= -->
-        <div class="welcome-section mb-4" data-aos="fade-down">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h2 class="mb-1">
-                        {% trans "Welcome back," %} {{ request.user.first_name|default:request.user.username }}! 👋
-                    </h2>
-                    <p class="text-muted mb-0">
-                        {% if role == 'admin' %}
-                            {% trans "Platform management and system health overview." %}
-                        {% else %}
-                            {% trans "Your project metrics and activity are looking great today." %}
-                        {% endif %}
-                    </p>
-                </div>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-white shadow-sm border-0 rounded-3 px-3 py-2">
-                        <i class="far fa-calendar-alt me-2"></i> {% now "D, d M Y" %}
-                    </button>
-                    {% if role == 'admin' %}
-                        <a href="{% url 'dash:user_list' %}" class="btn btn-primary shadow-sm rounded-3 px-3 py-2">
-                            <i class="fas fa-users me-2"></i> {% trans "Manage Users" %}
-                        </a>
-                    {% else %}
-                        <button class="btn btn-primary shadow-sm rounded-3 px-3 py-2">
-                            <i class="fas fa-plus me-2"></i> {% trans "New Entry" %}
-                        </button>
-                    {% endif %}
-                </div>
+<div class="dash-home">
+
+    <!-- Hero Banner -->
+    <div class="hero-banner mb-4">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <div>
+                <h2 class="hero-title">
+                    {% trans "Welcome back," %} {{ request.user.first_name|default:request.user.username }}
+                </h2>
+                <p class="hero-subtitle">{% trans "Here's what's happening with your projects today." %}</p>
+            </div>
+            <div class="hero-date">
+                <i class="far fa-calendar-alt me-2"></i> {% now "l, d M Y" %}
             </div>
         </div>
-
-        <!-- ======= Stats Cards ======= -->
-        <div class="row mb-4" data-aos="fade-up">
-            {% include "components/stat_card.html" with title=stat_1.title value=stat_1.value icon=stat_1.icon color=stat_1.color trend=stat_1.trend trend_dir="up" %}
-            
-            {% include "components/stat_card.html" with title=stat_2.title value=stat_2.value icon=stat_2.icon color=stat_2.color trend=stat_2.trend trend_dir="up" %}
-            
-            {% include "components/stat_card.html" with title=stat_3.title value=stat_3.value icon=stat_3.icon color=stat_3.color trend=stat_3.trend trend_dir=stat_3.trend_dir|default:"down" trend_color=stat_3.trend_color|default:"success" %}
-            
-            {% include "components/stat_card.html" with title=stat_4.title value=stat_4.value icon=stat_4.icon color=stat_4.color %}
-        </div>
-
-        <!-- ======= Main Section ======= -->
-        <div class="row g-4 mb-4">
-            <!-- Dynamic Chart -->
-            <div class="col-12 col-lg-8" data-aos="fade-right">
-                {% if role == 'admin' %}
-                    <div class="card shadow-sm chart-card h-100"
-                         id="userDistChartCard"
-                         data-bs-labels='{{ user_dist_labels|safe }}'
-                         data-bs-values='{{ user_dist_values|safe }}'>
-                        <div class="card-header bg-transparent border-0 pt-4 px-4">
-                            <h6 class="fw-bold mb-0 text-dark">{{ chart_title }}</h6>
-                        </div>
-                        <div class="card-body d-flex align-items-center justify-content-center">
-                            <div style="height: 280px; width: 100%;">
-                                <canvas id="userDistChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="card shadow-sm chart-card h-100"
-                         id="salesWeekChartCard"
-                         data-bs-labels='["{% trans "Sat" %}", "{% trans "Sun" %}", "{% trans "Mon" %}", "{% trans "Tue" %}", "{% trans "Wed" %}", "{% trans "Thu" %}", "{% trans "Fri" %}"]'
-                         data-bs-values='{{ chart_values|safe }}'>
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0">{{ chart_title }}</h6>
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    {% trans "Last 7 Days" %}
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#">{% trans "Last 30 Days" %}</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div style="height: 300px;">
-                                <canvas id="salesWeekChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
+        <div class="hero-quick-stats">
+            <div class="quick-stat">
+                <span class="quick-stat-value">{{ projects_today }}</span>
+                <span class="quick-stat-label">{% trans "Today" %}</span>
             </div>
-
-            <!-- List Section -->
-            <div class="col-12 col-lg-4" data-aos="fade-left">
-                <div class="card shadow-sm border-0 rounded-4 h-100 bg-white">
-                    <div class="card-header bg-transparent border-0 pt-4 px-4">
-                        <h6 class="fw-bold mb-0 text-primary">{{ list_title }}</h6>
-                    </div>
-                    <div class="card-body p-4">
-                        <ul class="list-group list-group-flush">
-                            {% if role == 'admin' %}
-                                {% for profile in recent_users %}
-                                <li class="list-group-item px-0 py-3 bg-transparent border-bottom d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="avatar-circle bg-light text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
-                                            {{ profile.user.username|slice:":1"|upper }}
-                                        </div>
-                                        <div>
-                                            <p class="mb-0 fw-bold small text-dark">{{ profile.user.get_full_name|default:profile.user.username }}</p>
-                                            <p class="mb-0 smaller text-muted">
-                                                {{ profile.get_sex_display|default:_("User") }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="text-muted">
-                                        <i class="fas fa-chevron-right smaller"></i>
-                                    </div>
-                                </li>
-                                {% endfor %}
-                            {% else %}
-                                {% for item in list_items %}
-                                <li class="list-group-item px-0 py-3 bg-transparent border-bottom d-flex justify-content-between align-items-center">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="avatar-circle bg-light text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                            <i class="fas fa-rocket"></i>
-                                        </div>
-                                        <div>
-                                            <p class="mb-0 fw-bold small text-dark">{{ item }}</p>
-                                            <p class="mb-0 smaller text-muted">
-                                                {% trans "Active" %}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <i class="fas fa-chevron-right smaller text-muted opacity-50"></i>
-                                </li>
-                                {% endfor %}
-                            {% endif %}
-                        </ul>
-                        {% if role == 'admin' %}
-                            <a href="{% url 'dash:user_list' %}" class="btn btn-light w-100 mt-3 btn-sm">{% trans "View Full List" %}</a>
-                        {% else %}
-                            <a href="#" class="btn btn-light w-100 mt-3 btn-sm">{% trans "View Full List" %}</a>
-                        {% endif %}
-                    </div>
-                </div>
+            <div class="quick-stat-divider"></div>
+            <div class="quick-stat">
+                <span class="quick-stat-value">{{ total_projects }}</span>
+                <span class="quick-stat-label">{% trans "Total" %}</span>
+            </div>
+            <div class="quick-stat-divider"></div>
+            <div class="quick-stat">
+                <span class="quick-stat-value">{{ total_inquiries }}</span>
+                <span class="quick-stat-label">{% trans "Inquiries" %}</span>
             </div>
         </div>
-
-        <!-- ======= Smart Recommendations Section ======= -->
-        {% if role != 'admin' %}
-        <div class="row" data-aos="fade-up">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm rounded-4" style="background: linear-gradient(to right, var(--brand-primary), var(--brand-secondary));">
-                    <div class="card-body p-4 p-md-5 text-white">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h4 class="fw-bold mb-3">{% trans "Smart Insights" %} ✨</h4>
-                                <p class="opacity-75 mb-4">
-                                    {% if role == 'admin' %}
-                                        {% trans "System performance is optimal. All 5 services are running within expected latency bounds." %}
-                                    {% else %}
-                                        {% trans "AI has detected a growth trend in your user engagement. Consider launching a new campaign to capitalize on this traffic." %}
-                                    {% endif %}
-                                </p>
-                                <button class="btn btn-light rounded-3 px-4 fw-bold">{% trans "Take Action" %}</button>
-                            </div>
-                            <div class="col-md-4 d-none d-md-block text-center">
-                                <i class="fas fa-brain fa-5x opacity-25"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
     </div>
+
+    <!-- Status Grid -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="stat-card stat-card--pending">
+                <div class="stat-card-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-card-body">
+                    <span class="stat-card-count">{{ pending_projects }}</span>
+                    <span class="stat-card-title">{% trans "Pending" %}</span>
+                </div>
+                <div class="stat-card-trend">
+                    <span class="badge bg-warning-subtle text-warning-emphasis">{% trans "Awaiting review" %}</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="stat-card stat-card--approved">
+                <div class="stat-card-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-card-body">
+                    <span class="stat-card-count">{{ approved_projects }}</span>
+                    <span class="stat-card-title">{% trans "Approved" %}</span>
+                </div>
+                <div class="stat-card-trend">
+                    <span class="badge bg-success-subtle text-success-emphasis">{% trans "In progress" %}</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="stat-card stat-card--declined">
+                <div class="stat-card-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-card-body">
+                    <span class="stat-card-count">{{ declined_projects }}</span>
+                    <span class="stat-card-title">{% trans "Declined" %}</span>
+                </div>
+                <div class="stat-card-trend">
+                    <span class="badge bg-danger-subtle text-danger-emphasis">{% trans "Not approved" %}</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="stat-card stat-card--inquiry">
+                <div class="stat-card-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="stat-card-body">
+                    <span class="stat-card-count">{{ total_inquiries }}</span>
+                    <span class="stat-card-title">{% trans "Inquiries" %}</span>
+                </div>
+                <div class="stat-card-trend">
+                    <a href="{% url 'dash:inquiry_list' %}" class="badge bg-info-subtle text-info-emphasis text-decoration-none">{% trans "View all" %} &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts & Recent Projects -->
+    <div class="row g-4 mb-4">
+        <!-- Distribution Chart -->
+        <div class="col-12 col-lg-5">
+            <div class="card dashboard-card h-100">
+                <div class="card-header">
+                    <h6>{% trans "Project Distribution" %}</h6>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <div class="chart-wrap" style="height: 240px; width: 100%; max-width: 320px;">
+                        <canvas id="statusDonut"
+                                data-labels='{{ status_labels|safe }}'
+                                data-values='{{ status_values|safe }}'
+                                data-colors='{{ status_colors|safe }}'></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Projects -->
+        <div class="col-12 col-lg-7">
+            <div class="card dashboard-card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6>{% trans "Recent Projects" %}</h6>
+                    <a href="{% url 'dash:admin_crm' %}" class="btn btn-sm btn-outline-primary rounded-3">{% trans "View All" %}</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table dash-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Project" %}</th>
+                                    <th>{% trans "Client" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                    <th>{% trans "Date" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for project in recent_projects %}
+                                <tr>
+                                    <td class="fw-medium">{{ project.project_name|truncatechars:20 }}</td>
+                                    <td class="text-muted">{{ project.first_name }} {{ project.last_name }}</td>
+                                    <td>
+                                        {% if project.status == 'pending' %}
+                                            <span class="status-badge status-pending">{% trans "Pending" %}</span>
+                                        {% elif project.status == 'approved' %}
+                                            <span class="status-badge status-approved">{% trans "Approved" %}</span>
+                                        {% elif project.status == 'declined' %}
+                                            <span class="status-badge status-declined">{% trans "Declined" %}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-muted smaller">{{ project.created_at|date:"d M Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">{% trans "No projects yet." %}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-3">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'dash:project_type_list' %}" class="action-card">
+                <div class="action-card-icon" style="background: rgba(42, 75, 140, 0.1);">
+                    <i class="fas fa-layer-group" style="color: var(--brand-primary);"></i>
+                </div>
+                <div>
+                    <div class="action-card-title">{% trans "Project Types" %}</div>
+                    <div class="action-card-desc">{% trans "Manage design categories" %}</div>
+                </div>
+                <i class="fas fa-chevron-right action-card-arrow"></i>
+            </a>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'dash:space_list' %}" class="action-card">
+                <div class="action-card-icon" style="background: rgba(16, 185, 129, 0.1);">
+                    <i class="fas fa-door-open" style="color: #10b981;"></i>
+                </div>
+                <div>
+                    <div class="action-card-title">{% trans "Spaces" %}</div>
+                    <div class="action-card-desc">{% trans "Configure room types" %}</div>
+                </div>
+                <i class="fas fa-chevron-right action-card-arrow"></i>
+            </a>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'dash:admin_crm' %}" class="action-card">
+                <div class="action-card-icon" style="background: rgba(245, 158, 11, 0.1);">
+                    <i class="fas fa-tasks" style="color: #f59e0b;"></i>
+                </div>
+                <div>
+                    <div class="action-card-title">{% trans "Projects" %}</div>
+                    <div class="action-card-desc">{% trans "Review & manage requests" %}</div>
+                </div>
+                <i class="fas fa-chevron-right action-card-arrow"></i>
+            </a>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <a href="{% url 'dash:inquiry_list' %}" class="action-card">
+                <div class="action-card-icon" style="background: rgba(139, 92, 246, 0.1);">
+                    <i class="fas fa-inbox" style="color: #8b5cf6;"></i>
+                </div>
+                <div>
+                    <div class="action-card-title">{% trans "Inquiries" %}</div>
+                    <div class="action-card-desc">{% trans "View incoming leads" %}</div>
+                </div>
+                <i class="fas fa-chevron-right action-card-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+</div>
 {% endblock dashContent %}
 
 {% block extra_js %}

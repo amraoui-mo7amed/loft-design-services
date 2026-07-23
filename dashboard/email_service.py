@@ -49,9 +49,30 @@ def send_status_update_email(design_request):
 
     subject = _("Project Status Update - %(number)s") % {"number": design_request.project_number}
 
-    return send_email(
+    sent = send_email(
         "dashboard/email/status_update.html",
         {"project": design_request},
         to_email,
         subject,
     )
+    if not sent:
+        raise RuntimeError(f"Failed to send status update email for project {design_request.project_number}")
+    return True
+
+
+def send_inquiry_status_update_email(inquiry):
+    to_email = inquiry.email
+    if not to_email:
+        return False
+
+    subject = _("Inquiry Status Update - %(name)s") % {"name": inquiry.first_name + " " + inquiry.last_name}
+
+    sent = send_email(
+        "dashboard/email/inquiry_status_update.html",
+        {"inquiry": inquiry},
+        to_email,
+        subject,
+    )
+    if not sent:
+        raise RuntimeError(f"Failed to send status update email for inquiry {inquiry.pk}")
+    return True

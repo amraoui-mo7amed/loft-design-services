@@ -4,12 +4,11 @@
   const stepUrls = [
     "/request/step/combined/",
     "/request/step/packages/",
-    "/request/step/inspirations/",
     "/request/step/questionnaire/",
     "/request/step/summary/",
   ];
 
-  const TOTAL_STEPS = 5;
+  const TOTAL_STEPS = 4;
   let currentStep = 0;
   const wizardData = {
     projectTypeSlug: null,
@@ -96,12 +95,9 @@
         bindPackagesStep();
         break;
       case 2:
-        bindInspirationsStep();
-        break;
-      case 3:
         bindQuestionnaireStep();
         break;
-      case 4:
+      case 3:
         bindSummaryStep();
         break;
     }
@@ -112,7 +108,6 @@
     if (wrapper) {
       var hidden = wrapper.querySelector('input[type="hidden"]');
       if (hidden) {
-        // Restore from DOM if pre-selected via GET param, else init
         if (!wizardData.projectTypeSlug && hidden.value) {
           wizardData.projectTypeSlug = hidden.value;
         }
@@ -122,7 +117,6 @@
       }
     }
 
-    // Use event delegation on the spaces container for space card clicks
     var container = document.getElementById("floorSpacesContainer");
     if (container) {
       container.addEventListener("click", function (e) {
@@ -175,7 +169,6 @@
       });
     });
 
-    // Floor count change
     var floorInput = document.getElementById("floorCountInput");
     if (floorInput) {
       floorInput.addEventListener("change", function () {
@@ -228,347 +221,263 @@
           var cb = c.querySelector(".space-checkbox");
           if (cb) cb.checked = false;
         });
-        var inlineForm = clone.querySelector(".custom-space-inline");
-        if (inlineForm) inlineForm.style.display = "none";
         var addBtn = clone.querySelector(".add-custom-space-btn");
         if (addBtn) addBtn.style.display = "inline-block";
+        var inline = clone.querySelector(".custom-space-inline");
+        if (inline) inline.style.display = "none";
         container.appendChild(clone);
       }
-    } else {
-      for (var j = current - 1; j >= count; j--) {
-        container.removeChild(container.querySelectorAll(".floor-space-group")[j]);
+    } else if (count < current) {
+      for (var i = current - 1; i >= count; i--) {
+        if (existing[i]) existing[i].remove();
       }
     }
-  }
-
-  function bindQuestionnaireStep() {
-    // Restore saved values when navigating back
-    var form = document.getElementById("questionnaireForm");
-    if (!form || !wizardData.questionnaire) return;
-    Object.keys(wizardData.questionnaire).forEach(function (key) {
-      var inp = form.querySelector('[name="' + key + '"]');
-      if (inp) inp.value = wizardData.questionnaire[key] || "";
-    });
-  }
-
-  function bindProjectTypeStep() {
-    wizardData.projectTypeSlug = null;
-    var wrapper = document.getElementById("projectTypeSelect");
-    if (wrapper) {
-      var hidden = wrapper.querySelector('input[type="hidden"]');
-      if (hidden) {
-        hidden.addEventListener("change", function () {
-          wizardData.projectTypeSlug = this.value || null;
-        });
-      }
-    }
-  }
-
-  function bindSpacesStep() {
-    document.querySelectorAll(".space-checkbox-card").forEach(function (card) {
-      card.addEventListener("click", function () {
-        card.classList.toggle("selected");
-        var cb = card.querySelector(".space-checkbox");
-        cb.checked = !cb.checked;
-        updateSpacesSubtotal();
-      });
-    });
-
-    document.querySelectorAll(".floor-space-group").forEach(function (group) {
-      var addBtn = group.querySelector(".add-custom-space-btn");
-      var inlineForm = group.querySelector(".custom-space-inline");
-      var input = inlineForm.querySelector(".custom-space-input");
-      var confirmBtn = inlineForm.querySelector(".confirm-custom-space");
-      var cancelBtn = inlineForm.querySelector(".cancel-custom-space");
-      var grid = group.querySelector(".floor-spaces-grid");
-
-      if (!addBtn || !inlineForm) return;
-
-      addBtn.addEventListener("click", function () {
-        addBtn.style.display = "none";
-        inlineForm.style.display = "block";
-        input.focus();
-      });
-
-      function addCustomSpaceCard(name) {
-        var col = document.createElement("div");
-        col.className = "col-md-4 col-sm-6";
-        var card = document.createElement("div");
-        card.className = "wiz-space-card space-checkbox-card selected";
-        card.dataset.spaceId = "custom";
-        card.dataset.price = "0";
-        card.dataset.days = "0";
-        card.innerHTML =
-          '<div class="wiz-space-img"><i class="fas fa-plus"></i></div><div class="wiz-space-info"><div class="wiz-space-name">' +
-          name +
-          '</div><div class="wiz-space-price">Custom</div></div><div class="wiz-space-check"><i class="fas fa-check"></i></div><input type="checkbox" class="d-none space-checkbox" checked>';
-        col.appendChild(card);
-        grid.appendChild(col);
-        card.addEventListener("click", function () {
-          card.classList.toggle("selected");
-          var cb2 = card.querySelector(".space-checkbox");
-          cb2.checked = !cb2.checked;
-          updateSpacesSubtotal();
-        });
-      }
-
-      function resetInline() {
-        input.value = "";
-        inlineForm.style.display = "none";
-        addBtn.style.display = "inline-block";
-      }
-
-      confirmBtn.addEventListener("click", function () {
-        var name = input.value.trim();
-        if (!name) return;
-        addCustomSpaceCard(name);
-        resetInline();
-      });
-
-      cancelBtn.addEventListener("click", resetInline);
-
-      input.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") {
-          var name = this.value.trim();
-          if (!name) return;
-          addCustomSpaceCard(name);
-          resetInline();
-        }
-        if (e.key === "Escape") {
-          resetInline();
-        }
-      });
-    });
+    updateSpacesSubtotal();
   }
 
   function updateSpacesSubtotal() {
-    var total = 0;
-    document
-      .querySelectorAll(".space-checkbox-card.selected")
-      .forEach(function (c) {
-        total += parseFloat(c.dataset.price) || 0;
-      });
+    var total = calcSubtotal();
     var el = document.getElementById("spacesSubtotal");
-    if (el) el.textContent = total.toLocaleString() + " DA";
+    if (el) el.textContent = Math.round(total).toLocaleString() + " DA";
   }
 
   function restoreCombinedStepSelections() {
-    var floorInput = document.getElementById("floorCountInput");
-    if (floorInput && wizardData.floors.length > 0) {
-      floorInput.value = wizardData.floors.length;
+    if (wizardData.projectTypeSlug) {
+      var hidden = document.querySelector("#projectTypeSelect input[type='hidden']");
+      if (hidden) hidden.value = wizardData.projectTypeSlug;
+    }
+    if (wizardData.floors.length > 0) {
+      var countInput = document.querySelector("[name='floor_count']");
+      if (countInput) {
+        countInput.value = wizardData.floors.length;
+        regenerateFloorGroups(wizardData.floors.length);
+      }
     }
     if (wizardData.spaces && wizardData.spaces.length > 0) {
-      wizardData.spaces.forEach(function (s) {
-        var group = document.querySelector(
-          '.floor-space-group[data-floor-index="' + s.floorIndex + '"]'
-        );
-        if (!group) return;
-        var card = group.querySelector(
-          '.space-checkbox-card[data-space-id="' + s.spaceId + '"]'
-        );
-        if (!card) return;
-        card.classList.add("selected");
-        var cb = card.querySelector(".space-checkbox");
-        if (cb) cb.checked = true;
-      });
-      updateSpacesSubtotal();
+      setTimeout(function () {
+        wizardData.spaces.forEach(function (s) {
+          var card = document.querySelector('.space-checkbox-card[data-space-id="' + s.spaceId + '"]');
+          if (card) {
+            card.classList.add("selected");
+            var cb = card.querySelector(".space-checkbox");
+            if (cb) cb.checked = true;
+          }
+        });
+        updateSpacesSubtotal();
+      }, 100);
     }
   }
 
   function bindPackagesStep() {
-    var cards = document.querySelectorAll(".package-card");
+    var cards = document.querySelectorAll(".pkg-card");
+
+    // Pre-fill each card's dynamic price on load
+    cards.forEach(function (card) {
+      var priceEl = card.querySelector(".pkg-dynamic-price");
+      var price = parseFloat(card.dataset.packagePrice) || 0;
+      if (priceEl) priceEl.textContent = Math.round(price).toLocaleString();
+    });
+
+    // Show estimate based on selected spaces (even before picking package)
+    updatePackageEstimate(wizardData.packagePrice || 0);
+    updatePriceSummary();
+
     cards.forEach(function (card) {
       card.addEventListener("click", function () {
         cards.forEach(function (c) { c.classList.remove("selected"); });
-        card.classList.add("selected");
-        var radio = card.querySelector(".package-radio");
-        if (radio) radio.checked = true;
-        wizardData.packageId = card.dataset.packageId;
-        wizardData.packagePrice = parseFloat(card.dataset.price) || 0;
-        updatePackageStepPrices();
+        this.classList.add("selected");
+        wizardData.packageId = this.dataset.packageId;
+        var priceTxt = this.dataset.packagePrice;
+        wizardData.packagePrice = parseFloat(priceTxt) || 0;
+        updatePackageEstimate(wizardData.packagePrice);
+        updatePriceSummary();
+        var hiddenTotal = document.querySelector("input[name='package_total']");
+        if (hiddenTotal) hiddenTotal.value = wizardData.packagePrice;
       });
     });
 
-    // Auto-select Basic (first card) or restore previous selection
-    if (wizardData.packageId) {
+    var params = new URLSearchParams(window.location.search);
+    var preselected = params.get("package_id");
+    if (preselected && wizardData.packageId === null) {
       cards.forEach(function (c) {
-        if (c.dataset.packageId === wizardData.packageId) {
+        if (c.dataset.packageId === preselected) {
           c.classList.add("selected");
-          var r = c.querySelector(".package-radio");
-          if (r) r.checked = true;
-          wizardData.packagePrice = parseFloat(c.dataset.price) || 0;
+          wizardData.packageId = preselected;
+          wizardData.packagePrice = parseFloat(c.dataset.packagePrice) || 0;
+          updatePackageEstimate(wizardData.packagePrice);
+          updatePriceSummary();
         }
       });
-    } else if (cards.length > 0) {
-      var first = cards[0];
-      first.classList.add("selected");
-      var radio = first.querySelector(".package-radio");
-      if (radio) radio.checked = true;
-      wizardData.packageId = first.dataset.packageId;
-      wizardData.packagePrice = parseFloat(first.dataset.price) || 0;
     }
-    updatePackageStepPrices();
+
+    var pkgForm = document.getElementById("packageOptionForm");
+    if (pkgForm) {
+      pkgForm.querySelectorAll("input[type='checkbox']").forEach(function (cb) {
+        cb.addEventListener("change", function () {
+          updatePackageEstimate(wizardData.packagePrice);
+        });
+      });
+    }
+  }
+
+  function updatePackageEstimate(pkgPrice) {
+    var subtotal = calcSubtotal();
+    var total = calcTotal(subtotal, pkgPrice);
+    var elSub = document.getElementById("pkgEstimateSubtotal");
+    var elPkg = document.getElementById("pkgEstimatePackage");
+    var elTotal = document.getElementById("pkgEstimateTotal");
+    if (elSub) elSub.textContent = Math.round(subtotal).toLocaleString() + " DA";
+    if (elPkg) elPkg.textContent = Math.round(pkgPrice).toLocaleString() + " DA";
+    if (elTotal) elTotal.textContent = Math.round(total).toLocaleString() + " DA";
   }
 
   function calcSubtotal() {
-    var sum = 0;
+    var total = 0;
     if (wizardData.spaces && wizardData.spaces.length > 0) {
-      wizardData.spaces.forEach(function (s) { sum += s.price; });
+      wizardData.spaces.forEach(function (s) { total += s.price || 0; });
     }
-    return sum;
+    return total;
   }
 
-  function calcTotal(subtotal, packagePrice) {
-    var pkg = packagePrice || wizardData.packagePrice || 0;
-    var tax = (subtotal + pkg) * 0.19;
-    return subtotal + pkg + tax;
+  function calcTotal(subtotal, pkgPrice) {
+    var base = (subtotal || 0) + (pkgPrice || 0);
+    return base * 1.19;
   }
 
-  function updatePackageStepPrices() {
-    var subtotal = calcSubtotal();
-    if (!subtotal) return;
-    var pkgPrice = wizardData.packagePrice || 0;
-    var total = calcTotal(subtotal, pkgPrice);
-    updateEstimateCard(subtotal, pkgPrice, total);
-    updatePriceBar(subtotal, pkgPrice, total);
-    updateAllPackageCardPrices(subtotal);
+  function showWarning(message) {
+    var title = document.querySelector(".wiz-step-title");
+    if (!title) return;
+    var existing = title.parentNode.querySelector(".wiz-warning-msg");
+    if (existing) existing.remove();
+    var msg = document.createElement("div");
+    msg.className = "alert alert-warning text-center py-2 mb-3 wiz-warning-msg";
+    msg.style.cssText = "font-size:0.85rem;border-radius:10px;";
+    msg.textContent = message;
+    title.parentNode.insertBefore(msg, title.nextSibling);
+    setTimeout(function () { msg.remove(); }, 2500);
   }
 
-  function updateEstimateCard(subtotal, pkgPrice, total) {
-    var el = document.getElementById("estSubtotal");
-    if (el) el.textContent = Math.round(subtotal).toLocaleString() + " DA";
-    el = document.getElementById("estPackagePrice");
-    if (el) el.textContent = Math.round(pkgPrice).toLocaleString() + " DA";
-    el = document.getElementById("estTotal");
-    if (el) el.textContent = Math.round(total).toLocaleString() + " DA";
-  }
-
-  function updatePriceBar(subtotal, pkgPrice, total) {
-    var bar = document.getElementById("priceSummaryBar");
-    if (bar) bar.style.display = "block";
-    var el = document.getElementById("priceTotal");
-    if (el) el.textContent = Math.round(total).toLocaleString() + " DA";
-    el = document.getElementById("priceSubtotal");
-    if (el) el.textContent = Math.round(subtotal).toLocaleString();
-    el = document.getElementById("pricePackage");
-    if (el) el.textContent = Math.round(pkgPrice).toLocaleString();
-  }
-
-  function updateAllPackageCardPrices(subtotal) {
-    document.querySelectorAll(".package-card").forEach(function (card) {
-      var pkgPrice = parseFloat(card.dataset.price) || 0;
-      var el = card.querySelector(".pkg-dynamic-price");
-      if (el) el.textContent = Math.round(pkgPrice).toLocaleString();
-    });
-  }
-
-  function bindInspirationsStep() {
-    var modalEl = document.getElementById("inspirationGalleryModal");
-    if (!modalEl) return;
-    var modalGrid = document.getElementById("inspirationModalGrid");
-    var modalTitle = document.getElementById("inspirationModalTitle");
-    var submitBtn = document.getElementById("inspirationSubmitBtn");
-    var bsModal = new bootstrap.Modal(modalEl);
-    var activeSpaceId = null;
-
-    if (!wizardData.inspirations) wizardData.inspirations = {};
-
-    function updateCardState(spaceId) {
-      var card = document.querySelector(
-        '.inspo-space-card[data-space-id="' + spaceId + '"]'
-      );
-      if (!card) return;
-      var ids = wizardData.inspirations[spaceId] || [];
-      var done = ids.length > 0;
-      card.dataset.completed = done ? "true" : "false";
-      var btnText = card.querySelector(".inspo-select-btn span");
-      if (btnText) btnText.textContent = done ? "Modify Selection" : "Select Inspiration";
+  function startInspirationModals() {
+    var ids = (wizardData.spaces || []).map(function (s) { return s.spaceId; }).filter(function (id) { return id; });
+    if (ids.length === 0) {
+      loadStep(2);
+      return;
     }
 
-    function enableNextIfAllDone() {
-      var allDone = true;
-      document.querySelectorAll(".inspo-space-card").forEach(function (c) {
-        if (c.dataset.completed !== "true") allDone = false;
-      });
-      var nextBtn = document.getElementById("nextBtn");
-      if (nextBtn) nextBtn.disabled = !allDone;
-    }
+    var btn = document.getElementById("nextBtn");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Loading...';
 
-    // Clean up stale entries for spaces no longer in the DOM
-    var currentIds = [];
-    document.querySelectorAll(".inspo-space-card").forEach(function (c) {
-      currentIds.push(c.dataset.spaceId);
-    });
-    Object.keys(wizardData.inspirations).forEach(function (sid) {
-      if (currentIds.indexOf(sid) === -1) delete wizardData.inspirations[sid];
-    });
+    fetch("/request/step/inspirations/?space_ids=" + ids.join(","))
+      .then(function (r) { return r.text(); })
+      .then(function (html) {
+        btn.disabled = false;
+        btn.innerHTML = 'Next <i class="fas fa-arrow-right ms-2"></i>';
 
-    // Restore existing selections on the cards
-    document.querySelectorAll(".inspo-space-card").forEach(function (card) {
-      var sid = card.dataset.spaceId;
-      updateCardState(sid);
-    });
-    enableNextIfAllDone();
-
-    function openSpaceModal(spaceId) {
-      activeSpaceId = spaceId;
-      var card = document.querySelector(
-        '.inspo-space-card[data-space-id="' + spaceId + '"]'
-      );
-      if (!card) return;
-
-      modalTitle.textContent = card.querySelector(".inspo-space-name").textContent.trim();
-      modalGrid.innerHTML = "";
-
-      var dataContainer = card.querySelector(".inspiration-data");
-      if (!dataContainer) return;
-
-      dataContainer.querySelectorAll(".inspiration-item").forEach(function (item) {
-        var clone = item.cloneNode(true);
-        var cardEl = clone.querySelector(".inspiration-card");
-        var imgId = parseInt(clone.dataset.imgId);
-        if (
-          wizardData.inspirations[spaceId] &&
-          wizardData.inspirations[spaceId].indexOf(imgId) !== -1
-        ) {
-          cardEl.classList.add("selected");
-        }
-        clone.classList.add("col-6");
-        clone.addEventListener("click", function () {
-          cardEl.classList.toggle("selected");
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, "text/html");
+        var spaceCards = doc.querySelectorAll(".inspo-space-card");
+        var spacesData = [];
+        spaceCards.forEach(function (card) {
+          var sid = card.dataset.spaceId;
+          var nameEl = card.querySelector(".inspo-space-name");
+          var items = card.querySelectorAll(".inspiration-item");
+          var images = [];
+          items.forEach(function (item) {
+            images.push({
+              imgId: parseInt(item.dataset.imgId),
+              imgUrl: item.dataset.imgUrl,
+            });
+          });
+          spacesData.push({ spaceId: sid, name: nameEl.textContent.trim(), images: images });
         });
-        modalGrid.appendChild(clone);
-      });
 
-      bsModal.show();
+        if (spacesData.length === 0) {
+          loadStep(2);
+          return;
+        }
+
+        showSequentialModals(spacesData, 0);
+      })
+      .catch(function () {
+        btn.disabled = false;
+        btn.innerHTML = 'Next <i class="fas fa-arrow-right ms-2"></i>';
+        loadStep(2);
+      });
+  }
+
+  function showSequentialModals(spacesData, index) {
+    if (index >= spacesData.length) {
+      loadStep(2);
+      return;
     }
 
-    document.querySelectorAll(".select-inspo-btn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        openSpaceModal(this.dataset.spaceId);
-      });
+    var space = spacesData[index];
+    var isLast = index === spacesData.length - 1;
+
+    var modalEl = document.getElementById("inspirationGalleryModal");
+    var modalTitle = document.getElementById("inspirationModalTitle");
+    var modalGrid = document.getElementById("inspirationModalGrid");
+    var modalBody = document.getElementById("inspirationModalBody");
+    var submitBtn = document.getElementById("inspirationSubmitBtn");
+
+    modalTitle.textContent = space.name;
+    modalGrid.innerHTML = "";
+
+    space.images.forEach(function (img) {
+      var col = document.createElement("div");
+      col.className = "col-6";
+      var card = document.createElement("div");
+      card.className = "wiz-inspo-card inspiration-card";
+      card.dataset.imgId = img.imgId;
+      card.innerHTML =
+        '<img src="' + img.imgUrl + '" alt="" class="wiz-inspo-img" loading="lazy">' +
+        '<div class="wiz-inspo-overlay"><i class="fas fa-check-circle"></i></div>';
+      card.addEventListener("click", function () { this.classList.toggle("selected"); });
+      col.appendChild(card);
+      modalGrid.appendChild(col);
     });
 
-    // Also allow clicking on the card itself (excluding the button)
-    document.querySelectorAll(".inspo-space-card").forEach(function (card) {
-      card.addEventListener("click", function (e) {
-        if (e.target.closest(".select-inspo-btn")) return;
-        if (e.target.closest(".inspo-checkmark")) return;
-        openSpaceModal(this.dataset.spaceId);
-      });
-    });
+    var oldHint = modalBody.querySelector(".modal-hint");
+    if (oldHint) oldHint.remove();
+
+    var hint = document.createElement("p");
+    hint.className = "text-muted mb-3 wiz-text-sm modal-hint";
+    hint.textContent = isLast
+      ? "Select images, then Submit to continue."
+      : "Select images, then Next for the next space.";
+    modalBody.insertBefore(hint, modalGrid);
+
+    var newBtn = submitBtn.cloneNode(true);
+    submitBtn.parentNode.replaceChild(newBtn, submitBtn);
+    submitBtn = newBtn;
+
+    if (isLast) {
+      submitBtn.textContent = "Submit & Continue";
+      submitBtn.className = "btn btn-sm wiz-btn-success rounded-3 px-4";
+    } else {
+      submitBtn.textContent = "Next Space";
+      submitBtn.className = "btn btn-sm wiz-btn-primary rounded-3 px-4";
+    }
 
     submitBtn.addEventListener("click", function () {
-      if (!activeSpaceId) return;
       var selectedIds = [];
       modalGrid.querySelectorAll(".inspiration-card.selected").forEach(function (c) {
-        selectedIds.push(parseInt(c.closest(".inspiration-item").dataset.imgId));
+        selectedIds.push(parseInt(c.dataset.imgId));
       });
-      wizardData.inspirations[activeSpaceId] = selectedIds;
-      updateCardState(activeSpaceId);
-      bsModal.hide();
-      enableNextIfAllDone();
+      wizardData.inspirations[space.spaceId] = selectedIds;
+      var bsModal = bootstrap.Modal.getInstance(modalEl);
+      if (bsModal) bsModal.hide();
+      showSequentialModals(spacesData, index + 1);
     });
+
+    var bsModal = new bootstrap.Modal(modalEl, { backdrop: "static", keyboard: false });
+    bsModal.show();
+  }
+
+  function bindQuestionnaireStep() {
+    var form = document.getElementById("questionnaireForm");
+    if (!form) return;
   }
 
   function bindSummaryStep() {
@@ -578,65 +487,61 @@
       if (wrapper) {
         var hidden = wrapper.querySelector('input[type="hidden"]');
         if (hidden) {
-          var li = wrapper.querySelector(
-            'li[data-value="' + hidden.value + '"]'
-          );
-          pt.textContent = li ? li.textContent : wizardData.projectTypeSlug;
+          var opt = wrapper.querySelector('option[value="' + wizardData.projectTypeSlug + '"]');
+          if (opt) pt.textContent = opt.textContent;
         }
       }
     }
+
     var floorsEl = document.getElementById("summaryFloors");
     if (floorsEl) {
-      var names = wizardData.floors.length
-        ? wizardData.floors
-        : ["Ground Floor"];
-      floorsEl.innerHTML = names
-        .map(function (n) {
-          return "<li>" + n + "</li>";
-        })
-        .join("");
+      var names = wizardData.floors;
+      if (names && names.length > 0) {
+        floorsEl.innerHTML = "";
+        names.forEach(function (n) {
+          var li = document.createElement("li");
+          li.textContent = n;
+          floorsEl.appendChild(li);
+        });
+      }
     }
+
     var spacesEl = document.getElementById("summarySpaces");
     if (spacesEl) {
-      spacesEl.textContent = wizardData.spaces && wizardData.spaces.length
-        ? wizardData.spaces.length + " spaces selected"
-        : "None selected";
+      var count = (wizardData.spaces || []).length;
+      spacesEl.textContent = count + " space" + (count !== 1 ? "s" : "");
     }
+
     var pkgEl = document.getElementById("summaryPackage");
-    if (wizardData.packageId && pkgEl) {
-      var pkgCard = document.querySelector(
-        ".package-card[data-package-id='" + wizardData.packageId + "']"
-      );
-      pkgEl.textContent = pkgCard
-        ? pkgCard.querySelector(".wiz-pkg-name").textContent
-        : "Selected";
+    if (pkgEl) {
+      var pkgCards = document.querySelectorAll(".wiz-pkg-card");
+      pkgCards.forEach(function (c) {
+        if (c.dataset.packageId === wizardData.packageId) {
+          var nameEl = c.querySelector(".wiz-pkg-name");
+          if (nameEl) pkgEl.textContent = nameEl.textContent.trim();
+        }
+      });
     }
+
     var inspEl = document.getElementById("summaryInspirations");
     if (inspEl) {
-      var count = 0;
-      Object.keys(wizardData.inspirations).forEach(function (key) {
-        count += wizardData.inspirations[key].length;
+      var total = 0;
+      Object.keys(wizardData.inspirations || {}).forEach(function (key) {
+        total += wizardData.inspirations[key].length;
       });
-      inspEl.textContent = count
-        ? count + " images selected"
-        : "None selected";
+      inspEl.textContent = total + " image" + (total !== 1 ? "s" : "") + " selected";
     }
-    updateSummaryPrice();
+
+    updateSummaryTotal();
   }
 
-  function updateSummaryPrice() {
+  function updateSummaryTotal() {
     var subtotal = calcSubtotal();
-    var elTotal = document.getElementById("summaryTotal");
-    var elDelivery = document.getElementById("summaryDelivery");
-    if (!subtotal) {
-      if (elTotal) elTotal.textContent = "0 DA";
-      if (elDelivery) elDelivery.textContent = "Estimated delivery: —";
-      return;
-    }
     var pkgPrice = wizardData.packagePrice || 0;
     var total = calcTotal(subtotal, pkgPrice);
-    if (elTotal)
-      elTotal.textContent = Math.round(total).toLocaleString() + " DA";
+    var elTotal = document.getElementById("summaryTotal");
+    if (elTotal) elTotal.textContent = Math.round(total).toLocaleString() + " DA";
+    var elDelivery = document.getElementById("summaryDelivery");
     if (elDelivery) {
       var days = 1;
       if (wizardData.spaces && wizardData.spaces.length > 0) {
@@ -668,7 +573,6 @@
   }
 
   function collectStepData() {
-    // Project type — only in step 0
     var wrapper = document.getElementById("projectTypeSelect");
     if (wrapper) {
       var hidden = wrapper.querySelector('input[type="hidden"]');
@@ -677,7 +581,6 @@
       }
     }
 
-    // Floors — only in step 0
     var countInput = document.querySelector("[name='floor_count']");
     if (countInput) {
       var count = parseInt(countInput.value) || 1;
@@ -697,29 +600,25 @@
       }
     }
 
-    // Spaces — only in step 0
     var floorGroups = document.querySelectorAll(".floor-space-group");
     if (floorGroups.length > 0) {
       wizardData.spaces = [];
       floorGroups.forEach(function (group) {
         var fi = parseInt(group.dataset.floorIndex);
-        group
-          .querySelectorAll(".space-checkbox-card.selected")
-          .forEach(function (card) {
-            var sid = card.dataset.spaceId;
-            if (sid && sid !== "custom") {
-              wizardData.spaces.push({
-                floorIndex: fi,
-                spaceId: parseInt(sid),
-                price: parseFloat(card.dataset.price) || 0,
-                days: parseInt(card.dataset.days) || 1,
-              });
-            }
-          });
+        group.querySelectorAll(".space-checkbox-card.selected").forEach(function (card) {
+          var sid = card.dataset.spaceId;
+          if (sid && sid !== "custom") {
+            wizardData.spaces.push({
+              floorIndex: fi,
+              spaceId: parseInt(sid),
+              price: parseFloat(card.dataset.price) || 0,
+              days: parseInt(card.dataset.days) || 1,
+            });
+          }
+        });
       });
     }
 
-    // Questionnaire — only in step 3
     var qForm = document.getElementById("questionnaireForm");
     if (qForm) {
       wizardData.questionnaire = {};
@@ -737,11 +636,6 @@
         params.floor_count = wizardData.floors.length || 1;
         if (wizardData.projectTypeSlug) params.project_type = wizardData.projectTypeSlug;
       }
-      // Pass space_ids when going back to inspirations step
-      if (currentStep - 1 === 2) {
-        var ids = (wizardData.spaces || []).map(function (s) { return s.spaceId; });
-        if (ids.length > 0) params.space_ids = ids.join(",");
-      }
       loadStep(currentStep - 1, Object.keys(params).length > 0 ? params : undefined);
     }
   }
@@ -751,57 +645,30 @@
 
     if (currentStep === 0) {
       if (!wizardData.projectTypeSlug) {
-        var msg = document.createElement("div");
-        msg.className = "alert alert-warning text-center py-2 mb-3";
-        msg.style.cssText = "font-size:0.85rem;border-radius:10px;";
-        msg.textContent = "Please select a project type.";
-        var title = document.querySelector(".wiz-step-title");
-        if (title) title.parentNode.insertBefore(msg, title.nextSibling);
-        setTimeout(function () { msg.remove(); }, 2500);
+        showWarning("Please select a project type.");
         return;
       }
       var countInput = document.querySelector("[name='floor_count']");
       var floorCount = countInput ? parseInt(countInput.value) : 1;
       if (!floorCount || floorCount < 1) {
-        var msg2 = document.createElement("div");
-        msg2.className = "alert alert-warning text-center py-2 mb-3";
-        msg2.style.cssText = "font-size:0.85rem;border-radius:10px;";
-        msg2.textContent = "Please enter at least 1 floor.";
-        var title2 = document.querySelector(".wiz-step-title");
-        if (title2) title2.parentNode.insertBefore(msg2, title2.nextSibling);
-        setTimeout(function () { msg2.remove(); }, 2500);
+        showWarning("Please enter at least 1 floor.");
         return;
       }
       var hasSpaces = document.querySelectorAll(".space-checkbox-card.selected").length > 0;
       if (!hasSpaces) {
-        var msg3 = document.createElement("div");
-        msg3.className = "alert alert-warning text-center py-2 mb-3";
-        msg3.style.cssText = "font-size:0.85rem;border-radius:10px;";
-        msg3.textContent = "Please select at least one space.";
-        var title3 = document.querySelector(".wiz-step-title");
-        if (title3) title3.parentNode.insertBefore(msg3, title3.nextSibling);
-        setTimeout(function () { msg3.remove(); }, 2500);
+        showWarning("Please select at least one space.");
         return;
       }
+      loadStep(1);
+      return;
     }
 
-    // Pass space_ids when going to inspirations step
     if (currentStep === 1) {
-      var ids = [];
-      if (wizardData.spaces) {
-        wizardData.spaces.forEach(function (s) { ids.push(s.spaceId); });
-      }
-      loadStep(2, ids.length > 0 ? { space_ids: ids.join(",") } : undefined);
+      startInspirationModals();
       return;
     }
 
     if (currentStep === 2) {
-      loadStep(currentStep + 1);
-      return;
-    }
-
-    // Validate questionnaire before going to summary
-    if (currentStep === 3) {
       if (!validateQuestionnaire()) return;
       loadStep(currentStep + 1);
       return;
@@ -824,13 +691,7 @@
     else if (q.email.indexOf("@") === -1) msg = "Please enter a valid email address.";
     else if (!q.phone) msg = "Please enter your phone number.";
     if (msg) {
-      var err = document.createElement("div");
-      err.className = "alert alert-warning text-center py-2 mb-3";
-      err.style.cssText = "font-size:0.85rem;border-radius:10px;";
-      err.textContent = msg;
-      var title = document.querySelector(".wiz-step-title");
-      if (title) title.parentNode.insertBefore(err, title.nextSibling);
-      setTimeout(function () { err.remove(); }, 2500);
+      showWarning(msg);
       return false;
     }
     return true;
@@ -839,13 +700,7 @@
   function submitRequest() {
     var terms = document.getElementById("acceptTerms");
     if (terms && !terms.checked) {
-      var termsMsg = document.createElement("div");
-      termsMsg.className = "alert alert-warning text-center py-2 mb-3";
-      termsMsg.style.cssText = "font-size:0.85rem;border-radius:10px;";
-      termsMsg.textContent = "Please accept the terms and conditions.";
-      var summaryTotal = document.querySelector(".wiz-summary-total");
-      if (summaryTotal) summaryTotal.parentNode.insertBefore(termsMsg, summaryTotal.nextSibling);
-      setTimeout(function () { termsMsg.remove(); }, 2500);
+      showWarning("Please accept the terms and conditions.");
       return;
     }
     var btn = document.getElementById("nextBtn");
@@ -863,9 +718,7 @@
       inspirations: JSON.stringify(wizardData.inspirations),
       questionnaire: JSON.stringify(wizardData.questionnaire),
       total: document.getElementById("summaryTotal")
-        ? document
-            .getElementById("summaryTotal")
-            .textContent.replace(/[^0-9]/g, "")
+        ? document.getElementById("summaryTotal").textContent.replace(/[^0-9]/g, "")
         : 0,
     };
 
@@ -877,9 +730,7 @@
       },
       body: JSON.stringify(payload),
     })
-      .then(function (r) {
-        return r.json();
-      })
+      .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data.success) {
           document.getElementById("confirmProjectNumber").textContent =
