@@ -54,6 +54,8 @@
         <!-- Google Fonts - Cairo (Arabic-friendly) -->
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap"
               rel="stylesheet" />
+        <!-- Three.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
         {% block css %}
         {% endblock css %}
         <!-- Custom CSS -->
@@ -61,6 +63,7 @@
         {% endblock extra_css %}
         {# Core CSS #}
         <link rel="stylesheet" href="{% static "css/index.css" %}?v={% now "U" %}" />
+        <link rel="stylesheet" href="{% static "css/three-sixty-bg.css" %}?v={% now "U" %}" />
     </head>
     <body class="{% block body_class %}{% endblock body_class %}">
         <!-- Navigation Bar -->
@@ -160,6 +163,9 @@
                 crossorigin="anonymous"></script>
         {# Core JS #}
         <script src="{% static "js/index.js" %}?v={% now "U" %}">
+        </script>
+        {# 360° Panorama Background #}
+        <script src="{% static "js/three-sixty-bg.js" %}?v={% now "U" %}">
         </script>
         {% block js %}
         {% endblock js %}

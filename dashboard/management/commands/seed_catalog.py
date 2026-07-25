@@ -273,14 +273,12 @@ class Command(BaseCommand):
 
             # ── InspirationImages ─────────────────────────────────
             gif_bytes = _make_gif()
-            for title, space_name, style_name in INSPIRATIONS:
-                style = StyleCategory.objects.get(slug=slugify(style_name))
+            for title, space_name, _ in INSPIRATIONS:
                 space = space_map[space_name]
                 insp, was = InspirationImage.objects.get_or_create(
                     title=title,
                     defaults={
                         "space": space,
-                        "style_category": style,
                         "active": True,
                     },
                 )

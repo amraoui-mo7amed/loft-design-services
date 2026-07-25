@@ -9,32 +9,27 @@
 {% endblock extra_css %}
 
 {% block nav %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-transparent py-4 fixed-top" id="landingNav">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-                <i class="fas fa-drafting-compass text-primary"></i>
-                <span class="fw-black fs-4 text-dark">
-                    {% if IS_RTL %}{{ site_config.ar_name }}{% else %}{{ site_config.name }}{% endif %}
-                </span>
+    <div class="panorama-bg" id="panoramaBg" data-panorama-src="{% static 'imgs/bg.jpeg' %}"></div>
+    <div class="panorama-overlay"></div>
+    <div class="floating-actions-bar">
+        {% include 'partials/language_switcher.html' %}
+        {% if user.is_authenticated %}
+            <a href="{% url 'dash:dash_home' %}" class="floating-btn">
+                <i class="fas fa-tachometer-alt"></i>
             </a>
-            <div class="ms-auto d-flex align-items-center gap-3">
-                {% include 'partials/language_switcher.html' %}
-                {% if user.is_authenticated %}
-                    <a href="{% url 'dash:dash_home' %}" class="btn btn-dark rounded-pill px-4 fw-bold">{% trans "Dashboard" %}</a>
-                {% else %}
-                    <a href="{% url 'user_auth:login' %}" class="btn btn-link text-dark fw-bold text-decoration-none d-none d-md-block">{% trans "Login" %}</a>
-                    <a href="{% url 'user_auth:signup' %}" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">{% trans "Get Started" %}</a>
-                {% endif %}
-            </div>
-        </div>
-    </nav>
+        {% else %}
+            <a href="{% url 'user_auth:login' %}" class="floating-btn">
+                <i class="fas fa-sign-in-alt"></i>
+            </a>
+        {% endif %}
+    </div>
 {% endblock nav %}
 
 {% block sidebar %}{% endblock sidebar %}
 
 {% block content %}
     <!-- Spaces Section -->
-    <section class="loft-section" id="spaces-section">
+    <section class="loft-section pt-0" id="spaces-section">
         <div class="container">
             <div class="mb-5 pt-5">
                 <h2 class="loft-section-title reveal">{% trans "Choose Your Spaces" %}</h2>
