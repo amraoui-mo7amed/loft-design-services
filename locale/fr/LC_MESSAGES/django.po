@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-28 10:44+0100\n"
+"POT-Creation-Date: 2026-07-25 09:31+0100\n"
 "PO-Revision-Date: 2026-03-28 12:00+0100\n"
 "Last-Translator: Mohamed <mohamed@example.com>\n"
 "Language-Team: French <fr@li.org>\n"
@@ -17,48 +17,794 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: core/context_processors.py:11
-msgid "SnapStore"
-msgstr "SnapStore"
-
-#: core/context_processors.py:13
-msgid "AI-Powered Landing Pages"
-msgstr "Pages de destination basées sur l'IA"
-
-#: core/context_processors.py:25
-msgid "Generate high-converting landing pages in seconds with Gemini AI."
-msgstr "Générez des pages de destination à haute conversion en quelques secondes avec Gemini AI."
-
-#: core/context_processors.py:28
-msgid "landing page, ai, gemini, merchant, ecommerce, conversion"
-msgstr "page de destination, ia, gemini, marchand, ecommerce, conversion"
-
-#: core/settings.py:127
+#: core/context_processors.py:9
+msgid "Loft Design"
+msgstr "Loft Design"#: core/context_processors.py:11
+msgid "Interior Design That Inspires"
+msgstr "Design intérieur qui inspire"#: core/context_processors.py:23
+msgid ""
+"Professional interior design services — from concept to completion, "
+"delivered by expert designers."
+msgstr "Services professionnels de design intérieur — du concept à la réalisation, livrés par des designers experts."#: core/context_processors.py:26
+msgid ""
+"interior design, home design, room design, loft, decoration, design service"
+msgstr "design intérieur, design maison, design de pièce, loft, décoration, service de design"#: core/settings.py:134
 msgid "العربية"
 msgstr "Arabe"
 
-#: core/settings.py:127
+#: core/settings.py:134
 msgid "English"
 msgstr "Anglais"
 
-#: core/settings.py:127
+#: core/settings.py:134
 msgid "French"
 msgstr "Français"
 
-#: dashboard/context_processors.py:11
-#: dashboard/templates/dash/dash_index.html:86 frontend/templates/home.html:22
+#: dashboard/context_processors.py:16
+#, fuzzy
+#| msgid "Main Menu"
+msgid "Main"
+msgstr "Menu principal"
+
+#: dashboard/context_processors.py:19 dashboard/templates/dash/dash_home.html:7
+#: dashboard/templates/dash/dash_index.html:110
 msgid "Dashboard"
 msgstr "Tableau de bord"
 
-#: dashboard/context_processors.py:17
-msgid "users"
-msgstr "utilisateurs"
+#: dashboard/context_processors.py:29
+#, fuzzy
+#| msgid "Manage Users"
+msgid "Management"
+msgstr "Gérer les utilisateurs"
 
+#: dashboard/context_processors.py:32
+msgid "Design Catalog"
+msgstr "Catalogue de design"#: dashboard/context_processors.py:37 dashboard/models/base.py:18
+#: dashboard/templates/dash/dash_home.html:183
+#: dashboard/templates/dashboard/design/project_type_list.html:6
+#: dashboard/templates/dashboard/design/project_type_list.html:16
+msgid "Project Types"
+msgstr "Types de projets"#: dashboard/context_processors.py:38 dashboard/models/base.py:61
+#: dashboard/models/inquiry.py:15 dashboard/templates/dash/dash_home.html:195
+#: dashboard/templates/dashboard/customer/project_detail.html:140
+#: dashboard/templates/dashboard/design/space_list.html:7
+#: dashboard/templates/dashboard/design/space_list.html:16
+#: dashboard/templates/dashboard/design/space_list.html:228
+#: dashboard/templates/dashboard/pdf/quote.html:20
+#: dashboard/templates/dashboard/wizard/step9_summary.html:29
+msgid "Spaces"
+msgstr "Espaces"#: dashboard/context_processors.py:39
+msgid "Packages"
+msgstr "Forfaits"#: dashboard/context_processors.py:40 dashboard/models/catalog.py:102
+#: dashboard/templates/dashboard/design/style_list.html:6
+#: dashboard/templates/dashboard/design/style_list.html:15
+msgid "Style Categories"
+msgstr "Catégories de styles"#: dashboard/context_processors.py:41 dashboard/models/catalog.py:124
+#: dashboard/templates/dashboard/admin/project_detail.html:258
+#: dashboard/templates/dashboard/design/inspiration_list.html:6
+#: dashboard/templates/dashboard/design/inspiration_list.html:15
+msgid "Inspiration Images"
+msgstr "Images d'inspiration"#: dashboard/context_processors.py:45 dashboard/context_processors.py:77
+#: dashboard/templates/dash/dash_home.html:207
+#: dashboard/templates/dashboard/admin/kanban.html:6
+#: dashboard/templates/dashboard/admin/kanban.html:16
+#, fuzzy
+#| msgid "Active Projects"
+msgid "Projects"
+msgstr "Projets actifs"
+
+#: dashboard/context_processors.py:51 dashboard/models/inquiry.py:23
+#: dashboard/templates/dash/dash_home.html:44
+#: dashboard/templates/dash/dash_home.html:100
+#: dashboard/templates/dash/dash_home.html:219
+#: dashboard/templates/dashboard/admin/inquiry_list.html:6
+#: dashboard/templates/dashboard/admin/inquiry_list.html:16
+msgid "Inquiries"
+msgstr "Demandes"#: dashboard/context_processors.py:62
+#: dashboard/templates/dashboard/customer/project_list.html:6
+#, fuzzy
+#| msgid "Active Projects"
+msgid "My Projects"
+msgstr "Projets actifs"
+
+#: dashboard/context_processors.py:70 dashboard/models/requests.py:42
+#: dashboard/templates/dash/dash_index.html:88
+#: dashboard/templates/dashboard/admin/project_detail.html:140
+#: dashboard/templates/dashboard/customer/project_detail.html:48
+#: user_auth/models.py:34
+msgid "Designer"
+msgstr "Designer"#: dashboard/email_service.py:33
+#, python-format
+msgid "Design Request Submitted - %(number)s"
+msgstr "Demande de design soumise - %(number)s"#: dashboard/email_service.py:50
+#, python-format
+msgid "Project Status Update - %(number)s"
+msgstr "Mise à jour du statut du projet - %(number)s"#: dashboard/email_service.py:68
+#, python-format
+msgid "Inquiry Status Update - %(name)s"
+msgstr "Mise à jour du statut de la demande - %(name)s"#: dashboard/models/base.py:7 dashboard/models/base.py:31
+#: dashboard/models/base.py:45 dashboard/models/catalog.py:9
+#: dashboard/models/catalog.py:42 dashboard/models/catalog.py:70
+#: dashboard/models/catalog.py:95 dashboard/models/marketplace.py:12
+#: dashboard/models/marketplace.py:31 dashboard/models/requests.py:69
+#: dashboard/templates/dashboard/admin/inquiry_detail.html:45
+#: dashboard/templates/dashboard/design/option_form.html:15
+#: dashboard/templates/dashboard/design/option_list.html:108
+#: dashboard/templates/dashboard/design/package_detail.html:165
+#: dashboard/templates/dashboard/design/package_form.html:15
+#: dashboard/templates/dashboard/design/package_list.html:166
+#: dashboard/templates/dashboard/design/package_list.html:198
+#: dashboard/templates/dashboard/design/package_list.html:228
+#: dashboard/templates/dashboard/design/project_type_form.html:15
+#: dashboard/templates/dashboard/design/project_type_list.html:121
+#: dashboard/templates/dashboard/design/space_form.html:15
+#: dashboard/templates/dashboard/design/space_list.html:226
+#: dashboard/templates/dashboard/design/space_list.html:258
+#: dashboard/templates/dashboard/design/space_list.html:288
+#: dashboard/templates/dashboard/design/style_form.html:15
+#: dashboard/templates/dashboard/design/style_list.html:99
+#: dashboard/templates/dashboard/designer/project_detail.html:105
+#, fuzzy
+#| msgid "Last Name"
+msgid "Name"
+msgstr "Nom"
+
+#: dashboard/models/base.py:8 dashboard/models/base.py:46
+#: dashboard/models/catalog.py:71 dashboard/models/catalog.py:96
+#: dashboard/models/marketplace.py:13 dashboard/models/marketplace.py:32
+msgid "Slug"
+msgstr "Slug"#: dashboard/models/base.py:9 dashboard/models/base.py:32
+#: dashboard/models/catalog.py:10 dashboard/models/catalog.py:43
+#: dashboard/models/catalog.py:72 dashboard/models/catalog.py:97
+#: dashboard/models/communication.py:108 dashboard/models/marketplace.py:14
+#: dashboard/models/marketplace.py:33
+#: dashboard/templates/dashboard/design/option_form.html:19
+#: dashboard/templates/dashboard/design/option_list.html:112
+#: dashboard/templates/dashboard/design/package_detail.html:133
+#: dashboard/templates/dashboard/design/package_detail.html:184
+#: dashboard/templates/dashboard/design/package_form.html:19
+#: dashboard/templates/dashboard/design/package_list.html:126
+#: dashboard/templates/dashboard/design/package_list.html:167
+#: dashboard/templates/dashboard/design/package_list.html:202
+#: dashboard/templates/dashboard/design/package_list.html:232
+#: dashboard/templates/dashboard/design/project_type_list.html:128
+#: dashboard/templates/dashboard/design/space_list.html:227
+#: dashboard/templates/dashboard/design/space_list.html:262
+#: dashboard/templates/dashboard/design/space_list.html:292
+#: dashboard/templates/dashboard/design/style_form.html:19
+#: dashboard/templates/dashboard/design/style_list.html:103
+msgid "Description"
+msgstr "Description"#: dashboard/models/base.py:10 dashboard/models/base.py:47
+#: dashboard/models/catalog.py:117 dashboard/models/marketplace.py:15
+#: dashboard/models/marketplace.py:35
+#: dashboard/templates/dashboard/design/inspiration_form.html:25
+#: dashboard/templates/dashboard/design/space_form.html:19
+msgid "Image"
+msgstr "Image"#: dashboard/models/base.py:11 dashboard/models/base.py:55
+#: dashboard/models/catalog.py:50 dashboard/models/catalog.py:79
+#: dashboard/models/catalog.py:119 dashboard/models/marketplace.py:40
+#: dashboard/templates/dashboard/design/inspiration_form.html:35
+#: dashboard/templates/dashboard/design/inspiration_list.html:40
+#: dashboard/templates/dashboard/design/inspiration_list.html:143
+#: dashboard/templates/dashboard/design/option_form.html:34
+#: dashboard/templates/dashboard/design/option_list.html:71
+#: dashboard/templates/dashboard/design/option_list.html:130
+#: dashboard/templates/dashboard/design/package_detail.html:50
+#: dashboard/templates/dashboard/design/package_detail.html:138
+#: dashboard/templates/dashboard/design/package_form.html:29
+#: dashboard/templates/dashboard/design/package_list.html:55
+#: dashboard/templates/dashboard/design/package_list.html:137
+#: dashboard/templates/dashboard/design/project_type_form.html:24
+#: dashboard/templates/dashboard/design/project_type_list.html:45
+#: dashboard/templates/dashboard/design/project_type_list.html:161
+#: dashboard/templates/dashboard/design/space_form.html:43
+#: dashboard/templates/dashboard/design/space_list.html:97
+#: dashboard/templates/dashboard/design/space_list.html:191
+#: dashboard/templates/users/designer_list.html:42
+#: dashboard/templates/users/list.html:50
+msgid "Active"
+msgstr "Actif"
+
+#: dashboard/models/base.py:12 dashboard/models/base.py:80
+#: dashboard/models/catalog.py:29
+#: dashboard/templates/dashboard/design/project_type_form.html:19
+#: dashboard/templates/dashboard/design/project_type_list.html:136
+msgid "Sort Order"
+msgstr "Ordre de tri"#: dashboard/models/base.py:13 dashboard/models/base.py:33
+#: dashboard/models/base.py:56 dashboard/models/catalog.py:11
+#: dashboard/models/catalog.py:51 dashboard/models/catalog.py:98
+#: dashboard/models/catalog.py:120 dashboard/models/communication.py:20
+#: dashboard/models/communication.py:46 dashboard/models/communication.py:68
+#: dashboard/models/communication.py:89 dashboard/models/communication.py:109
+#: dashboard/models/inquiry.py:19 dashboard/models/marketplace.py:41
+#: dashboard/models/marketplace.py:80 dashboard/models/marketplace.py:126
+#: dashboard/models/notification.py:24 dashboard/models/payments.py:31
+#: dashboard/models/requests.py:49 user_auth/models.py:43
+msgid "Created At"
+msgstr "Créé le"
+
+#: dashboard/models/base.py:14 dashboard/models/base.py:57
+#: dashboard/models/catalog.py:52 dashboard/models/marketplace.py:42
+#: dashboard/models/marketplace.py:81 dashboard/models/marketplace.py:127
+#: dashboard/models/requests.py:50
+#, fuzzy
+#| msgid "Created At"
+msgid "Updated At"
+msgstr "Créé le"
+
+#: dashboard/models/base.py:17 dashboard/models/base.py:75
+#: dashboard/models/requests.py:29
+#: dashboard/templates/dashboard/admin/project_detail.html:118
+#: dashboard/templates/dashboard/customer/project_detail.html:28
+#: dashboard/templates/dashboard/wizard/step1_combined.html:11
+#: dashboard/templates/dashboard/wizard/step1_project_type.html:11
+#: dashboard/templates/dashboard/wizard/step9_summary.html:11
+msgid "Project Type"
+msgstr "Type de projet"#: dashboard/models/base.py:36 dashboard/models/base.py:51
+msgid "Space Category"
+msgstr "Catégorie d'espace"#: dashboard/models/base.py:37
+#: dashboard/templates/dashboard/design/space_list.html:218
+msgid "Space Categories"
+msgstr "Catégories d'espace"#: dashboard/models/base.py:48 dashboard/models/catalog.py:77
+#: dashboard/models/marketplace.py:37
+#: dashboard/templates/dashboard/design/option_form.html:28
+#: dashboard/templates/dashboard/design/option_list.html:121
+#: dashboard/templates/dashboard/design/package_detail.html:180
+#: dashboard/templates/dashboard/design/space_form.html:28
+#: dashboard/templates/dashboard/design/space_list.html:145
+#: dashboard/views/design.py:236 dashboard/views/design.py:278
+msgid "Category"
+msgstr "Catégorie"#: dashboard/models/base.py:53
+#: dashboard/templates/dashboard/design/space_form.html:33
+#: dashboard/templates/dashboard/design/space_list.html:88
+#: dashboard/templates/dashboard/design/space_list.html:153
+msgid "Base Price"
+msgstr "Prix de base"#: dashboard/models/base.py:54
+#: dashboard/templates/dashboard/design/space_form.html:37
+#: dashboard/templates/dashboard/design/space_list.html:92
+msgid "Estimated Days"
+msgstr "Jours estimés"#: dashboard/models/base.py:60 dashboard/models/base.py:78
+#: dashboard/models/catalog.py:115 dashboard/models/marketplace.py:59
+#: dashboard/models/requests.py:90
+#: dashboard/templates/dashboard/admin/project_detail.html:201
+#: dashboard/templates/dashboard/design/inspiration_form.html:16
+#: dashboard/templates/dashboard/design/inspiration_list.html:112
+#: dashboard/templates/dashboard/pdf/quote.html:21
+msgid "Space"
+msgstr "Espace"#: dashboard/models/base.py:83
+msgid "Default Space for Type"
+msgstr "Espace par défaut pour le type"#: dashboard/models/base.py:84
+msgid "Default Spaces for Types"
+msgstr "Espaces par défaut pour les types"#: dashboard/models/catalog.py:14
+msgid "Service Category"
+msgstr "Catégorie de service"#: dashboard/models/catalog.py:15
+#: dashboard/templates/dashboard/design/package_list.html:158
+msgid "Service Categories"
+msgstr "Catégories de service"#: dashboard/models/catalog.py:23 dashboard/models/requests.py:47
+#: dashboard/templates/dashboard/admin/kanban.html:82
+#: dashboard/templates/dashboard/admin/project_detail.html:129
+#: dashboard/templates/dashboard/customer/project_detail.html:32
+#: dashboard/templates/dashboard/pdf/quote.html:24
+#: dashboard/templates/dashboard/wizard/container.html:60
+#: dashboard/templates/dashboard/wizard/step4_packages.html:21
+#: dashboard/templates/dashboard/wizard/step9_summary.html:37
+#: dashboard/views/wizard.py:25
+msgid "Package"
+msgstr "Forfait"#: dashboard/models/catalog.py:26
+#, fuzzy
+#| msgid "Overview"
+msgid "Service"
+msgstr "Aperçu"
+
+#: dashboard/models/catalog.py:28 dashboard/models/catalog.py:73
+#: dashboard/models/marketplace.py:34
+#: dashboard/templates/dashboard/admin/project_detail.html:202
+#: dashboard/templates/dashboard/admin/project_detail.html:236
+#: dashboard/templates/dashboard/design/option_form.html:24
+#: dashboard/templates/dashboard/design/option_list.html:117
+#: dashboard/templates/dashboard/design/package_detail.html:169
+#: dashboard/templates/dashboard/pdf/quote.html:21
+#: dashboard/templates/dashboard/wizard/step4_packages.html:60
+msgid "Price"
+msgstr "Prix"#: dashboard/models/catalog.py:32
+msgid "Package Service"
+msgstr "Service de forfait"#: dashboard/models/catalog.py:33
+msgid "Package Services"
+msgstr "Services de forfait"#: dashboard/models/catalog.py:44 dashboard/models/catalog.py:74
+msgid "Delivery Time (days)"
+msgstr "Délai de livraison (jours)"#: dashboard/models/catalog.py:45
+#: dashboard/templates/dashboard/design/package_form.html:23
+msgid "Price Multiplier"
+msgstr "Multiplicateur de prix"#: dashboard/models/catalog.py:46
+msgid "Services After Payment"
+msgstr "Services après paiement"#: dashboard/models/catalog.py:48
+#: dashboard/templates/dashboard/wizard/step4_packages.html:56
+#, fuzzy
+#| msgid "Overview"
+msgid "Services"
+msgstr "Aperçu"
+
+#: dashboard/models/catalog.py:55
+msgid "Design Package"
+msgstr "Forfait de design"#: dashboard/models/catalog.py:56
+#: dashboard/templates/dashboard/design/package_list.html:7
+#: dashboard/templates/dashboard/design/package_list.html:16
+msgid "Design Packages"
+msgstr "Forfaits de design"#: dashboard/models/catalog.py:82
+msgid "Design Option"
+msgstr "Option de design"#: dashboard/models/catalog.py:83
+#: dashboard/templates/dashboard/design/option_list.html:7
+#: dashboard/templates/dashboard/design/option_list.html:16
+#, fuzzy
+#| msgid "Pending Actions"
+msgid "Design Options"
+msgstr "Actions en attente"
+
+#: dashboard/models/catalog.py:101
+msgid "Style Category"
+msgstr "Catégorie de style"#: dashboard/models/catalog.py:118 dashboard/models/communication.py:61
+#: dashboard/models/notification.py:18
+#: dashboard/templates/dashboard/design/inspiration_form.html:21
+#: dashboard/templates/dashboard/design/inspiration_list.html:119
+msgid "Title"
+msgstr "Titre"#: dashboard/models/catalog.py:123 dashboard/models/requests.py:126
+#: dashboard/templates/dashboard/design/inspiration_list.html:128
+msgid "Inspiration Image"
+msgstr "Image d'inspiration"#: dashboard/models/communication.py:12 dashboard/models/communication.py:33
+#: dashboard/models/communication.py:59 dashboard/models/communication.py:82
+#: dashboard/models/communication.py:102 dashboard/models/payments.py:20
+#: dashboard/models/requests.py:53 dashboard/models/requests.py:67
+#: dashboard/models/requests.py:84 dashboard/models/requests.py:106
+#: dashboard/models/requests.py:139
+msgid "Design Request"
+msgstr "Demande de design"#: dashboard/models/communication.py:15
+#, fuzzy
+#| msgid "Gender"
+msgid "Sender"
+msgstr "Sexe"
+
+#: dashboard/models/communication.py:17 dashboard/models/communication.py:23
+#: dashboard/models/notification.py:19
+msgid "Message"
+msgstr "Message"#: dashboard/models/communication.py:18
+msgid "Attachment"
+msgstr "Pièce jointe"#: dashboard/models/communication.py:19 dashboard/models/inquiry.py:18
+#: dashboard/models/notification.py:23
+msgid "Is Read"
+msgstr "Lu"#: dashboard/models/communication.py:24
+#: dashboard/templates/dashboard/customer/project_detail.html:120
+msgid "Messages"
+msgstr "Messages"#: dashboard/models/communication.py:35
+#, fuzzy
+#| msgid "Phone Number"
+msgid "Revision Number"
+msgstr "Numéro de téléphone"
+
+#: dashboard/models/communication.py:37
+msgid "Requested By"
+msgstr "Demandé par"#: dashboard/models/communication.py:39
+msgid "Reason"
+msgstr "Raison"#: dashboard/models/communication.py:42 dashboard/models/inquiry.py:7
+#: dashboard/models/marketplace.py:111 dashboard/models/payments.py:14
+#: dashboard/models/requests.py:15 dashboard/templates/dash/dash_home.html:58
+#: dashboard/templates/dash/dash_home.html:153
+#: dashboard/templates/users/designer_list.html:42
+#: dashboard/templates/users/list.html:54 dashboard/views/dashboard.py:26
+#: dashboard/views/users.py:51
+msgid "Pending"
+msgstr "En attente"
+
+#: dashboard/models/communication.py:42
+msgid "In Progress"
+msgstr "En cours"#: dashboard/models/communication.py:42 dashboard/models/payments.py:15
+#, fuzzy
+#| msgid "Completed Tasks"
+msgid "Completed"
+msgstr "Tâches terminées"
+
+#: dashboard/models/communication.py:44 dashboard/models/inquiry.py:17
+#: dashboard/models/marketplace.py:121 dashboard/models/payments.py:28
+#: dashboard/models/requests.py:32 dashboard/templates/dash/dash_home.html:142
+#: dashboard/templates/dashboard/admin/inquiry_list.html:137
+#: dashboard/templates/dashboard/admin/kanban.html:39
+#: dashboard/templates/dashboard/admin/kanban.html:133
+#: dashboard/templates/dashboard/design/package_detail.html:49
+#: dashboard/templates/dashboard/design/package_list.html:132
+#: dashboard/templates/users/designer_list.html:183
+#: dashboard/templates/users/list.html:203
+#, fuzzy
+#| msgid "All Status"
+msgid "Status"
+msgstr "Tous les statuts"
+
+#: dashboard/models/communication.py:49
+msgid "Revision"
+msgstr "Révision"#: dashboard/models/communication.py:50
+#: dashboard/templates/dashboard/admin/project_detail.html:179
+#: dashboard/templates/dashboard/designer/project_detail.html:112
+msgid "Revisions"
+msgstr "Révisions"#: dashboard/models/communication.py:62 dashboard/models/requests.py:141
+msgid "File"
+msgstr "Fichier"#: dashboard/models/communication.py:63 dashboard/models/requests.py:142
+msgid "File Type"
+msgstr "Type de fichier"#: dashboard/models/communication.py:64
+msgid "Version"
+msgstr "Version"#: dashboard/models/communication.py:66 dashboard/models/requests.py:144
+msgid "Uploaded By"
+msgstr "Téléchargé par"#: dashboard/models/communication.py:69
+#, fuzzy
+#| msgid "Approved"
+msgid "Approved At"
+msgstr "Approuvé"
+
+#: dashboard/models/communication.py:72
+msgid "Deliverable"
+msgstr "Livrable"#: dashboard/models/communication.py:73
+#: dashboard/templates/dashboard/customer/project_detail.html:56
+msgid "Deliverables"
+msgstr "Livrables"#: dashboard/models/communication.py:85
+msgid "Author"
+msgstr "Auteur"#: dashboard/models/communication.py:87 dashboard/models/communication.py:92
+msgid "Note"
+msgstr "Note"#: dashboard/models/communication.py:88
+msgid "Is Internal"
+msgstr "Est interne"#: dashboard/models/communication.py:93
+#: dashboard/templates/dashboard/admin/project_detail.html:357
+msgid "Notes"
+msgstr "Notes"#: dashboard/models/communication.py:105
+msgid "Actor"
+msgstr "Acteur"#: dashboard/models/communication.py:107
+#, fuzzy
+#| msgid "Take Action"
+msgid "Action"
+msgstr "Passer à l'action"
+
+#: dashboard/models/communication.py:112
+msgid "Activity Log"
+msgstr "Journal d'activité"#: dashboard/models/communication.py:113
+msgid "Activity Logs"
+msgstr "Journaux d'activité"#: dashboard/models/inquiry.py:8 dashboard/models/requests.py:16
+#: dashboard/templates/dash/dash_home.html:72
+#: dashboard/templates/dash/dash_home.html:155
+#: dashboard/templates/dashboard/customer/project_detail.html:80
+#: dashboard/templates/users/details.html:77 dashboard/views/dashboard.py:27
+#: dashboard/views/users.py:50
+msgid "Approved"
+msgstr "Approuvé"
+
+#: dashboard/models/inquiry.py:9 dashboard/models/requests.py:17
+#: dashboard/templates/dash/dash_home.html:86
+#: dashboard/templates/dash/dash_home.html:157 dashboard/views/dashboard.py:28
+msgid "Declined"
+msgstr "Refusée"#: dashboard/models/inquiry.py:11 dashboard/models/requests.py:23
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:38
+#: dashboard/templates/dashboard/wizard/step7_questionnaire.html:14
+#: dashboard/templates/users/designer_list.html:114
+#: dashboard/templates/users/list.html:135 frontend/templates/order.html:54
+#: user_auth/forms.py:8 user_auth/templates/auth/profile_edit.html:44
+#: user_auth/templates/auth/signup.html:64
+msgid "First Name"
+msgstr "Prénom"
+
+#: dashboard/models/inquiry.py:12 dashboard/models/requests.py:24
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:42
+#: dashboard/templates/dashboard/wizard/step7_questionnaire.html:18
+#: dashboard/templates/users/designer_list.html:118
+#: dashboard/templates/users/list.html:139 frontend/templates/order.html:58
+#: user_auth/forms.py:11 user_auth/templates/auth/profile_edit.html:51
+#: user_auth/templates/auth/signup.html:69
+msgid "Last Name"
+msgstr "Nom"
+
+#: dashboard/models/inquiry.py:13 dashboard/models/requests.py:25
+#: dashboard/templates/dashboard/admin/inquiry_detail.html:49
+#: dashboard/templates/dashboard/designer/project_detail.html:30
+#: dashboard/templates/dashboard/designer/project_detail.html:106
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:46
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:64
+#: dashboard/templates/users/designer_list.html:123
+#: dashboard/templates/users/details.html:106
+#: dashboard/templates/users/list.html:144 frontend/templates/order.html:62
+#: user_auth/forms.py:13 user_auth/templates/auth/profile_edit.html:58
+#: user_auth/templates/auth/signup.html:74
+msgid "Email"
+msgstr "E-mail"
+
+#: dashboard/models/inquiry.py:14
+#: dashboard/templates/dashboard/wizard/step7_questionnaire.html:31
+#: dashboard/templates/users/details.html:110 frontend/templates/order.html:66
+#: user_auth/models.py:28 user_auth/templates/auth/profile_edit.html:65
+#: user_auth/templates/auth/signup.html:79
+msgid "Phone Number"
+msgstr "Numéro de téléphone"
+
+#: dashboard/models/inquiry.py:16 dashboard/models/marketplace.py:123
+#: dashboard/models/requests.py:35 dashboard/templates/dash/dash_home.html:39
+#: dashboard/templates/dashboard/admin/project_detail.html:159
+#: dashboard/templates/dashboard/customer/project_detail.html:36
+#: dashboard/templates/dashboard/designer/project_detail.html:38
+#: dashboard/templates/dashboard/designer/project_list.html:39
+#: dashboard/templates/dashboard/marketplace/cart.html:51
+#: dashboard/templates/dashboard/marketplace/checkout.html:43
+#: dashboard/templates/dashboard/marketplace/orders.html:34
+#: dashboard/templates/dashboard/pdf/quote.html:28
+#: frontend/templates/home.html:100 frontend/templates/order.html:70
+#, fuzzy
+#| msgid "Total Users"
+msgid "Total"
+msgstr "Total des utilisateurs"
+
+#: dashboard/models/inquiry.py:22
+msgid "Inquiry"
+msgstr "Demande"#: dashboard/models/marketplace.py:18
+msgid "Product Category"
+msgstr "Catégorie de produit"#: dashboard/models/marketplace.py:19
+#, fuzzy
+#| msgid "Products"
+msgid "Product Categories"
+msgstr "Produits"
+
+#: dashboard/models/marketplace.py:39
+msgid "SKU"
+msgstr "UGS"#: dashboard/models/marketplace.py:45 dashboard/models/marketplace.py:62
+#: dashboard/models/marketplace.py:96 dashboard/models/marketplace.py:143
+#, fuzzy
+#| msgid "Products"
+msgid "Product"
+msgstr "Produits"
+
+#: dashboard/models/marketplace.py:46 frontend/templates/index.html:100
+msgid "Products"
+msgstr "Produits"
+
+#: dashboard/models/marketplace.py:64
+msgid "Priority"
+msgstr "Priorité"#: dashboard/models/marketplace.py:67
+msgid "Product Recommendation"
+msgstr "Recommandation de produit"#: dashboard/models/marketplace.py:68
+msgid "Product Recommendations"
+msgstr "Recommandations de produits"#: dashboard/models/marketplace.py:78 dashboard/models/marketplace.py:118
+#: dashboard/models/notification.py:16
+#: dashboard/templates/dash/dash_index.html:90
+#: dashboard/templates/dash/dash_index.html:136
+msgid "User"
+msgstr "Utilisateur"
+
+#: dashboard/models/marketplace.py:84 dashboard/models/marketplace.py:93
+#: dashboard/templates/dashboard/marketplace/product_list.html:12
+msgid "Cart"
+msgstr "Panier"#: dashboard/models/marketplace.py:85
+msgid "Carts"
+msgstr "Paniers"#: dashboard/models/marketplace.py:98 dashboard/models/marketplace.py:145
+msgid "Quantity"
+msgstr "Quantité"#: dashboard/models/marketplace.py:99 dashboard/models/marketplace.py:146
+#: dashboard/models/requests.py:93 dashboard/models/requests.py:111
+msgid "Price at Time"
+msgstr "Prix au moment de l'achat"#: dashboard/models/marketplace.py:102
+msgid "Cart Item"
+msgstr "Article du panier"#: dashboard/models/marketplace.py:103
+msgid "Cart Items"
+msgstr "Articles du panier"#: dashboard/models/marketplace.py:112
+#, fuzzy
+#| msgid "Confirm Password"
+msgid "Confirmed"
+msgstr "Confirmez le mot de passe"
+
+#: dashboard/models/marketplace.py:113
+msgid "Shipped"
+msgstr "Expédié"#: dashboard/models/marketplace.py:114
+#, fuzzy
+#| msgid "Registered"
+msgid "Delivered"
+msgstr "Inscrit le"
+
+#: dashboard/models/marketplace.py:115
+#, fuzzy
+#| msgid "Cancel"
+msgid "Cancelled"
+msgstr "Annuler"
+
+#: dashboard/models/marketplace.py:124 dashboard/models/payments.py:24
+#: dashboard/templates/dashboard/marketplace/checkout.html:18
+msgid "Payment Method"
+msgstr "Méthode de paiement"#: dashboard/models/marketplace.py:125
+#: dashboard/templates/dashboard/marketplace/checkout.html:14
+#, fuzzy
+#| msgid "Address"
+msgid "Shipping Address"
+msgstr "Adresse"
+
+#: dashboard/models/marketplace.py:130 dashboard/models/marketplace.py:140
+#: dashboard/models/requests.py:71
+#: dashboard/templates/dashboard/design/project_type_list.html:78
+#: dashboard/templates/dashboard/marketplace/orders.html:18
+msgid "Order"
+msgstr "Commande"#: dashboard/models/marketplace.py:131
+msgid "Orders"
+msgstr "Commandes"#: dashboard/models/marketplace.py:149
+msgid "Order Item"
+msgstr "Article de commande"#: dashboard/models/marketplace.py:150
+msgid "Order Items"
+msgstr "Articles de commande"#: dashboard/models/notification.py:10
+msgid "Info"
+msgstr "Info"#: dashboard/models/notification.py:11
+#, fuzzy
+#| msgid "Success!"
+msgid "Success"
+msgstr "Succès !"
+
+#: dashboard/models/notification.py:12
+msgid "Warning"
+msgstr "Avertissement"#: dashboard/models/notification.py:13
+msgid "Error"
+msgstr "Erreur"#: dashboard/models/notification.py:21
+#, fuzzy
+#| msgid "Notifications"
+msgid "Notification Type"
+msgstr "Notifications"
+
+#: dashboard/models/notification.py:25
+#, fuzzy
+#| msgid "Created At"
+msgid "Read At"
+msgstr "Créé le"
+
+#: dashboard/models/notification.py:26
+msgid "Link"
+msgstr "Lien"#: dashboard/models/notification.py:26
+msgid "Optional navigation link"
+msgstr "Lien de navigation optionnel"#: dashboard/models/notification.py:29
+#, fuzzy
+#| msgid "Notifications"
+msgid "Notification"
+msgstr "Notifications"
+
+#: dashboard/models/notification.py:30
 #: dashboard/templates/components/notification_dropdown.html:12
 msgid "Notifications"
 msgstr "Notifications"
 
-#: dashboard/templates/components/notification_dropdown.html:13
+#: dashboard/models/payments.py:9
+msgid "Stripe"
+msgstr "Stripe"#: dashboard/models/payments.py:10
+msgid "PayPal"
+msgstr "PayPal"#: dashboard/models/payments.py:11
+msgid "Manual Transfer"
+msgstr "Virement manuel"#: dashboard/models/payments.py:16
+msgid "Failed"
+msgstr "Échoué"#: dashboard/models/payments.py:17
+msgid "Refunded"
+msgstr "Remboursé"#: dashboard/models/payments.py:22
+msgid "Amount"
+msgstr "Montant"#: dashboard/models/payments.py:26
+msgid "Transaction ID"
+msgstr "ID de transaction"#: dashboard/models/payments.py:30
+msgid "Paid At"
+msgstr "Payé le"#: dashboard/models/payments.py:34
+msgid "Payment"
+msgstr "Paiement"#: dashboard/models/payments.py:35
+msgid "Payments"
+msgstr "Paiements"#: dashboard/models/pricing.py:6
+msgid "Tax Rate (%)"
+msgstr "Taux de taxe (%)"#: dashboard/models/pricing.py:7
+#: dashboard/templates/dashboard/admin/pricing.html:24
+msgid "Default Revision Count"
+msgstr "Nombre de révisions par défaut"#: dashboard/models/pricing.py:8
+#: dashboard/templates/dashboard/admin/pricing.html:28
+msgid "Currency Symbol"
+msgstr "Symbole de devise"#: dashboard/models/pricing.py:9
+#: dashboard/templates/dashboard/admin/pricing.html:32
+msgid "Default Delivery Days"
+msgstr "Délai de livraison par défaut"#: dashboard/models/pricing.py:12 dashboard/models/pricing.py:13
+#: dashboard/models/pricing.py:16
+msgid "Pricing Configuration"
+msgstr "Configuration des tarifs"#: dashboard/models/requests.py:19
+msgid "UUID"
+msgstr "UUID"#: dashboard/models/requests.py:21 dashboard/templates/dash/dash_home.html:141
+#: dashboard/templates/dashboard/admin/kanban.html:76
+#: dashboard/templates/dashboard/designer/project_detail.html:26
+#: dashboard/templates/dashboard/designer/project_list.html:35
+#: dashboard/templates/dashboard/pdf/quote.html:17
+#, fuzzy
+#| msgid "Client Meeting"
+msgid "Client"
+msgstr "Réunion client"
+
+#: dashboard/models/requests.py:26
+#: dashboard/templates/dashboard/admin/inquiry_detail.html:53
+#: dashboard/templates/dashboard/designer/project_detail.html:34
+#: dashboard/templates/dashboard/designer/project_detail.html:107
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:50
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:68
+#: dashboard/templates/users/designer_list.html:127
+msgid "Phone"
+msgstr "Téléphone"#: dashboard/models/requests.py:27
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:100
+#, fuzzy
+#| msgid "First Name"
+msgid "Project Name"
+msgstr "Prénom"
+
+#: dashboard/models/requests.py:34
+#: dashboard/templates/dashboard/admin/project_detail.html:150
+#: dashboard/templates/dashboard/customer/project_detail.html:40
+msgid "Budget"
+msgstr "Budget"#: dashboard/models/requests.py:44
+#, fuzzy
+#| msgid "Birth Date"
+msgid "Delivery Date"
+msgstr "Date de naissance"
+
+#: dashboard/models/requests.py:45
+msgid "Revision Count"
+msgstr "Nombre de révisions"#: dashboard/models/requests.py:54
+msgid "Design Requests"
+msgstr "Demandes de design"#: dashboard/models/requests.py:70
+msgid "Level"
+msgstr "Niveau"#: dashboard/models/requests.py:74 dashboard/models/requests.py:87
+#: dashboard/templates/dashboard/admin/project_detail.html:200
+#: dashboard/templates/dashboard/wizard/step1_combined.html:37
+#: dashboard/templates/dashboard/wizard/step3_spaces.html:18
+msgid "Floor"
+msgstr "Étage"#: dashboard/models/requests.py:75
+#: dashboard/templates/dashboard/customer/project_detail.html:136
+#: dashboard/templates/dashboard/wizard/step9_summary.html:19
+msgid "Floors"
+msgstr "Étages"#: dashboard/models/requests.py:92
+#, fuzzy
+#| msgid "Last Name"
+msgid "Custom Name"
+msgstr "Nom"
+
+#: dashboard/models/requests.py:96 dashboard/models/requests.py:123
+msgid "Request Space"
+msgstr "Espace de demande"#: dashboard/models/requests.py:97
+msgid "Request Spaces"
+msgstr "Espaces de demande"#: dashboard/models/requests.py:109
+#: dashboard/templates/dashboard/admin/project_detail.html:235
+msgid "Option"
+msgstr "Option"#: dashboard/models/requests.py:114
+msgid "Request Option"
+msgstr "Option de demande"#: dashboard/models/requests.py:115
+msgid "Request Options"
+msgstr "Options de demande"#: dashboard/models/requests.py:130
+#, fuzzy
+#| msgid "Recent Registrations"
+msgid "Request Inspiration"
+msgstr "Inscriptions récentes"
+
+#: dashboard/models/requests.py:131
+#, fuzzy
+#| msgid "Recent Registrations"
+msgid "Request Inspirations"
+msgstr "Inscriptions récentes"
+
+#: dashboard/models/requests.py:146
+msgid "Uploaded At"
+msgstr "Téléversé le"#: dashboard/models/requests.py:149
+msgid "Request File"
+msgstr "Fichier de demande"#: dashboard/models/requests.py:150
+msgid "Request Files"
+msgstr "Fichiers de demande"#: dashboard/signals.py:25
+msgid "Project Created"
+msgstr "Projet créé"#: dashboard/signals.py:26
+msgid "Design request submitted"
+msgstr "Demande de design soumise"#: dashboard/signals.py:32
+msgid "New Design Request"
+msgstr "Nouvelle demande de design"#: dashboard/signals.py:33
+#, python-format
+msgid "New project submitted: %(project)s"
+msgstr "Nouveau projet soumis : %(project)s"#: dashboard/signals.py:58
+msgid "Message Sent"
+msgstr "Message envoyé"#: dashboard/signals.py:59
+msgid "New message in project chat"
+msgstr "Nouveau message dans le chat du projet"#: dashboard/signals.py:69
+msgid "Deliverable Uploaded"
+msgstr "Livrable téléchargé"#: dashboard/signals.py:74
+msgid "New Deliverable"
+msgstr "Nouveau livrable"#: dashboard/signals.py:87
+msgid "Payment Received"
+msgstr "Paiement reçu"#: dashboard/templates/components/notification_dropdown.html:13
 #: dashboard/templates/dash/dash_index.html:30
 msgid "New"
 msgstr "Nouveau"
@@ -72,110 +818,83 @@ msgid "Mark all as read"
 msgstr "Tout marquer comme lu"
 
 #: dashboard/templates/components/pagination.html:9
+#: dashboard/templates/dashboard/wizard/container.html:83
 msgid "Previous"
 msgstr "Précédent"
 
-#: dashboard/templates/components/pagination.html:39
+#: dashboard/templates/components/pagination.html:37
+#: dashboard/templates/dashboard/wizard/container.html:86
 msgid "Next"
 msgstr "Suivant"
 
-#: dashboard/templates/dash/dash_home.html:7
-msgid "Overview"
-msgstr "Aperçu"
-
-#: dashboard/templates/dash/dash_home.html:21
+#: dashboard/templates/dash/dash_home.html:23
 msgid "Welcome back,"
 msgstr "Bon retour,"
 
 #: dashboard/templates/dash/dash_home.html:25
-msgid "Platform management and system health overview."
-msgstr "Gestion de la plateforme et aperçu de la santé du système."
+msgid "Here's what's happening with your projects today."
+msgstr "Voici ce qui se passe avec vos projets aujourd'hui."#: dashboard/templates/dash/dash_home.html:34
+msgid "Today"
+msgstr "Aujourd'hui"#: dashboard/templates/dash/dash_home.html:61
+msgid "Awaiting review"
+msgstr "En attente de révision"#: dashboard/templates/dash/dash_home.html:75
+msgid "In progress"
+msgstr "En cours"#: dashboard/templates/dash/dash_home.html:89
+#, fuzzy
+#| msgid "Approved"
+msgid "Not approved"
+msgstr "Approuvé"
 
-#: dashboard/templates/dash/dash_home.html:27
-msgid "Your project metrics and activity are looking great today."
-msgstr "Les mesures et l'activité de votre projet sont excellentes aujourd'hui."
-
-#: dashboard/templates/dash/dash_home.html:37
-msgid "Manage Users"
-msgstr "Gérer les utilisateurs"
-
-#: dashboard/templates/dash/dash_home.html:41
-msgid "New Entry"
-msgstr "Nouvelle entrée"
-
-#: dashboard/templates/dash/dash_home.html:80
-msgid "Sat"
-msgstr "Sam"
-
-#: dashboard/templates/dash/dash_home.html:80
-msgid "Sun"
-msgstr "Dim"
-
-#: dashboard/templates/dash/dash_home.html:80
-msgid "Mon"
-msgstr "Lun"
-
-#: dashboard/templates/dash/dash_home.html:80
-msgid "Tue"
-msgstr "Mar"
-
-#: dashboard/templates/dash/dash_home.html:80
-msgid "Wed"
-msgstr "Mer"
-
-#: dashboard/templates/dash/dash_home.html:80
-msgid "Thu"
-msgstr "Jeu"
-
-#: dashboard/templates/dash/dash_home.html:80
-msgid "Fri"
-msgstr "Ven"
-
-#: dashboard/templates/dash/dash_home.html:86
-msgid "Last 7 Days"
-msgstr "7 derniers jours"
-
-#: dashboard/templates/dash/dash_home.html:89
-msgid "Last 30 Days"
-msgstr "30 derniers jours"
-
-#: dashboard/templates/dash/dash_home.html:120
-#: dashboard/templates/dash/dash_index.html:114
-#: dashboard/templates/users/list.html:101
-msgid "User"
-msgstr "Utilisateur"
-
-#: dashboard/templates/dash/dash_home.html:139
-#: dashboard/templates/users/list.html:106
-msgid "Active"
-msgstr "Actif"
-
-#: dashboard/templates/dash/dash_home.html:149
-#: dashboard/templates/dash/dash_home.html:151
-msgid "View Full List"
+#: dashboard/templates/dash/dash_home.html:103
+#, fuzzy
+#| msgid "View Full List"
+msgid "View all"
 msgstr "Voir la liste complète"
 
-#: dashboard/templates/dash/dash_home.html:166
-msgid "Smart Insights"
-msgstr "Aperçus intelligents"
+#: dashboard/templates/dash/dash_home.html:115
+#, fuzzy
+#| msgid "Recent Registrations"
+msgid "Project Distribution"
+msgstr "Inscriptions récentes"
 
-#: dashboard/templates/dash/dash_home.html:169
-msgid ""
-"System performance is optimal. All 5 services are running within expected "
-"latency bounds."
-msgstr "Les performances du système sont optimales. Les 5 services fonctionnent dans les limites de latence attendues."
+#: dashboard/templates/dash/dash_home.html:132
+#, fuzzy
+#| msgid "Active Projects"
+msgid "Recent Projects"
+msgstr "Projets actifs"
 
-#: dashboard/templates/dash/dash_home.html:171
-msgid ""
-"AI has detected a growth trend in your user engagement. Consider launching a "
-"new campaign to capitalize on this traffic."
-msgstr "L'IA a détecté une tendance de croissance de l'engagement de vos utilisateurs. Envisagez de lancer une nouvelle campagne."
+#: dashboard/templates/dash/dash_home.html:133
+#, fuzzy
+#| msgid "View Full List"
+msgid "View All"
+msgstr "Voir la liste complète"
 
-#: dashboard/templates/dash/dash_home.html:174
-msgid "Take Action"
-msgstr "Passer à l'action"
+#: dashboard/templates/dash/dash_home.html:140
+#: dashboard/templates/dashboard/pdf/quote.html:18
+#: dashboard/templates/users/designer_list.html:155
+#, fuzzy
+#| msgid "Active Projects"
+msgid "Project"
+msgstr "Projets actifs"
 
-#: dashboard/templates/dash/dash_index.html:26
+#: dashboard/templates/dash/dash_home.html:143
+#: dashboard/templates/dashboard/admin/kanban.html:77
+msgid "Date"
+msgstr "Date"#: dashboard/templates/dash/dash_home.html:164
+msgid "No projects yet."
+msgstr "Aucun projet pour le moment."#: dashboard/templates/dash/dash_home.html:184
+#, fuzzy
+#| msgid "Manage Users"
+msgid "Manage design categories"
+msgstr "Gérer les utilisateurs"
+
+#: dashboard/templates/dash/dash_home.html:196
+msgid "Configure room types"
+msgstr "Configurer les types de pièces"#: dashboard/templates/dash/dash_home.html:208
+msgid "Review & manage requests"
+msgstr "Examiner et gérer les demandes"#: dashboard/templates/dash/dash_home.html:220
+msgid "View incoming leads"
+msgstr "Voir les prospects entrants"#: dashboard/templates/dash/dash_index.html:26
 msgid "Just now"
 msgstr "À l'instant"
 
@@ -191,27 +910,1206 @@ msgstr "il y a %d heures"
 msgid "No notifications"
 msgstr "Pas de notifications"
 
-#: dashboard/templates/dash/dash_index.html:72
-#: dashboard/templates/dash/dash_index.html:144
+#: dashboard/templates/dash/dash_index.html:86 user_auth/models.py:35
+msgid "Admin"
+msgstr "Administrateur"#: dashboard/templates/dash/dash_index.html:94
+#: dashboard/templates/dash/dash_index.html:166
 msgid "Logout"
 msgstr "Déconnexion"
 
-#: dashboard/templates/dash/dash_index.html:112
+#: dashboard/templates/dash/dash_index.html:105
+msgid "Toggle sidebar"
+msgstr "Basculer la barre latérale"#: dashboard/templates/dash/dash_index.html:134
 msgid "Administrator"
 msgstr "Administrateur"
 
-#: dashboard/templates/dash/dash_index.html:131
+#: dashboard/templates/dash/dash_index.html:153
 msgid "My Profile"
 msgstr "Mon profil"
 
-#: dashboard/templates/dash/dash_index.html:134
-#: frontend/templates/index.html:105
+#: dashboard/templates/dash/dash_index.html:156
+#: frontend/templates/index.html:106
 msgid "Settings"
 msgstr "Paramètres"
 
-#: dashboard/templates/dash/dash_index.html:137
+#: dashboard/templates/dash/dash_index.html:159
 msgid "Help & Support"
 msgstr "Aide et support"
+
+#: dashboard/templates/dashboard/admin/inquiry_detail.html:6
+#, fuzzy
+#| msgid "User Details"
+msgid "Inquiry Details"
+msgstr "Détails de l'utilisateur"
+
+#: dashboard/templates/dashboard/admin/inquiry_detail.html:17
+#, fuzzy
+#| msgid "Back to List"
+msgid "Back to Inquiries"
+msgstr "Retour à la liste"
+
+#: dashboard/templates/dashboard/admin/inquiry_detail.html:23
+msgid "Change Status?"
+msgstr "Changer le statut ?"#: dashboard/templates/dashboard/admin/inquiry_detail.html:24
+msgid "This will send an email notification to the customer."
+msgstr "Cela enverra une notification par e-mail au client."#: dashboard/templates/dashboard/admin/inquiry_detail.html:25
+#, fuzzy
+#| msgid "Yes, delete it!"
+msgid "Yes, update"
+msgstr "Oui, supprimer !"
+
+#: dashboard/templates/dashboard/admin/inquiry_detail.html:26
+#: dashboard/templates/dashboard/admin/inquiry_list.html:104
+#: dashboard/templates/dashboard/design/inspiration_form.html:39
+#: dashboard/templates/dashboard/design/inspiration_list.html:154
+#: dashboard/templates/dashboard/design/option_form.html:38
+#: dashboard/templates/dashboard/design/option_list.html:138
+#: dashboard/templates/dashboard/design/package_detail.html:142
+#: dashboard/templates/dashboard/design/package_detail.html:189
+#: dashboard/templates/dashboard/design/package_form.html:33
+#: dashboard/templates/dashboard/design/package_list.html:143
+#: dashboard/templates/dashboard/design/package_list.html:207
+#: dashboard/templates/dashboard/design/package_list.html:237
+#: dashboard/templates/dashboard/design/project_type_form.html:31
+#: dashboard/templates/dashboard/design/project_type_list.html:172
+#: dashboard/templates/dashboard/design/space_form.html:47
+#: dashboard/templates/dashboard/design/space_list.html:202
+#: dashboard/templates/dashboard/design/space_list.html:267
+#: dashboard/templates/dashboard/design/space_list.html:297
+#: dashboard/templates/dashboard/design/style_form.html:24
+#: dashboard/templates/dashboard/design/style_list.html:107
+#: dashboard/templates/dashboard/wizard/container.html:105
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:181
+#: dashboard/templates/users/designer_list.html:132
+#: dashboard/templates/users/designer_list.html:160
+#: dashboard/templates/users/details.html:27
+#: dashboard/templates/users/details.html:46
+#: dashboard/templates/users/list.html:153
+#: dashboard/templates/users/list.html:176
+#: user_auth/templates/auth/profile_edit.html:101
+msgid "Cancel"
+msgstr "Annuler"
+
+#: dashboard/templates/dashboard/admin/inquiry_detail.html:27
+msgid "Status Updated"
+msgstr "Statut mis à jour"#: dashboard/templates/dashboard/admin/inquiry_detail.html:28
+msgid "An email notification has been sent."
+msgstr "Une notification par e-mail a été envoyée."#: dashboard/templates/dashboard/admin/inquiry_detail.html:42
+#: dashboard/templates/dashboard/admin/project_detail.html:59
+#, fuzzy
+#| msgid "Detailed Information"
+msgid "Contact Information"
+msgstr "Informations détaillées"
+
+#: dashboard/templates/dashboard/admin/inquiry_detail.html:61
+#, fuzzy
+#| msgid "Total Users"
+msgid "Total Estimate"
+msgstr "Total des utilisateurs"
+
+#: dashboard/templates/dashboard/admin/inquiry_detail.html:69
+#, fuzzy
+#| msgid "Select sex"
+msgid "Selected Spaces"
+msgstr "Sélectionnez le sexe"
+
+#: dashboard/templates/dashboard/admin/inquiry_detail.html:82
+msgid "No spaces selected."
+msgstr "Aucun espace sélectionné."#: dashboard/templates/dashboard/admin/inquiry_list.html:17
+msgid "New design inquiries from the website"
+msgstr "Nouvelles demandes de design depuis le site web"#: dashboard/templates/dashboard/admin/inquiry_list.html:21
+#, fuzzy
+#| msgid "Filter Users"
+msgid "Filters active"
+msgstr "Filtrer les utilisateurs"
+
+#: dashboard/templates/dashboard/admin/inquiry_list.html:22
+#: dashboard/templates/dashboard/admin/inquiry_list.html:142
+#: dashboard/templates/users/designer_list.html:188
+#: dashboard/templates/users/list.html:208
+msgid "Clear"
+msgstr "Effacer"
+
+#: dashboard/templates/dashboard/admin/inquiry_list.html:26
+#: dashboard/templates/dashboard/admin/kanban.html:27
+#, fuzzy
+#| msgid "Filter Users"
+msgid "Filters"
+msgstr "Filtrer les utilisateurs"
+
+#: dashboard/templates/dashboard/admin/inquiry_list.html:49
+#: dashboard/templates/dashboard/admin/kanban.html:91
+#, fuzzy
+#| msgid "User Details"
+msgid "Details"
+msgstr "Détails de l'utilisateur"
+
+#: dashboard/templates/dashboard/admin/inquiry_list.html:52
+#: dashboard/templates/dashboard/admin/kanban.html:94
+#: dashboard/templates/dashboard/design/inspiration_list.html:65
+#: dashboard/templates/dashboard/design/option_list.html:58
+#: dashboard/templates/dashboard/design/package_detail.html:37
+#: dashboard/templates/dashboard/design/package_list.html:64
+#: dashboard/templates/dashboard/design/project_type_list.html:64
+#: dashboard/templates/dashboard/design/space_list.html:78
+#: dashboard/templates/dashboard/design/style_list.html:56
+#: dashboard/templates/users/designer_list.html:70
+#, fuzzy
+#| msgid "Deleted!"
+msgid "Delete"
+msgstr "Supprimé !"
+
+#: dashboard/templates/dashboard/admin/inquiry_list.html:67
+#: dashboard/templates/dashboard/wizard/step9_summary.html:30
+msgid "No spaces selected"
+msgstr "Aucun espace sélectionné"#: dashboard/templates/dashboard/admin/inquiry_list.html:81
+msgid "No inquiries yet."
+msgstr "Aucune demande pour le moment."#: dashboard/templates/dashboard/admin/inquiry_list.html:97
+#, fuzzy
+#| msgid "Delete User"
+msgid "Delete Inquiry"
+msgstr "Supprimer l'utilisateur"
+
+#: dashboard/templates/dashboard/admin/inquiry_list.html:98
+#, fuzzy
+#| msgid "Are you sure you want to approve %(name)s?"
+msgid "Are you sure you want to delete the inquiry from"
+msgstr "Êtes-vous sûr de vouloir approuver %(name)s ?"
+
+#: dashboard/templates/dashboard/admin/inquiry_list.html:103
+#, fuzzy
+#| msgid "Yes, delete it!"
+msgid "Yes, delete"
+msgstr "Oui, supprimer !"
+
+#: dashboard/templates/dashboard/admin/inquiry_list.html:111
+#, fuzzy
+#| msgid "Deleted!"
+msgid "Deleted"
+msgstr "Supprimé !"
+
+#: dashboard/templates/dashboard/admin/inquiry_list.html:127
+#, fuzzy
+#| msgid "Filter Users"
+msgid "Filter Inquiries"
+msgstr "Filtrer les utilisateurs"
+
+#: dashboard/templates/dashboard/admin/inquiry_list.html:133
+#: dashboard/templates/users/designer_list.html:179
+#: dashboard/templates/users/list.html:195
+#, fuzzy
+#| msgid "Search Keyword"
+msgid "Search"
+msgstr "Mot-clé de recherche"
+
+#: dashboard/templates/dashboard/admin/inquiry_list.html:134
+#: dashboard/templates/users/designer_list.html:180
+#: dashboard/templates/users/list.html:196
+msgid "Search by name or email..."
+msgstr "Rechercher par nom ou e-mail..."#: dashboard/templates/dashboard/admin/inquiry_list.html:138
+#: dashboard/templates/users/designer_list.html:184
+#: dashboard/templates/users/list.html:204 dashboard/views/users.py:49
+msgid "All Status"
+msgstr "Tous les statuts"
+
+#: dashboard/templates/dashboard/admin/inquiry_list.html:143
+#: dashboard/templates/dashboard/admin/kanban.html:142
+#: dashboard/templates/users/designer_list.html:189
+#: dashboard/templates/users/list.html:209
+msgid "Apply Filters"
+msgstr "Appliquer les filtres"
+
+#: dashboard/templates/dashboard/admin/kanban.html:17
+msgid "Manage and track all design projects"
+msgstr "Gérer et suivre tous les projets de design"#: dashboard/templates/dashboard/admin/kanban.html:22
+#, fuzzy
+#| msgid "Quick search..."
+msgid "Search..."
+msgstr "Recherche rapide..."
+
+#: dashboard/templates/dashboard/admin/kanban.html:37
+#, fuzzy
+#| msgid "Active Projects"
+msgid "Active filters:"
+msgstr "Projets actifs"
+
+#: dashboard/templates/dashboard/admin/kanban.html:41
+#, fuzzy
+#| msgid "Clear All"
+msgid "Clear all"
+msgstr "Tout effacer"
+
+#: dashboard/templates/dashboard/admin/kanban.html:76
+msgid "Anonymous"
+msgstr "Anonyme"#: dashboard/templates/dashboard/admin/kanban.html:79
+#: dashboard/templates/dashboard/pdf/quote.html:19
+msgid "Type"
+msgstr "Type"#: dashboard/templates/dashboard/admin/kanban.html:98
+#, fuzzy
+#| msgid "Active Projects"
+msgid "Delete Project?"
+msgstr "Projets actifs"
+
+#: dashboard/templates/dashboard/admin/kanban.html:99
+#: dashboard/templates/dashboard/design/inspiration_list.html:69
+#: dashboard/templates/dashboard/design/option_list.html:62
+#: dashboard/templates/dashboard/design/package_detail.html:36
+#: dashboard/templates/dashboard/design/package_list.html:68
+#: dashboard/templates/dashboard/design/project_type_list.html:68
+#: dashboard/templates/dashboard/design/space_list.html:82
+#: dashboard/templates/dashboard/design/style_list.html:60
+#: dashboard/templates/users/designer_list.html:69
+#, fuzzy
+#| msgid "You are about to delete %(name)s. This action cannot be undone!"
+msgid "This action cannot be undone."
+msgstr ""
+"Vous êtes sur le point de supprimer %(name)s. Cette action est irréversible !"
+
+#: dashboard/templates/dashboard/admin/kanban.html:111
+#, fuzzy
+#| msgid "No users found"
+msgid "No projects found"
+msgstr "Aucun utilisateur trouvé"
+
+#: dashboard/templates/dashboard/admin/kanban.html:112
+msgid "No design requests match the current filters."
+msgstr "Aucune demande de design ne correspond aux filtres actuels."#: dashboard/templates/dashboard/admin/kanban.html:113
+#, fuzzy
+#| msgid "Clear All"
+msgid "Clear filters"
+msgstr "Tout effacer"
+
+#: dashboard/templates/dashboard/admin/kanban.html:127
+#, fuzzy
+#| msgid "Active Projects"
+msgid "Filter Projects"
+msgstr "Projets actifs"
+
+#: dashboard/templates/dashboard/admin/kanban.html:134
+#, fuzzy
+#| msgid "All Status"
+msgid "All Statuses"
+msgstr "Tous les statuts"
+
+#: dashboard/templates/dashboard/admin/kanban.html:141
+#, fuzzy
+#| msgid "Reset All"
+msgid "Reset"
+msgstr "Tout réinitialiser"
+
+#: dashboard/templates/dashboard/admin/pricing.html:5
+#: dashboard/templates/dashboard/admin/pricing.html:10
+msgid "Pricing Rules"
+msgstr "Règles de tarification"#: dashboard/templates/dashboard/admin/pricing.html:11
+msgid "Configure pricing defaults for design requests"
+msgstr "Configurer les paramètres de tarification par défaut pour les demandes de design"#: dashboard/templates/dashboard/admin/pricing.html:20
+#, python-format
+msgid "Tax Rate (%%)"
+msgstr "Taux de taxe (%%)"#: dashboard/templates/dashboard/admin/pricing.html:36
+#, fuzzy
+#| msgid "Settings"
+msgid "Save Settings"
+msgstr "Paramètres"
+
+#: dashboard/templates/dashboard/admin/project_detail.html:18
+#, fuzzy
+#| msgid "Active Projects"
+msgid "Back to Projects"
+msgstr "Projets actifs"
+
+#: dashboard/templates/dashboard/admin/project_detail.html:67
+#, fuzzy
+#| msgid "Registered"
+msgid "Registered user"
+msgstr "Inscrit le"
+
+#: dashboard/templates/dashboard/admin/project_detail.html:81
+msgid "Anonymous submission"
+msgstr "Soumission anonyme"#: dashboard/templates/dashboard/admin/project_detail.html:108
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:97
+#, fuzzy
+#| msgid "User Details"
+msgid "Project Details"
+msgstr "Détails de l'utilisateur"
+
+#: dashboard/templates/dashboard/admin/project_detail.html:169
+#: dashboard/templates/dashboard/design/package_detail.html:53
+#: dashboard/templates/dashboard/design/package_list.html:74
+msgid "Delivery"
+msgstr "Livraison"#: dashboard/templates/dashboard/admin/project_detail.html:192
+msgid "Floors & Spaces"
+msgstr "Étages et espaces"#: dashboard/templates/dashboard/admin/project_detail.html:213
+msgid "No spaces"
+msgstr "Aucun espace"#: dashboard/templates/dashboard/admin/project_detail.html:227
+#: dashboard/templates/dashboard/customer/project_detail.html:144
+#: dashboard/templates/dashboard/design/package_detail.html:57
+#: dashboard/templates/dashboard/design/package_list.html:168
+#: dashboard/templates/dashboard/pdf/quote.html:26
+msgid "Options"
+msgstr "Options"#: dashboard/templates/dashboard/admin/project_detail.html:278
+msgid "No inspiration images selected."
+msgstr "Aucune image d'inspiration sélectionnée."#: dashboard/templates/dashboard/admin/project_detail.html:293
+#: dashboard/templates/dashboard/design/package_list.html:169
+#: dashboard/templates/dashboard/design/space_list.html:229
+#, fuzzy
+#| msgid "Take Action"
+msgid "Actions"
+msgstr "Passer à l'action"
+
+#: dashboard/templates/dashboard/admin/project_detail.html:299
+#: dashboard/templates/dashboard/admin/project_detail.html:313
+#, fuzzy
+#| msgid "Active Projects"
+msgid "Approve Project"
+msgstr "Projets actifs"
+
+#: dashboard/templates/dashboard/admin/project_detail.html:302
+#: dashboard/templates/dashboard/admin/project_detail.html:309
+#, fuzzy
+#| msgid "Active Projects"
+msgid "Decline Project"
+msgstr "Projets actifs"
+
+#: dashboard/templates/dashboard/admin/project_detail.html:306
+#: dashboard/templates/dashboard/admin/project_detail.html:316
+#, fuzzy
+#| msgid "Pending"
+msgid "Move to Pending"
+msgstr "En attente"
+
+#: dashboard/templates/dashboard/admin/project_detail.html:327
+#, fuzzy
+#| msgid "Active"
+msgid "Activity"
+msgstr "Actif"
+
+#: dashboard/templates/dashboard/admin/project_detail.html:347
+#: dashboard/templates/dashboard/customer/project_detail.html:112
+msgid "No activity yet."
+msgstr "Aucune activité pour le moment."#: dashboard/templates/dashboard/admin/project_detail.html:372
+msgid "Internal"
+msgstr "Interne"#: dashboard/templates/dashboard/admin/project_detail.html:380
+msgid "No notes yet."
+msgstr "Aucune note pour le moment."#: dashboard/templates/dashboard/admin/project_detail.html:391
+#: dashboard/templates/dashboard/customer/project_detail.html:148
+msgid "Files"
+msgstr "Fichiers"#: dashboard/templates/dashboard/chat/chat_widget.html:4
+msgid "Project Chat"
+msgstr "Discussion du projet"#: dashboard/templates/dashboard/chat/chat_widget.html:11
+msgid "Type a message..."
+msgstr "Tapez un message..."#: dashboard/templates/dashboard/customer/project_detail.html:44
+#, fuzzy
+#| msgid "Created At"
+msgid "Created"
+msgstr "Créé le"
+
+#: dashboard/templates/dashboard/customer/project_detail.html:49
+msgid "Not assigned"
+msgstr "Non assigné"#: dashboard/templates/dashboard/customer/project_detail.html:85
+msgid "No deliverables yet."
+msgstr "Aucun livrable pour le moment."#: dashboard/templates/dashboard/customer/project_detail.html:89
+msgid "No deliverables uploaded yet."
+msgstr "Aucun livrable n'a encore été téléchargé."#: dashboard/templates/dashboard/customer/project_detail.html:95
+msgid "Activity Timeline"
+msgstr "Chronologie d'activité"#: dashboard/templates/dashboard/customer/project_detail.html:128
+msgid "No messages yet."
+msgstr "Aucun message pour le moment."#: dashboard/templates/dashboard/customer/project_detail.html:134
+msgid "Project Summary"
+msgstr "Résumé du projet"#: dashboard/templates/dashboard/customer/project_list.html:47
+#, fuzzy
+#| msgid "User Details"
+msgid "View Details"
+msgstr "Détails de l'utilisateur"
+
+#: dashboard/templates/dashboard/customer/project_list.html:57
+msgid "No projects yet"
+msgstr "Aucun projet pour le moment"#: dashboard/templates/dashboard/customer/project_list.html:58
+msgid "Start your first design project today!"
+msgstr "Commencez votre premier projet de design aujourd'hui !"#: dashboard/templates/dashboard/customer/project_list.html:60
+#, fuzzy
+#| msgid "Active Projects"
+msgid "Start New Project"
+msgstr "Projets actifs"
+
+#: dashboard/templates/dashboard/design/inspiration_form.html:17
+#: dashboard/views/design.py:465 dashboard/views/design.py:489
+#: dashboard/views/design.py:512
+#, fuzzy
+#| msgid "Select sex"
+msgid "Select Space"
+msgstr "Sélectionnez le sexe"
+
+#: dashboard/templates/dashboard/design/inspiration_form.html:38
+#: dashboard/templates/dashboard/design/inspiration_list.html:57
+#: dashboard/templates/dashboard/design/option_form.html:37
+#: dashboard/templates/dashboard/design/option_list.html:49
+#: dashboard/templates/dashboard/design/package_detail.html:26
+#: dashboard/templates/dashboard/design/package_form.html:32
+#: dashboard/templates/dashboard/design/package_list.html:238
+#: dashboard/templates/dashboard/design/project_type_form.html:28
+#: dashboard/templates/dashboard/design/project_type_list.html:55
+#: dashboard/templates/dashboard/design/space_form.html:46
+#: dashboard/templates/dashboard/design/space_list.html:67
+#: dashboard/templates/dashboard/design/space_list.html:298
+#: dashboard/templates/dashboard/design/style_form.html:23
+#: dashboard/templates/dashboard/design/style_list.html:50
+msgid "Save"
+msgstr "Enregistrer"#: dashboard/templates/dashboard/design/inspiration_list.html:16
+msgid "Manage inspiration gallery images per space and style"
+msgstr "Gérer les images de la galerie d'inspiration par espace et style"#: dashboard/templates/dashboard/design/inspiration_list.html:21
+#: dashboard/views/design.py:487
+msgid "New Inspiration Image"
+msgstr "Nouvelle image d'inspiration"#: dashboard/templates/dashboard/design/inspiration_list.html:22
+#: dashboard/templates/dashboard/designer/project_detail.html:57
+msgid "Upload"
+msgstr "Téléverser"#: dashboard/templates/dashboard/design/inspiration_list.html:23
+msgid "New Image"
+msgstr "Nouvelle image"#: dashboard/templates/dashboard/design/inspiration_list.html:40
+#: dashboard/templates/dashboard/design/option_list.html:71
+#: dashboard/templates/dashboard/design/package_detail.html:50
+#: dashboard/templates/dashboard/design/package_list.html:55
+#: dashboard/templates/dashboard/design/project_type_list.html:45
+#: dashboard/templates/dashboard/design/space_list.html:97
+#, fuzzy
+#| msgid "Active"
+msgid "Inactive"
+msgstr "Actif"
+
+#: dashboard/templates/dashboard/design/inspiration_list.html:46
+msgid "Untitled"
+msgstr "Sans titre"#: dashboard/templates/dashboard/design/inspiration_list.html:53
+#: dashboard/templates/dashboard/design/option_list.html:45
+#: dashboard/templates/dashboard/design/project_type_list.html:51
+#: dashboard/templates/dashboard/design/space_list.html:63
+#: dashboard/templates/dashboard/design/style_list.html:46
+msgid "Edit"
+msgstr "Modifier"#: dashboard/templates/dashboard/design/inspiration_list.html:56
+msgid "Edit Image"
+msgstr "Modifier l'image"#: dashboard/templates/dashboard/design/inspiration_list.html:68
+#, fuzzy
+#| msgid "Delete User"
+msgid "Delete Image?"
+msgstr "Supprimer l'utilisateur"
+
+#: dashboard/templates/dashboard/design/inspiration_list.html:81
+msgid "No inspiration images yet"
+msgstr "Aucune image d'inspiration pour le moment"#: dashboard/templates/dashboard/design/inspiration_list.html:82
+msgid "Upload your first inspiration image to get started."
+msgstr "Téléversez votre première image d'inspiration pour commencer."#: dashboard/templates/dashboard/design/inspiration_list.html:99
+msgid "Add an inspiration image to the gallery"
+msgstr "Ajouter une image d'inspiration à la galerie"#: dashboard/templates/dashboard/design/inspiration_list.html:114
+#, fuzzy
+#| msgid "Select sex"
+msgid "Select a space"
+msgstr "Sélectionnez le sexe"
+
+#: dashboard/templates/dashboard/design/inspiration_list.html:121
+msgid "e.g. Modern Living Room Concept"
+msgstr "ex. Concept de salon moderne"#: dashboard/templates/dashboard/design/inspiration_list.html:133
+#: dashboard/templates/dashboard/design/project_type_list.html:151
+#: dashboard/templates/dashboard/design/space_list.html:181
+msgid "Click to upload"
+msgstr "Cliquez pour téléverser"#: dashboard/templates/dashboard/design/inspiration_list.html:134
+#: dashboard/templates/dashboard/design/project_type_list.html:152
+#: dashboard/templates/dashboard/design/space_list.html:182
+msgid "PNG, JPG up to 5MB"
+msgstr "PNG, JPG jusqu'à 5 Mo"#: dashboard/templates/dashboard/design/inspiration_list.html:146
+#: dashboard/templates/dashboard/design/option_list.html:133
+#: dashboard/templates/dashboard/design/package_list.html:133
+#: dashboard/templates/dashboard/design/project_type_list.html:164
+#: dashboard/templates/dashboard/design/space_list.html:194
+msgid "Published"
+msgstr "Publié"#: dashboard/templates/dashboard/design/inspiration_list.html:149
+msgid "Visible in design request inspirations step"
+msgstr "Visible dans l'étape inspirations de la demande de design"#: dashboard/templates/dashboard/design/option_list.html:17
+msgid "Manage extra design options and their prices"
+msgstr "Gérer les options de design supplémentaires et leurs prix"#: dashboard/templates/dashboard/design/option_list.html:22
+#: dashboard/templates/dashboard/design/option_list.html:24
+msgid "New Option"
+msgstr "Nouvelle option"#: dashboard/templates/dashboard/design/option_list.html:23
+#: dashboard/templates/dashboard/design/package_list.html:34
+#: dashboard/templates/dashboard/design/package_list.html:208
+#: dashboard/templates/dashboard/design/project_type_list.html:23
+#: dashboard/templates/dashboard/design/space_list.html:34
+#: dashboard/templates/dashboard/design/space_list.html:268
+#: dashboard/templates/dashboard/design/style_list.html:22
+#, fuzzy
+#| msgid "Created At"
+msgid "Create"
+msgstr "Créé le"
+
+#: dashboard/templates/dashboard/design/option_list.html:48
+msgid "Edit Option"
+msgstr "Modifier l'option"#: dashboard/templates/dashboard/design/option_list.html:61
+msgid "Delete Option?"
+msgstr "Supprimer l'option ?"#: dashboard/templates/dashboard/design/option_list.html:69
+#: dashboard/templates/dashboard/design/space_list.html:58
+msgid "General"
+msgstr "Général"#: dashboard/templates/dashboard/design/option_list.html:81
+#, fuzzy
+#| msgid "No notifications"
+msgid "No options yet"
+msgstr "Pas de notifications"
+
+#: dashboard/templates/dashboard/design/option_list.html:82
+msgid "Create your first option to get started."
+msgstr "Créez votre première option pour commencer."#: dashboard/templates/dashboard/design/option_list.html:99
+msgid "Configure design option details, pricing and availability"
+msgstr "Configurer les détails, le prix et la disponibilité de l'option de design"#: dashboard/templates/dashboard/design/option_list.html:109
+msgid "e.g. Extra Rendering"
+msgstr "ex. Rendu supplémentaire"#: dashboard/templates/dashboard/design/option_list.html:113
+msgid "Brief description of this option..."
+msgstr "Brève description de cette option..."#: dashboard/templates/dashboard/design/option_list.html:122
+msgid "e.g. Visualization"
+msgstr "ex. Visualisation"#: dashboard/templates/dashboard/design/option_list.html:135
+#: dashboard/templates/dashboard/design/project_type_list.html:167
+msgid "Available for selection in new design requests"
+msgstr "Disponible à la sélection dans les nouvelles demandes de design"#: dashboard/templates/dashboard/design/package_detail.html:16
+#, fuzzy
+#| msgid "Back to List"
+msgid "Back to Packages"
+msgstr "Retour à la liste"
+
+#: dashboard/templates/dashboard/design/package_detail.html:25
+#: dashboard/templates/dashboard/design/package_detail.html:30
+msgid "Edit Package"
+msgstr "Modifier le forfait"#: dashboard/templates/dashboard/design/package_detail.html:35
+#: dashboard/templates/dashboard/design/package_list.html:67
+#, fuzzy
+#| msgid "Delete User"
+msgid "Delete Package?"
+msgstr "Supprimer l'utilisateur"
+
+#: dashboard/templates/dashboard/design/package_detail.html:47
+#, fuzzy
+#| msgid "User Details"
+msgid "Package Details"
+msgstr "Détails de l'utilisateur"
+
+#: dashboard/templates/dashboard/design/package_detail.html:54
+#: dashboard/templates/dashboard/design/package_detail.html:80
+#: dashboard/templates/dashboard/design/package_detail.html:94
+#: dashboard/templates/dashboard/design/package_detail.html:176
+#: dashboard/templates/dashboard/design/package_list.html:75
+#: dashboard/templates/dashboard/design/space_list.html:93
+#: dashboard/templates/dashboard/design/space_list.html:167
+#: frontend/templates/home.html:60
+msgid "days"
+msgstr "jours"#: dashboard/templates/dashboard/design/package_detail.html:72
+msgid "Service Options"
+msgstr "Options de service"#: dashboard/templates/dashboard/design/package_detail.html:74
+#: dashboard/templates/dashboard/design/package_detail.html:160
+msgid "Add Option"
+msgstr "Ajouter une option"#: dashboard/templates/dashboard/design/package_detail.html:81
+#: dashboard/templates/dashboard/design/package_detail.html:107
+msgid "No options yet. Add one to get started."
+msgstr "Aucune option pour le moment. Ajoutez-en une pour commencer."#: dashboard/templates/dashboard/design/package_detail.html:82
+msgid "Remove this option?"
+msgstr "Supprimer cette option ?"#: dashboard/templates/dashboard/design/package_detail.html:100
+msgid "Remove"
+msgstr "Supprimer"#: dashboard/templates/dashboard/design/package_detail.html:129
+#: dashboard/templates/dashboard/design/package_list.html:119
+msgid "Package Name"
+msgstr "Nom du forfait"#: dashboard/templates/dashboard/design/package_detail.html:166
+msgid "e.g. Logo Design"
+msgstr "ex. Conception de logo"#: dashboard/templates/dashboard/design/package_detail.html:170
+msgid "0.00"
+msgstr "0,00"#: dashboard/templates/dashboard/design/package_detail.html:173
+msgid "Delivery Time"
+msgstr "Délai de livraison"#: dashboard/templates/dashboard/design/package_detail.html:181
+#, fuzzy
+#| msgid "Select sex"
+msgid "Select"
+msgstr "Sélectionnez le sexe"
+
+#: dashboard/templates/dashboard/design/package_detail.html:185
+msgid "Short description"
+msgstr "Description courte"#: dashboard/templates/dashboard/design/package_detail.html:191
+#, fuzzy
+#| msgid "Address"
+msgid "Add"
+msgstr "Adresse"
+
+#: dashboard/templates/dashboard/design/package_form.html:25
+msgid "Multiplied by the subtotal of selected spaces"
+msgstr "Multiplié par le sous-total des espaces sélectionnés"#: dashboard/templates/dashboard/design/package_list.html:17
+msgid "Manage design packages, options and pricing"
+msgstr "Gérer les forfaits de conception, les options et la tarification"#: dashboard/templates/dashboard/design/package_list.html:22
+#: dashboard/templates/dashboard/design/space_list.html:22
+msgid "Categories"
+msgstr "Catégories"#: dashboard/templates/dashboard/design/package_list.html:25
+#: dashboard/templates/dashboard/design/space_list.html:25
+msgid "View Categories"
+msgstr "Voir les catégories"#: dashboard/templates/dashboard/design/package_list.html:27
+#: dashboard/templates/dashboard/design/space_list.html:27
+msgid "Add Category"
+msgstr "Ajouter une catégorie"#: dashboard/templates/dashboard/design/package_list.html:33
+#: dashboard/templates/dashboard/design/package_list.html:35
+msgid "New Package"
+msgstr "Nouveau forfait"#: dashboard/templates/dashboard/design/package_list.html:60
+#, fuzzy
+#| msgid "Manage Users"
+msgid "Manage"
+msgstr "Gérer les utilisateurs"
+
+#: dashboard/templates/dashboard/design/package_list.html:79
+#, fuzzy
+#| msgid "Notifications"
+msgid "options"
+msgstr "Notifications"
+
+#: dashboard/templates/dashboard/design/package_list.html:88
+msgid "No packages yet"
+msgstr "Aucun forfait pour l'instant"#: dashboard/templates/dashboard/design/package_list.html:89
+msgid "Create your first package to get started."
+msgstr "Créez votre premier forfait pour commencer."#: dashboard/templates/dashboard/design/package_list.html:121
+msgid "e.g. Premium Design"
+msgstr "ex. Design Premium"#: dashboard/templates/dashboard/design/package_list.html:128
+msgid "Brief description..."
+msgstr "Brève description..."#: dashboard/templates/dashboard/design/package_list.html:139
+#: dashboard/templates/dashboard/design/space_list.html:197
+msgid "Visible for selection in new design requests"
+msgstr "Visible pour la sélection dans les nouvelles demandes de design"#: dashboard/templates/dashboard/design/package_list.html:173
+#: dashboard/templates/dashboard/design/space_list.html:233
+#: dashboard/templates/dashboard/wizard/container.html:70
+msgid "Loading..."
+msgstr "Chargement..."#: dashboard/templates/dashboard/design/package_list.html:179
+#: dashboard/templates/dashboard/design/space_list.html:239
+msgid "Close"
+msgstr "Fermer"#: dashboard/templates/dashboard/design/package_list.html:190
+#: dashboard/templates/dashboard/design/space_list.html:250
+#, fuzzy
+#| msgid "New Entry"
+msgid "New Category"
+msgstr "Nouvelle entrée"
+
+#: dashboard/templates/dashboard/design/package_list.html:220
+#: dashboard/templates/dashboard/design/space_list.html:280
+msgid "Edit Category"
+msgstr "Modifier la catégorie"#: dashboard/templates/dashboard/design/project_type_list.html:17
+msgid "Manage project types for design requests"
+msgstr "Gérer les types de projets pour les demandes de conception"#: dashboard/templates/dashboard/design/project_type_list.html:22
+#: dashboard/templates/dashboard/design/project_type_list.html:24
+#: dashboard/views/design.py:72
+msgid "New Project Type"
+msgstr "Nouveau type de projet"#: dashboard/templates/dashboard/design/project_type_list.html:54
+#: dashboard/views/design.py:90
+msgid "Edit Project Type"
+msgstr "Modifier le type de projet"#: dashboard/templates/dashboard/design/project_type_list.html:67
+msgid "Delete Project Type?"
+msgstr "Supprimer le type de projet ?"#: dashboard/templates/dashboard/design/project_type_list.html:89
+msgid "No project types yet"
+msgstr "Aucun type de projet pour l'instant"#: dashboard/templates/dashboard/design/project_type_list.html:90
+msgid "Create your first project type to get started."
+msgstr "Créez votre premier type de projet pour commencer."#: dashboard/templates/dashboard/design/project_type_list.html:108
+msgid "Configure project type details, image and availability"
+msgstr "Configurez les détails du type de projet, l'image et la disponibilité"#: dashboard/templates/dashboard/design/project_type_list.html:123
+msgid "e.g. Residential"
+msgstr "ex. Résidentiel"#: dashboard/templates/dashboard/design/project_type_list.html:130
+msgid "Brief description of this project type..."
+msgstr "Brève description de ce type de projet..."#: dashboard/templates/dashboard/design/project_type_list.html:146
+msgid "Project Type Image"
+msgstr "Image du type de projet"#: dashboard/templates/dashboard/design/space_list.html:17
+msgid "Manage spaces/rooms for design projects"
+msgstr "Gérer les espaces/pièces pour les projets de design"#: dashboard/templates/dashboard/design/space_list.html:33
+#: dashboard/templates/dashboard/design/space_list.html:35
+#: dashboard/views/design.py:191
+msgid "New Space"
+msgstr "Nouvel Espace"#: dashboard/templates/dashboard/design/space_list.html:66
+#: dashboard/views/design.py:212
+msgid "Edit Space"
+msgstr "Modifier l'Espace"#: dashboard/templates/dashboard/design/space_list.html:81
+#, fuzzy
+#| msgid "Delete User"
+msgid "Delete Space?"
+msgstr "Supprimer l'utilisateur"
+
+#: dashboard/templates/dashboard/design/space_list.html:107
+msgid "No spaces yet"
+msgstr "Aucun espace pour le moment"#: dashboard/templates/dashboard/design/space_list.html:108
+msgid "Create your first space to get started."
+msgstr "Créez votre premier espace pour commencer."#: dashboard/templates/dashboard/design/space_list.html:125
+msgid "Configure space details, pricing and availability"
+msgstr "Configurez les détails de l'espace, la tarification et la disponibilité"#: dashboard/templates/dashboard/design/space_list.html:138
+#, fuzzy
+#| msgid "Last Name"
+msgid "Space Name"
+msgstr "Nom"
+
+#: dashboard/templates/dashboard/design/space_list.html:140
+msgid "e.g. Living Room"
+msgstr "ex. Salon"#: dashboard/templates/dashboard/design/space_list.html:147
+msgid "Select a category"
+msgstr "Sélectionnez une catégorie"#: dashboard/templates/dashboard/design/space_list.html:163
+msgid "Duration"
+msgstr "Durée"#: dashboard/templates/dashboard/design/space_list.html:176
+msgid "Space Image"
+msgstr "Image de l'Espace"#: dashboard/templates/dashboard/design/style_list.html:16
+msgid "Manage interior design style categories"
+msgstr "Gérer les catégories de styles de design intérieur"#: dashboard/templates/dashboard/design/style_list.html:21
+#: dashboard/templates/dashboard/design/style_list.html:23
+#: dashboard/views/design.py:424
+#, fuzzy
+#| msgid "New Entry"
+msgid "New Style"
+msgstr "Nouvelle entrée"
+
+#: dashboard/templates/dashboard/design/style_list.html:49
+#: dashboard/views/design.py:438
+msgid "Edit Style"
+msgstr "Modifier le style"#: dashboard/templates/dashboard/design/style_list.html:59
+#, fuzzy
+#| msgid "Delete User"
+msgid "Delete Style?"
+msgstr "Supprimer l'utilisateur"
+
+#: dashboard/templates/dashboard/design/style_list.html:72
+msgid "No styles yet"
+msgstr "Aucun style pour le moment"#: dashboard/templates/dashboard/design/style_list.html:73
+msgid "Create your first style to get started."
+msgstr "Créez votre premier style pour commencer."#: dashboard/templates/dashboard/design/style_list.html:90
+msgid "Configure interior design style category details"
+msgstr "Configurer les détails de la catégorie de style de design intérieur"#: dashboard/templates/dashboard/design/style_list.html:100
+msgid "e.g. Modern"
+msgstr "ex. Moderne"#: dashboard/templates/dashboard/design/style_list.html:104
+msgid "Brief description of this style category..."
+msgstr "Brève description de cette catégorie de style..."#: dashboard/templates/dashboard/designer/project_detail.html:46
+msgid "Upload Deliverable"
+msgstr "Téléverser un livrable"#: dashboard/templates/dashboard/designer/project_detail.html:51
+msgid "Deliverable title"
+msgstr "Titre du livrable"#: dashboard/templates/dashboard/designer/project_detail.html:62
+msgid "Previous Deliverables"
+msgstr "Livrables précédents"#: dashboard/templates/dashboard/designer/project_detail.html:74
+msgid "Internal Notes"
+msgstr "Notes internes"#: dashboard/templates/dashboard/designer/project_detail.html:79
+msgid "Add a note..."
+msgstr "Ajouter une note..."#: dashboard/templates/dashboard/designer/project_detail.html:82
+msgid "Add Note"
+msgstr "Ajouter une note"#: dashboard/templates/dashboard/designer/project_detail.html:104
+#, fuzzy
+#| msgid "Client Meeting"
+msgid "Client Info"
+msgstr "Réunion client"
+
+#: dashboard/templates/dashboard/designer/project_detail.html:108
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:88
+#: dashboard/templates/users/details.html:125 user_auth/models.py:29
+#: user_auth/templates/auth/profile_edit.html:86
+msgid "Address"
+msgstr "Adresse"
+
+#: dashboard/templates/dashboard/designer/project_detail.html:121
+msgid "No revisions requested."
+msgstr "Aucune révision demandée."#: dashboard/templates/dashboard/designer/project_list.html:6
+#, fuzzy
+#| msgid "Active Projects"
+msgid "My Assigned Projects"
+msgstr "Projets actifs"
+
+#: dashboard/templates/dashboard/designer/project_list.html:44
+#, fuzzy
+#| msgid "Active Projects"
+msgid "Open Project"
+msgstr "Projets actifs"
+
+#: dashboard/templates/dashboard/designer/project_list.html:54
+msgid "No assigned projects"
+msgstr "Aucun projet assigné"#: dashboard/templates/dashboard/designer/project_list.html:55
+msgid "You will see projects here when an admin assigns them to you."
+msgstr "Vous verrez les projets ici lorsqu'un administrateur vous les assignera."#: dashboard/templates/dashboard/marketplace/cart.html:5
+#: dashboard/templates/dashboard/marketplace/cart.html:9
+msgid "Shopping Cart"
+msgstr "Panier"#: dashboard/templates/dashboard/marketplace/cart.html:44
+#: dashboard/templates/dashboard/marketplace/checkout.html:34
+msgid "Order Summary"
+msgstr "Résumé de la commande"#: dashboard/templates/dashboard/marketplace/cart.html:46
+#: dashboard/templates/dashboard/wizard/container.html:59
+#: dashboard/templates/dashboard/wizard/step1_combined.html:27
+#: dashboard/templates/dashboard/wizard/step3_spaces.html:9
+msgid "Subtotal"
+msgstr "Sous-total"#: dashboard/templates/dashboard/marketplace/cart.html:55
+msgid "Proceed to Checkout"
+msgstr "Passer à la caisse"#: dashboard/templates/dashboard/marketplace/cart.html:58
+msgid "Continue Shopping"
+msgstr "Continuer mes achats"#: dashboard/templates/dashboard/marketplace/cart.html:66
+msgid "Your cart is empty"
+msgstr "Votre panier est vide"#: dashboard/templates/dashboard/marketplace/cart.html:67
+#, fuzzy
+#| msgid "Products"
+msgid "Browse Products"
+msgstr "Produits"
+
+#: dashboard/templates/dashboard/marketplace/checkout.html:5
+#: dashboard/templates/dashboard/marketplace/checkout.html:9
+msgid "Checkout"
+msgstr "Passer à la caisse"#: dashboard/templates/dashboard/marketplace/checkout.html:15
+#, fuzzy
+#| msgid "Enter your username"
+msgid "Enter your shipping address"
+msgstr "Entrez votre nom d'utilisateur"
+
+#: dashboard/templates/dashboard/marketplace/checkout.html:27
+msgid "Bank Transfer"
+msgstr "Virement bancaire"#: dashboard/templates/dashboard/marketplace/checkout.html:47
+msgid "Place Order"
+msgstr "Passer la commande"#: dashboard/templates/dashboard/marketplace/orders.html:4
+#: dashboard/templates/dashboard/marketplace/orders.html:8
+msgid "My Orders"
+msgstr "Mes commandes"#: dashboard/templates/dashboard/marketplace/orders.html:45
+msgid "No orders yet"
+msgstr "Aucune commande pour l'instant"#: dashboard/templates/dashboard/marketplace/orders.html:46
+msgid "Start Shopping"
+msgstr "Commencer mes achats"#: dashboard/templates/dashboard/marketplace/product_detail.html:11
+#: dashboard/templates/dashboard/marketplace/product_list.html:5
+#: dashboard/templates/dashboard/marketplace/product_list.html:10
+msgid "Marketplace"
+msgstr "Marché"#: dashboard/templates/dashboard/marketplace/product_detail.html:35
+msgid "Add to Cart"
+msgstr "Ajouter au panier"#: dashboard/templates/dashboard/marketplace/product_detail.html:40
+msgid "Recommended For"
+msgstr "Recommandé pour"#: dashboard/templates/dashboard/marketplace/product_list.html:18
+msgid "All"
+msgstr "Tous"#: dashboard/templates/dashboard/marketplace/product_list.html:56
+#, fuzzy
+#| msgid "No users found"
+msgid "No products found"
+msgstr "Aucun utilisateur trouvé"
+
+#: dashboard/templates/dashboard/pdf/quote.html:14
+msgid "Design Quote"
+msgstr "Devis de design"#: dashboard/templates/dashboard/pdf/quote.html:29
+msgid "Thank you for choosing our design service!"
+msgstr "Merci d'avoir choisi notre service de design !"#: dashboard/templates/dashboard/wizard/container.html:5
+msgid "Design Service Request"
+msgstr "Demande de service de design"#: dashboard/templates/dashboard/wizard/container.html:21
+#: dashboard/templates/dashboard/wizard/container.html:131
+#, fuzzy
+#| msgid "Back to List"
+msgid "Back to Home"
+msgstr "Retour à la liste"
+
+#: dashboard/templates/dashboard/wizard/container.html:25
+#, fuzzy
+#| msgid "Terms of Service"
+msgid "Design Service"
+msgstr "Conditions d'utilisation"
+
+#: dashboard/templates/dashboard/wizard/container.html:57
+#: dashboard/templates/dashboard/wizard/container.html:126
+#: dashboard/templates/dashboard/wizard/step4_packages.html:26
+#: dashboard/templates/dashboard/wizard/step9_summary.html:53
+msgid "Estimated Total"
+msgstr "Total estimé"#: dashboard/templates/dashboard/wizard/container.html:101
+msgid "Click images to select. Submit when done."
+msgstr "Cliquez sur les images pour sélectionner. Soumettez lorsque vous avez terminé."#: dashboard/templates/dashboard/wizard/container.html:106
+msgid "Submit"
+msgstr "Soumettre"#: dashboard/templates/dashboard/wizard/container.html:119
+msgid "Request Under Review"
+msgstr "Demande en cours d'examen"#: dashboard/templates/dashboard/wizard/container.html:120
+msgid "Your design request has been submitted and is now under review."
+msgstr "Votre demande de design a été soumise et est maintenant en cours d'examen."#: dashboard/templates/dashboard/wizard/container.html:122
+#, fuzzy
+#| msgid "Phone Number"
+msgid "Project Number"
+msgstr "Numéro de téléphone"
+
+#: dashboard/templates/dashboard/wizard/container.html:129
+msgid "You will receive an email with your project number and next steps."
+msgstr "Vous recevrez un e-mail avec votre numéro de projet et les prochaines étapes."#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:6
+msgid "Project Questionnaire"
+msgstr "Questionnaire du projet"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:10
+msgid "Help us understand your project better"
+msgstr "Aidez-nous à mieux comprendre votre projet"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:14
+msgid "First, tell us who you are"
+msgstr "Tout d'abord, dites-nous qui vous êtes"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:19
+msgid "Normal Customer"
+msgstr "Client particulier"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:20
+msgid "Individual looking for design services"
+msgstr "Particulier recherchant des services de design"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:25
+msgid "Professional Customer"
+msgstr "Client professionnel"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:26
+msgid "Company or contractor needing design services"
+msgstr "Entreprise ou entrepreneur ayant besoin de services de design"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:35
+#, fuzzy
+#| msgid "User Details"
+msgid "Personal Details"
+msgstr "Détails de l'utilisateur"
+
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:57
+#, fuzzy
+#| msgid "Detailed Information"
+msgid "Personal Information"
+msgstr "Informations détaillées"
+
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:60
+#, fuzzy
+#| msgid "First Name"
+msgid "Full Name"
+msgstr "Prénom"
+
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:72
+msgid "WhatsApp"
+msgstr "WhatsApp"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:76
+msgid "Country"
+msgstr "Pays"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:80
+msgid "City"
+msgstr "Ville"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:84
+msgid "Company"
+msgstr "Entreprise"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:101
+msgid "e.g. My Dream Villa"
+msgstr "ex. Ma villa de rêve"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:104
+msgid "Budget (DA)"
+msgstr "Budget (DA)"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:105
+msgid "Estimated budget"
+msgstr "Budget estimé"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:108
+msgid "Timeline"
+msgstr "Délai"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:109
+#: dashboard/views/wizard.py:29
+#, fuzzy
+#| msgid "Select sex"
+msgid "Select timeline"
+msgstr "Sélectionnez le sexe"
+
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:112
+msgid "Property Type"
+msgstr "Type de propriété"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:113
+#: dashboard/views/wizard.py:36
+#, fuzzy
+#| msgid "Select sex"
+msgid "Select type"
+msgstr "Sélectionnez le sexe"
+
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:119
+msgid "Additional Questions"
+msgstr "Questions supplémentaires"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:124
+msgid "Need custom furniture?"
+msgstr "Besoin de mobilier sur mesure ?"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:130
+msgid "Need shopping assistance?"
+msgstr "Besoin d'aide pour les achats ?"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:136
+msgid "Need a contractor?"
+msgstr "Besoin d'un entrepreneur ?"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:142
+msgid "Need supervision?"
+msgstr "Besoin d'une supervision ?"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:146
+msgid "Preferred Colors"
+msgstr "Couleurs préférées"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:147
+msgid "e.g. Neutral, Earth tones..."
+msgstr "p. ex. Neutres, tons terreux..."#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:150
+msgid "Preferred Materials"
+msgstr "Matériaux préférés"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:151
+msgid "e.g. Wood, Marble..."
+msgstr "p. ex. Bois, Marbre..."#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:156
+msgid "Pets"
+msgstr "Animaux de compagnie"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:162
+msgid "Children"
+msgstr "Enfants"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:168
+#, fuzzy
+#| msgid "Possibilities"
+msgid "Accessibility Needs"
+msgstr "Possibilités"
+
+#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:172
+msgid "Additional Comments"
+msgstr "Commentaires supplémentaires"#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:173
+msgid "Any other details you want to share..."
+msgstr "Tout autre détail que vous souhaitez partager..."#: dashboard/templates/dashboard/wizard/questionnaire_modal.html:183
+msgid "Save & Continue"
+msgstr "Enregistrer et continuer"#: dashboard/templates/dashboard/wizard/step1_combined.html:4
+msgid "Project Details & Spaces"
+msgstr "Détails du projet et espaces"#: dashboard/templates/dashboard/wizard/step1_combined.html:5
+msgid "Tell us about your project and select the spaces you need"
+msgstr "Parlez-nous de votre projet et sélectionnez les espaces dont vous avez besoin"#: dashboard/templates/dashboard/wizard/step1_combined.html:12
+#: dashboard/templates/dashboard/wizard/step1_project_type.html:12
+#: dashboard/views/wizard.py:23 dashboard/views/wizard.py:56
+msgid "Choose project type"
+msgstr "Choisir le type de projet"#: dashboard/templates/dashboard/wizard/step1_combined.html:17
+#: dashboard/templates/dashboard/wizard/step1_project_type.html:17
+msgid "Number of Floors"
+msgstr "Nombre d'étages"#: dashboard/templates/dashboard/wizard/step1_combined.html:21
+#: dashboard/templates/dashboard/wizard/step1_project_type.html:21
+msgid "Specify how many floors your project covers"
+msgstr "Indiquez combien d'étages couvre votre projet"#: dashboard/templates/dashboard/wizard/step1_combined.html:40
+#: dashboard/templates/dashboard/wizard/step3_spaces.html:21
+msgid "Custom Space"
+msgstr "Espace personnalisé"#: dashboard/templates/dashboard/wizard/step1_combined.html:67
+#: dashboard/templates/dashboard/wizard/step3_spaces.html:48
+#, fuzzy
+#| msgid "Enter your username"
+msgid "Enter space name..."
+msgstr "Entrez votre nom d'utilisateur"
+
+#: dashboard/templates/dashboard/wizard/step1_project_type.html:4
+msgid "Project & Floors"
+msgstr "Projet et étages"#: dashboard/templates/dashboard/wizard/step1_project_type.html:5
+msgid "Select your project type and specify the number of floors"
+msgstr "Sélectionnez votre type de projet et indiquez le nombre d'étages"#: dashboard/templates/dashboard/wizard/step3_spaces.html:4
+msgid "Select Spaces Per Floor"
+msgstr "Sélectionner les espaces par étage"#: dashboard/templates/dashboard/wizard/step3_spaces.html:5
+msgid "Choose the rooms and spaces for each floor"
+msgstr "Choisissez les pièces et les espaces pour chaque étage"#: dashboard/templates/dashboard/wizard/step4_packages.html:4
+#, fuzzy
+#| msgid "Choose a file..."
+msgid "Choose a Package"
+msgstr "Choisir un fichier..."
+
+#: dashboard/templates/dashboard/wizard/step4_packages.html:5
+msgid "Select the service package that fits your needs"
+msgstr "Sélectionnez le forfait de service adapté à vos besoins"#: dashboard/templates/dashboard/wizard/step4_packages.html:12
+msgid "Your Estimate"
+msgstr "Votre estimation"#: dashboard/templates/dashboard/wizard/step4_packages.html:13
+msgid "Based on your selected spaces"
+msgstr "Selon les espaces sélectionnés"#: dashboard/templates/dashboard/wizard/step4_packages.html:17
+msgid "Base price (selected spaces)"
+msgstr "Prix de base (espaces sélectionnés)"#: dashboard/templates/dashboard/wizard/step4_packages.html:52
+msgid "Days"
+msgstr "Jours"#: dashboard/templates/dashboard/wizard/step4_packages.html:67
+msgid "What's included"
+msgstr "Ce qui est inclus"#: dashboard/templates/dashboard/wizard/step4_packages.html:75
+msgid "more"
+msgstr "plus"#: dashboard/templates/dashboard/wizard/step4_packages.html:83
+msgid "Choose"
+msgstr "Choisir"#: dashboard/templates/dashboard/wizard/step4_packages.html:83
+msgid "Basic"
+msgstr "Basique"#: dashboard/templates/dashboard/wizard/step4_packages.html:83
+msgid "Pro"
+msgstr "Pro"#: dashboard/templates/dashboard/wizard/step4_packages.html:83
+msgid "Premium"
+msgstr "Premium"#: dashboard/templates/dashboard/wizard/step6_inspirations.html:4
+msgid "Choose Inspiration Images"
+msgstr "Choisir des images d'inspiration"#: dashboard/templates/dashboard/wizard/step6_inspirations.html:5
+msgid "Select images for each space to guide your designer"
+msgstr "Sélectionnez des images pour chaque espace afin de guider votre designer"#: dashboard/templates/dashboard/wizard/step6_inspirations.html:29
+msgid "inspiration images"
+msgstr "images d'inspiration"#: dashboard/templates/dashboard/wizard/step6_inspirations.html:35
+#, fuzzy
+#| msgid "Detailed Information"
+msgid "Select Inspiration"
+msgstr "Informations détaillées"
+
+#: dashboard/templates/dashboard/wizard/step6_inspirations.html:55
+#, fuzzy
+#| msgid "New security update available."
+msgid "No inspiration images available."
+msgstr "Nouvelle mise à jour de sécurité disponible."
+
+#: dashboard/templates/dashboard/wizard/step7_questionnaire.html:4
+#, fuzzy
+#| msgid "Detailed Information"
+msgid "Your Contact Information"
+msgstr "Informations détaillées"
+
+#: dashboard/templates/dashboard/wizard/step7_questionnaire.html:5
+msgid "We'll send your design proposal to this email"
+msgstr "Nous enverrons votre proposition de design à cette adresse e-mail"#: dashboard/templates/dashboard/wizard/step7_questionnaire.html:15
+#: frontend/templates/order.html:55
+msgid "John"
+msgstr "John"#: dashboard/templates/dashboard/wizard/step7_questionnaire.html:19
+#: frontend/templates/order.html:59
+msgid "Doe"
+msgstr "Doe"#: dashboard/templates/dashboard/wizard/step7_questionnaire.html:27
+#, fuzzy
+#| msgid "Address"
+msgid "Email Address"
+msgstr "Adresse"
+
+#: dashboard/templates/dashboard/wizard/step7_questionnaire.html:28
+#: frontend/templates/order.html:63
+msgid "john@example.com"
+msgstr "john@example.com"#: dashboard/templates/dashboard/wizard/step7_questionnaire.html:32
+msgid "+213 555 123 456"
+msgstr "+213 555 123 456"#: dashboard/templates/dashboard/wizard/step9_summary.html:4
+msgid "Review & Submit"
+msgstr "Revoir et soumettre"#: dashboard/templates/dashboard/wizard/step9_summary.html:5
+msgid "Review your selections before submitting"
+msgstr "Vérifiez vos sélections avant de soumettre"#: dashboard/templates/dashboard/wizard/step9_summary.html:12
+#: dashboard/templates/dashboard/wizard/step9_summary.html:38
+msgid "Not selected"
+msgstr "Non sélectionné"#: dashboard/templates/dashboard/wizard/step9_summary.html:21
+msgid "Ground Floor"
+msgstr "Rez-de-chaussée"#: dashboard/templates/dashboard/wizard/step9_summary.html:45
+msgid "Inspirations"
+msgstr "Inspirations"#: dashboard/templates/dashboard/wizard/step9_summary.html:46
+msgid "No inspirations selected"
+msgstr "Aucune inspiration sélectionnée"#: dashboard/templates/dashboard/wizard/step9_summary.html:54
+#, python-format
+msgid "Including 19%% VAT"
+msgstr "TVA de 19%% incluse"#: dashboard/templates/dashboard/wizard/step9_summary.html:58
+msgid "Estimated delivery"
+msgstr "Délai de livraison estimé"#: dashboard/templates/dashboard/wizard/step9_summary.html:65
+msgid "I accept the terms and conditions"
+msgstr "J'accepte les termes et conditions"#: dashboard/templates/dashboard/wizard/step9_summary.html:70
+msgid ""
+"After submitting, you will receive a confirmation email with your project "
+"number and a link to track your project."
+msgstr "Après soumission, vous recevrez un e-mail de confirmation avec votre numéro de projet et un lien pour suivre votre projet."#: dashboard/templates/users/designer_list.html:6
+#: dashboard/templates/users/designer_list.html:15
+msgid "Designers"
+msgstr "Designers"#: dashboard/templates/users/designer_list.html:16
+msgid "Manage interior designers"
+msgstr "Gérer les designers d'intérieur"#: dashboard/templates/users/designer_list.html:21
+#: dashboard/templates/users/list.html:22
+#, fuzzy
+#| msgid "Filter Users"
+msgid "Filter"
+msgstr "Filtrer les utilisateurs"
+
+#: dashboard/templates/users/designer_list.html:26
+#: dashboard/templates/users/designer_list.html:105
+msgid "New Designer"
+msgstr "Nouveau Designer"#: dashboard/templates/users/designer_list.html:52
+#: dashboard/templates/users/list.html:84
+#, fuzzy
+#| msgid "Approved"
+msgid "Approve"
+msgstr "Approuvé"
+
+#: dashboard/templates/users/designer_list.html:61
+#: dashboard/templates/users/designer_list.html:159
+#: dashboard/templates/users/list.html:92
+#: dashboard/templates/users/list.html:177
+msgid "Assign"
+msgstr "Assigner"#: dashboard/templates/users/designer_list.html:68
+#, fuzzy
+#| msgid "Delete User"
+msgid "Delete Designer?"
+msgstr "Supprimer l'utilisateur"
+
+#: dashboard/templates/users/designer_list.html:80
+#: dashboard/templates/users/list.html:75
+#, fuzzy
+#| msgid "Active Projects"
+msgid "projects"
+msgstr "Projets actifs"
+
+#: dashboard/templates/users/designer_list.html:89
+#, fuzzy
+#| msgid "No users found"
+msgid "No designers found"
+msgstr "Aucun utilisateur trouvé"
+
+#: dashboard/templates/users/designer_list.html:90
+#, fuzzy
+#| msgid "Try adjusting your filters"
+msgid "Try adjusting your filters or add a new designer"
+msgstr "Essayez d'ajuster vos filtres"
+
+#: dashboard/templates/users/designer_list.html:131
+#: dashboard/templates/users/list.html:154
+msgid "Create & Send Credentials"
+msgstr "Créer et envoyer les identifiants"#: dashboard/templates/users/designer_list.html:145
+#: dashboard/templates/users/list.html:166
+#, fuzzy
+#| msgid "Active Projects"
+msgid "Assign to Project"
+msgstr "Projets actifs"
+
+#: dashboard/templates/users/designer_list.html:156
+#: dashboard/templates/users/list.html:173 dashboard/views/users.py:56
+msgid "Select a project..."
+msgstr "Sélectionnez un projet..."#: dashboard/templates/users/designer_list.html:173
+#, fuzzy
+#| msgid "Filter Users"
+msgid "Filter Designers"
+msgstr "Filtrer les utilisateurs"
 
 #: dashboard/templates/users/details.html:6
 msgid "User Details"
@@ -234,11 +2132,6 @@ msgstr "Êtes-vous sûr de vouloir approuver %(name)s ?"
 msgid "Yes, approve!"
 msgstr "Oui, approuver !"
 
-#: dashboard/templates/users/details.html:27
-#: dashboard/templates/users/details.html:45
-msgid "Cancel"
-msgstr "Annuler"
-
 #: dashboard/templates/users/details.html:28
 msgid "Success!"
 msgstr "Succès !"
@@ -247,400 +2140,665 @@ msgstr "Succès !"
 msgid "Approve User"
 msgstr "Approuver l'utilisateur"
 
-#: dashboard/templates/users/details.html:42
+#: dashboard/templates/users/details.html:43
 msgid "Are you sure?"
 msgstr "Êtes-vous sûr ?"
 
-#: dashboard/templates/users/details.html:43
+#: dashboard/templates/users/details.html:44
 #, python-format
 msgid "You are about to delete %(name)s. This action cannot be undone!"
-msgstr "Vous êtes sur le point de supprimer %(name)s. Cette action est irréversible !"
+msgstr ""
+"Vous êtes sur le point de supprimer %(name)s. Cette action est irréversible !"
 
-#: dashboard/templates/users/details.html:44
+#: dashboard/templates/users/details.html:45
 msgid "Yes, delete it!"
 msgstr "Oui, supprimer !"
 
-#: dashboard/templates/users/details.html:46
+#: dashboard/templates/users/details.html:47
 msgid "Deleted!"
 msgstr "Supprimé !"
 
-#: dashboard/templates/users/details.html:48
+#: dashboard/templates/users/details.html:49
 msgid "Delete User"
 msgstr "Supprimer l'utilisateur"
 
-#: dashboard/templates/users/details.html:73
-#: dashboard/templates/users/list.html:75
+#: dashboard/templates/users/details.html:75
 msgid "Account Status"
 msgstr "Statut du compte"
 
-#: dashboard/templates/users/details.html:75 dashboard/views/users.py:42
-msgid "Approved"
-msgstr "Approuvé"
-
-#: dashboard/templates/users/details.html:77 dashboard/views/dashboard.py:54
+#: dashboard/templates/users/details.html:79
 msgid "Pending Approval"
 msgstr "En attente d'approbation"
 
-#: dashboard/templates/users/details.html:81
+#: dashboard/templates/users/details.html:83
 msgid "Member Since"
 msgstr "Membre depuis"
 
-#: dashboard/templates/users/details.html:85
+#: dashboard/templates/users/details.html:87
 msgid "User ID"
 msgstr "ID Utilisateur"
 
-#: dashboard/templates/users/details.html:98
+#: dashboard/templates/users/details.html:100
 msgid "Detailed Information"
 msgstr "Informations détaillées"
 
-#: dashboard/templates/users/details.html:104
-#: dashboard/templates/users/list.html:133
-#: user_auth/templates/auth/signup.html:81
-msgid "Email"
-msgstr "E-mail"
-
-#: dashboard/templates/users/details.html:108
-#: dashboard/templates/users/list.html:143 user_auth/models.py:28
-#: user_auth/templates/auth/signup.html:94
-msgid "Phone Number"
-msgstr "Numéro de téléphone"
-
-#: dashboard/templates/users/details.html:112 user_auth/models.py:24
-#: user_auth/templates/auth/signup.html:105
+#: dashboard/templates/users/details.html:114 user_auth/models.py:24
+#: user_auth/templates/auth/profile_edit.html:72
+#: user_auth/templates/auth/signup.html:84
 msgid "Birth Date"
 msgstr "Date de naissance"
 
-#: dashboard/templates/users/details.html:116
+#: dashboard/templates/users/details.html:118
 msgid "Gender"
 msgstr "Sexe"
 
-#: dashboard/templates/users/details.html:123 user_auth/models.py:29
-msgid "Address"
-msgstr "Adresse"
-
-#: dashboard/templates/users/details.html:127 user_auth/models.py:23
+#: dashboard/templates/users/details.html:129 user_auth/models.py:23
+#: user_auth/templates/auth/profile_edit.html:93
 msgid "Bio"
 msgstr "Bio"
 
-#: dashboard/templates/users/details.html:128
+#: dashboard/templates/users/details.html:130
 msgid "No bio provided."
 msgstr "Aucune bio fournie."
 
-#: dashboard/templates/users/list.html:7
-msgid "Users List"
-msgstr "Liste des utilisateurs"
+#: dashboard/templates/users/list.html:6 dashboard/templates/users/list.html:16
+#, fuzzy
+#| msgid "User"
+msgid "Users"
+msgstr "Utilisateur"
 
-#: dashboard/templates/users/list.html:22
-msgid "Filter Users"
-msgstr "Filtrer les utilisateurs"
-
-#: dashboard/templates/users/list.html:30
-msgid "Clear All"
-msgstr "Tout effacer"
-
-#: dashboard/templates/users/list.html:31
-msgid "Clear"
-msgstr "Effacer"
-
-#: dashboard/templates/users/list.html:40
-msgid "Quick search..."
-msgstr "Recherche rapide..."
-
-#: dashboard/templates/users/list.html:56
-msgid "Advanced Filter"
-msgstr "Filtre avancé"
-
-#: dashboard/templates/users/list.html:65
-msgid "Search Keyword"
-msgstr "Mot-clé de recherche"
-
-#: dashboard/templates/users/list.html:69
-msgid "Name, Username, Email..."
-msgstr "Nom, Utilisateur, Email..."
-
-#: dashboard/templates/users/list.html:81
-msgid "Reset All"
-msgstr "Tout réinitialiser"
-
-#: dashboard/templates/users/list.html:84
-msgid "Apply Filters"
-msgstr "Appliquer les filtres"
-
-#: dashboard/templates/users/list.html:110 dashboard/views/users.py:43
-msgid "Pending"
-msgstr "En attente"
-
-#: dashboard/templates/users/list.html:151
-msgid "View Full Profile"
-msgstr "Voir le profil complet"
-
-#: dashboard/templates/users/list.html:156
-msgid "Registered"
-msgstr "Inscrit le"
-
-#: dashboard/templates/users/list.html:167
+#: dashboard/templates/users/list.html:17
+msgid "Manage customers and designers"
+msgstr "Gérer les clients et les designers"#: dashboard/templates/users/list.html:26
+#: dashboard/templates/users/list.html:126
+msgid "Add Designer"
+msgstr "Ajouter un Designer"#: dashboard/templates/users/list.html:109
 msgid "No users found"
 msgstr "Aucun utilisateur trouvé"
 
-#: dashboard/templates/users/list.html:168
+#: dashboard/templates/users/list.html:110
 msgid "Try adjusting your filters"
 msgstr "Essayez d'ajuster vos filtres"
 
-#: dashboard/utils.py:18
-msgid "Your SOC Account has been Activated!"
+#: dashboard/templates/users/list.html:148
+msgid "Phone (optional)"
+msgstr "Téléphone (facultatif)"#: dashboard/templates/users/list.html:189
+msgid "Filter Users"
+msgstr "Filtrer les utilisateurs"
+
+#: dashboard/templates/users/list.html:199 user_auth/models.py:38
+msgid "Role"
+msgstr "Rôle"#: dashboard/templates/users/list.html:200
+msgid "All Roles"
+msgstr "Tous les rôles"#: dashboard/utils.py:20
+msgid "A project type with this name already exists."
+msgstr "Un type de projet avec ce nom existe déjà."#: dashboard/utils.py:21
+#, fuzzy
+#| msgid "This email is already registered."
+msgid "This sort order is already taken."
+msgstr "Cet e-mail est déjà enregistré."
+
+#: dashboard/utils.py:22
+msgid "A space with this name already exists."
+msgstr "Un espace avec ce nom existe déjà."#: dashboard/utils.py:23
+msgid "A design option with this name already exists."
+msgstr "Une option de design avec ce nom existe déjà."#: dashboard/utils.py:24
+msgid "A style category with this name already exists."
+msgstr "Une catégorie de style avec ce nom existe déjà."#: dashboard/utils.py:25
+msgid "This space is already linked to this project type."
+msgstr "Cet espace est déjà lié à ce type de projet."#: dashboard/utils.py:26
+msgid "A product category with this name already exists."
+msgstr "Une catégorie de produit avec ce nom existe déjà."#: dashboard/utils.py:27
+msgid "A product with this name already exists."
+msgstr "Un produit avec ce nom existe déjà."#: dashboard/utils.py:28
+msgid "A product with this SKU already exists."
+msgstr "Un produit avec cette référence (SKU) existe déjà."#: dashboard/utils.py:29
+msgid "This product is already recommended for this space."
+msgstr "Ce produit est déjà recommandé pour cet espace."#: dashboard/utils.py:43 dashboard/utils.py:48
+#, fuzzy, python-format
+#| msgid "This email is already registered."
+msgid "%(field)s already exists."
+msgstr "Cet e-mail est déjà enregistré."
+
+#: dashboard/utils.py:49
+msgid "A record with the same value already exists."
+msgstr "Un enregistrement avec la même valeur existe déjà."#: dashboard/utils.py:57
+#, fuzzy, python-format
+#| msgid "Your SOC Account has been Activated!"
+msgid "Your %(site)s Account has been Activated!"
 msgstr "Votre compte a été activé !"
 
-#: dashboard/views/dashboard.py:19
-msgid "System Alert"
-msgstr "Alerte système"
-
-#: dashboard/views/dashboard.py:20
-msgid "New security update available."
-msgstr "Nouvelle mise à jour de sécurité disponible."
-
-#: dashboard/views/dashboard.py:25
-msgid "Welcome"
-msgstr "Bienvenue"
-
-#: dashboard/views/dashboard.py:26
-msgid "Welcome to your new dashboard!"
-msgstr "Bienvenue dans votre nouveau tableau de bord !"
-
-#: dashboard/views/dashboard.py:42
-msgid "Total Users"
-msgstr "Total des utilisateurs"
-
-#: dashboard/views/dashboard.py:48
-msgid "Approved Users"
-msgstr "Utilisateurs approuvés"
-
-#: dashboard/views/dashboard.py:60
-msgid "Staff Members"
-msgstr "Membres du personnel"
-
-#: dashboard/views/dashboard.py:65
-msgid "Registration Trends"
-msgstr "Tendances d'inscription"
-
-#: dashboard/views/dashboard.py:67
-msgid "Jan"
-msgstr "Jan"
-
-#: dashboard/views/dashboard.py:67
-msgid "Feb"
-msgstr "Fév"
-
-#: dashboard/views/dashboard.py:67
-msgid "Mar"
-msgstr "Mar"
-
-#: dashboard/views/dashboard.py:72
-msgid "Recent Registrations"
-msgstr "Inscriptions récentes"
-
-#: dashboard/views/dashboard.py:83
-msgid "Active Projects"
-msgstr "Projets actifs"
-
-#: dashboard/views/dashboard.py:90
-msgid "Completed Tasks"
-msgstr "Tâches terminées"
-
-#: dashboard/views/dashboard.py:97
-msgid "Pending Actions"
-msgstr "Actions en attente"
-
-#: dashboard/views/dashboard.py:104
-msgid "Total Hours"
-msgstr "Total d'heures"
-
-#: dashboard/views/dashboard.py:109
-msgid "Weekly Activity"
-msgstr "Activité hebdomadaire"
-
-#: dashboard/views/dashboard.py:111
-msgid "Upcoming Tasks"
-msgstr "Tâches à venir"
-
-#: dashboard/views/dashboard.py:113
-msgid "Launch Website"
-msgstr "Lancer le site web"
-
-#: dashboard/views/dashboard.py:114
-msgid "Database Migration"
-msgstr "Migration de base de données"
-
-#: dashboard/views/dashboard.py:115
-msgid "Client Meeting"
-msgstr "Réunion client"
-
-#: dashboard/views/users.py:41 dashboard/views/users.py:46
-msgid "All Status"
-msgstr "Tous les statuts"
-
-#: dashboard/views/users.py:80
+#: dashboard/views/admin_crm.py:65 dashboard/views/admin_crm.py:192
+msgid "Status update failed. Email could not be sent."
+msgstr "La mise à jour du statut a échoué. L'e-mail n'a pas pu être envoyé."#: dashboard/views/admin_crm.py:68
 #, python-format
-msgid "User %(name)s deleted successfully."
+msgid "Status updated to %(status)s."
+msgstr "Statut mis à jour vers %(status)s."#: dashboard/views/admin_crm.py:69 dashboard/views/admin_crm.py:195
+msgid "Invalid status."
+msgstr "Statut invalide."#: dashboard/views/admin_crm.py:70 dashboard/views/admin_crm.py:139
+#: dashboard/views/design.py:102 dashboard/views/design.py:128
+#: dashboard/views/design.py:142 dashboard/views/design.py:155
+#: dashboard/views/design.py:224 dashboard/views/design.py:316
+#: dashboard/views/design.py:330 dashboard/views/design.py:342
+#: dashboard/views/design.py:368 dashboard/views/design.py:382
+#: dashboard/views/design.py:395 dashboard/views/design.py:450
+#: dashboard/views/design.py:525 dashboard/views/users.py:155
+#: dashboard/views/users.py:183
+msgid "Invalid request."
+msgstr "Requête invalide."#: dashboard/views/admin_crm.py:108
+#, fuzzy, python-format
+#| msgid "User %(name)s deleted successfully."
+msgid "Project %(name)s deleted."
 msgstr "Utilisateur %(name)s supprimé avec succès."
 
-#: dashboard/views/users.py:107
-msgid "Failed to send activation email. Approval cancelled."
-msgstr "Échec de l'envoi de l'e-mail d'activation."
+#: dashboard/views/admin_crm.py:126 dashboard/views/users.py:172
+msgid "New Assignment"
+msgstr "Nouvelle assignation"#: dashboard/views/admin_crm.py:133 dashboard/views/users.py:178
+#: frontend/views/design_service.py:15
+msgid "Designer Assigned"
+msgstr "Designer assigné"#: dashboard/views/admin_crm.py:137
+msgid "Designer assigned."
+msgstr "Designer assigné."#: dashboard/views/admin_crm.py:138
+msgid "Designer not specified."
+msgstr "Designer non spécifié."#: dashboard/views/admin_crm.py:194
+msgid "Status updated."
+msgstr "Statut mis à jour."#: dashboard/views/admin_crm.py:211
+#, fuzzy, python-format
+#| msgid "User %(name)s deleted successfully."
+msgid "Inquiry %(name)s deleted."
+msgstr "Utilisateur %(name)s supprimé avec succès."
 
-#: dashboard/views/users.py:113
-#, python-format
-msgid "User %(name)s approved successfully."
+#: dashboard/views/chat.py:22 dashboard/views/chat.py:70
+#: dashboard/views/file_manager.py:25 dashboard/views/file_manager.py:55
+msgid "Access denied."
+msgstr "Accès refusé."#: dashboard/views/chat.py:28
+msgid "Message is empty."
+msgstr "Le message est vide."#: dashboard/views/chat.py:50 dashboard/views/chat.py:56
+msgid "New Message"
+msgstr "Nouveau message"#: dashboard/views/chat.py:51
+msgid "Sent a message in the project chat"
+msgstr "A envoyé un message dans la discussion du projet"#: dashboard/views/chat.py:58
+msgid "Message sent."
+msgstr "Message envoyé."#: dashboard/views/chat.py:78
+#, fuzzy
+#| msgid "System Alert"
+msgid "System"
+msgstr "Alerte système"
+
+#: dashboard/views/design.py:63 dashboard/views/design.py:122
+#: dashboard/views/design.py:182 dashboard/views/design.py:247
+#: dashboard/views/design.py:362 dashboard/views/design.py:418
+#, fuzzy
+#| msgid "Last name is required."
+msgid "Name is required."
+msgstr "Le nom est requis."
+
+#: dashboard/views/design.py:69
+#, fuzzy
+#| msgid "Your account has been created successfully."
+msgid "Project type created successfully."
+msgstr "Votre compte a été créé avec succès."
+
+#: dashboard/views/design.py:87
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "Project type updated successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/design.py:99
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "Project type deleted successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/design.py:125 dashboard/views/design.py:365
+#, fuzzy
+#| msgid "Your account has been created successfully."
+msgid "Category created successfully."
+msgstr "Votre compte a été créé avec succès."
+
+#: dashboard/views/design.py:139 dashboard/views/design.py:379
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "Category updated successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/design.py:152 dashboard/views/design.py:392
+#, fuzzy, python-format
+#| msgid "User %(name)s deleted successfully."
+msgid "Category \"%(name)s\" deleted."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/design.py:167
+msgid "No Category"
+msgstr "Aucune catégorie"#: dashboard/views/design.py:188
+#, fuzzy
+#| msgid "Your account has been created successfully."
+msgid "Space created successfully."
+msgstr "Votre compte a été créé avec succès."
+
+#: dashboard/views/design.py:209
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "Space updated successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/design.py:221
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "Space deleted successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/design.py:253
+#, fuzzy
+#| msgid "Your account has been created successfully."
+msgid "Package created successfully."
+msgstr "Votre compte a été créé avec succès."
+
+#: dashboard/views/design.py:268
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "Package updated successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/design.py:292
+#, fuzzy
+#| msgid "Last name is required."
+msgid "Option name is required."
+msgstr "Le nom est requis."
+
+#: dashboard/views/design.py:303
+msgid "Option added."
+msgstr "Option ajoutée."#: dashboard/views/design.py:327
+msgid "Option removed."
+msgstr "Option supprimée."#: dashboard/views/design.py:339
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "Package deleted successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/design.py:421
+#, fuzzy
+#| msgid "Your account has been created successfully."
+msgid "Style created successfully."
+msgstr "Votre compte a été créé avec succès."
+
+#: dashboard/views/design.py:435
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "Style updated successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/design.py:447
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "Style deleted successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/design.py:477
+#, fuzzy
+#| msgid "Last name is required."
+msgid "Space and image are required."
+msgstr "Le nom est requis."
+
+#: dashboard/views/design.py:482
+#, fuzzy
+#| msgid "Your account has been created successfully."
+msgid "Inspiration image created successfully."
+msgstr "Votre compte a été créé avec succès."
+
+#: dashboard/views/design.py:504
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "Inspiration image updated successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/design.py:509
+msgid "Edit Inspiration Image"
+msgstr "Modifier l'image d'inspiration"#: dashboard/views/design.py:522
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "Inspiration image deleted successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/file_manager.py:29
+#, fuzzy
+#| msgid "No bio provided."
+msgid "No file provided."
+msgstr "Aucune bio fournie."
+
+#: dashboard/views/file_manager.py:34
+msgid "File type not supported."
+msgstr "Type de fichier non pris en charge."#: dashboard/views/file_manager.py:43
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "File uploaded successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/genric.py:15
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "Deleted successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/marketplace.py:57
+msgid "Added to cart."
+msgstr "Ajouté au panier."#: dashboard/views/marketplace.py:67 dashboard/views/marketplace.py:78
+msgid "Item removed."
+msgstr "Article supprimé."#: dashboard/views/marketplace.py:70
+msgid "Cart updated."
+msgstr "Panier mis à jour."#: dashboard/views/marketplace.py:100
+msgid "Cart is empty."
+msgstr "Le panier est vide."#: dashboard/views/marketplace.py:120
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "Order placed successfully!"
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/notifications.py:50
+#, fuzzy
+#| msgid "Notifications"
+msgid "Notification updated."
+msgstr "Notifications"
+
+#: dashboard/views/notifications.py:58
+#, fuzzy
+#| msgid "No notifications"
+msgid "All notifications updated."
+msgstr "Pas de notifications"
+
+#: dashboard/views/notifications.py:65
+#, fuzzy
+#| msgid "Notifications"
+msgid "Notification deleted."
+msgstr "Notifications"
+
+#: dashboard/views/pricing.py:21
+#, fuzzy
+#| msgid "Your account has been created successfully."
+msgid "Pricing settings updated successfully."
+msgstr "Votre compte a été créé avec succès."
+
+#: dashboard/views/users.py:78
+#, fuzzy, python-format
+#| msgid "User %(name)s deleted successfully."
+msgid "Designer %(name)s deleted successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
+
+#: dashboard/views/users.py:93
+#, fuzzy, python-format
+#| msgid "User %(name)s approved successfully."
+msgid "Designer %(name)s approved successfully."
 msgstr "Utilisateur %(name)s approuvé avec succès."
 
-#: dashboard/views/users.py:121
+#: dashboard/views/users.py:107
+msgid "Email is required."
+msgstr "L'e-mail est requis."
+
+#: dashboard/views/users.py:109
+#, fuzzy
+#| msgid "First name is required."
+msgid "First and last name are required."
+msgstr "Le prénom est requis."
+
+#: dashboard/views/users.py:113
+#, fuzzy
+#| msgid "This email is already registered."
+msgid "A user with this email already exists."
+msgstr "Cet e-mail est déjà enregistré."
+
+#: dashboard/views/users.py:141
+#, fuzzy
+#| msgid "Your SOC Account has been Activated!"
+msgid "Your Designer Account Has Been Created"
+msgstr "Votre compte a été activé !"
+
+#: dashboard/views/users.py:145
+#, fuzzy
+#| msgid "Failed to send activation email. Approval cancelled."
+msgid "Failed to send credentials email."
+msgstr "Échec de l'envoi de l'e-mail d'activation."
+
+#: dashboard/views/users.py:149
 #, python-format
-msgid "An error occurred during approval: %(error)s"
-msgstr "Une erreur est survenue lors de l'approbation : %(error)s"
+msgid "Designer %(name)s created successfully. Credentials sent to %(email)s."
+msgstr "Designer %(name)s créé avec succès. Identifiants envoyés à %(email)s."#: dashboard/views/users.py:164
+msgid "Designer and project are required."
+msgstr "Le designer et le projet sont requis."#: dashboard/views/users.py:173
+#, python-format
+msgid "You have been assigned to project %(number)s"
+msgstr "Vous avez été assigné au projet %(number)s"#: dashboard/views/users.py:179
+#, python-format
+msgid "Designer %(name)s has been assigned to your project"
+msgstr "Le designer %(name)s a été assigné à votre projet"#: dashboard/views/users.py:182
+#, fuzzy
+#| msgid "User %(name)s deleted successfully."
+msgid "Designer assigned successfully."
+msgstr "Utilisateur %(name)s supprimé avec succès."
 
-#: frontend/templates/home.html:24 user_auth/templates/auth/login.html:10
-#: user_auth/templates/auth/login.html:92
-#: user_auth/templates/auth/signup.html:182
-msgid "Login"
-msgstr "Connexion"
-
-#: frontend/templates/home.html:25
+#: dashboard/views/wizard.py:25
+msgid "Project & Spaces"
+msgstr "Projet & Espaces"#: dashboard/views/wizard.py:26
+msgid "Contact"
+msgstr "Contact"#: dashboard/views/wizard.py:26
+msgid "Summary"
+msgstr "Résumé"#: dashboard/views/wizard.py:30
+msgid "ASAP (Within 2 weeks)"
+msgstr "Dès que possible (sous 2 semaines)"#: dashboard/views/wizard.py:31
+msgid "Normal (1-2 months)"
+msgstr "Normal (1 à 2 mois)"#: dashboard/views/wizard.py:32
+msgid "Relaxed (2-3 months)"
+msgstr "Détendu (2 à 3 mois)"#: dashboard/views/wizard.py:33
+msgid "Flexible (No deadline)"
+msgstr "Flexible (sans échéance)"#: dashboard/views/wizard.py:37
+msgid "New Construction"
+msgstr "Nouvelle construction"#: dashboard/views/wizard.py:38
+msgid "Renovation"
+msgstr "Rénovation"#: dashboard/views/wizard.py:39
+msgid "Occupied"
+msgstr "Occupé"#: dashboard/views/wizard.py:40
+msgid "Vacant"
+msgstr "Vacant"#: dashboard/views/wizard.py:183
+msgid "Design request submitted successfully!"
+msgstr "Demande de design soumise avec succès !"#: frontend/templates/frontend/design_service.html:5
+msgid "Design Service — Professional Interior Design"
+msgstr "Service de Design — Design d'Intérieur Professionnel"#: frontend/templates/frontend/design_service.html:21
+msgid "Professional Design Service"
+msgstr "Service de Design Professionnel"#: frontend/templates/frontend/design_service.html:23
+msgid "Transform Your Space Into a Masterpiece"
+msgstr "Transformez Votre Espace en Chef-d'Œuvre"#: frontend/templates/frontend/design_service.html:24
+msgid ""
+"From concept to completion, our expert designers bring your vision to life. "
+"Choose your style, select your spaces, and let us handle the rest."
+msgstr "Du concept à la réalisation, nos designers experts donnent vie à votre vision. Choisissez votre style, sélectionnez vos espaces, et laissez-nous nous occuper du reste."#: frontend/templates/frontend/design_service.html:27
+msgid "Start My Project"
+msgstr "Démarrer Mon Projet"#: frontend/templates/frontend/design_service.html:30
+msgid "Learn More"
+msgstr "En Savoir Plus"#: frontend/templates/frontend/design_service.html:38
+msgid "Professional Interior Design"
+msgstr "Design d'Intérieur Professionnel"#: frontend/templates/frontend/design_service.html:50
+msgid "Why Choose Our Design Service?"
+msgstr "Pourquoi Choisir Notre Service de Design ?"#: frontend/templates/frontend/design_service.html:51
+msgid ""
+"We make professional interior design accessible, affordable, and enjoyable"
+msgstr "Nous rendons le design d'intérieur professionnel accessible, abordable et agréable"#: frontend/templates/frontend/design_service.html:57
+msgid "Expert Designers"
+msgstr "Designers Experts"#: frontend/templates/frontend/design_service.html:58
+msgid ""
+"Work with experienced professional designers who understand your vision."
+msgstr "Travaillez avec des designers professionnels expérimentés qui comprennent votre vision."#: frontend/templates/frontend/design_service.html:64
+msgid "Transparent Pricing"
+msgstr "Tarification transparente"#: frontend/templates/frontend/design_service.html:65
+msgid "Know exactly what you pay with our clear, upfront pricing model."
+msgstr "Sachez exactement ce que vous payez grâce à notre modèle de tarification claire et anticipée."#: frontend/templates/frontend/design_service.html:71
+msgid "Fast Delivery"
+msgstr "Livraison rapide"#: frontend/templates/frontend/design_service.html:72
+msgid "Get your designs delivered within your timeline, no endless waiting."
+msgstr "Recevez vos designs dans les délais impartis, sans attente interminable."#: frontend/templates/frontend/design_service.html:83
+msgid "How It Works"
+msgstr "Comment ça marche"#: frontend/templates/frontend/design_service.html:84
+msgid "Six simple steps to your dream space"
+msgstr "Six étapes simples vers l'espace de vos rêves"#: frontend/templates/frontend/design_service.html:101
+msgid "Start Your Project Now"
+msgstr "Commencez votre projet maintenant"#: frontend/templates/frontend/design_service.html:111
+msgid "Our Packages"
+msgstr "Nos forfaits"#: frontend/templates/frontend/design_service.html:112
+msgid "Choose the package that suits your needs"
+msgstr "Choisissez le forfait qui correspond à vos besoins"#: frontend/templates/frontend/design_service.html:120
+msgid "Most Popular"
+msgstr "Le plus populaire"#: frontend/templates/frontend/design_service.html:131
+msgid "Multiplier"
+msgstr "Multiplicateur"#: frontend/templates/frontend/design_service.html:136
 msgid "Get Started"
 msgstr "Commencer"
 
-#: frontend/templates/home.html:53
-msgid "Launch Now"
-msgstr "Lancer maintenant"
-
-#: frontend/templates/home.html:56
-msgid "See Features"
-msgstr "Voir les fonctionnalités"
-
-#: frontend/templates/home.html:68
-msgid "Supercharged Features"
-msgstr "Fonctionnalités suralimentées"
-
-#: frontend/templates/home.html:69
-msgid "Designed for modern developers and scaling startups."
-msgstr "Conçu pour les développeurs modernes et les startups en pleine croissance."
-
-#: frontend/templates/home.html:74
-msgid "Scalable Architecture"
-msgstr "Architecture évolutive"
-
-#: frontend/templates/home.html:75
-msgid "A clean, modular structure that grows with your team and complexity."
-msgstr "Une structure modulaire qui grandit avec votre équipe."
-
-#: frontend/templates/home.html:79
-msgid "Auth Ready"
-msgstr "Authentification prête"
-
-#: frontend/templates/home.html:80
-msgid "Secure login and signup out of the box."
-msgstr "Connexion et inscription sécurisées prêtes à l'emploi."
-
-#: frontend/templates/home.html:84
-msgid "Global i18n"
-msgstr "i18n mondial"
-
-#: frontend/templates/home.html:85
-msgid "Built-in RTL support for Arabic markets."
-msgstr "Support RTL intégré pour les marchés arabes."
-
-#: frontend/templates/home.html:89
-msgid "Developer Friendly"
-msgstr "Amical pour les développeurs"
-
-#: frontend/templates/home.html:90
-msgid ""
-"Written in clean Python with extensive documentation and helper utilities."
-msgstr "Écrit en Python propre avec une documentation complète."
-
-#: frontend/templates/home.html:103
-msgid "Code Quality"
-msgstr "Qualité du code"
-
-#: frontend/templates/home.html:109
-msgid "Support"
-msgstr "Support"
-
-#: frontend/templates/home.html:115
-msgid "Speed"
-msgstr "Vitesse"
-
-#: frontend/templates/home.html:121
-msgid "Possibilities"
-msgstr "Possibilités"
-
-#: frontend/templates/home.html:132
-msgid "Get Started in Minutes"
-msgstr "Commencez en quelques minutes"
-
-#: frontend/templates/home.html:139
-msgid "Clone the Repository"
-msgstr "Cloner le dépôt"
-
-#: frontend/templates/home.html:140
-msgid ""
-"Grab the source code and install the dependencies with a single command."
-msgstr "Récupérez le code source et installez les dépendances."
-
-#: frontend/templates/home.html:146
-msgid "Customize Branding"
-msgstr "Personnaliser le branding"
-
-#: frontend/templates/home.html:147
-msgid "Update your colors and site details in the central context processor."
-msgstr "Mettez à jour vos couleurs et détails dans le processeur de contexte."
-
-#: frontend/templates/home.html:153
-msgid "Deploy & Shine"
-msgstr "Déployer et briller"
-
-#: frontend/templates/home.html:154
-msgid "Push your application to production and start welcoming users."
-msgstr "Poussez votre application en production."
-
-#: frontend/templates/home.html:166
-msgid "Ready to Start Building?"
-msgstr "Prêt à commencer à construire ?"
-
-#: frontend/templates/home.html:168
-#, python-format
-msgid ""
-"Join the elite group of developers using %(site_name)s to ship faster and "
-"cleaner code."
-msgstr "Rejoignez le groupe d'élite utilisant %(site_name)s."
-
-#: frontend/templates/home.html:172
-msgid "Get Started Now"
-msgstr "Commencer maintenant"
-
-#: frontend/templates/home.html:187
-msgid "All rights reserved."
-msgstr "Tous droits réservés."
-
-#: frontend/templates/index.html:96
+#: frontend/templates/frontend/design_service.html:150
+msgid "Design Styles We Offer"
+msgstr "Styles de design que nous proposons"#: frontend/templates/frontend/design_service.html:151
+msgid "From modern minimalism to classic elegance, find your style"
+msgstr "Du minimalisme moderne à l'élégance classique, trouvez votre style"#: frontend/templates/frontend/design_service.html:170
+msgid "Frequently Asked Questions"
+msgstr "Questions fréquemment posées"#: frontend/templates/frontend/design_service.html:196
+msgid "Ready to Transform Your Space?"
+msgstr "Prêt à transformer votre espace ?"#: frontend/templates/frontend/design_service.html:197
+msgid "Start your design journey today. It's free to get started."
+msgstr "Commencez votre projet de design dès aujourd'hui. C'est gratuit pour commencer."#: frontend/templates/frontend/design_service.html:199
+msgid "Get My Free Quote"
+msgstr "Obtenez mon devis gratuit"#: frontend/templates/home.html:35
+msgid "Choose Your Spaces"
+msgstr "Choisissez vos espaces"#: frontend/templates/home.html:36
+msgid "Select the rooms you want to design and get an instant price"
+msgstr "Sélectionnez les pièces que vous souhaitez aménager et obtenez un prix instantané"#: frontend/templates/home.html:83
+msgid "Click images you like to select them."
+msgstr "Cliquez sur les images que vous aimez pour les sélectionner."#: frontend/templates/home.html:87 frontend/templates/home.html:106
+msgid "Continue"
+msgstr "Continuer"#: frontend/templates/home.html:105
+msgid "Create a custom project"
+msgstr "Créer un projet personnalisé"#: frontend/templates/index.html:97
 msgid "Home"
 msgstr "Accueil"
 
-#: frontend/templates/index.html:99
-msgid "Products"
-msgstr "Produits"
-
-#: frontend/templates/index.html:102
+#: frontend/templates/index.html:103
 msgid "Reports"
 msgstr "Rapports"
 
-#: frontend/templates/index.html:118
+#: frontend/templates/index.html:119
 msgid "Main Menu"
 msgstr "Menu principal"
 
-#: frontend/templates/partials/custom_file_input.html:6
+#: frontend/templates/order.html:21
+msgid "Shopping List"
+msgstr "Liste de courses"#: frontend/templates/order.html:34
+msgid "Back"
+msgstr "Retour"#: frontend/templates/order.html:35
+#, fuzzy
+#| msgid "User Details"
+msgid "Order Details"
+msgstr "Détails de l'utilisateur"
+
+#: frontend/templates/order.html:36
+msgid "Fill in your details and we'll get back to you"
+msgstr "Remplissez vos coordonnées et nous reviendrons vers vous"#: frontend/templates/order.html:42 frontend/templates/order.html:73
+msgid "Submit Inquiry"
+msgstr "Envoyer la demande"#: frontend/templates/order.html:43
+#, fuzzy
+#| msgid "Pending"
+msgid "Sending..."
+msgstr "En attente"
+
+#: frontend/templates/order.html:44
+msgid "Missing Fields"
+msgstr "Champs manquants"#: frontend/templates/order.html:45
+#, fuzzy
+#| msgid "Please fill in all required fields."
+msgid "Please fill in all your details."
+msgstr "Veuillez remplir tous les champs obligatoires."
+
+#: frontend/templates/order.html:46
+msgid "Inquiry Sent!"
+msgstr "Demande envoyée !"#: frontend/templates/order.html:47
+msgid "We'll get back to you shortly with a personalized quote."
+msgstr "Nous reviendrons vers vous sous peu avec un devis personnalisé."#: frontend/templates/order.html:48
+msgid "Great!"
+msgstr "Excellent !"#: frontend/templates/order.html:49
+msgid "Oops!"
+msgstr "Oups !"#: frontend/templates/order.html:50
+msgid "Something went wrong."
+msgstr "Une erreur est survenue."#: frontend/templates/order.html:51
+msgid "Network Error"
+msgstr "Erreur réseau"#: frontend/templates/order.html:52
+msgid "Please check your connection."
+msgstr "Veuillez vérifier votre connexion."#: frontend/templates/order.html:67
+msgid "+213 XXX XX XX XX"
+msgstr "+213 XXX XX XX XX"#: frontend/templates/partials/custom_file_input.html:6
 msgid "Choose a file..."
 msgstr "Choisir un fichier..."
 
-#: user_auth/models.py:9
+#: frontend/views/design_service.py:11
+#, fuzzy
+#| msgid "Active Projects"
+msgid "Choose Project"
+msgstr "Projets actifs"
+
+#: frontend/views/design_service.py:11
+msgid "Select your project type"
+msgstr "Sélectionnez votre type de projet"#: frontend/views/design_service.py:12
+#, fuzzy
+#| msgid "Choose a file..."
+msgid "Choose Spaces"
+msgstr "Choisir un fichier..."
+
+#: frontend/views/design_service.py:12
+msgid "Select rooms to design"
+msgstr "Sélectionnez les pièces à concevoir"#: frontend/views/design_service.py:13
+#, fuzzy
+#| msgid "Choose a file..."
+msgid "Choose Styles"
+msgstr "Choisir un fichier..."
+
+#: frontend/views/design_service.py:13
+msgid "Pick your design style"
+msgstr "Choisissez votre style de design"#: frontend/views/design_service.py:14
+msgid "Submit Brief"
+msgstr "Envoyer le brief"#: frontend/views/design_service.py:14
+msgid "Tell us your preferences"
+msgstr "Dites-nous vos préférences"#: frontend/views/design_service.py:15
+msgid "Expert takes over"
+msgstr "Un expert prend le relais"#: frontend/views/design_service.py:16
+msgid "Receive Design"
+msgstr "Recevez le design"#: frontend/views/design_service.py:16
+msgid "Get your completed design"
+msgstr "Obtenez votre design terminé"#: frontend/views/design_service.py:19
+msgid "How long does the design process take?"
+msgstr "Combien de temps prend le processus de design ?"#: frontend/views/design_service.py:19
+msgid ""
+"Depending on the package and complexity, designs are delivered within 1-4 "
+"weeks."
+msgstr "Selon le forfait et la complexité, les designs sont livrés sous 1 à 4 semaines."#: frontend/views/design_service.py:20
+msgid "Can I make changes to the design?"
+msgstr "Puis-je apporter des modifications au design ?"#: frontend/views/design_service.py:20
+msgid ""
+"Yes! Each package includes revisions. You can request changes until you are "
+"satisfied."
+msgstr "Oui ! Chaque forfait inclut des révisions. Vous pouvez demander des modifications jusqu'à ce que vous soyez satisfait."#: frontend/views/design_service.py:21
+msgid "What do I need to get started?"
+msgstr "De quoi ai-je besoin pour commencer ?"#: frontend/views/design_service.py:21
+msgid ""
+"Just your floor plan or room dimensions, inspiration images, and your "
+"preferences. We guide you through the rest."
+msgstr "Juste votre plan d'étage ou les dimensions des pièces, des images d'inspiration et vos préférences. Nous vous guidons pour le reste."#: frontend/views/design_service.py:22
+msgid "How do I communicate with my designer?"
+msgstr "Comment puis-je communiquer avec mon designer ?"#: frontend/views/design_service.py:22
+msgid ""
+"Through our built-in messaging system. You can chat, share files, and get "
+"real-time updates on your project."
+msgstr "Grâce à notre système de messagerie intégré. Vous pouvez discuter, partager des fichiers et recevoir des mises à jour en temps réel sur votre projet."#: frontend/views/design_service.py:23
+msgid "What if I don't like the design?"
+msgstr "Et si je n'aime pas le design ?"#: frontend/views/design_service.py:23
+msgid ""
+"We offer revisions until you are happy. If you are still not satisfied, we "
+"offer a satisfaction guarantee."
+msgstr "Nous proposons des révisions jusqu'à ce que vous soyez satisfait. Si vous n'êtes toujours pas satisfait, nous offrons une garantie de satisfaction."#: user_auth/models.py:9
 msgid "Male"
 msgstr "Homme"
 
@@ -656,162 +2814,387 @@ msgstr "Autre"
 msgid "Profile Picture"
 msgstr "Photo de profil"
 
-#: user_auth/models.py:26 user_auth/templates/auth/signup.html:114
+#: user_auth/models.py:26 user_auth/templates/auth/profile_edit.html:79
+#: user_auth/templates/auth/signup.html:88
 msgid "Sex"
 msgstr "Sexe"
 
-#: user_auth/models.py:32
+#: user_auth/models.py:33
+#, fuzzy
+#| msgid "Customize Branding"
+msgid "Customer"
+msgstr "Personnaliser le branding"
+
+#: user_auth/models.py:42
 msgid "Is Approved"
 msgstr "Est approuvé"
 
-#: user_auth/models.py:33
-msgid "Created At"
-msgstr "Créé le"
-
-#: user_auth/models.py:39
+#: user_auth/models.py:61
 msgid "User Profile"
 msgstr "Profil utilisateur"
 
-#: user_auth/models.py:40
+#: user_auth/models.py:62
 msgid "User Profiles"
 msgstr "Profils utilisateurs"
 
-#: user_auth/templates/auth/login.html:41
-msgid "Login to your account"
-msgstr "Connectez-vous à votre compte"
+#: user_auth/templates/auth/login.html:5
+msgid "Login"
+msgstr "Connexion"
 
-#: user_auth/templates/auth/login.html:53
-msgid "username"
-msgstr "nom d'utilisateur"
+#: user_auth/templates/auth/login.html:32
+msgid "Professional interior design services"
+msgstr "Services professionnels de design d'intérieur"#: user_auth/templates/auth/login.html:36
+msgid "Expert designers at your fingertips"
+msgstr "Des designers experts à portée de main"#: user_auth/templates/auth/login.html:40
+msgid "Transparent pricing, no surprises"
+msgstr "Tarification transparente, sans surprises"#: user_auth/templates/auth/login.html:44
+msgid "From concept to completion"
+msgstr "Du concept à la réalisation"#: user_auth/templates/auth/login.html:53
+#, fuzzy
+#| msgid "Welcome back,"
+msgid "Welcome Back"
+msgstr "Bon retour,"
 
-#: user_auth/templates/auth/login.html:59
-msgid "Enter your username"
+#: user_auth/templates/auth/login.html:54
+msgid "Sign in to continue your design journey"
+msgstr "Connectez-vous pour continuer votre parcours design"#: user_auth/templates/auth/login.html:62
+#, fuzzy
+#| msgid "Enter your username"
+msgid "Email or Username"
 msgstr "Entrez votre nom d'utilisateur"
 
-#: user_auth/templates/auth/login.html:65
-#: user_auth/templates/auth/signup.html:119
+#: user_auth/templates/auth/login.html:64
+#, fuzzy
+#| msgid "Enter your username"
+msgid "Enter your email or username"
+msgstr "Entrez votre nom d'utilisateur"
+
+#: user_auth/templates/auth/login.html:67
+#: user_auth/templates/auth/signup.html:91
 msgid "Password"
 msgstr "Mot de passe"
 
-#: user_auth/templates/auth/login.html:72
+#: user_auth/templates/auth/login.html:70
 msgid "Enter your password"
 msgstr "Entrez votre mot de passe"
 
-#: user_auth/templates/auth/login.html:86
+#: user_auth/templates/auth/login.html:80
 msgid "Remember me"
 msgstr "Se souvenir de moi"
 
-#: user_auth/templates/auth/login.html:89
+#: user_auth/templates/auth/login.html:82
 msgid "Forgot password?"
 msgstr "Mot de passe oublié ?"
 
-#: user_auth/templates/auth/login.html:96
-msgid "Don't have an account?"
-msgstr "Pas de compte ?"
+#: user_auth/templates/auth/login.html:85
+msgid "Sign In"
+msgstr "Se connecter"#: user_auth/templates/auth/profile_edit.html:5
+#, fuzzy
+#| msgid "My Profile"
+msgid "Edit Profile"
+msgstr "Mon profil"
 
-#: user_auth/templates/auth/login.html:97
-msgid "Create new account"
-msgstr "Créer un compte"
-
-#: user_auth/templates/auth/signup.html:9
-#: user_auth/templates/auth/signup.html:37
-#: user_auth/templates/auth/signup.html:176
-msgid "Create Account"
-msgstr "Créer un compte"
-
-#: user_auth/templates/auth/signup.html:40
-#, python-format
-msgid "Join the community and start your journey with %(site_name)s"
-msgstr "Rejoignez la communauté avec %(site_name)s"
-
-#: user_auth/templates/auth/signup.html:55
-msgid "First Name"
-msgstr "Prénom"
-
-#: user_auth/templates/auth/signup.html:61
-msgid "Enter your first name"
-msgstr "Entrez votre prénom"
-
-#: user_auth/templates/auth/signup.html:68
-msgid "Last Name"
-msgstr "Nom"
-
-#: user_auth/templates/auth/signup.html:74
-msgid "Enter your last name"
-msgstr "Entrez votre nom"
-
-#: user_auth/templates/auth/signup.html:114
+#: user_auth/templates/auth/profile_edit.html:81
+#: user_auth/templates/auth/signup.html:88
 msgid "Select sex"
 msgstr "Sélectionnez le sexe"
 
-#: user_auth/templates/auth/signup.html:126
-msgid "Enter password"
-msgstr "Entrez le mot de passe"
+#: user_auth/templates/auth/profile_edit.html:104
+msgid "Save Changes"
+msgstr "Enregistrer les modifications"#: user_auth/templates/auth/signup.html:5
+#: user_auth/templates/auth/signup.html:53
+#: user_auth/templates/auth/signup.html:123
+msgid "Create Account"
+msgstr "Créer un compte"
 
-#: user_auth/templates/auth/signup.html:140
+#: user_auth/templates/auth/signup.html:32
+msgid "Free account, no hidden fees"
+msgstr "Compte gratuit, sans frais cachés"#: user_auth/templates/auth/signup.html:36
+msgid "Track your projects in real-time"
+msgstr "Suivez vos projets en temps réel"#: user_auth/templates/auth/signup.html:40
+msgid "Chat directly with your designer"
+msgstr "Discutez directement avec votre designer"#: user_auth/templates/auth/signup.html:44
+msgid "Get inspired by our style gallery"
+msgstr "Inspirez-vous de notre galerie de styles"#: user_auth/templates/auth/signup.html:54
+msgid "Start your design journey today"
+msgstr "Commencez votre aventure design aujourd'hui"#: user_auth/templates/auth/signup.html:66
+msgid "Enter your first name"
+msgstr "Entrez votre prénom"
+
+#: user_auth/templates/auth/signup.html:71
+msgid "Enter your last name"
+msgstr "Entrez votre nom"
+
+#: user_auth/templates/auth/signup.html:94
+msgid "Min. 8 characters"
+msgstr "Min. 8 caractères"#: user_auth/templates/auth/signup.html:102
 msgid "Confirm Password"
 msgstr "Confirmez le mot de passe"
 
-#: user_auth/templates/auth/signup.html:147
+#: user_auth/templates/auth/signup.html:105
 msgid "Re-enter password"
 msgstr "Ré-entrez le mot de passe"
 
-#: user_auth/templates/auth/signup.html:170
+#: user_auth/templates/auth/signup.html:116
 msgid "I agree to"
 msgstr "J'accepte les"
 
-#: user_auth/templates/auth/signup.html:170
+#: user_auth/templates/auth/signup.html:117
 msgid "Terms of Service"
 msgstr "Conditions d'utilisation"
 
-#: user_auth/templates/auth/signup.html:170
+#: user_auth/templates/auth/signup.html:118
 msgid "and"
 msgstr "et la"
 
-#: user_auth/templates/auth/signup.html:170
+#: user_auth/templates/auth/signup.html:119
 msgid "Privacy Policy"
 msgstr "Politique de confidentialité"
 
-#: user_auth/templates/auth/signup.html:181
+#: user_auth/templates/auth/signup.html:127
 msgid "Already have an account?"
 msgstr "Déjà un compte ?"
 
-#: user_auth/views.py:25
+#: user_auth/templates/auth/signup.html:128
+msgid "Sign in"
+msgstr "Se connecter"#: user_auth/views.py:55
 msgid "Please fill in all required fields."
 msgstr "Veuillez remplir tous les champs obligatoires."
 
-#: user_auth/views.py:42
+#: user_auth/views.py:79
 msgid "Invalid username or password. Please try again."
 msgstr "Identifiants invalides."
 
-#: user_auth/views.py:76
-msgid "First name is required."
-msgstr "Le prénom est requis."
+#~ msgid "SnapStore"
+#~ msgstr "SnapStore"
 
-#: user_auth/views.py:78
-msgid "Last name is required."
-msgstr "Le nom est requis."
+#~ msgid "AI-Powered Landing Pages"
+#~ msgstr "Pages de destination basées sur l'IA"
 
-#: user_auth/views.py:80
-msgid "Email is required."
-msgstr "L'e-mail est requis."
+#~ msgid "Generate high-converting landing pages in seconds with Gemini AI."
+#~ msgstr ""
+#~ "Générez des pages de destination à haute conversion en quelques secondes "
+#~ "avec Gemini AI."
 
-#: user_auth/views.py:82
-msgid "Password is required."
-msgstr "Le mot de passe est requis."
+#~ msgid "landing page, ai, gemini, merchant, ecommerce, conversion"
+#~ msgstr "page de destination, ia, gemini, marchand, ecommerce, conversion"
 
-#: user_auth/views.py:84
-msgid "Passwords do not match."
-msgstr "Les mots de passe ne correspondent pas."
+#~ msgid "users"
+#~ msgstr "utilisateurs"
 
-#: user_auth/views.py:86
-msgid "Password must be at least 8 characters long."
-msgstr "Le mot de passe doit faire au moins 8 caractères."
+#~ msgid "Platform management and system health overview."
+#~ msgstr "Gestion de la plateforme et aperçu de la santé du système."
 
-#: user_auth/views.py:94
-msgid "This email is already registered."
-msgstr "Cet e-mail est déjà enregistré."
+#~ msgid "Your project metrics and activity are looking great today."
+#~ msgstr ""
+#~ "Les mesures et l'activité de votre projet sont excellentes aujourd'hui."
 
-#: user_auth/views.py:116
-msgid "Your account has been created successfully."
-msgstr "Votre compte a été créé avec succès."
+#~ msgid "Sat"
+#~ msgstr "Sam"
+
+#~ msgid "Sun"
+#~ msgstr "Dim"
+
+#~ msgid "Mon"
+#~ msgstr "Lun"
+
+#~ msgid "Tue"
+#~ msgstr "Mar"
+
+#~ msgid "Wed"
+#~ msgstr "Mer"
+
+#~ msgid "Thu"
+#~ msgstr "Jeu"
+
+#~ msgid "Fri"
+#~ msgstr "Ven"
+
+#~ msgid "Last 7 Days"
+#~ msgstr "7 derniers jours"
+
+#~ msgid "Last 30 Days"
+#~ msgstr "30 derniers jours"
+
+#~ msgid "Smart Insights"
+#~ msgstr "Aperçus intelligents"
+
+#~ msgid ""
+#~ "System performance is optimal. All 5 services are running within expected "
+#~ "latency bounds."
+#~ msgstr ""
+#~ "Les performances du système sont optimales. Les 5 services fonctionnent "
+#~ "dans les limites de latence attendues."
+
+#~ msgid ""
+#~ "AI has detected a growth trend in your user engagement. Consider "
+#~ "launching a new campaign to capitalize on this traffic."
+#~ msgstr ""
+#~ "L'IA a détecté une tendance de croissance de l'engagement de vos "
+#~ "utilisateurs. Envisagez de lancer une nouvelle campagne."
+
+#~ msgid "Users List"
+#~ msgstr "Liste des utilisateurs"
+
+#~ msgid "Advanced Filter"
+#~ msgstr "Filtre avancé"
+
+#~ msgid "Name, Username, Email..."
+#~ msgstr "Nom, Utilisateur, Email..."
+
+#~ msgid "View Full Profile"
+#~ msgstr "Voir le profil complet"
+
+#~ msgid "Welcome"
+#~ msgstr "Bienvenue"
+
+#~ msgid "Welcome to your new dashboard!"
+#~ msgstr "Bienvenue dans votre nouveau tableau de bord !"
+
+#~ msgid "Approved Users"
+#~ msgstr "Utilisateurs approuvés"
+
+#~ msgid "Staff Members"
+#~ msgstr "Membres du personnel"
+
+#~ msgid "Registration Trends"
+#~ msgstr "Tendances d'inscription"
+
+#~ msgid "Jan"
+#~ msgstr "Jan"
+
+#~ msgid "Feb"
+#~ msgstr "Fév"
+
+#~ msgid "Mar"
+#~ msgstr "Mar"
+
+#~ msgid "Total Hours"
+#~ msgstr "Total d'heures"
+
+#~ msgid "Weekly Activity"
+#~ msgstr "Activité hebdomadaire"
+
+#~ msgid "Upcoming Tasks"
+#~ msgstr "Tâches à venir"
+
+#~ msgid "Launch Website"
+#~ msgstr "Lancer le site web"
+
+#~ msgid "Database Migration"
+#~ msgstr "Migration de base de données"
+
+#, python-format
+#~ msgid "An error occurred during approval: %(error)s"
+#~ msgstr "Une erreur est survenue lors de l'approbation : %(error)s"
+
+#~ msgid "Launch Now"
+#~ msgstr "Lancer maintenant"
+
+#~ msgid "See Features"
+#~ msgstr "Voir les fonctionnalités"
+
+#~ msgid "Supercharged Features"
+#~ msgstr "Fonctionnalités suralimentées"
+
+#~ msgid "Designed for modern developers and scaling startups."
+#~ msgstr ""
+#~ "Conçu pour les développeurs modernes et les startups en pleine croissance."
+
+#~ msgid "Scalable Architecture"
+#~ msgstr "Architecture évolutive"
+
+#~ msgid "A clean, modular structure that grows with your team and complexity."
+#~ msgstr "Une structure modulaire qui grandit avec votre équipe."
+
+#~ msgid "Auth Ready"
+#~ msgstr "Authentification prête"
+
+#~ msgid "Secure login and signup out of the box."
+#~ msgstr "Connexion et inscription sécurisées prêtes à l'emploi."
+
+#~ msgid "Global i18n"
+#~ msgstr "i18n mondial"
+
+#~ msgid "Built-in RTL support for Arabic markets."
+#~ msgstr "Support RTL intégré pour les marchés arabes."
+
+#~ msgid "Developer Friendly"
+#~ msgstr "Amical pour les développeurs"
+
+#~ msgid ""
+#~ "Written in clean Python with extensive documentation and helper utilities."
+#~ msgstr "Écrit en Python propre avec une documentation complète."
+
+#~ msgid "Code Quality"
+#~ msgstr "Qualité du code"
+
+#~ msgid "Support"
+#~ msgstr "Support"
+
+#~ msgid "Speed"
+#~ msgstr "Vitesse"
+
+#~ msgid "Get Started in Minutes"
+#~ msgstr "Commencez en quelques minutes"
+
+#~ msgid "Clone the Repository"
+#~ msgstr "Cloner le dépôt"
+
+#~ msgid ""
+#~ "Grab the source code and install the dependencies with a single command."
+#~ msgstr "Récupérez le code source et installez les dépendances."
+
+#~ msgid ""
+#~ "Update your colors and site details in the central context processor."
+#~ msgstr ""
+#~ "Mettez à jour vos couleurs et détails dans le processeur de contexte."
+
+#~ msgid "Deploy & Shine"
+#~ msgstr "Déployer et briller"
+
+#~ msgid "Push your application to production and start welcoming users."
+#~ msgstr "Poussez votre application en production."
+
+#~ msgid "Ready to Start Building?"
+#~ msgstr "Prêt à commencer à construire ?"
+
+#, python-format
+#~ msgid ""
+#~ "Join the elite group of developers using %(site_name)s to ship faster and "
+#~ "cleaner code."
+#~ msgstr "Rejoignez le groupe d'élite utilisant %(site_name)s."
+
+#~ msgid "Get Started Now"
+#~ msgstr "Commencer maintenant"
+
+#~ msgid "All rights reserved."
+#~ msgstr "Tous droits réservés."
+
+#~ msgid "Login to your account"
+#~ msgstr "Connectez-vous à votre compte"
+
+#~ msgid "username"
+#~ msgstr "nom d'utilisateur"
+
+#~ msgid "Don't have an account?"
+#~ msgstr "Pas de compte ?"
+
+#~ msgid "Create new account"
+#~ msgstr "Créer un compte"
+
+#, python-format
+#~ msgid "Join the community and start your journey with %(site_name)s"
+#~ msgstr "Rejoignez la communauté avec %(site_name)s"
+
+#~ msgid "Enter password"
+#~ msgstr "Entrez le mot de passe"
+
+#~ msgid "Password is required."
+#~ msgstr "Le mot de passe est requis."
+
+#~ msgid "Passwords do not match."
+#~ msgstr "Les mots de passe ne correspondent pas."
+
+#~ msgid "Password must be at least 8 characters long."
+#~ msgstr "Le mot de passe doit faire au moins 8 caractères."
