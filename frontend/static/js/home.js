@@ -185,14 +185,5 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     })();
 
-    document.addEventListener("scroll", function () {
-        var nav = document.getElementById("landingNav");
-        if (window.scrollY > 50) {
-            nav.classList.add("bg-white", "shadow-sm");
-            nav.classList.remove("bg-transparent");
-        } else {
-            nav.classList.remove("bg-white", "shadow-sm");
-            nav.classList.add("bg-transparent");
-        }
-    });
+
 });
