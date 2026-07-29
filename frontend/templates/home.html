@@ -9,8 +9,6 @@
 {% endblock extra_css %}
 
 {% block nav %}
-    <div class="panorama-bg" id="panoramaBg" data-panorama-src="{% static 'imgs/bg.jpeg' %}"></div>
-    <div class="panorama-overlay"></div>
     <div class="floating-actions-bar">
         {% include 'partials/language_switcher.html' %}
         {% if user.is_authenticated %}
@@ -32,8 +30,8 @@
     <section class="loft-section pt-0" id="spaces-section">
         <div class="container">
             <div class="mb-5 pt-5">
-                <h2 class="loft-section-title reveal">{% trans "Choose Your Spaces" %}</h2>
-                <p class="loft-section-sub reveal">{% trans "Select the rooms you want to design and get an instant price" %}</p>
+                <h2 class="loft-section-title text-dark reveal">{% trans "Choose Your Spaces" %}</h2>
+                <p class="loft-section-sub text-dark reveal">{% trans "Select the rooms you want to design and get an instant price" %}</p>
             </div>
             <div class="row g-4 justify-content-center" id="spacesGrid">
                 {% for space in spaces %}
