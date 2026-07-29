@@ -76,8 +76,8 @@
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #fff;
+  border: 2px solid var(--brand-primary);
+  color: var(--brand-primary);
   font-size: 1rem;
   text-decoration: none;
   transition: all 0.2s ease;
@@ -101,8 +101,8 @@
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #fff;
+  border: 2px solid var(--brand-primary);
+  color: var(--brand-primary);
   font-size: 0.75rem;
 }
 
