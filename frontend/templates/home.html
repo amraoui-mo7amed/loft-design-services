@@ -6,11 +6,15 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static "css/home.css" %}?v={% now "U" %}">
+    <link rel="stylesheet" href="{% static "css/portfolio_list.css" %}?v={% now "U" %}">
 {% endblock extra_css %}
 
 {% block nav %}
     <div class="floating-actions-bar">
         {% include 'partials/language_switcher.html' %}
+        <a href="{% url 'frontend:portfolio_list' %}" class="floating-btn" title="{% trans 'Portfolio' %}">
+            <i class="fas fa-briefcase"></i>
+        </a>
         {% if user.is_authenticated %}
             <a href="{% url 'dash:dash_home' %}" class="floating-btn">
                 <i class="fas fa-tachometer-alt"></i>
@@ -39,7 +43,7 @@
                     <div class="space-card reveal" data-space-id="{{ space.id }}" data-price="{{ space.base_price }}">
                         {% if space.image %}
                         <div class="space-card-img">
-                            <img src="{{ space.image }}" alt="{{ space.name }}" loading="lazy" onerror="this.parentElement.style.display='none'">
+                            <img src="{{ space.image }}" alt="{{ space.name }}" loading="lazy" data-img-error="hide-parent">
                         </div>
                         {% endif %}
                         <div class="space-card-body">
@@ -60,7 +64,7 @@
                             </div>
                         </div>
                         <div class="space-card-bar">
-                            <div class="space-card-bar-fill" style="width: {{ space.percentage }}%"></div>
+                            <div class="space-card-bar-fill" data-bar-width="{{ space.percentage }}"></div>
                         </div>
                     </div>
                 </div>
@@ -72,7 +76,7 @@
     <!-- Inspiration Gallery Modal -->
     <div class="modal fade" id="inspirationGalleryModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; background: #fff;">
+            <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header border-0 pb-0">
                     <h5 class="modal-title fw-bold" id="inspirationModalTitle"></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

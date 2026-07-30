@@ -43,6 +43,11 @@
                 <span class="quick-stat-value">{{ total_inquiries }}</span>
                 <span class="quick-stat-label">{% trans "Inquiries" %}</span>
             </div>
+            <div class="quick-stat-divider"></div>
+            <div class="quick-stat">
+                <span class="quick-stat-value">{{ total_portfolios }}</span>
+                <span class="quick-stat-label">{% trans "Portfolios" %}</span>
+            </div>
         </div>
     </div>
 
@@ -101,6 +106,20 @@
                 </div>
                 <div class="stat-card-trend">
                     <a href="{% url 'dash:inquiry_list' %}" class="badge bg-info-subtle text-info-emphasis text-decoration-none">{% trans "View all" %} &rarr;</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="stat-card stat-card--portfolio">
+                <div class="stat-card-icon">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <div class="stat-card-body">
+                    <span class="stat-card-count">{{ total_portfolios }}</span>
+                    <span class="stat-card-title">{% trans "Portfolios" %}</span>
+                </div>
+                <div class="stat-card-trend">
+                    <a href="{% url 'dash:portfolio_list' %}" class="badge bg-info-subtle text-info-emphasis text-decoration-none">{% trans "View all" %} &rarr;</a>
                 </div>
             </div>
         </div>

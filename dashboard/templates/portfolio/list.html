@@ -1,0 +1,101 @@
+{% extends "dash/dash_index.html" %}
+{% load i18n %}
+{% load static %}
+{% load l10n %}
+{% load tags %}
+
+{% block dashTitle %}{% trans "Portfolios" %}{% endblock dashTitle %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/portfolio.css' %}?v={% now "U" %}">
+{% endblock extra_css %}
+
+{% block dashContent %}
+<div class="editorial-header">
+  <div class="editorial-header-left">
+    <h5 class="fw-bold mb-0">{% trans "Portfolios" %}</h5>
+    <p class="text-muted small mb-0">{% trans "Manage your design portfolio projects" %}</p>
+  </div>
+  <div class="d-flex gap-2 align-items-center">
+    <div class="editorial-search">
+      <i class="fas fa-search"></i>
+      <input type="text" class="form-control" id="searchInput" data-portfolio-search="true" placeholder="{% trans "Search portfolios..." %}" value="{{ query }}" autocomplete="off">
+      {% if query %}
+      <button class="search-clear" id="searchClear" data-search-clear="true">&times;</button>
+      {% endif %}
+    </div>
+    <a href="{% url 'dash:portfolio_create' %}" class="btn btn-primary rounded-3 px-4 fw-bold shadow-sm">
+      <i class="fas fa-plus me-2"></i>{% trans "New Masterpiece" %}
+    </a>
+  </div>
+</div>
+
+{% if page_obj.object_list %}
+<div class="editorial-grid">
+  {% for portfolio in page_obj %}
+  <div class="editorial-item" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|stringformat:'i'|slice:':1' }}0">
+    <div class="editorial-img-container">
+      {% if portfolio.thumbnail %}
+      <img src="{{ portfolio.thumbnail.url }}" alt="{{ portfolio.title }}" loading="lazy">
+      {% else %}
+      <div class="editorial-img-fallback"><i class="fas fa-image"></i></div>
+      {% endif %}
+      {% if portfolio.is_featured %}
+      <span class="editorial-featured-badge">{% trans "Featured" %}</span>
+      {% endif %}
+    </div>
+    <div class="editorial-meta-bar">
+      {% if portfolio.model_3d %}
+      <span class="editorial-meta-3d"><i class="fas fa-cube"></i> 3D</span>
+      {% endif %}
+      <span><i class="far fa-images"></i> {{ portfolio.gallery_images.count }}</span>
+      <span><i class="far fa-calendar-alt"></i> {{ portfolio.created_at|date:"M d, Y" }}</span>
+    </div>
+    <div class="editorial-content">
+      <h5>{{ portfolio.title }}</h5>
+      <p>{{ portfolio.description|truncatewords:18 }}</p>
+      {% with tags=portfolio.tags|split:"," %}
+      {% if tags %}
+      <div class="editorial-tags">
+        {% for tag in tags|slice:":4" %}
+        <span>{{ tag|truncatechars:14 }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+      <div class="editorial-card-actions">
+        <a href="{% url 'dash:portfolio_update' portfolio.pk %}" class="editorial-card-action" title="{% trans 'Edit' %}">
+          <i class="fas fa-pen"></i> {% trans "Edit" %}
+        </a>
+        <button class="editorial-card-action editorial-card-action--delete delete_button"
+          title="{% trans 'Delete' %}"
+          data-delete-url="{% url 'dash:portfolio_delete' portfolio.pk %}"
+          data-csrf-token="{{ csrf_token }}"
+          data-swal-title="{% trans 'Delete Portfolio?' %}"
+          data-swal-text="{% trans 'This will permanently delete this portfolio and all its images.' %}">
+          <i class="fas fa-trash"></i> {% trans "Delete" %}
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="editorial-empty">
+  <i class="fas fa-briefcase"></i>
+  <h5>{% trans "No portfolios yet" %}</h5>
+  <p class="text-muted small mb-3">{% trans "Create your first masterpiece to showcase your work." %}</p>
+  <a href="{% url 'dash:portfolio_create' %}" class="btn btn-primary rounded-3 px-4 fw-bold">
+    <i class="fas fa-plus me-2"></i>{% trans "New Masterpiece" %}
+  </a>
+</div>
+{% endif %}
+
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="mt-5">{% render_pagination page_obj %}</div>
+{% endif %}
+{% endblock dashContent %}
+
+{% block extra_js %}
+<script src="{% static 'js/portfolio.js' %}?v={% now "U" %}"></script>
+{% endblock extra_js %}

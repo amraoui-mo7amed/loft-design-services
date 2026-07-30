@@ -7,6 +7,7 @@ import json
 
 from dashboard.models.requests import DesignRequest
 from dashboard.models.inquiry import Inquiry
+from dashboard.models.portfolio import Portfolio
 
 
 @login_required
@@ -18,6 +19,7 @@ def dash_home(request):
     approved_projects = DesignRequest.objects.filter(status=DesignRequest.Status.APPROVED).count()
     declined_projects = DesignRequest.objects.filter(status=DesignRequest.Status.DECLINED).count()
     total_inquiries = Inquiry.objects.count()
+    total_portfolios = Portfolio.objects.count()
     projects_today = DesignRequest.objects.filter(created_at__date=today).count()
 
     recent_projects = DesignRequest.objects.select_related("project_type", "package").order_by("-created_at")[:5]
@@ -36,6 +38,7 @@ def dash_home(request):
         "approved_projects": approved_projects,
         "declined_projects": declined_projects,
         "total_inquiries": total_inquiries,
+        "total_portfolios": total_portfolios,
         "projects_today": projects_today,
         "recent_projects": recent_projects,
         "status_labels": status_labels,

@@ -170,6 +170,21 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     });
 
+    // ── Bar Width ──
+    document.querySelectorAll("[data-bar-width]").forEach(function (el) {
+        el.style.width = el.dataset.barWidth + "%";
+    });
+
+    // ── Image Error Handling ──
+    document.querySelectorAll("[data-img-error]").forEach(function (img) {
+        img.addEventListener("error", function () {
+            var action = this.dataset.imgError;
+            if (action === "hide-parent" && this.parentElement) {
+                this.parentElement.style.display = "none";
+            }
+        });
+    });
+
     // ── Scroll Reveal ──
 
     (function () {

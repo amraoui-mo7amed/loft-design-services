@@ -1,0 +1,110 @@
+{% extends "index.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static "css/home.css" %}?v={% now "U" %}">
+<link rel="stylesheet" href="{% static "css/portfolio_list.css" %}?v={% now "U" %}">
+<link rel="stylesheet" href="{% static "css/portfolio_detail.css" %}?v={% now "U" %}">
+{% endblock extra_css %}
+
+{% block nav %}{% endblock nav %}
+
+{% block sidebar %}{% endblock sidebar %}
+
+{% block content %}
+<div class="detail-viewer" id="portfolioViewer">
+  <a href="{% url 'frontend:portfolio_list' %}" class="detail-back"><i class="fas fa-arrow-left"></i></a>
+
+  <div class="viewer-actions">
+    <button class="viewer-action-btn" id="detailsTrigger" data-bs-toggle="modal" data-bs-target="#projectDetailsModal">
+      <i class="fas fa-info"></i>
+    </button>
+    {% if model_3d_url %}
+    <button class="viewer-action-btn" id="view3dBtn" title="{% trans 'View in 3D' %}">
+      <i class="fas fa-cube"></i>
+    </button>
+    {% endif %}
+  </div>
+
+  <button class="nav-btn nav-prev"><i class="fas fa-chevron-left"></i></button>
+  <img class="viewer-main-img" id="heroImage" src="{{ gallery_images|first }}" alt="{{ portfolio.title }}">
+  <button class="nav-btn nav-next"><i class="fas fa-chevron-right"></i></button>
+  <span class="viewer-counter">1 / {{ gallery_images|length }}</span>
+
+  {% if model_3d_url %}
+  <div class="model-viewer-overlay" id="modelViewerOverlay">
+    <model-viewer src="{{ model_3d_url }}" alt="{{ portfolio.title }} 3D model" auto-rotate camera-controls ar shadow-intensity="1" exposure="0.8" interaction-prompt="none"></model-viewer>
+  </div>
+  {% endif %}
+
+  <div class="thumb-strip" id="thumbStrip">
+    {% for img in gallery_images %}
+    <div class="thumb-item {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}">
+      <img src="{{ img }}" alt="">
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Hidden Gallery Data -->
+<script id="galleryData" type="application/json">{{ gallery_json|safe }}</script>
+
+<!-- Hidden Details Content -->
+<div id="projectDetails" class="d-none">
+  <div class="details-hero">
+    {% if portfolio.thumbnail %}
+    <img src="{{ portfolio.thumbnail.url }}" alt="{{ portfolio.title }}">
+    {% else %}
+    <img src="{{ gallery_images|first }}" alt="{{ portfolio.title }}">
+    {% endif %}
+  </div>
+  <div class="details-body">
+    <h2>{{ portfolio.title }}</h2>
+    <p class="details-date"><i class="far fa-calendar-alt me-1"></i>{{ portfolio.created_at|date:"F d, Y" }}</p>
+    <p class="details-description">{{ portfolio.description }}</p>
+    {% if tags %}
+    <div class="details-tags">
+      {% for tag in tags %}
+      <span class="badge">{{ tag }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if portfolio.external_link %}
+    <div class="text-center mb-3">
+      <a href="{{ portfolio.external_link }}" target="_blank" rel="noopener" class="btn btn-outline-dark rounded-pill px-4 fw-bold">
+        <i class="fas fa-external-link-alt me-2"></i>{% trans "View Project" %}
+      </a>
+    </div>
+    {% endif %}
+    <div class="details-contact">
+      <p>{% trans "Interested in a similar project for your space?" %}</p>
+      <a href="{% url 'frontend:home' %}" class="btn btn-primary rounded-pill px-4 fw-bold shadow">
+        <i class="fas fa-comment me-2"></i>{% trans "Get in Touch" %}
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="projectDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-body p-0" id="detailsModalBody">
+        <div class="text-center py-5 text-muted">{% trans "Loading..." %}</div>
+      </div>
+      <div class="modal-footer border-0 justify-content-center pb-4">
+        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">{% trans "Close" %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block footer %}{% endblock footer %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+<script src="{% static "js/portfolio_detail.js" %}?v={% now "U" %}"></script>
+{% endblock extra_js %}

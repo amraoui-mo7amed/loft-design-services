@@ -28,6 +28,7 @@ from .marketplace import (
     Order,
     OrderItem,
 )
+from .portfolio import Portfolio, PortfolioGallery
 
 __all__ = [
     "Inquiry",
@@ -62,4 +63,6 @@ __all__ = [
     "CartItem",
     "Order",
     "OrderItem",
+    "Portfolio",
+    "PortfolioGallery",
 ]

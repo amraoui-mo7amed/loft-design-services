@@ -53,6 +53,12 @@ def _build_menu(is_admin, is_designer, is_customer):
                     "url_name": "dash:inquiry_list",
                     "admin_only": True,
                 },
+                {
+                    "title": _("Portfolio"),
+                    "icon": "fas fa-briefcase",
+                    "url_name": "dash:portfolio_list",
+                    "admin_only": True,
+                },
             ],
         )
 

@@ -26,8 +26,17 @@ def get_item(dictionary, key):
 
 
 @register.filter
+def split(value, sep=","):
+    if not value:
+        return []
+    if isinstance(value, list):
+        return value
+    return [t.strip() for t in value.split(sep) if t.strip()]
+
+
+@register.filter
 def humanize_number(value):
-    """
+    """models
     Converts a large number into a human-readable format with k, M, B, etc.
     Example:
         1500 -> 1.5k

@@ -1,0 +1,293 @@
+/* ── Full-Viewport Dark Viewer ── */
+.detail-viewer {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.detail-viewer .viewer-main-img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 4px;
+  transition: opacity 0.3s ease;
+}
+
+/* ── Action Buttons ── */
+.viewer-actions {
+  position: absolute;
+  top: 20px;
+  inset-inline-end: 20px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.viewer-action-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  text-decoration: none;
+}
+
+.viewer-action-btn:hover {
+  background: var(--brand-primary);
+  color: var(--brand-secondary);
+  transform: scale(1.08);
+}
+
+.viewer-action-btn.danger:hover {
+  background: #c0392b;
+  color: #fff;
+}
+
+/* ── Thumb Strip ── */
+.thumb-strip {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(10px);
+  padding: 12px 20px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  z-index: 10;
+}
+
+.thumb-strip::-webkit-scrollbar {
+  height: 4px;
+}
+
+.thumb-strip::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.thumb-item {
+  flex: 0 0 64px;
+  height: 48px;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+  opacity: 0.5;
+}
+
+.thumb-item:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+.thumb-item.active {
+  border-color: var(--brand-primary);
+  opacity: 1;
+}
+
+.thumb-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Details Modal ── */
+#projectDetailsModal .modal-content {
+  border-radius: 20px;
+  border: none;
+  background: #fff;
+}
+
+.details-hero {
+  height: 200px;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+}
+
+.details-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.details-body {
+  padding: 24px 28px;
+}
+
+.details-body h2 {
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+  color: var(--brand-secondary);
+}
+
+.details-body .details-date {
+  font-size: 0.8rem;
+  color: #bbb;
+  margin-bottom: 16px;
+}
+
+.details-body .details-description {
+  font-size: 0.92rem;
+  color: #555;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.details-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.details-tags .badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 5px 14px;
+  background: #f0f0f0;
+  color: #666;
+  border-radius: 20px;
+}
+
+.details-contact {
+  background: var(--brand-light);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.details-contact p {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.details-contact .btn {
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+/* ── Back Button ── */
+.detail-back {
+  position: absolute;
+  top: 20px;
+  inset-inline-start: 20px;
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  text-decoration: none;
+}
+
+.detail-back:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  transform: scale(1.08);
+}
+
+@media (max-width: 991.98px) {
+  .detail-viewer .viewer-main-img {
+    max-width: 95vw;
+    max-height: 70vh;
+  }
+  .thumb-item {
+    flex: 0 0 52px;
+    height: 40px;
+  }
+  .details-hero {
+    height: 150px;
+  }
+  .details-body {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .viewer-actions {
+    top: 12px;
+    inset-inline-end: 12px;
+    gap: 6px;
+  }
+  .viewer-action-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 0.85rem;
+  }
+  .detail-back {
+    top: 12px;
+    inset-inline-start: 12px;
+    width: 36px;
+    height: 36px;
+  }
+  .thumb-strip {
+    padding: 8px 12px;
+  }
+  .thumb-item {
+    flex: 0 0 44px;
+    height: 34px;
+  }
+}
+
+/* ── 3D Model Viewer ── */
+.model-viewer-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: #111;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.model-viewer-overlay.active {
+  display: flex;
+}
+
+.model-viewer-overlay model-viewer {
+  width: 100%;
+  height: 100%;
+  --progress-bar-color: var(--brand-primary);
+  --poster-color: transparent;
+}
+
+.viewer-action-btn.active-3d {
+  background: var(--brand-primary);
+  color: var(--brand-secondary);
+}
+
+.viewer-action-btn.active-3d:hover {
+  background: var(--brand-primary);
+  color: var(--brand-secondary);
+  opacity: 0.9;
+}
+
+.viewer-action-btn .fa-cube {
+  font-size: 1.1rem;
+}
