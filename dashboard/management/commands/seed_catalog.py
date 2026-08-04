@@ -5,15 +5,13 @@ from django.db import transaction
 from django.utils.text import slugify
 from dashboard.models import (
     ProjectType,
-    SpaceCategory,
     Space,
+    SpaceImage,
     ProjectTypeSpace,
     DesignPackage,
     PackageService,
     ServiceCategory,
     DesignOption,
-    StyleCategory,
-    InspirationImage,
 )
 
 
@@ -25,46 +23,39 @@ def _make_gif():
     )
 
 
-SPACE_CATEGORIES = ["Interior", "Exterior"]
 SPACES = [
-    ("Living Room", "Interior", 8000, 7),
-    ("Kitchen", "Interior", 12000, 10),
-    ("Bedroom", "Interior", 6000, 5),
-    ("Bathroom", "Interior", 7000, 6),
-    ("Dining Room", "Interior", 9000, 8),
-    ("Home Office", "Interior", 5000, 4),
-    ("Garden", "Exterior", 15000, 14),
-    ("Terrace", "Exterior", 10000, 10),
-    ("Balcony", "Exterior", 4000, 3),
-    ("Corridor", "Interior", 3000, 2),
-    ("Kids Room", "Interior", 6500, 6),
-    ("Guest Room", "Interior", 7000, 6),
-    ("Laundry Room", "Interior", 3500, 3),
-    ("Storage Room", "Interior", 2500, 2),
-    ("Rooftop", "Exterior", 18000, 16),
-    ("Entrance Hall", "Interior", 5500, 5),
-    ("Study Room", "Interior", 6000, 5),
-    ("Pool Area", "Exterior", 22000, 20),
+    ("Living Room", 8000),
+    ("Kitchen", 12000),
+    ("Bedroom", 6000),
+    ("Bathroom", 7000),
+    ("Dining Room", 9000),
+    ("Home Office", 5000),
+    ("Garden", 15000),
+    ("Terrace", 10000),
+    ("Balcony", 4000),
+    ("Corridor", 3000),
+    ("Kids Room", 6500),
+    ("Guest Room", 7000),
+    ("Laundry Room", 3500),
+    ("Storage Room", 2500),
+    ("Rooftop", 18000),
+    ("Entrance Hall", 5500),
+    ("Study Room", 6000),
+    ("Pool Area", 22000),
 ]
 
 PROJECT_TYPES = [
     {
         "name": "Residential",
-        "description": "Complete interior design for apartments, villas, and houses \u2014 from a single room to the entire home.",
-        "sort_order": 1,
-        "spaces": ["Living Room", "Kitchen", "Bedroom", "Bathroom", "Dining Room"],
+        "spaces": ["Living Room", "Kitchen", "Bedroom", "Bathroom", "Dining Room", "Kids Room", "Guest Room", "Study Room", "Laundry Room", "Storage Room"],
     },
     {
         "name": "Commercial",
-        "description": "Professional design for offices, retail spaces, and restaurants that impress clients and boost productivity.",
-        "sort_order": 2,
-        "spaces": ["Home Office", "Kitchen", "Bathroom"],
+        "spaces": ["Home Office", "Corridor", "Entrance Hall"],
     },
     {
         "name": "Outdoor",
-        "description": "Landscape and exterior design \u2014 gardens, terraces, and outdoor living areas for year-round enjoyment.",
-        "sort_order": 3,
-        "spaces": ["Garden", "Terrace"],
+        "spaces": ["Garden", "Terrace", "Balcony", "Rooftop", "Pool Area"],
     },
 ]
 
@@ -127,31 +118,9 @@ PACKAGE_SERVICES = [
     ("Luxury", "Landscape Concept", 18000),
 ]
 
-STYLES = [
-    {
-        "name": "Modern",
-        "description": "Clean lines, neutral palettes, and a focus on function over ornament. Minimalist yet warm.",
-    },
-    {
-        "name": "Industrial",
-        "description": "Raw materials, exposed structures, and an urban loft vibe. Brick, steel, and concrete meet comfort.",
-    },
-    {
-        "name": "Scandinavian",
-        "description": "Light-filled spaces, natural textures, and understated elegance. Hygge-inspired living.",
-    },
-]
-
-INSPIRATIONS = [
-    ("Modern Living Room", "Living Room", "Modern"),
-    ("Industrial Kitchen", "Kitchen", "Industrial"),
-    ("Scandi Bedroom", "Bedroom", "Scandinavian"),
-    ("Garden Lounge", "Garden", "Modern"),
-]
-
 
 class Command(BaseCommand):
-    help = "Seeds catalog data: 3 ProjectTypes, 8 Spaces, 3 Packages, 4 Options, 3 Styles, 4 Inspirations"
+    help = "Seeds catalog data: ProjectTypes, Spaces, Packages, Options, ServiceCategories"
 
     def handle(self, *args, **kwargs):
         counts = {
@@ -159,33 +128,24 @@ class Command(BaseCommand):
             "spaces": 0,
             "packages": 0,
             "options": 0,
-            "styles": 0,
-            "inspirations": 0,
         }
 
         with transaction.atomic():
-            # ── SpaceCategories ───────────────────────────────────
-            cat_map = {}
-            for cat_name in SPACE_CATEGORIES:
-                cat, _ = SpaceCategory.objects.get_or_create(name=cat_name)
-                cat_map[cat_name] = cat
-
             # ── Spaces ────────────────────────────────────────────
             space_map = {}
-            for s_name, cat_name, price, days in SPACES:
+            for s_name, price in SPACES:
                 space, created = Space.objects.get_or_create(
                     name=s_name,
                     defaults={
                         "slug": slugify(s_name),
-                        "space_category": cat_map[cat_name],
                         "base_price": price,
-                        "estimated_days": days,
-                        "category": cat_name,
                     },
                 )
                 space_map[s_name] = space
                 if created:
                     counts["spaces"] += 1
+                    gif_bytes = _make_gif()
+                    SpaceImage.objects.create(space=space, image=ContentFile(gif_bytes, name=f"{space.slug}.gif"))
 
             # ── ProjectTypes + ProjectTypeSpace ───────────────────
             for pt_data in PROJECT_TYPES:
@@ -193,18 +153,16 @@ class Command(BaseCommand):
                     slug=slugify(pt_data["name"]),
                     defaults={
                         "name": pt_data["name"],
-                        "description": pt_data["description"],
-                        "sort_order": pt_data["sort_order"],
                     },
                 )
                 if pt_created:
                     counts["project_types"] += 1
                 for idx, space_name in enumerate(pt_data["spaces"]):
                     if space_name in space_map:
-                        ProjectTypeSpace.objects.get_or_create(
-                            project_type=pt,
-                            space=space_map[space_name],
-                            defaults={"sort_order": idx},
+                        space_obj = space_map[space_name]
+                        ProjectTypeSpace.objects.filter(space=space_obj).delete()
+                        ProjectTypeSpace.objects.create(
+                            project_type=pt, space=space_obj, sort_order=idx,
                         )
 
             # ── Packages ──────────────────────────────────────────
@@ -258,38 +216,6 @@ class Command(BaseCommand):
                 except (DesignPackage.DoesNotExist, DesignOption.DoesNotExist):
                     pass
 
-            # ── StyleCategories ───────────────────────────────────
-            for data in STYLES:
-                slug = slugify(data["name"])
-                _, was = StyleCategory.objects.get_or_create(
-                    slug=slug,
-                    defaults={
-                        "name": data["name"],
-                        "description": data["description"],
-                    },
-                )
-                if was:
-                    counts["styles"] += 1
-
-            # ── InspirationImages ─────────────────────────────────
-            gif_bytes = _make_gif()
-            for title, space_name, _ in INSPIRATIONS:
-                space = space_map[space_name]
-                insp, was = InspirationImage.objects.get_or_create(
-                    title=title,
-                    defaults={
-                        "space": space,
-                        "active": True,
-                    },
-                )
-                if was:
-                    insp.image.save(
-                        f"{slugify(title)}.gif",
-                        ContentFile(gif_bytes),
-                        save=True,
-                    )
-                    counts["inspirations"] += 1
-
         total = sum(counts.values())
         self.stdout.write(
             self.style.SUCCESS(
@@ -298,8 +224,6 @@ class Command(BaseCommand):
                 f"{counts['spaces']} spaces \u00b7 "
                 f"{counts['packages']} packages \u00b7 "
                 f"{counts.get('service_categories', 0)} service categories \u00b7 "
-                f"{counts['options']} options \u00b7 "
-                f"{counts['styles']} styles \u00b7 "
-                f"{counts['inspirations']} inspirations"
+                f"{counts['options']} options"
             )
         )

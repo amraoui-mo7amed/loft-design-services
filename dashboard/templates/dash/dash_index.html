@@ -5,9 +5,9 @@
 
 {% block css %}
     <link rel="stylesheet"
-          href="{% static 'css/dash_index.css' %}?v={% now "U" %}" />
+          href="{% static 'css/dash_index.css' %}?v={{ ASSET_VERSION }}" />
     <link rel="stylesheet"
-          href="{% static 'css/notifications.css' %}?v={% now "U" %}" />
+          href="{% static 'css/notifications.css' %}?v={{ ASSET_VERSION }}" />
 {% endblock css %}
 {% block nav %}
 {% endblock nav %}
@@ -180,7 +180,7 @@
 {% endblock footer %}
 {% block js %}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{% static 'js/dash_index.js' %}?v={% now "U" %}"></script>
-    <script src="{% static 'js/notifications.js' %}?v={% now "U" %}"></script>
+    <script src="{% static 'js/dash_index.js' %}?v={{ ASSET_VERSION }}"></script>
+    <script src="{% static 'js/notifications.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock js %}
 {% block extra_js %}{% endblock extra_js %}

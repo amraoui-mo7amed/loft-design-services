@@ -1,24 +1,101 @@
-/* ── Full-Viewport Dark Viewer ── */
+/* ── Full-Viewport Liquid-Glass Viewer ── */
 .detail-viewer {
   position: relative;
   width: 100%;
   height: 100vh;
-  background: #111;
+  background:
+    radial-gradient(680px 440px at 10% 15%, rgba(255, 214, 90, 0.18), transparent 62%),
+    radial-gradient(680px 440px at 92% 8%, rgba(74, 222, 128, 0.14), transparent 62%),
+    radial-gradient(820px 540px at 50% 100%, rgba(139, 92, 246, 0.18), transparent 62%),
+    #0e1013;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  border-radius: 0;
 }
 
 .detail-viewer .viewer-main-img {
-  max-width: 90vw;
-  max-height: 85vh;
-  object-fit: contain;
-  border-radius: 4px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: opacity 0.3s ease;
 }
 
-/* ── Action Buttons ── */
+/* ── Nav Arrows (floating over the image) ── */
+.detail-viewer .nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 12;
+}
+
+.detail-viewer .nav-prev {
+  inset-inline-start: 20px;
+}
+
+.detail-viewer .nav-next {
+  inset-inline-end: 20px;
+}
+
+/* ── Glass control buttons ── */
+.viewer-action-btn,
+.viewer-icon-btn {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f2f5f8;
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.viewer-action-btn:hover,
+.viewer-icon-btn:hover {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: #212121;
+  transform: scale(1.08);
+}
+
+/* ── Top-left controls (back + 360) ── */
+.viewer-top-left {
+  position: absolute;
+  top: 20px;
+  inset-inline-start: 20px;
+  z-index: 12;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.viewer-icon-btn {
+  height: 44px;
+  width: 44px;
+  border-radius: 12px;
+  font-size: 1.05rem;
+}
+
+.viewer-icon-btn.viewer-external-btn {
+  width: auto;
+  padding: 0 16px;
+  border-radius: 12px;
+  color: var(--brand-primary);
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.viewer-icon-btn.viewer-external-btn:hover {
+  background: var(--brand-primary);
+  color: #212121;
+}
+
+/* ── Right actions ── */
 .viewer-actions {
   position: absolute;
   top: 20px;
@@ -31,29 +108,15 @@
 .viewer-action-btn {
   width: 44px;
   height: 44px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  border-radius: 12px;
   font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(8px);
-  text-decoration: none;
 }
 
-.viewer-action-btn:hover {
+/* ── Gallery toggle ── */
+.gallery-toggle-btn.active-3d {
   background: var(--brand-primary);
-  color: var(--brand-secondary);
-  transform: scale(1.08);
-}
-
-.viewer-action-btn.danger:hover {
-  background: #c0392b;
-  color: #fff;
+  border-color: var(--brand-primary);
+  color: #212121;
 }
 
 /* ── Thumb Strip ── */
@@ -62,12 +125,17 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(10px);
+  background: rgba(14, 17, 20, 0.6);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding: 12px 20px;
   display: flex;
+  flex-wrap: nowrap;
   gap: 8px;
   overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
   z-index: 10;
 }
 
@@ -76,7 +144,7 @@
 }
 
 .thumb-strip::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 214, 90, 0.4);
   border-radius: 4px;
 }
 
@@ -87,7 +155,7 @@
   overflow: hidden;
   cursor: pointer;
   border: 2px solid transparent;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  transition: border-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
   opacity: 0.5;
 }
 
@@ -107,125 +175,10 @@
   object-fit: cover;
 }
 
-/* ── Details Modal ── */
-#projectDetailsModal .modal-content {
-  border-radius: 20px;
-  border: none;
-  background: #fff;
-}
-
-.details-hero {
-  height: 200px;
-  overflow: hidden;
-  border-radius: 20px 20px 0 0;
-}
-
-.details-hero img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.details-body {
-  padding: 24px 28px;
-}
-
-.details-body h2 {
-  font-size: 1.5rem;
-  font-weight: 900;
-  margin-bottom: 8px;
-  color: var(--brand-secondary);
-}
-
-.details-body .details-date {
-  font-size: 0.8rem;
-  color: #bbb;
-  margin-bottom: 16px;
-}
-
-.details-body .details-description {
-  font-size: 0.92rem;
-  color: #555;
-  line-height: 1.7;
-  margin-bottom: 20px;
-}
-
-.details-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 20px;
-}
-
-.details-tags .badge {
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 5px 14px;
-  background: #f0f0f0;
-  color: #666;
-  border-radius: 20px;
-}
-
-.details-contact {
-  background: var(--brand-light);
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-}
-
-.details-contact p {
-  font-size: 0.85rem;
-  color: #888;
-  margin-bottom: 12px;
-}
-
-.details-contact .btn {
-  border-radius: 12px;
-  font-weight: 800;
-}
-
-/* ── Back Button ── */
-.detail-back {
-  position: absolute;
-  top: 20px;
-  inset-inline-start: 20px;
-  z-index: 10;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(8px);
-  text-decoration: none;
-}
-
-.detail-back:hover {
-  background: rgba(255, 255, 255, 0.25);
-  color: #fff;
-  transform: scale(1.08);
-}
-
 @media (max-width: 991.98px) {
-  .detail-viewer .viewer-main-img {
-    max-width: 95vw;
-    max-height: 70vh;
-  }
   .thumb-item {
     flex: 0 0 52px;
     height: 40px;
-  }
-  .details-hero {
-    height: 150px;
-  }
-  .details-body {
-    padding: 20px;
   }
 }
 
@@ -235,19 +188,32 @@
     inset-inline-end: 12px;
     gap: 6px;
   }
-  .viewer-action-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 0.85rem;
-  }
-  .detail-back {
+  .viewer-top-left {
     top: 12px;
     inset-inline-start: 12px;
-    width: 36px;
-    height: 36px;
+    gap: 6px;
+  }
+  .detail-viewer .nav-prev {
+    inset-inline-start: 10px;
+  }
+  .detail-viewer .nav-next {
+    inset-inline-end: 10px;
+  }
+  .viewer-action-btn,
+  .viewer-icon-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+  }
+  .viewer-icon-btn.viewer-external-btn {
+    width: auto;
+    padding: 0 12px;
+    font-size: 0.75rem;
   }
   .thumb-strip {
     padding: 8px 12px;
+    gap: 6px;
   }
   .thumb-item {
     flex: 0 0 44px;
@@ -260,7 +226,10 @@
   position: absolute;
   inset: 0;
   z-index: 5;
-  background: #111;
+  background:
+    radial-gradient(680px 440px at 15% 20%, rgba(255, 214, 90, 0.12), transparent 62%),
+    radial-gradient(680px 440px at 85% 80%, rgba(139, 92, 246, 0.14), transparent 62%),
+    #0e1013;
   display: none;
   align-items: center;
   justify-content: center;

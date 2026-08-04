@@ -1,36 +1,180 @@
+/* ============================================
+   Inquiries — dark liquid glass theme
+   (dashboard pages, scoped under .dashContent)
+   ============================================ */
+
+/* ── List card ── */
+
 .inquiry-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .inquiry-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    border-color: rgba(255, 214, 90, 0.35) !important;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
 }
 .inquiry-card.unread {
     border-left: 4px solid var(--brand-primary, #FFD65A) !important;
 }
 
+/* ── Status pills ── */
+
+.inquiry-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+.inquiry-status::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.85;
+}
+.inquiry-status-pending {
+    background: rgba(245, 158, 11, 0.16);
+    color: #fbbf24;
+}
+.inquiry-status-approved {
+    background: rgba(16, 185, 129, 0.16);
+    color: #34d399;
+}
+.inquiry-status-declined {
+    background: rgba(239, 68, 68, 0.16);
+    color: #f87171;
+}
+
+/* ── Card action buttons ── */
+
+.inquiry-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.inquiry-action-details {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f2f5f8;
+    border-color: rgba(255, 255, 255, 0.14);
+}
+.inquiry-action-details:hover {
+    background: rgba(255, 214, 90, 0.14);
+    border-color: rgba(255, 214, 90, 0.35);
+    color: var(--brand-primary);
+}
+.inquiry-action-delete {
+    background: rgba(239, 68, 68, 0.14);
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+.inquiry-action-delete:hover {
+    background: rgba(239, 68, 68, 0.24);
+    color: #fff;
+    border-color: rgba(239, 68, 68, 0.45);
+}
+
+/* ── Spaces chips (list card) ── */
+
+.inquiry-space-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.28rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.74rem;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.07);
+    color: #e6eaee;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.inquiry-space-chip:hover {
+    border-color: rgba(255, 214, 90, 0.3);
+    background: rgba(255, 214, 90, 0.08);
+    color: #f2f5f8;
+}
+.inquiry-space-chip i {
+    color: var(--brand-primary);
+    font-size: 0.7rem;
+}
+
+/* ── Card footer divider ── */
+
+.inquiry-card-foot {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ── Spaces cards (detail page) ── */
+
 .inquiry-space-card {
-    background: #f8f9fc;
-    border: 1px solid #e9ecef;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 12px;
     padding: 0.75rem 1rem;
     height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    transition: border-color 0.2s ease;
+    gap: 4px;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
 }
 .inquiry-space-card:hover {
-    border-color: var(--brand-primary, #FFD65A);
+    border-color: rgba(255, 214, 90, 0.4);
+    transform: translateY(-2px);
+}
+.inquiry-space-card .inquiry-space-icon {
+    color: var(--brand-primary);
+    font-size: 0.8rem;
+    opacity: 0.9;
 }
 .inquiry-space-name {
     font-weight: 600;
     font-size: 0.85rem;
-    color: #212529;
+    color: #f2f5f8;
 }
 .inquiry-space-price {
     font-weight: 600;
     font-size: 0.8rem;
-    color: #495057;
+    color: var(--brand-primary);
+}
+
+/* ── RTL ── */
+
+.inquiry-detail-card a {
+    color: var(--brand-primary);
+    transition: color 0.2s ease;
+}
+.inquiry-detail-card a:hover {
+    color: #ffe9a8;
+}
+
+.inquiry-total {
+    color: var(--brand-primary);
+}
+
+.inquiry-status-select {
+    width: auto;
+}
+
+[dir="rtl"] .inquiry-card.unread {
+    border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-right: 4px solid var(--brand-primary, #FFD65A) !important;
 }
 
 [dir="rtl"] .inquiry-space-card {

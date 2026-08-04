@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.utils.translation import gettext_lazy as _
 from django.db import transaction
+from django.core.paginator import Paginator
 
 from ..models import ProductCategory, Product, SpaceProductRecommendation, Cart, CartItem, Order, OrderItem, Space
 
@@ -14,8 +15,11 @@ def product_list(request):
     categories = ProductCategory.objects.all()
     if category_slug:
         products = products.filter(category__slug=category_slug)
+    paginator = Paginator(products, 12)
+    page_obj = paginator.get_page(request.GET.get("page"))
     return render(request, "dashboard/marketplace/product_list.html", {
-        "products": products,
+        "products": page_obj,
+        "page_obj": page_obj,
         "categories": categories,
         "current_category": category_slug,
     })
@@ -32,7 +36,7 @@ def product_detail(request, slug):
 
 @login_required
 def cart_view(request):
-    cart, _ = Cart.objects.get_or_create(user=request.user)
+    cart, cart_created = Cart.objects.get_or_create(user=request.user)
     items = cart.items.select_related("product").all()
     total = sum(item.price_at_time * item.quantity for item in items)
     return render(request, "dashboard/marketplace/cart.html", {
@@ -46,7 +50,7 @@ def cart_view(request):
 @require_POST
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id, active=True)
-    cart, _ = Cart.objects.get_or_create(user=request.user)
+    cart, cart_created = Cart.objects.get_or_create(user=request.user)
     cart_item, created = CartItem.objects.get_or_create(
         cart=cart, product=product,
         defaults={"price_at_time": product.price, "quantity": 1},
@@ -123,4 +127,9 @@ def place_order(request):
 @login_required
 def order_history(request):
     orders = Order.objects.filter(user=request.user).prefetch_related("items__product")
-    return render(request, "dashboard/marketplace/orders.html", {"orders": orders})
+    paginator = Paginator(orders, 12)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    return render(request, "dashboard/marketplace/orders.html", {
+        "orders": page_obj,
+        "page_obj": page_obj,
+    })

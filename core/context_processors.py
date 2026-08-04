@@ -1,7 +1,7 @@
 from functools import lru_cache
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _, get_language
-
+import time
 
 @lru_cache(maxsize=1)
 def _get_site_config():
@@ -39,4 +39,7 @@ def _get_site_config():
 
 
 def site_settings(request):
-    return {"site_config": _get_site_config()}
+    return {
+        "site_config": _get_site_config(),
+        "ASSET_VERSION": str(int(time.time())) if settings.DEBUG else settings.ASSET_VERSION,
+    }

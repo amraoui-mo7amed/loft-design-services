@@ -55,7 +55,7 @@ A full-featured interior design service platform built on Django. Clients submit
 
 ### Admin Catalog Management
 - **Project Types**: Manage types (Residential, Commercial, Outdoor, etc.) with associated spaces
-- **Spaces**: Manage rooms (Living Room, Kitchen, Bedroom, etc.) with base pricing and estimated days
+- **Spaces**: Manage rooms (Living Room, Kitchen, Bedroom, etc.) with base pricing
 - **Space Categories**: Group spaces (Interior, Exterior)
 - **Design Packages**: Essential, Premium, Luxury — with price multipliers and service inclusions
 - **Design Options**: Extra services (3D Walkthrough, Furniture Procurement, Lighting Design, Landscape Concept)
@@ -156,7 +156,7 @@ loft-design-services/
 #### `base.py` — Core Structure
 - **`ProjectType`**: name, slug, description, image, active, sort_order
 - **`SpaceCategory`**: name, description
-- **`Space`**: name, slug, image, category (legacy), space_category (FK), base_price, estimated_days, active
+- **`Space`**: name, slug, image, category (legacy), space_category (FK), base_price, active
 - **`ProjectTypeSpace`** (M2M through): project_type ↔ space, sort_order
 
 #### `catalog.py` — Packages & Options
@@ -466,7 +466,6 @@ The wizard queries `GET /api/design/calculate-price/` on every selection change.
 - **Options total** = sum of selected option prices
 - **Tax** = `PricingConfig.tax_rate`% on (subtotal + package + options)
 - **Total** = subtotal + package + options + tax
-- **Delivery estimate** = max `estimated_days` across selected spaces
 
 ### File Uploads
 

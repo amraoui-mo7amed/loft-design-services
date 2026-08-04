@@ -7,13 +7,13 @@
 
   <div class="row g-3" id="inspirationSpacesGrid">
     {% for space in spaces_list %}
-    {% with images=insp_by_space|get_item:space.id %}
+    {% with images=gallery_by_space|get_item:space.id %}
     {% if images %}
     <div class="col-md-6 col-lg-4">
       <div class="inspo-space-card" data-space-id="{{ space.id }}" data-completed="false">
         <div class="inspo-card-header">
-          {% if space.image %}
-          <img src="{{ space.image.url }}" alt="{{ space.name }}" class="inspo-card-cover">
+          {% if space.thumbnail %}
+          <img src="{{ space.thumbnail.url }}" alt="{{ space.name }}" class="inspo-card-cover">
           {% else %}
           <div class="inspo-card-icon-wrap">
             <i class="fas fa-couch"></i>
@@ -26,13 +26,13 @@
 
         <div class="inspo-card-body">
           <h6 class="inspo-card-name inspo-space-name">{{ space.name }}</h6>
-          <span class="inspo-card-meta">{{ images|length }} {% trans "inspiration images" %}</span>
+          <span class="inspo-card-meta">{{ images|length }} {% trans "gallery images" %}</span>
         </div>
 
         <div class="inspo-card-footer">
           <button type="button" class="inspo-select-btn select-inspo-btn" data-space-id="{{ space.id }}">
             <i class="fas fa-images"></i>
-            <span>{% trans "Select Inspiration" %}</span>
+            <span>{% trans "Select Gallery Images" %}</span>
           </button>
         </div>
 
@@ -40,7 +40,7 @@
           {% for img in images %}
           <div class="inspiration-item" data-img-id="{{ img.id }}" data-img-url="{{ img.image.url }}">
             <div class="wiz-inspo-card inspiration-card">
-              <img src="{{ img.image.url }}" alt="{{ img.title }}" class="wiz-inspo-img" loading="lazy">
+              <img src="{{ img.image.url }}" alt="{{ space.name }}" class="wiz-inspo-img" loading="lazy">
               <div class="wiz-inspo-overlay"><i class="fas fa-check-circle"></i></div>
             </div>
           </div>

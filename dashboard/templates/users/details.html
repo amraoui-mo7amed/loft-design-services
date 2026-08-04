@@ -7,7 +7,7 @@
 {% endblock dashTitle %}
 
 {% block extra_js %}
-    <script src="{% static "js/users.js" %}?v={% now "U" %}"></script>
+    <script src="{% static "js/users.js" %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}
 
 {% block dashContent %}

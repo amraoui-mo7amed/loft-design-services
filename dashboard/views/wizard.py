@@ -7,19 +7,15 @@ from django.db import transaction
 import json
 
 from ..models import (
-    ProjectType, Space, DesignPackage, DesignOption,
-    StyleCategory, InspirationImage, DesignRequest,
-    DesignRequestFloor, DesignRequestSpace, DesignRequestOption,
-    DesignRequestInspiration, DesignRequestFile,
+    ProjectType, Space, SpaceImage, DesignPackage, DesignOption,
+    DesignRequest, DesignRequestFloor, DesignRequestSpace, DesignRequestOption,
+    DesignRequestSpaceImage, DesignRequestFile,
 )
 from ..price_engine import calculate_full_price
 
 
 def wizard_container(request):
-    project_types = ProjectType.objects.filter(active=True)
-    packages = DesignPackage.objects.filter(active=True).prefetch_related("package_services__option__category")
-    options = DesignOption.objects.filter(active=True)
-    styles = StyleCategory.objects.all()
+    project_types = ProjectType.objects.all()
     project_type_choices = [("", _("Choose project type"))] + [(pt.slug, pt.name) for pt in project_types]
     step_labels = [
         _("Project & Spaces"), _("Package"),
@@ -42,9 +38,6 @@ def wizard_container(request):
     return render(request, "dashboard/wizard/container.html", {
         "project_types": project_types,
         "project_type_choices": project_type_choices,
-        "packages": packages,
-        "options": options,
-        "styles": styles,
         "step_labels": step_labels,
         "timeline_choices": timeline_choices,
         "property_type_choices": property_type_choices,
@@ -52,9 +45,9 @@ def wizard_container(request):
 
 
 def step_combined(request):
-    project_types = ProjectType.objects.filter(active=True)
+    project_types = ProjectType.objects.all()
     project_type_choices = [("", _("Choose project type"))] + [(pt.slug, pt.name) for pt in project_types]
-    spaces = Space.objects.filter(active=True)
+    spaces = Space.objects.all().prefetch_related("gallery_images")
     floor_count = int(request.GET.get("floor_count", 1))
     return render(request, "dashboard/wizard/step1_combined.html", {
         "project_types": project_types,
@@ -81,30 +74,28 @@ def step_packages(request):
 
 def step_inspirations(request):
     space_ids_param = request.GET.get("space_ids")
-    spaces_qs = Space.objects.filter(active=True)
+    spaces_qs = Space.objects.all().prefetch_related("gallery_images")
     if space_ids_param:
         ids = [int(x) for x in space_ids_param.split(",") if x]
         if ids:
             spaces_qs = spaces_qs.filter(id__in=ids)
     spaces_list = list(spaces_qs)
     selected_ids = {s.id for s in spaces_list}
-    inspirations = InspirationImage.objects.filter(
-        active=True, space_id__in=selected_ids
-    )
+    galleries = SpaceImage.objects.filter(space_id__in=selected_ids)
 
-    insp_by_space = {}
-    for img in inspirations:
+    gallery_by_space = {}
+    for img in galleries:
         sid = img.space_id
-        if sid not in insp_by_space:
-            insp_by_space[sid] = []
-        insp_by_space[sid].append(img)
+        if sid not in gallery_by_space:
+            gallery_by_space[sid] = []
+        gallery_by_space[sid].append(img)
 
-    for sid in insp_by_space:
-        insp_by_space[sid] = insp_by_space[sid][-3:]
+    for sid in gallery_by_space:
+        gallery_by_space[sid] = gallery_by_space[sid][-3:]
 
     return render(request, "dashboard/wizard/step6_inspirations.html", {
         "spaces_list": spaces_list,
-        "insp_by_space": insp_by_space,
+        "gallery_by_space": gallery_by_space,
     })
 
 
@@ -150,15 +141,20 @@ def submit_design_request(request):
         )
 
         floor_names = json.loads(data.get("floors", "[]"))
+        floors = []
         for i, name in enumerate(floor_names):
-            DesignRequestFloor.objects.create(
+            floor = DesignRequestFloor.objects.create(
                 design_request=design_request, name=name, level=i, order=i
             )
+            floors.append(floor)
+        floors_by_order = {floor.order: floor for floor in floors}
 
         spaces_data = json.loads(data.get("spaces", "[]"))
+        space_ids = {item.get("spaceId") for item in spaces_data if item.get("spaceId")}
+        space_map = Space.objects.in_bulk(space_ids)
         for item in spaces_data:
-            floor = design_request.floors.filter(order=item.get("floorIndex", 0)).first()
-            space = Space.objects.filter(id=item.get("spaceId")).first()
+            floor = floors_by_order.get(item.get("floorIndex", 0))
+            space = space_map.get(item.get("spaceId"))
             if floor and space:
                 DesignRequestSpace.objects.create(
                     design_request=design_request, floor=floor, space=space,
@@ -171,11 +167,13 @@ def submit_design_request(request):
                 design_request=design_request, space_id=space_id
             ).first()
             if drs:
-                for img_id in image_ids:
-                    img = InspirationImage.objects.filter(id=img_id).first()
+                img_ids = {int(x) for x in image_ids if x}
+                img_map = SpaceImage.objects.in_bulk(img_ids)
+                for img_id in img_ids:
+                    img = img_map.get(img_id)
                     if img:
-                        DesignRequestInspiration.objects.create(
-                            design_request_space=drs, inspiration_image=img
+                        DesignRequestSpaceImage.objects.create(
+                            design_request_space=drs, space_image=img
                         )
 
     return JsonResponse({

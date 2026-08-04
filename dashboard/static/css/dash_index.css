@@ -3,17 +3,27 @@
    ======================================== */
 
 :root {
-  --sidebar-width: 280px;
-  --sidebar-bg: var(--brand-dark, #1a1a1a);
-  --sidebar-surface: rgba(255, 255, 255, 0.04);
-  --sidebar-border: rgba(255, 255, 255, 0.06);
-  --sidebar-text: rgba(255, 255, 255, 0.55);
-  --sidebar-text-hover: rgba(255, 255, 255, 0.9);
-  --sidebar-active-bg: rgba(255, 214, 90, 0.15);
+  --sidebar-width: 268px;
+  --sidebar-gap: 16px;
+  --sidebar-bg: rgba(14, 17, 20, 0.78);
+  --sidebar-surface: rgba(255, 255, 255, 0.05);
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-text: rgba(255, 255, 255, 0.62);
+  --sidebar-text-hover: rgba(255, 255, 255, 0.95);
+  --sidebar-active-bg: rgba(255, 214, 90, 0.16);
   --sidebar-active-border: var(--brand-primary, #FFD65A);
   --sidebar-icon-size: 20px;
   --header-height: 64px;
-  --dropdown-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  --dropdown-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Dark dashboard backdrop (behind floating glass sidebar & content) */
+body:has(.dashContent) {
+  background: #0e1013 !important;
+}
+.main-content:has(.dashContent) {
+  padding: 0 !important;
+  min-height: 100vh;
 }
 
 /* ---------- Mobile Backdrop ---------- */
@@ -35,26 +45,31 @@
 /* ---------- Sidebar Shell ---------- */
 .sidebar {
   position: fixed;
-  top: 0;
-  bottom: 0;
+  top: var(--sidebar-gap);
+  bottom: var(--sidebar-gap);
+  inset-inline-start: var(--sidebar-gap);
   width: var(--sidebar-width);
   z-index: 1040;
   background: var(--sidebar-bg);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   display: flex;
   flex-direction: column;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
               width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  border-right: 1px solid var(--sidebar-border);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 20px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 [dir="rtl"] .sidebar {
-  right: 0;
+  right: var(--sidebar-gap);
   left: auto;
   border-right: none;
   border-left: 1px solid var(--sidebar-border);
 }
 [dir="ltr"] .sidebar {
-  left: 0;
+  left: var(--sidebar-gap);
   right: auto;
 }
 
@@ -69,8 +84,7 @@
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.03);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-.sidebar-logo {
+}.sidebar-logo {
   height: 34px;
   width: auto;
   border-radius: 8px;
@@ -339,26 +353,32 @@
 
 .dashContent {
   min-height: 100vh;
-  background: var(--brand-light, #f5f0ea);
+  background: #0e1013;
+  background-image:
+    radial-gradient(680px 440px at 10% 10%, rgba(255, 214, 90, 0.08), transparent 62%),
+    radial-gradient(680px 440px at 92% 6%, rgba(74, 222, 128, 0.06), transparent 62%),
+    radial-gradient(820px 540px at 50% 105%, rgba(139, 92, 246, 0.08), transparent 62%);
+  color: #f2f5f8;
   transition: margin 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  width: calc(100% - var(--sidebar-width) - 20px);
+  width: calc(100% - var(--sidebar-width) - 2 * var(--sidebar-gap) - 20px);
   display: flex;
   flex-direction: column;
 }
 [dir="ltr"] .dashContent {
-  margin-left: var(--sidebar-width);
+  margin-left: calc(var(--sidebar-width) + 2 * var(--sidebar-gap) + 20px);
 }
 [dir="rtl"] .dashContent {
-  margin-right: var(--sidebar-width);
+  margin-right: calc(var(--sidebar-width) + 2 * var(--sidebar-gap) + 20px);
 }
 
 /* ---------- Header ---------- */
 .dash-header {
   height: var(--header-height);
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
+  background: rgba(14, 17, 20, 0.72);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
   padding: 0 24px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 1020;
   flex-shrink: 0;
 }
@@ -369,7 +389,7 @@
   border-radius: 10px;
   border: none;
   background: transparent;
-  color: var(--sidebar-bg);
+  color: #f2f5f8;
   font-size: 1.2rem;
   cursor: pointer;
   transition: background 0.2s ease;
@@ -377,13 +397,13 @@
   justify-content: center;
 }
 .dash-toggle-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.08);
 }
 .dash-header-title {
   margin: 0;
   font-size: 1.15rem;
   font-weight: 800;
-  color: var(--brand-primary, #FFD65A);
+  color: #f2f5f8;
   letter-spacing: -0.3px;
 }
 
@@ -396,7 +416,10 @@
 /* ---------- Dropdown Styling ---------- */
 .dropdown-menu {
   border-radius: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(20, 24, 29, 0.92);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
   box-shadow: var(--dropdown-shadow);
   padding: 0.5rem;
   margin-top: 10px !important;
@@ -407,20 +430,30 @@
   to { opacity: 1; transform: translateY(0); }
 }
 .dropdown-item {
-  border-radius: 8px;
   padding: 0.5rem 0.85rem;
   font-weight: 500;
   font-size: 0.85rem;
+  color: #f2f5f8;
   transition: all 0.2s ease;
 }
 .dropdown-item:hover {
-  background: rgba(255, 214, 90, 0.1);
+  background: rgba(255, 214, 90, 0.12);
   color: var(--brand-primary, #FFD65A);
+}
+.dropdown-item.text-danger {
+  color: #f87171;
+}
+.dropdown-item.text-danger:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+}
+.dropdown-divider {
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* ---------- User Dropdown Trigger ---------- */
 .user-dropdown-trigger {
-  background: var(--brand-light, #f5f0ea);
+  background: rgba(255, 255, 255, 0.06);
   padding: 4px 10px 4px 4px;
   border-radius: 10px;
   transition: background 0.2s ease;
@@ -429,18 +462,50 @@
   padding: 4px 4px 4px 10px;
 }
 .user-dropdown-trigger:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.1);
+}
+.user-dropdown-trigger .text-dark {
+  color: #f2f5f8 !important;
 }
 .avatar-circle {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.25);
   background: var(--brand-primary, #FFD65A) !important;
-  color: var(--brand-secondary) !important;
-  color: #fff;
+  color: #212121 !important;
 }
 .leading-tight { line-height: 1.25; }
 .opacity-10 { opacity: 0.1; }
 .no-caret::after { display: none !important; }
+
+/* ---------- Language Switcher (dark header) ---------- */
+.dashContent .lang-switcher-btn {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f2f5f8;
+}
+.dashContent .lang-switcher-btn:hover {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary);
+  color: #212121;
+}
+.dashContent .lang-switcher-menu {
+  background: rgba(20, 24, 29, 0.92);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--dropdown-shadow);
+}
+.dashContent .lang-switcher-item {
+  color: #f2f5f8;
+}
+.dashContent .lang-switcher-item:hover {
+  background: rgba(255, 214, 90, 0.12);
+  color: var(--brand-primary);
+}
+.dashContent .lang-switcher-item.active-lang {
+  background: var(--brand-primary);
+  color: #212121;
+}
 
 /* ========================================
    Dashboard Button Styles (brand-aligned)
@@ -456,9 +521,9 @@
 }
 
 .dash-btn-primary {
-  background-color: var(--brand-primary);
-  border-color: var(--brand-primary);
-  color: var(--brand-secondary);
+  background-color: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+  color: var(--brand-secondary) !important;
 }
 
 .dash-btn-primary:hover {
@@ -509,33 +574,36 @@
 }
 
 /* ========================================
-   Dashboard Modal Styles - white bg, dark text
+   Dashboard Modal Styles - dark glass
    ======================================== */
 
 .dash-modal .modal-content,
 .modal-content.pt-modal-overlay {
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 1rem;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
     overflow: hidden;
 }
 
 .modal-header,
 .pt-modal-header {
-    background: #fff;
+    background: transparent;
     padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #e8e8e8;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modal-header .modal-title,
 .pt-modal-header .modal-title {
     font-weight: 700;
-    color: var(--brand-dark, #1a1a1a);
+    color: #f2f5f8;
     font-size: 1.1rem;
 }
 
 .pt-modal-subtitle {
-    color: #6c757d;
+    color: #a8b2bd;
     font-size: 0.78rem;
     margin-bottom: 0;
 }
@@ -557,12 +625,12 @@
 
 @media (max-width: 991.98px) {
   .sidebar {
-    transform: translateX(-100%);
+    transform: translateX(calc(-100% - var(--sidebar-gap)));
     width: var(--sidebar-width);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
   [dir="rtl"] .sidebar {
-    transform: translateX(100%);
+    transform: translateX(calc(100% + var(--sidebar-gap)));
   }
   .sidebar.open {
     transform: translateX(0);
@@ -654,16 +722,16 @@
   border-radius: 10px;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #495057;
-  background: #fff;
-  border: 2px solid transparent;
+  color: #a8b2bd;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   text-decoration: none;
   transition: all 0.2s ease;
   cursor: pointer;
 }
 
 .pagination-link:hover {
-  background: var(--brand-light);
+  background: rgba(255, 214, 90, 0.1);
   color: var(--brand-primary);
   border-color: var(--brand-primary);
   transform: translateY(-1px);
@@ -671,7 +739,7 @@
 
 .pagination-item.active .pagination-link {
   background: var(--brand-primary);
-  color: var(--brand-secondary);
+  color: #212121;
   border-color: var(--brand-primary);
   box-shadow: 0 4px 12px rgba(255, 214, 90, 0.3);
 }
@@ -703,4 +771,279 @@
     font-size: 0.75rem;
     padding: 0 0.45rem;
   }
+}
+
+/* ========================================
+   Liquid Glass — all dashboard cards, tables & forms
+   ======================================== */
+
+.dashContent .card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  color: #f2f5f8;
+}
+.dashContent .card.border-0,
+.dashContent .card.border-0.shadow-sm {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+.dashContent .card:hover {
+  border-color: rgba(255, 214, 90, 0.4);
+}
+.dashContent .card-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f2f5f8;
+}
+.dashContent .card-header h4,
+.dashContent .card-header h5,
+.dashContent .card-header h6 {
+  color: #f2f5f8;
+}
+.dashContent .card-title,
+.dashContent .card h4,
+.dashContent .card h5,
+.dashContent .card h6 {
+  color: #f2f5f8;
+}
+.dashContent .card-body {
+  color: #e6eaee;
+}
+
+/* Tables */
+.dashContent .table {
+  --bs-table-bg: transparent;
+  --bs-table-color: #e6eaee;
+  --bs-table-border-color: rgba(255, 255, 255, 0.1);
+  color: #e6eaee;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.dashContent .table thead th {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+.dashContent .table td {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+.dashContent .table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Form controls */
+.dashContent .form-control,
+.dashContent .form-select,
+.dashContent textarea.form-control,
+.dashContent input.form-control {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #f2f5f8;
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+.dashContent .form-control::placeholder,
+.dashContent .form-select::placeholder {
+  color: #8b95a1;
+}
+.dashContent .form-control:focus,
+.dashContent .form-select:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(255, 214, 90, 0.15);
+  color: #f2f5f8;
+}
+.dashContent .form-select {
+  color: #f2f5f8;
+}
+.dashContent .form-select option {
+  background: #14181d;
+  color: #f2f5f8;
+}
+.dashContent .form-label {
+  color: #f2f5f8;
+}
+
+/* Muted / helper text on dark */
+.dashContent .text-muted {
+  color: #a8b2bd !important;
+}
+.dashContent h4,
+.dashContent h5,
+.dashContent h6,
+.dashContent .fw-bold {
+  color: #f2f5f8;
+}
+
+/* Bootstrap color adjustments for dark bg */
+.dashContent .bg-white { background-color: rgba(255, 255, 255, 0.08) !important; }
+.dashContent .bg-light { background-color: rgba(255, 255, 255, 0.08) !important; }
+.dashContent .bg-secondary-subtle { background-color: rgba(255, 255, 255, 0.08) !important; }
+
+/* ========================================
+   Liquid glass — Bootstrap modals (all dashboard pages)
+   ======================================== */
+
+.dashContent .modal-content {
+  background: linear-gradient(145deg, rgba(30, 35, 42, 0.96), rgba(20, 24, 29, 0.94));
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+  color: #f2f5f8;
+}
+.dashContent .modal-content.border-0 {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+.dashContent .modal-title {
+  color: #f2f5f8;
+}
+.dashContent .modal-body,
+.dashContent .modal-body * {
+  color: #e6eaee;
+}
+.dashContent .modal .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+.dashContent .modal-backdrop.show {
+  opacity: 0.7;
+}
+
+/* Liquid glass — Bootstrap alerts (all dashboard pages) */
+.dashContent .alert {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e6eaee;
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+.dashContent .alert-info {
+  background: rgba(13, 202, 240, 0.12);
+  border: 1px solid rgba(13, 202, 240, 0.3);
+  color: #a5e8f7;
+}
+.dashContent .alert-warning {
+  background: rgba(255, 214, 90, 0.12);
+  border: 1px solid rgba(255, 214, 90, 0.35);
+  color: #f6d87a;
+}
+.dashContent .alert-success {
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  color: #9ce8cc;
+}
+.dashContent .alert-danger {
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  color: #f5a3a3;
+}
+.dashContent .alert p {
+  color: inherit;
+}
+
+/* ========================================
+   SweetAlert2 — dark liquid glass theme (all dashboard pages)
+   ======================================== */
+
+body:has(.dashContent) .swal2-popup {
+  background: linear-gradient(145deg, rgba(30, 35, 42, 0.97), rgba(20, 24, 29, 0.95));
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+body:has(.dashContent) .swal2-title {
+  color: #f2f5f8;
+}
+body:has(.dashContent) .swal2-html-container {
+  color: #a8b2bd;
+}
+body:has(.dashContent) .swal2-icon {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+body:has(.dashContent) .swal2-icon.swal2-warning { color: #fbbf24; border-color: rgba(251, 191, 36, 0.5); }
+body:has(.dashContent) .swal2-icon.swal2-success { color: #34d399; border-color: rgba(52, 211, 153, 0.5); }
+body:has(.dashContent) .swal2-icon.swal2-error { color: #f87171; border-color: rgba(248, 113, 113, 0.5); }
+body:has(.dashContent) .swal2-icon.swal2-info { color: var(--brand-primary); border-color: rgba(255, 214, 90, 0.5); }
+body:has(.dashContent) .swal2-timer-progress-bar {
+  background: var(--brand-primary);
+}
+body:has(.dashContent) .swal2-actions .btn {
+  padding: 0.5rem 1.4rem;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* ========================================
+   Liquid glass — shared custom-select (filter modals)
+   ======================================== */
+
+.dashContent .custom-select-wrapper {
+  position: relative;
+}
+.dashContent .custom-select-display {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #f2f5f8;
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.dashContent .custom-select-display:hover,
+.dashContent .custom-select-wrapper.active .custom-select-display {
+  border-color: var(--brand-primary);
+  background: rgba(255, 255, 255, 0.09);
+}
+.dashContent .custom-select-display .arrow i {
+  color: #8b95a1;
+  font-size: 0.7rem;
+}
+.dashContent .custom-select-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  inset-inline-start: 0;
+  right: 0;
+  z-index: 1055;
+  list-style: none;
+  margin: 0;
+  padding: 0.35rem;
+  background: linear-gradient(145deg, rgba(30, 35, 42, 0.97), rgba(20, 24, 29, 0.95));
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+  max-height: 240px;
+  overflow-y: auto;
+  display: none;
+}
+.dashContent .custom-select-list.show {
+  display: block;
+}
+.dashContent .custom-select-list li {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  color: #f2f5f8;
+  cursor: pointer;
+  background: transparent;
+  border-bottom: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.dashContent .custom-select-list li:hover {
+  background: rgba(255, 214, 90, 0.12);
+  color: var(--brand-primary);
+}
+.dashContent .custom-select-list::-webkit-scrollbar {
+  width: 6px;
+}
+.dashContent .custom-select-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
 }

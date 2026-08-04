@@ -1,11 +1,21 @@
 from django.shortcuts import render
 from django.db.models import Max
-from dashboard.models import Space
+from dashboard.models import Portfolio, ProjectType, Space
 
 
 def home_view(request):
-    spaces = Space.objects.filter(active=True).order_by("name")
-    max_price = Space.objects.filter(active=True).aggregate(Max("base_price"))["base_price__max"] or 1
+    featured = ProjectType.objects.filter(featured_on_home=True).first()
+    if featured:
+        spaces = (
+            Space.objects.filter(project_types__project_type=featured, project_types__show_on_home=True)
+            .distinct()
+            .prefetch_related("gallery_images")
+            .order_by("name")
+        )
+    else:
+        spaces = Space.objects.none()
+
+    max_price = spaces.aggregate(Max("base_price"))["base_price__max"] or 1
 
     spaces_data = []
     for space in spaces:
@@ -15,14 +25,13 @@ def home_view(request):
             "name": space.name,
             "slug": space.slug,
             "base_price": space.base_price,
-            "estimated_days": space.estimated_days,
-            "category": space.category or space.space_category.name if space.space_category else "",
-            "image": space.image.url if space.image else None,
+            "thumbnail": space.thumbnail.url if space.thumbnail else None,
             "percentage": percentage,
         })
 
     return render(request, "home.html", {
         "spaces": spaces_data,
+        "projects": Portfolio.objects.prefetch_related("gallery_images").order_by("-created_at")[:12],
     })
 
 
@@ -32,7 +41,7 @@ def order_view(request):
     total = 0
     if space_ids:
         ids = [s for s in space_ids.split(",") if s.isdigit()]
-        selected = Space.objects.filter(id__in=ids, active=True)
+        selected = Space.objects.filter(id__in=ids)
         for s in selected:
             total += float(s.base_price)
 

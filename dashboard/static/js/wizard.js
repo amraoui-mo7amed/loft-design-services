@@ -12,10 +12,12 @@
   let currentStep = 0;
   const wizardData = {
     projectTypeSlug: null,
+    projectTypeName: null,
     floors: [],
     spaces: [],
     packageId: null,
     packagePrice: 0,
+    packageName: null,
     inspirations: {},
     questionnaire: {},
   };
@@ -184,7 +186,6 @@
     card.className = "wiz-space-card space-checkbox-card selected";
     card.dataset.spaceId = "custom";
     card.dataset.price = "0";
-    card.dataset.days = "0";
     card.innerHTML =
       '<div class="wiz-space-img"><i class="fas fa-plus"></i></div><div class="wiz-space-info"><div class="wiz-space-name">' +
       name +
@@ -270,30 +271,78 @@
 
   function bindPackagesStep() {
     var cards = document.querySelectorAll(".pkg-card");
+    var basicCard = document.querySelector('.pkg-card[data-package-id=""]');
 
-    // Pre-fill each card's dynamic price on load
-    cards.forEach(function (card) {
-      var priceEl = card.querySelector(".pkg-dynamic-price");
-      var price = parseFloat(card.dataset.packagePrice) || 0;
-      if (priceEl) priceEl.textContent = Math.round(price).toLocaleString();
-    });
+    // Pre-fill each card's price = base (spaces) + package add-on on load
+    renderPackageCardPrices();
 
-    // Show estimate based on selected spaces (even before picking package)
-    updatePackageEstimate(wizardData.packagePrice || 0);
+    // Basic is always included (auto-selected, cannot be unselected).
+    // A package card is a complementary add-on that can be toggled on/off.
+    if (wizardData.packageId) {
+      cards.forEach(function (c) {
+        if (c.dataset.packageId === wizardData.packageId) c.classList.add("selected");
+      });
+    } else {
+      wizardData.packageId = null;
+      wizardData.packagePrice = 0;
+      var basicNameEl = basicCard ? basicCard.querySelector(".pkg-card-name") : null;
+      wizardData.packageName = basicNameEl ? basicNameEl.textContent.trim() : null;
+    }
+
+    // Show estimate in sticky bar based on selected spaces
     updatePriceSummary();
 
     cards.forEach(function (card) {
-      card.addEventListener("click", function () {
-        cards.forEach(function (c) { c.classList.remove("selected"); });
-        this.classList.add("selected");
-        wizardData.packageId = this.dataset.packageId;
-        var priceTxt = this.dataset.packagePrice;
-        wizardData.packagePrice = parseFloat(priceTxt) || 0;
-        updatePackageEstimate(wizardData.packagePrice);
+      card.addEventListener("click", function (e) {
+        if (e.target.closest(".pkg-details-btn")) return;
+
+        if (this === basicCard) {
+          // Deselect any add-on package, back to basic only
+          cards.forEach(function (c) {
+            if (c !== basicCard) c.classList.remove("selected");
+          });
+          basicCard.classList.add("selected");
+          wizardData.packageId = null;
+          wizardData.packagePrice = 0;
+          wizardData.packageName = basicCard.querySelector(".pkg-card-name").textContent.trim();
+        } else {
+          var isActive = this.classList.contains("selected");
+          cards.forEach(function (c) {
+            if (c !== basicCard) c.classList.remove("selected");
+          });
+          if (isActive) {
+            // toggle off -> back to basic only
+            basicCard.classList.add("selected");
+            wizardData.packageId = null;
+            wizardData.packagePrice = 0;
+            var bn = basicCard.querySelector(".pkg-card-name");
+            wizardData.packageName = bn ? bn.textContent.trim() : null;
+          } else {
+            this.classList.add("selected");
+            wizardData.packageId = this.dataset.packageId;
+            wizardData.packagePrice = parseFloat(this.dataset.packagePrice) || 0;
+            var nameEl = this.querySelector(".pkg-card-name");
+            wizardData.packageName = nameEl ? nameEl.textContent.trim() : null;
+          }
+        }
         updatePriceSummary();
         var hiddenTotal = document.querySelector("input[name='package_total']");
         if (hiddenTotal) hiddenTotal.value = wizardData.packagePrice;
       });
+    });
+
+    // View details opens a modal showing that card's breakdown (base + add-on)
+    cards.forEach(function (card) {
+      var btn = card.querySelector(".pkg-details-btn");
+      if (btn) {
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          renderEstimateDetailsModal(card);
+          var estModal = new bootstrap.Modal(document.getElementById("estimateDetailsModal"));
+          estModal.show();
+        });
+      }
     });
 
     var params = new URLSearchParams(window.location.search);
@@ -304,7 +353,8 @@
           c.classList.add("selected");
           wizardData.packageId = preselected;
           wizardData.packagePrice = parseFloat(c.dataset.packagePrice) || 0;
-          updatePackageEstimate(wizardData.packagePrice);
+          var nameEl = c.querySelector(".pkg-card-name");
+          wizardData.packageName = nameEl ? nameEl.textContent.trim() : null;
           updatePriceSummary();
         }
       });
@@ -314,21 +364,121 @@
     if (pkgForm) {
       pkgForm.querySelectorAll("input[type='checkbox']").forEach(function (cb) {
         cb.addEventListener("change", function () {
-          updatePackageEstimate(wizardData.packagePrice);
+          updatePriceSummary();
         });
       });
     }
   }
 
-  function updatePackageEstimate(pkgPrice) {
+  function renderPackageCardPrices() {
     var subtotal = calcSubtotal();
-    var total = calcTotal(subtotal, pkgPrice);
-    var elSub = document.getElementById("pkgEstimateSubtotal");
-    var elPkg = document.getElementById("pkgEstimatePackage");
-    var elTotal = document.getElementById("pkgEstimateTotal");
-    if (elSub) elSub.textContent = Math.round(subtotal).toLocaleString() + " DA";
-    if (elPkg) elPkg.textContent = Math.round(pkgPrice).toLocaleString() + " DA";
-    if (elTotal) elTotal.textContent = Math.round(total).toLocaleString() + " DA";
+    var spacesCount = (wizardData.spaces || []).length;
+    var floorsCount = (wizardData.floors || []).length || 1;
+
+    document.querySelectorAll(".pkg-card").forEach(function (card) {
+      var priceEl = card.querySelector(".pkg-dynamic-price");
+      var sumEl = card.querySelector(".pkg-sum-price");
+      var baseEl = card.querySelector(".pkg-base-price");
+      var addonEl = card.querySelector(".pkg-addon-price");
+      var basicEl = card.querySelector(".pkg-basic-breakdown");
+      var addon = parseFloat(card.dataset.packagePrice) || 0;
+      var sum = Math.round(subtotal + addon).toLocaleString();
+      if (priceEl) priceEl.textContent = sum;
+      if (sumEl) sumEl.textContent = sum;
+      if (baseEl) baseEl.textContent = Math.round(subtotal).toLocaleString();
+      if (addonEl) addonEl.textContent = Math.round(addon).toLocaleString();
+      if (basicEl) basicEl.textContent = Math.round(subtotal).toLocaleString();
+    });
+
+    var elSpaces = document.getElementById("basicSpacesCount");
+    if (elSpaces) elSpaces.textContent = spacesCount;
+    var elFloors = document.getElementById("basicFloorsCount");
+    if (elFloors) elFloors.textContent = floorsCount;
+    var elSub = document.getElementById("basicSubtotal");
+    if (elSub) elSub.textContent = Math.round(subtotal).toLocaleString();
+  }
+
+  function renderEstimateDetailsModal(cardEl) {
+    var body = document.getElementById("estimateDetailsBody");
+    if (!body) return;
+
+    var subtotal = calcSubtotal();
+    var addon = 0;
+    var cardName = wizardData.projectTypeName || "Basic";
+    if (cardEl) {
+      addon = parseFloat(cardEl.dataset.packagePrice) || 0;
+      var nameEl = cardEl.querySelector(".pkg-card-name");
+      cardName = nameEl ? nameEl.textContent.trim() : cardName;
+    }
+    var packageLabel = cardName;
+    var total = Math.round(subtotal + addon);
+
+    var html = "";
+
+    // Step 1 summary: project type + floors
+    html += '<div class="wiz-summary-card mb-3">';
+    html += '  <div class="d-flex align-items-center gap-2 mb-2">';
+    html += '    <div class="wiz-summary-icon"><i class="fas fa-building"></i></div>';
+    html += '    <div>';
+    html += '      <div class="wiz-summary-title">' + (wizardData.projectTypeName || wizardData.projectTypeSlug || "—") + '</div>';
+    html += '      <div class="wiz-text-sm text-muted">' + (wizardData.floors.length || 1) + ' floor(s)</div>';
+    html += '    </div>';
+    html += '  </div>';
+    html += '</div>';
+
+    // Selected spaces with prices
+    html += '<div class="wiz-summary-card mb-3">';
+    html += '  <div class="wiz-summary-title mb-2">' + "Selected Spaces" + '</div>';
+    var spaces = wizardData.spaces || [];
+    if (spaces.length === 0) {
+      html += '<div class="wiz-text-sm text-muted">' + "No spaces selected." + '</div>';
+    } else {
+      spaces.forEach(function (s) {
+        html += '  <div class="d-flex justify-content-between align-items-center py-1">';
+        html += '    <span class="wiz-text-sm">' + (s.name || ("Space #" + s.spaceId)) + '</span>';
+        html += '    <span class="fw-bold" style="color:var(--wiz-text);">' + Math.round(s.price).toLocaleString() + ' DA</span>';
+        html += '  </div>';
+      });
+    }
+    html += '</div>';
+
+    // Included services for this specific package
+    var services = [];
+    if (cardEl) {
+      cardEl.querySelectorAll(".pkg-card-feature span").forEach(function (s) {
+        services.push(s.textContent.trim());
+      });
+    }
+    if (services.length > 0) {
+      html += '<div class="wiz-summary-card mb-3">';
+      html += '  <div class="wiz-summary-title mb-2">' + packageLabel + ' — ' + "What's included" + '</div>';
+      services.forEach(function (name) {
+        html += '  <div class="d-flex align-items-center gap-2 py-1 wiz-text-sm">';
+        html += '    <i class="fas fa-check-circle" style="color:var(--wiz-success);font-size:0.6rem;flex-shrink:0;"></i>';
+        html += '    <span>' + name + '</span>';
+        html += '  </div>';
+      });
+      html += '</div>';
+    }
+
+    // Totals breakdown
+    html += '<div class="wiz-summary-card mb-3">';
+    html += '  <div class="d-flex justify-content-between align-items-center py-1">';
+    html += '    <span class="wiz-text-muted-light">' + "Base price (selected spaces)" + '</span>';
+    html += '    <span class="fw-bold" style="color:var(--wiz-text);">' + Math.round(subtotal).toLocaleString() + ' DA</span>';
+    html += '  </div>';
+    html += '  <div class="d-flex justify-content-between align-items-center py-1">';
+    html += '    <span class="wiz-text-muted-light">' + "Package" + '</span>';
+    html += '    <span class="fw-bold" style="color:var(--wiz-text);">' + packageLabel + ' — ' + Math.round(addon).toLocaleString() + ' DA</span>';
+    html += '  </div>';
+    html += '  <hr class="my-2" style="border-color:var(--wiz-border);opacity:0.6;">';
+    html += '  <div class="d-flex justify-content-between align-items-center py-1">';
+    html += '    <span class="fw-bold">' + "Estimated Total" + '</span>';
+    html += '    <span style="font-size:1.3rem;font-weight:800;color:var(--wiz-accent);">' + total.toLocaleString() + ' DA</span>';
+    html += '  </div>';
+    html += '</div>';
+
+    body.innerHTML = html;
   }
 
   function calcSubtotal() {
@@ -340,8 +490,7 @@
   }
 
   function calcTotal(subtotal, pkgPrice) {
-    var base = (subtotal || 0) + (pkgPrice || 0);
-    return base * 1.19;
+    return (subtotal || 0) + (pkgPrice || 0);
   }
 
   function showWarning(message) {
@@ -482,15 +631,8 @@
 
   function bindSummaryStep() {
     var pt = document.getElementById("summaryProjectType");
-    if (pt && wizardData.projectTypeSlug) {
-      var wrapper = document.getElementById("projectTypeSelect");
-      if (wrapper) {
-        var hidden = wrapper.querySelector('input[type="hidden"]');
-        if (hidden) {
-          var opt = wrapper.querySelector('option[value="' + wizardData.projectTypeSlug + '"]');
-          if (opt) pt.textContent = opt.textContent;
-        }
-      }
+    if (pt) {
+      pt.textContent = wizardData.projectTypeName || wizardData.projectTypeSlug || "Not selected";
     }
 
     var floorsEl = document.getElementById("summaryFloors");
@@ -514,13 +656,7 @@
 
     var pkgEl = document.getElementById("summaryPackage");
     if (pkgEl) {
-      var pkgCards = document.querySelectorAll(".wiz-pkg-card");
-      pkgCards.forEach(function (c) {
-        if (c.dataset.packageId === wizardData.packageId) {
-          var nameEl = c.querySelector(".wiz-pkg-name");
-          if (nameEl) pkgEl.textContent = nameEl.textContent.trim();
-        }
-      });
+      pkgEl.textContent = wizardData.packageName || (wizardData.packageId ? wizardData.packageId : "Not selected");
     }
 
     var inspEl = document.getElementById("summaryInspirations");
@@ -541,16 +677,6 @@
     var total = calcTotal(subtotal, pkgPrice);
     var elTotal = document.getElementById("summaryTotal");
     if (elTotal) elTotal.textContent = Math.round(total).toLocaleString() + " DA";
-    var elDelivery = document.getElementById("summaryDelivery");
-    if (elDelivery) {
-      var days = 1;
-      if (wizardData.spaces && wizardData.spaces.length > 0) {
-        wizardData.spaces.forEach(function (s) {
-          if (s.days > days) days = s.days;
-        });
-      }
-      elDelivery.textContent = "Estimated delivery: " + days + " days";
-    }
   }
 
   function updatePriceSummary() {
@@ -578,6 +704,8 @@
       var hidden = wrapper.querySelector('input[type="hidden"]');
       if (hidden && hidden.value) {
         wizardData.projectTypeSlug = hidden.value;
+        var opt = wrapper.querySelector('li[data-value="' + hidden.value + '"]');
+        wizardData.projectTypeName = opt ? opt.textContent.trim() : hidden.value;
       }
     }
 
@@ -608,11 +736,12 @@
         group.querySelectorAll(".space-checkbox-card.selected").forEach(function (card) {
           var sid = card.dataset.spaceId;
           if (sid && sid !== "custom") {
+            var nameEl = card.querySelector(".wiz-space-name");
             wizardData.spaces.push({
               floorIndex: fi,
               spaceId: parseInt(sid),
+              name: nameEl ? nameEl.textContent.trim() : "Space",
               price: parseFloat(card.dataset.price) || 0,
-              days: parseInt(card.dataset.days) || 1,
             });
           }
         });

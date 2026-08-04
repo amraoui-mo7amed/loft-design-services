@@ -1,0 +1,239 @@
+{% extends "dash/dash_index.html" %}
+{% load i18n %}
+{% load static %}
+{% load l10n %}
+
+{% block dashTitle %}{{ pt.name }} - {% trans "Spaces" %}{% endblock dashTitle %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/project_type_list.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet" href="{% static 'css/project_type_detail.css' %}?v={{ ASSET_VERSION }}">
+{% endblock extra_css %}
+
+{% block dashContent %}
+<div class="container-fluid">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'dash:project_type_list' %}" class="btn btn-outline-light btn-sm rounded-3 d-inline-flex align-items-center justify-content-center"
+               style="width: 36px; height: 36px;"
+               aria-label="{% trans 'Back to project types' %}">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h5 class="fw-bold mb-0">   {{ pt.name }}</h5>
+                <p class="text-muted small mb-0 pt-section-title">{% trans "Manage the spaces available for this project type" %}</p>
+            </div>
+        </div>
+        <button class="btn dash-btn-primary rounded-3 px-4 fw-bold shadow-sm" id="addSpaceBtn"
+                data-create-url="{% url 'dash:space_create' %}"
+                data-project-type-id="{{ pt.pk }}">
+            <i class="fas fa-plus me-2"></i>{% trans "Add Space" %}
+        </button>
+    </div>
+
+    <div class="alert alert-info d-flex align-items-center gap-2 rounded-3 border-0" style="font-size:0.8rem;">
+        <i class="fas fa-info-circle"></i>
+        {% trans "The first gallery image of a space is used as its thumbnail." %}
+    </div>
+
+    {% if not pt.featured_on_home %}
+    <div class="alert alert-warning d-flex align-items-center gap-2 rounded-3 border-0 ptd-homebar ptd-homebar--muted mb-3" style="font-size:0.8rem;">
+        <i class="fas fa-star"></i>
+        {% blocktrans with name=pt.name %}This project type is not featured on the homepage. Feature it from the project types list to show its spaces there.{% endblocktrans %}
+    </div>
+    {% endif %}
+
+    <div class="row g-4" id="spacesGrid">
+        {% for space in spaces %}
+        <div class="col-lg-4 col-md-6">
+            <div class="ptd-space-card">
+                <div class="ptd-space-head">
+                    <div class="ptd-space-icon"><i class="fas fa-door-open"></i></div>
+                    <div class="ptd-space-head-info">
+                        <h5>{{ space.name }}</h5>
+                        <span class="ptd-space-count"><i class="fas fa-images"></i> {{ space.gallery_images.all|length }} {% trans "images" %}</span>
+                    </div>
+                    <button class="ptd-feature-btn{% if space.pk in featured_ids %} is-featured{% endif %}"
+                            type="button"
+                            title="{% trans 'Feature on home' %}"
+                            data-toggle-url="{% url 'dash:space_home_toggle' space.pk %}"
+                            data-csrf="{{ csrf_token }}"
+                            data-action="{% if space.pk in featured_ids %}unfeature{% else %}feature{% endif %}"
+                            data-name="{{ space.name }}">
+                        <i class="{% if space.pk in featured_ids %}fas fa-star{% else %}far fa-star{% endif %}"></i>
+                    </button>
+                </div>
+                <div class="ptd-space-body">
+                    <div class="ptd-space-meta">
+                        <span class="ptd-space-price"><i class="fas fa-dollar-sign"></i>{{ space.base_price }} <small>DA</small></span>
+                    </div>
+                </div>
+                <div class="ptd-space-actions">
+                    <button class="ptd-space-action ptd-space-action--gallery space-gallery-btn"
+                            title="{% trans 'Gallery' %}"
+                            data-name="{{ space.name }}"
+                            data-update-url="{% url 'dash:space_update' space.pk %}"
+                            data-del-base="{% url 'dash:space_image_delete' %}"
+                            data-gallery="{{ space.gallery_images_json }}"
+                            {% if space.thumbnail %}data-thumbnail="{{ space.thumbnail.url }}"{% endif %}>
+                        <i class="fas fa-images"></i>{% trans "Gallery" %}
+                    </button>
+                    <button class="ptd-space-action space-edit-btn"
+                            title="{% trans 'Edit' %}"
+                            data-update-url="{% url 'dash:space_update' space.pk %}"
+                            data-name="{{ space.name }}"
+                            data-base_price="{{ space.base_price|unlocalize }}"
+                            data-gallery="{{ space.gallery_images_json }}"
+                            {% if space.thumbnail %}data-thumbnail="{{ space.thumbnail.url }}"{% endif %}>
+                        <i class="fas fa-pen"></i>{% trans "Edit" %}
+                    </button>
+                    <button class="ptd-space-action ptd-space-action--danger delete_button"
+                            title="{% trans 'Delete' %}"
+                            data-delete-url="{% url 'dash:space_delete' space.pk %}"
+                            data-csrf-token="{{ csrf_token }}"
+                            data-item-title="{{ space.name }}">
+                        <i class="fas fa-trash"></i>{% trans "Delete" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm p-5 text-center rounded-4">
+                <div class="mb-4"><i class="fas fa-door-open fa-4x text-light"></i></div>
+                <h4 class="text-muted fw-bold mb-2">{% trans "No spaces yet" %}</h4>
+                <p class="text-muted small mb-0">{% trans "Add your first space to this project type." %}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Space Modal -->
+<div class="modal fade" id="spaceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="pt-modal-header d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 class="modal-title fw-bold mb-1"></h5>
+                    <p class="pt-modal-subtitle">{% trans "Configure space details, pricing and gallery" %}</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="p-4">
+                <form method="post" action="" enctype="multipart/form-data" class="form" id="spaceForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="project_type_id" value="{{ pt.pk }}">
+                    {% include "partials/errorList.html" with form_id="spaceForm" %}
+                    <div class="row g-4">
+                        <div class="col-md-7">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                    <i class="fas fa-tag text-primary" style="font-size:0.8rem;"></i>
+                                    {% trans "Space Name" %}
+                                </label>
+                                <input type="text" name="name" class="form-control" required placeholder="{% trans 'e.g. Living Room' %}">
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                        <i class="fas fa-dollar-sign text-success" style="font-size:0.8rem;"></i>
+                                        {% trans "Base Price" %}
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="number" step="0.01" name="base_price" class="form-control" value="0" min="0">
+                                        <span class="input-group-text bg-light fw-semibold">DA</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div id="editThumbSection">
+                                <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                    <i class="fas fa-image text-primary" style="font-size:0.8rem;"></i>
+                                    {% trans "Thumbnail" %}
+                                </label>
+                                <div class="ptd-thumb-preview" id="editThumbPreview">
+                                    <i class="fas fa-door-open"></i>
+                                </div>
+                                <small class="text-muted d-block mt-2" style="font-size:0.7rem;">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {% trans "Manage gallery images from the Gallery button." %}
+                                </small>
+                            </div>
+                            <div id="createGallerySection" class="d-none">
+                                <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                    <i class="fas fa-images text-primary" style="font-size:0.8rem;"></i>
+                                    {% trans "Gallery Images" %}
+                                </label>
+                                <div class="ptd-gallery-upload p-3 text-center position-relative" id="spaceGalleryUpload">
+                                    <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-1"></i>
+                                    <p class="small text-muted mb-0">{% trans "Click to upload multiple images" %}</p>
+                                    <p class="small text-muted" style="font-size:0.7rem;">{% trans "PNG, JPG up to 5MB" %}</p>
+                                    <div class="row g-2 mt-2 text-start" id="spaceGalleryPreview"></div>
+                                    <input type="file" name="gallery_images" class="d-none" accept="image/*" multiple id="spaceGalleryInput">
+                                </div>
+                                <small class="text-muted d-block mt-2" style="font-size:0.7rem;">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {% trans "You can manage the gallery later from the Gallery button." %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-end pt-3 mt-3 border-top">
+                        <button type="button" class="btn btn-outline-light rounded-3 px-4" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                        <button type="submit" class="btn dash-btn-primary rounded-3 px-4">
+                            <i class="fas fa-save me-2"></i><span class="catalog-submit-text"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Space Gallery Modal -->
+<div class="modal fade" id="galleryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="pt-modal-header d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 class="modal-title fw-bold mb-1"><i class="fas fa-images me-2 text-primary"></i><span id="galleryModalTitle"></span></h5>
+                    <p class="pt-modal-subtitle">{% trans "Manage gallery images and deletion" %}</p>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-outline-primary rounded-3 btn-sm fw-semibold" id="galleryAddBtn">
+                        <i class="fas fa-plus me-1"></i>{% trans "Add Images" %}
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+            </div>
+            <form method="post" action="" enctype="multipart/form-data" class="form" id="galleryForm">
+                {% csrf_token %}
+                <input type="hidden" name="project_type_id" value="{{ pt.pk }}">
+                <input type="file" name="gallery_images" class="d-none" accept="image/*" multiple id="galleryImagesInput">
+                {% include "partials/errorList.html" with form_id="galleryForm" %}
+                <div class="p-4">
+                    <div class="row g-3" id="galleryModalGrid"></div>
+                    <div class="row g-2 mt-3" id="galleryNewPreview"></div>
+                    <div class="alert alert-warning py-2 px-3 mt-3 mb-0" style="font-size:0.7rem;">
+                        <i class="fas fa-info-circle me-1"></i>
+                        {% trans "Select the default image with the star checkbox. Delete an image with the trash button." %}
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-light rounded-3 px-4" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn dash-btn-primary rounded-3 px-4">
+                        <i class="fas fa-save me-2"></i>{% trans "Save Gallery" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock dashContent %}
+
+{% block extra_js %}
+<script src="{% static 'js/space_management.js' %}?v={{ ASSET_VERSION }}"></script>
+<script src="{% static 'js/project_type_featured.js' %}?v={{ ASSET_VERSION }}"></script>
+{% endblock extra_js %}

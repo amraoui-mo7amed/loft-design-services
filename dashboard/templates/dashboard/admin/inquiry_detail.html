@@ -6,7 +6,7 @@
 {% block dashTitle %}{% trans "Inquiry Details" %}{% endblock dashTitle %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/inquiry.css' %}?v={% now "U" %}">
+<link rel="stylesheet" href="{% static 'css/inquiry.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
 
 {% block dashContent %}
@@ -27,7 +27,7 @@
               data-success-title="{% trans 'Status Updated' %}"
               data-success-text="{% trans 'An email notification has been sent.' %}">
             {% csrf_token %}
-            <select name="status" class="form-select form-select-sm rounded-3" style="width: auto;">
+            <select name="status" class="form-select form-select-sm rounded-3 inquiry-status-select">
                 {% for val, label in status_choices %}
                 <option value="{{ val }}" {% if inquiry.status == val %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
@@ -37,7 +37,7 @@
 
     <div class="row g-4">
         <div class="col-lg-4 order-lg-2">
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 shadow-sm inquiry-detail-card">
                 <div class="card-body p-4">
                     <h6 class="fw-bold mb-3">{% trans "Contact Information" %}</h6>
                     <div class="d-flex flex-column gap-3">
@@ -59,7 +59,7 @@
             <div class="card border-0 shadow-sm mt-4">
                 <div class="card-body p-4 text-center">
                     <small class="text-muted d-block mb-1">{% trans "Total Estimate" %}</small>
-                    <span class="fw-bold fs-3" style="color: var(--brand-primary);">{{ inquiry.total }} DZD</span>
+                    <span class="fw-bold fs-3 inquiry-total">{{ inquiry.total }} DZD</span>
                 </div>
             </div>
         </div>
@@ -72,7 +72,7 @@
                         {% for s in inquiry.spaces %}
                         <div class="col-xl-3 col-lg-4 col-md-3 col-sm-4 col-6">
                             <div class="inquiry-space-card">
-                                <div class="inquiry-space-name">{{ s.name }}</div>
+                                <div class="inquiry-space-name"><i class="fas fa-cube inquiry-space-icon me-1"></i>{{ s.name }}</div>
                                 <div class="inquiry-space-price">{{ s.price }} DZD</div>
                             </div>
                         </div>
@@ -89,5 +89,5 @@
 {% endblock dashContent %}
 
 {% block extra_js %}
-<script src="{% static 'js/inquiry.js' %}?v={% now "U" %}"></script>
+<script src="{% static 'js/inquiry.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

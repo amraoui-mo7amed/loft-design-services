@@ -7,7 +7,7 @@
 {% block dashTitle %}{% trans "Portfolios" %}{% endblock dashTitle %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/portfolio.css' %}?v={% now "U" %}">
+  <link rel="stylesheet" href="{% static 'css/portfolio.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
 
 {% block dashContent %}
@@ -21,10 +21,10 @@
       <i class="fas fa-search"></i>
       <input type="text" class="form-control" id="searchInput" data-portfolio-search="true" placeholder="{% trans "Search portfolios..." %}" value="{{ query }}" autocomplete="off">
       {% if query %}
-      <button class="search-clear" id="searchClear" data-search-clear="true">&times;</button>
+      <button class="search-clear" id="searchClear" data-search-clear="true">×</button>
       {% endif %}
     </div>
-    <a href="{% url 'dash:portfolio_create' %}" class="btn btn-primary rounded-3 px-4 fw-bold shadow-sm">
+    <a href="{% url 'dash:portfolio_create' %}" class="dash-btn dash-btn-primary rounded-3 px-4 fw-bold shadow-sm">
       <i class="fas fa-plus me-2"></i>{% trans "New Masterpiece" %}
     </a>
   </div>
@@ -48,7 +48,7 @@
       {% if portfolio.model_3d %}
       <span class="editorial-meta-3d"><i class="fas fa-cube"></i> 3D</span>
       {% endif %}
-      <span><i class="far fa-images"></i> {{ portfolio.gallery_images.count }}</span>
+      <span><i class="far fa-images"></i> {{ portfolio.gallery_images.all|length }}</span>
       <span><i class="far fa-calendar-alt"></i> {{ portfolio.created_at|date:"M d, Y" }}</span>
     </div>
     <div class="editorial-content">
@@ -85,7 +85,7 @@
   <i class="fas fa-briefcase"></i>
   <h5>{% trans "No portfolios yet" %}</h5>
   <p class="text-muted small mb-3">{% trans "Create your first masterpiece to showcase your work." %}</p>
-  <a href="{% url 'dash:portfolio_create' %}" class="btn btn-primary rounded-3 px-4 fw-bold">
+  <a href="{% url 'dash:portfolio_create' %}" class="dash-btn dash-btn-primary rounded-3 px-4 fw-bold">
     <i class="fas fa-plus me-2"></i>{% trans "New Masterpiece" %}
   </a>
 </div>
@@ -97,5 +97,5 @@
 {% endblock dashContent %}
 
 {% block extra_js %}
-<script src="{% static 'js/portfolio.js' %}?v={% now "U" %}"></script>
+<script src="{% static 'js/portfolio.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

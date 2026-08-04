@@ -1,5 +1,5 @@
 from decimal import Decimal
-from django.db.models import Sum, Max
+from django.db.models import Sum
 
 TAX_RATE = Decimal("0.19")
 
@@ -29,17 +29,12 @@ def calculate_total(subtotal, package_price, options_total, tax):
     return (subtotal + package_price + options_total + tax).quantize(Decimal("0.01"))
 
 
-def estimate_delivery(spaces_qs):
-    result = spaces_qs.aggregate(max_days=Max("estimated_days"))
-    return result["max_days"] or 1
-
-
 def calculate_full_price(space_ids=None, package=None, option_ids=None):
     from .models import Space, DesignOption
 
     subtotal = Decimal("0")
     if space_ids:
-        spaces = Space.objects.filter(id__in=space_ids, active=True)
+        spaces = Space.objects.filter(id__in=space_ids)
         subtotal = spaces.aggregate(total=Sum("base_price"))["total"] or Decimal("0")
     package_price = calculate_package_price(subtotal, package)
     options_total = Decimal("0")
@@ -48,13 +43,6 @@ def calculate_full_price(space_ids=None, package=None, option_ids=None):
         options_total = options.aggregate(total=Sum("price"))["total"] or Decimal("0")
     tax = calculate_tax(subtotal, package_price, options_total)
     total = calculate_total(subtotal, package_price, options_total, tax)
-    delivery_days = 1
-    if space_ids:
-        max_days = Space.objects.filter(id__in=space_ids, active=True).aggregate(
-            v=Max("estimated_days")
-        )["v"]
-        if max_days:
-            delivery_days = max_days
 
     return {
         "subtotal": float(subtotal),
@@ -62,5 +50,4 @@ def calculate_full_price(space_ids=None, package=None, option_ids=None):
         "options_total": float(options_total),
         "tax": float(tax),
         "total": float(total),
-        "estimated_delivery_days": delivery_days,
     }

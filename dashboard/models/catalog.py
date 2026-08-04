@@ -2,8 +2,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 
-from .base import Space
-
 
 class ServiceCategory(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("Name"))
@@ -60,9 +58,8 @@ class DesignPackage(models.Model):
 
     @property
     def total_delivery_days(self):
-        total = self.package_services.aggregate(
-            total=models.Sum("option__delivery_time_days")
-        )["total"]
+        services = self.package_services.all()
+        total = sum(ps.option.delivery_time_days for ps in services)
         return total or 0
 
 
@@ -89,39 +86,3 @@ class DesignOption(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class StyleCategory(models.Model):
-    name = models.CharField(max_length=200, verbose_name=_("Name"))
-    slug = models.SlugField(max_length=200, unique=True, blank=True, verbose_name=_("Slug"))
-    description = models.TextField(blank=True, verbose_name=_("Description"))
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
-
-    class Meta:
-        verbose_name = _("Style Category")
-        verbose_name_plural = _("Style Categories")
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
-
-class InspirationImage(models.Model):
-    space = models.ForeignKey(
-        Space, on_delete=models.CASCADE, related_name="inspiration_images", verbose_name=_("Space")
-    )
-    image = models.ImageField(upload_to="inspirations/", verbose_name=_("Image"))
-    title = models.CharField(max_length=200, blank=True, verbose_name=_("Title"))
-    active = models.BooleanField(default=True, verbose_name=_("Active"))
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
-
-    class Meta:
-        verbose_name = _("Inspiration Image")
-        verbose_name_plural = _("Inspiration Images")
-
-    def __str__(self):
-        return self.title or f"Inspiration #{self.id}"

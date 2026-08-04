@@ -1,20 +1,20 @@
 .crm-card {
     transition: box-shadow 0.2s ease, transform 0.2s ease;
-    box-shadow: 0 0 0 0 #e2e8f0, 0 2px 15px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     overflow: visible;
 }
 
 .crm-card:hover {
-    box-shadow: 0 0 0 0 #e2e8f0, 0 8px 30px rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
     transform: translateY(-2px);
 }
 
-.crm-card[data-status="pending"] { box-shadow: 0 -3px 0 0 #ffc107, 0 2px 15px rgba(0,0,0,0.05); }
-.crm-card[data-status="pending"]:hover { box-shadow: 0 -3px 0 0 #ffc107, 0 8px 30px rgba(0,0,0,0.08) !important; }
-.crm-card[data-status="approved"] { box-shadow: 0 -3px 0 0 #28a745, 0 2px 15px rgba(0,0,0,0.05); }
-.crm-card[data-status="approved"]:hover { box-shadow: 0 -3px 0 0 #28a745, 0 8px 30px rgba(0,0,0,0.08) !important; }
-.crm-card[data-status="declined"] { box-shadow: 0 -3px 0 0 #dc3545, 0 2px 15px rgba(0,0,0,0.05); }
-.crm-card[data-status="declined"]:hover { box-shadow: 0 -3px 0 0 #dc3545, 0 8px 30px rgba(0,0,0,0.08) !important; }
+.crm-card[data-status="pending"] { box-shadow: 0 -3px 0 0 #ffc107, 0 10px 34px rgba(0, 0, 0, 0.4); }
+.crm-card[data-status="pending"]:hover { box-shadow: 0 -3px 0 0 #ffc107, 0 18px 44px rgba(0, 0, 0, 0.5) !important; }
+.crm-card[data-status="approved"] { box-shadow: 0 -3px 0 0 #28a745, 0 10px 34px rgba(0, 0, 0, 0.4); }
+.crm-card[data-status="approved"]:hover { box-shadow: 0 -3px 0 0 #28a745, 0 18px 44px rgba(0, 0, 0, 0.5) !important; }
+.crm-card[data-status="declined"] { box-shadow: 0 -3px 0 0 #dc3545, 0 10px 34px rgba(0, 0, 0, 0.4); }
+.crm-card[data-status="declined"]:hover { box-shadow: 0 -3px 0 0 #dc3545, 0 18px 44px rgba(0, 0, 0, 0.5) !important; }
 
 .bg-pending { background-color: #ffc107 !important; color: #212529 !important; }
 .bg-approved { background-color: #28a745 !important; }
@@ -28,13 +28,14 @@
 }
 
 .crm-meta .label {
-    color: #6c757d;
+    color: #8b95a1;
     min-width: 60px;
     display: inline-block;
 }
 
 .crm-meta .value {
     font-weight: 600;
+    color: #e6eaee;
 }
 
 .crm-status-btn {
@@ -78,10 +79,12 @@
     overflow-y: auto;
     padding: 0.4rem;
     min-width: 170px;
-    border: 1px solid rgba(0,0,0,0.04);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06);
-    border-radius: 10px;
-    background: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(30, 35, 42, 0.97), rgba(20, 24, 29, 0.95));
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
 }
 
 .crm-status-menu .dropdown-item {
@@ -93,8 +96,17 @@
     gap: 0.55rem;
     transition: all 0.15s ease;
     font-weight: 500;
-    color: #2d3748;
+    color: #f2f5f8;
     margin-bottom: 2px;
+    background: transparent;
+    border: none;
+    border-bottom: none;
+}
+
+.crm-status-menu li {
+    background: transparent;
+    border: none;
+    border-bottom: none;
 }
 
 .crm-status-menu .dropdown-item:last-child {
@@ -102,18 +114,18 @@
 }
 
 .crm-status-menu .dropdown-item:hover {
-    background-color: #f7fafc;
-    color: #1a202c;
+    background-color: rgba(255, 214, 90, 0.12);
+    color: var(--brand-primary);
 }
 
 .crm-status-menu .dropdown-item.active {
-    background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
-    color: #2d3748;
+    background: rgba(255, 214, 90, 0.15);
+    color: var(--brand-primary);
     font-weight: 600;
 }
 
 .crm-status-menu .dropdown-item.active .crm-option-dot {
-    box-shadow: 0 0 0 2px rgba(40,167,69,0.3);
+    box-shadow: 0 0 0 2px rgba(255, 214, 90, 0.35);
 }
 
 .crm-option-dot {

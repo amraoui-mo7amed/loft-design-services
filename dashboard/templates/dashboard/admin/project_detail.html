@@ -5,7 +5,7 @@
 {% block dashTitle %}{{ project.project_name }}{% endblock dashTitle %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/kanban.css' %}?v={% now "U" %}">
+    <link rel="stylesheet" href="{% static 'css/kanban.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
 
 {% block dashContent %}
@@ -54,9 +54,9 @@
 
             <!-- Contact / Client Info -->
             <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
                     <i class="fas fa-user text-primary"></i>
-                    <h6 class="fw-bold mb-0 text-dark">{% trans "Contact Information" %}</h6>
+                    <h6 class="fw-bold mb-0 text-light">{% trans "Contact Information" %}</h6>
                 </div>
                 <div class="card-body px-4 pb-4">
                     {% if project.client %}
@@ -103,9 +103,9 @@
 
             <!-- Project Info stats -->
             <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
                     <i class="fas fa-info-circle text-primary"></i>
-                    <h6 class="fw-bold mb-0 text-dark">{% trans "Project Details" %}</h6>
+                    <h6 class="fw-bold mb-0 text-light">{% trans "Project Details" %}</h6>
                 </div>
                 <div class="card-body px-4 pb-4">
                     <div class="row g-4">
@@ -187,9 +187,9 @@
             <!-- Floors & Spaces -->
             {% if floors %}
             <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
                     <i class="fas fa-layer-group text-info"></i>
-                    <h6 class="fw-bold mb-0 text-dark">{% trans "Floors & Spaces" %}</h6>
+                    <h6 class="fw-bold mb-0 text-light">{% trans "Floors & Spaces" %}</h6>
                     <span class="badge bg-info bg-opacity-10 text-info rounded-pill ms-auto">{{ spaces|length }}</span>
                 </div>
                 <div class="card-body px-0 pb-0">
@@ -222,9 +222,9 @@
             <!-- Options -->
             {% if options %}
             <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
                     <i class="fas fa-plus-circle text-success"></i>
-                    <h6 class="fw-bold mb-0 text-dark">{% trans "Options" %}</h6>
+                    <h6 class="fw-bold mb-0 text-light">{% trans "Options" %}</h6>
                     <span class="badge bg-success bg-opacity-10 text-success rounded-pill ms-auto">{{ options|length }}</span>
                 </div>
                 <div class="card-body px-0 pb-0">
@@ -253,21 +253,21 @@
             <!-- Inspirations -->
             {% if inspirations %}
             <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
                     <i class="fas fa-images text-warning"></i>
-                    <h6 class="fw-bold mb-0 text-dark">{% trans "Inspiration Images" %}</h6>
+                    <h6 class="fw-bold mb-0 text-light">{% trans "Inspiration Images" %}</h6>
                     <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill ms-auto">{{ inspirations|length }}</span>
                 </div>
                 <div class="card-body px-4 pb-4">
                     {% for drs in inspirations %}
-                    {% with inspos=drs.inspirations.all %}
+                    {% with inspos=drs.space_images.all %}
                     {% if inspos %}
                     <div class="mb-3">
                         <small class="fw-semibold d-block mb-2">{{ drs.custom_name|default:drs.space.name }}</small>
                         <div class="crm-inspo-grid">
                             {% for insp in inspos %}
-                            {% if insp.inspiration_image %}
-                            <img src="{{ insp.inspiration_image.image.url }}" alt="{{ insp.inspiration_image.alt_text }}" loading="lazy">
+                            {% if insp.space_image %}
+                            <img src="{{ insp.space_image.image.url }}" alt="{{ insp.space_image.image.name }}" loading="lazy">
                             {% endif %}
                             {% endfor %}
                         </div>
@@ -288,9 +288,9 @@
 
             <!-- Status actions -->
             <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
                     <i class="fas fa-tasks text-primary"></i>
-                    <h6 class="fw-bold mb-0 text-dark">{% trans "Actions" %}</h6>
+                    <h6 class="fw-bold mb-0 text-light">{% trans "Actions" %}</h6>
                 </div>
                 <div class="card-body px-4 pb-4">
                     <div class="d-grid gap-2">
@@ -322,9 +322,9 @@
 
             <!-- Activity Timeline -->
             <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
                     <i class="fas fa-clock text-secondary"></i>
-                    <h6 class="fw-bold mb-0 text-dark">{% trans "Activity" %}</h6>
+                    <h6 class="fw-bold mb-0 text-light">{% trans "Activity" %}</h6>
                     <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill ms-auto">{{ activity|length }}</span>
                 </div>
                 <div class="card-body px-4 pb-4">
@@ -352,9 +352,9 @@
 
             <!-- Notes -->
             <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
                     <i class="fas fa-sticky-note text-warning"></i>
-                    <h6 class="fw-bold mb-0 text-dark">{% trans "Notes" %}</h6>
+                    <h6 class="fw-bold mb-0 text-light">{% trans "Notes" %}</h6>
                     <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill ms-auto">{{ notes|length }}</span>
                 </div>
                 <div class="card-body px-4 pb-4">
@@ -386,9 +386,9 @@
             <!-- Files -->
             {% if files %}
             <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
                     <i class="fas fa-paperclip text-secondary"></i>
-                    <h6 class="fw-bold mb-0 text-dark">{% trans "Files" %}</h6>
+                    <h6 class="fw-bold mb-0 text-light">{% trans "Files" %}</h6>
                     <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill ms-auto">{{ files|length }}</span>
                 </div>
                 <div class="card-body px-4 pb-4">
@@ -412,5 +412,5 @@
 {% endblock dashContent %}
 
 {% block extra_js %}
-<script src="{% static 'js/kanban.js' %}?v={% now "U" %}"></script>
+<script src="{% static 'js/kanban.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

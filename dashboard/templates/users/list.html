@@ -6,7 +6,7 @@
 {% block dashTitle %}{% trans "Users" %}{% endblock dashTitle %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static "css/users.css" %}?v={% now "U" %}">
+    <link rel="stylesheet" href="{% static "css/users.css" %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
 
 {% block dashContent %}
@@ -215,5 +215,5 @@
 {% endblock dashContent %}
 
 {% block extra_js %}
-<script src="{% static 'js/users.js' %}?v={% now "U" %}"></script>
+<script src="{% static 'js/users.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

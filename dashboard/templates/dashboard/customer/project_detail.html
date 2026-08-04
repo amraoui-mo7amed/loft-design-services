@@ -5,7 +5,7 @@
 {% block dashTitle %}{{ project.project_number }}{% endblock dashTitle %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/users.css' %}?v={% now "U" %}">
+<link rel="stylesheet" href="{% static 'css/users.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
 
 {% block dashContent %}
@@ -134,19 +134,19 @@
                 <h5 class="fw-bold mb-3">{% trans "Project Summary" %}</h5>
                 <div class="d-flex justify-content-between mb-2">
                     <small class="text-muted">{% trans "Floors" %}</small>
-                    <span class="fw-bold">{{ project.floors.count }}</span>
+                    <span class="fw-bold">{{ project.floors.all|length }}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-2">
                     <small class="text-muted">{% trans "Spaces" %}</small>
-                    <span class="fw-bold">{{ project.spaces.count }}</span>
+                    <span class="fw-bold">{{ project.spaces.all|length }}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-2">
                     <small class="text-muted">{% trans "Options" %}</small>
-                    <span class="fw-bold">{{ project.options.count }}</span>
+                    <span class="fw-bold">{{ project.options.all|length }}</span>
                 </div>
                 <div class="d-flex justify-content-between">
                     <small class="text-muted">{% trans "Files" %}</small>
-                    <span class="fw-bold">{{ project.files.count }}</span>
+                    <span class="fw-bold">{{ project.files.all|length }}</span>
                 </div>
             </div>
         </div>

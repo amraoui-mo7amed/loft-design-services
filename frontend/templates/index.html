@@ -12,12 +12,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content="{{ site_config.seo.description }}" />
         <meta name="keywords" content="{{ site_config.seo.keywords }}" />
-        <link rel="icon" type="image/png" href="{% if site_config.favicon %}{{ site_config.favicon }}{% else %}{% static 'icons/logo.jpg' %}{% endif %}" />
+        <link rel="icon" type="image/jpeg" href="{% if site_config.favicon %}{{ site_config.favicon }}{% else %}{% static 'img/icon.jpeg' %}{% endif %}" />
         <script>
             window.SiteConfig = {
                 name: "{{ site_config.name|escapejs }}",
-                logo: "{% if site_config.logo %}{{ site_config.logo }}{% else %}{% static 'icons/logo.jpg' %}{% endif %}",
-                favicon: "{% if site_config.favicon %}{{ site_config.favicon }}{% else %}{% static 'icons/logo.jpg' %}{% endif %}"
+                logo: "{% if site_config.logo %}{{ site_config.logo }}{% else %}{% static 'img/icon.jpeg' %}{% endif %}",
+                favicon: "{% if site_config.favicon %}{{ site_config.favicon }}{% else %}{% static 'img/icon.jpeg' %}{% endif %}"
             };
         </script>
         <title>
@@ -54,16 +54,14 @@
         <!-- Google Fonts - Cairo (Arabic-friendly) -->
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap"
               rel="stylesheet" />
-        <!-- Three.js -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
         {% block css %}
         {% endblock css %}
+        {# Core CSS #}
+        <link rel="stylesheet" href="{% static "css/index.css" %}?v={{ ASSET_VERSION }}" />
+        <link rel="stylesheet" href="{% static "css/three-sixty-bg.css" %}?v={{ ASSET_VERSION }}" />
         <!-- Custom CSS -->
         {% block extra_css %}
         {% endblock extra_css %}
-        {# Core CSS #}
-        <link rel="stylesheet" href="{% static "css/index.css" %}?v={% now "U" %}" />
-        <link rel="stylesheet" href="{% static "css/three-sixty-bg.css" %}?v={% now "U" %}" />
     </head>
     <body class="{% block body_class %}{% endblock body_class %}">
         <!-- Navigation Bar -->
@@ -162,10 +160,7 @@
                 integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
                 crossorigin="anonymous"></script>
         {# Core JS #}
-        <script src="{% static "js/index.js" %}?v={% now "U" %}">
-        </script>
-        {# 360° Panorama Background #}
-        <script src="{% static "js/three-sixty-bg.js" %}?v={% now "U" %}">
+        <script src="{% static "js/index.js" %}?v={{ ASSET_VERSION }}">
         </script>
         {% block js %}
         {% endblock js %}

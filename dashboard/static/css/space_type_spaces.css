@@ -1,0 +1,131 @@
+.sts-banner {
+  background: #fffbeb;
+  color: #78350f;
+  border-left: 4px solid #fbbf24 !important;
+}
+
+[dir="rtl"] .sts-banner {
+  border-left: none !important;
+  border-right: 4px solid #fbbf24 !important;
+}
+
+.sts-banner-icon {
+  color: #fbbf24;
+}
+
+.sts-toolbar {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 14px;
+  padding: 10px 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.sts-count {
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.sts-count i {
+  color: var(--brand-primary);
+}
+
+.sts-featured-count {
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.sts-featured-count-icon {
+  color: #fbbf24;
+}
+
+.sts-featured-count-value {
+  color: #d97706;
+  font-weight: 700;
+}
+
+.sts-card {
+  overflow: hidden;
+}
+
+.sts-card-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+}
+
+.sts-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: var(--brand-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-secondary);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sts-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sts-thumb i {
+  font-size: 1.4rem;
+}
+
+.sts-name h6 {
+  font-weight: 700;
+}
+
+.sts-price {
+  font-size: 0.72rem;
+  color: #10b981;
+  font-weight: 600;
+}
+
+.sts-body {
+  padding: 12px 14px 14px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sts-check {
+  cursor: pointer;
+  min-width: 0;
+}
+
+.sts-check .form-check-input {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-top: 0.15rem;
+  border-radius: 6px;
+  border: 2px solid #ced4da;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.sts-check .form-check-input:checked {
+  background-color: #d97706;
+  border-color: #d97706;
+}
+
+.sts-check .form-check-input:focus {
+  box-shadow: 0 0 0 0.15rem rgba(217, 119, 6, 0.2);
+}
+
+.sts-check .form-check-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #495057;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

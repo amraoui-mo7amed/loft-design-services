@@ -2,29 +2,56 @@
 {% load i18n %}
 {% load static %}
 
+{% get_current_language_bidi as IS_RTL %}
+
 {% block body_class %}landing-page{% endblock body_class %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static "css/home.css" %}?v={% now "U" %}">
-    <link rel="stylesheet" href="{% static "css/portfolio_list.css" %}?v={% now "U" %}">
+    <link rel="stylesheet" href="{% static "css/home.css" %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet" href="{% static "css/portfolio_list.css" %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
 
 {% block nav %}
-    <div class="floating-actions-bar">
-        {% include 'partials/language_switcher.html' %}
-        <a href="{% url 'frontend:portfolio_list' %}" class="floating-btn" title="{% trans 'Portfolio' %}">
-            <i class="fas fa-briefcase"></i>
-        </a>
-        {% if user.is_authenticated %}
-            <a href="{% url 'dash:dash_home' %}" class="floating-btn">
-                <i class="fas fa-tachometer-alt"></i>
+    <nav class="home-navbar">
+        <div class="container home-navbar-inner">
+            <a class="home-navbar-brand" href="{% url 'frontend:home' %}">
+                {% if site_config.logo %}
+                    <img src="{{ site_config.logo }}" alt="{% trans 'Logo' %}" class="home-navbar-logo me-2">
+                {% else %}
+                    <img src="{% static 'img/icon.jpeg' %}" alt="{% trans 'Logo' %}" class="home-navbar-logo me-2">
+                {% endif %}
+                <span class="home-navbar-brand-name">
+                    {% if IS_RTL %}{{ site_config.ar_name }}{% else %}{{ site_config.name }}{% endif %}
+                </span>
             </a>
-        {% else %}
-            <a href="{% url 'user_auth:login' %}" class="floating-btn">
-                <i class="fas fa-sign-in-alt"></i>
-            </a>
-        {% endif %}
-    </div>
+
+            <ul class="home-navbar-links list-unstyled mb-0">
+                <li>
+                    <a href="{% url 'frontend:home' %}" class="home-nav-link active">
+                        {% trans "Home" %}
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'frontend:portfolio_list' %}" class="home-nav-link">
+                        {% trans "Portfolio" %}
+                    </a>
+                </li>
+            </ul>
+
+            <div class="home-navbar-actions d-flex align-items-center gap-2">
+                {% include 'partials/language_switcher.html' %}
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dash:dash_home' %}" class="home-navbar-btn" title="{% trans 'Dashboard' %}">
+                        <span class="home-navbar-btn-label">{% trans "Dashboard" %}</span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'user_auth:login' %}" class="home-navbar-btn" title="{% trans 'Login' %}">
+                        <span class="home-navbar-btn-label">{% trans "Login" %}</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
 {% endblock nav %}
 
 {% block sidebar %}{% endblock sidebar %}
@@ -34,16 +61,16 @@
     <section class="loft-section pt-0" id="spaces-section">
         <div class="container">
             <div class="mb-5 pt-5">
-                <h2 class="loft-section-title text-dark reveal">{% trans "Choose Your Spaces" %}</h2>
-                <p class="loft-section-sub text-dark reveal">{% trans "Select the rooms you want to design and get an instant price" %}</p>
+                <h2 class="loft-section-title reveal">{% trans "Choose Your Spaces" %}</h2>
+                <p class="loft-section-sub reveal">{% trans "Select the rooms you want to design and get an instant price" %}</p>
             </div>
             <div class="row g-4 justify-content-center" id="spacesGrid">
                 {% for space in spaces %}
                 <div class="col-lg-4 col-md-6">
                     <div class="space-card reveal" data-space-id="{{ space.id }}" data-price="{{ space.base_price }}">
-                        {% if space.image %}
+                        {% if space.thumbnail %}
                         <div class="space-card-img">
-                            <img src="{{ space.image }}" alt="{{ space.name }}" loading="lazy" data-img-error="hide-parent">
+                            <img src="{{ space.thumbnail }}" alt="{{ space.name }}" loading="lazy" data-img-error="hide-parent">
                         </div>
                         {% endif %}
                         <div class="space-card-body">
@@ -58,9 +85,6 @@
                                     <span class="space-card-price-value">{{ space.base_price }}</span>
                                     <span class="space-card-price-currency">DZD</span>
                                 </div>
-                                <div class="space-card-days">
-                                    <i class="far fa-calendar-alt me-1"></i>{{ space.estimated_days }} {% trans "days" %}
-                                </div>
                             </div>
                         </div>
                         <div class="space-card-bar">
@@ -69,6 +93,64 @@
                     </div>
                 </div>
                 {% endfor %}
+            </div>
+
+            <div class="floating-bottom-bar" id="floatingBar">
+                <div class="floating-bottom-inner">
+                    <div class="floating-total">
+                        <span class="floating-total-label">{% trans "Total" %}</span>
+                        <span class="floating-total-amount" id="floatingTotal">0</span>
+                        <span class="floating-total-currency">DZD</span>
+                    </div>
+                    <div class="floating-actions">
+                        <a href="{% url 'design_service' %}" class="btn btn-outline-light rounded-pill px-4 fw-bold">{% trans "Create a custom project" %}</a>
+                        <button class="btn btn-primary rounded-pill px-4 fw-bold shadow" id="continueBtn">{% trans "Continue" %}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Projects Slider -->
+    <button type="button" class="projects-toggle" id="projectsToggle"
+            aria-expanded="false" aria-controls="projects-section">
+        <i class="fas fa-chevron-up projects-toggle-icon"></i>
+        <span class="projects-toggle-label">{% trans "Recent Projects" %}</span>
+    </button>
+    <section class="projects-section" id="projects-section" aria-hidden="true">
+        <div class="container">
+            <div class="projects-slider-nav">
+                <button type="button" class="projects-nav-btn projects-prev" aria-label="{% trans 'Previous projects' %}">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button type="button" class="projects-nav-btn projects-next" aria-label="{% trans 'Next projects' %}">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <div class="projects-slider">
+                <div class="projects-track" id="projectsTrack">
+                    {% for project in projects %}
+                    <a class="project-rect-card reveal" href="{% url 'frontend:portfolio_detail' project.pk %}">
+                        <div class="project-rect-img">
+                            {% if project.thumbnail %}
+                            <img src="{{ project.thumbnail.url }}" alt="{{ project.title }}" loading="lazy">
+                            {% else %}
+                            <div class="project-rect-fallback"><i class="fas fa-image"></i></div>
+                            {% endif %}
+                            {% if project.is_featured %}
+                            <span class="project-rect-featured">{% trans "Featured" %}</span>
+                            {% endif %}
+                        </div>
+                        <div class="project-rect-body">
+                            <h5>{{ project.title }}</h5>
+                            <p>{{ project.description|truncatewords:14 }}</p>
+                            <span class="project-rect-link">
+                                {% trans "View Project" %} <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </section>
@@ -94,25 +176,11 @@
 
 {% endblock content %}
 
-{% block footer %}
-    <div class="floating-bottom-bar" id="floatingBar">
-        <div class="container">
-            <div class="floating-bottom-inner">
-                <div class="floating-total">
-                    <span class="floating-total-label">{% trans "Total" %}</span>
-                    <span class="floating-total-amount" id="floatingTotal">0</span>
-                    <span class="floating-total-currency">DZD</span>
-                </div>
-                <div class="floating-actions">
-                    <a href="{% url 'design_service' %}" class="btn btn-outline-dark rounded-pill px-4 fw-bold">{% trans "Create a custom project" %}</a>
-                    <button class="btn btn-primary rounded-pill px-4 fw-bold shadow" id="continueBtn">{% trans "Continue" %}</button>
-                </div>
-            </div>
-        </div>
-    </div>
-{% endblock footer %}
+{% block footer %}{% endblock footer %}
 
 {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="{% static "js/three-sixty-bg.js" %}?v={{ ASSET_VERSION }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{% static "js/home.js" %}?v={% now "U" %}"></script>
+<script src="{% static "js/home.js" %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

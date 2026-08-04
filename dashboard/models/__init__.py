@@ -1,13 +1,13 @@
 from .notification import Notification
 from .inquiry import Inquiry
-from .base import ProjectType, Space, SpaceCategory, ProjectTypeSpace
-from .catalog import DesignPackage, PackageService, ServiceCategory, DesignOption, StyleCategory, InspirationImage
+from .base import ProjectType, Space, SpaceImage, ProjectTypeSpace
+from .catalog import DesignPackage, PackageService, ServiceCategory, DesignOption
 from .requests import (
     DesignRequest,
     DesignRequestFloor,
     DesignRequestSpace,
     DesignRequestOption,
-    DesignRequestInspiration,
+    DesignRequestSpaceImage,
     DesignRequestFile,
 )
 from .communication import (
@@ -35,20 +35,18 @@ __all__ = [
     "PricingConfig",
     "Notification",
     "ProjectType",
-    "SpaceCategory",
     "Space",
+    "SpaceImage",
     "ProjectTypeSpace",
     "DesignPackage",
     "PackageService",
     "ServiceCategory",
     "DesignOption",
-    "StyleCategory",
-    "InspirationImage",
     "DesignRequest",
     "DesignRequestFloor",
     "DesignRequestSpace",
     "DesignRequestOption",
-    "DesignRequestInspiration",
+    "DesignRequestSpaceImage",
     "DesignRequestFile",
     "DesignMessage",
     "DesignRevision",

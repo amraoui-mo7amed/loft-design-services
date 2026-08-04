@@ -6,7 +6,7 @@
 {% block dashTitle %}{% trans "My Projects" %}{% endblock dashTitle %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/users.css' %}?v={% now "U" %}">
+    <link rel="stylesheet" href="{% static 'css/users.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
 
 {% block dashContent %}
@@ -51,6 +51,9 @@
         </div>
         {% endfor %}
     </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="mt-5">{% render_pagination page_obj %}</div>
+    {% endif %}
     {% else %}
     <div class="card border-0 shadow-sm p-5 text-center rounded-4">
         <i class="fas fa-drafting-compass fa-4x text-light mb-4"></i>

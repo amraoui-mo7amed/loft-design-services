@@ -23,11 +23,6 @@
     </div>
   </div>
 
-  <div class="wiz-subtotal-bar mb-4">
-    <span class="wiz-subtotal-label wiz-text-md">{% trans "Subtotal" %}</span>
-    <span class="wiz-subtotal-value" id="spacesSubtotal">0 DA</span>
-  </div>
-
   <div id="floorSpacesContainer">
     {% for fi in floor_count %}
     <div class="floor-space-group mb-4" data-floor-index="{{ fi }}">
@@ -44,10 +39,10 @@
         {% for space in spaces %}
         <div class="col-md-4 col-sm-6">
           <div class="wiz-space-card space-checkbox-card" data-space-id="{{ space.id }}"
-               data-price="{{ space.base_price|unlocalize }}" data-days="{{ space.estimated_days }}">
+               data-price="{{ space.base_price|unlocalize }}">
             <div class="wiz-space-img">
-              {% if space.image %}
-              <img src="{{ space.image.url }}" alt="{{ space.name }}">
+              {% if space.thumbnail %}
+              <img src="{{ space.thumbnail.url }}" alt="{{ space.name }}">
               {% else %}
               <i class="fas fa-door-open"></i>
               {% endif %}

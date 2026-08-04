@@ -1,5 +1,6 @@
 {% extends "index.html" %}
 {% load i18n %}
+{% load tags %}
 
 {% block title %}{% trans "My Orders" %}{% endblock title %}
 
@@ -39,6 +40,9 @@
         </div>
         {% endfor %}
     </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="mt-5">{% render_pagination page_obj %}</div>
+    {% endif %}
     {% else %}
     <div class="text-center py-5">
         <i class="fas fa-box-open fa-4x text-muted mb-3"></i>

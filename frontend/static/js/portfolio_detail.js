@@ -83,6 +83,26 @@
     });
   }
 
+  /* ── Gallery auto-hide + toggle ── */
+  var galleryToggleBtn = document.getElementById("galleryToggle");
+  var galleryVisible = true;
+
+  function setGalleryVisible(visible) {
+    galleryVisible = visible;
+    if (thumbStrip) thumbStrip.style.display = visible ? "" : "none";
+    if (galleryToggleBtn) galleryToggleBtn.classList.toggle("active-3d", visible);
+  }
+
+  setTimeout(function () {
+    setGalleryVisible(false);
+  }, 5000);
+
+  if (galleryToggleBtn) {
+    galleryToggleBtn.addEventListener("click", function () {
+      setGalleryVisible(!galleryVisible);
+    });
+  }
+
   document.addEventListener("keydown", function (e) {
     if (!viewer.classList.contains("active")) return;
     if (e.key === "Escape") closeViewer();
@@ -111,18 +131,6 @@
       if (nextBtn) nextBtn.style.display = is3dActive ? "none" : "";
       if (counterEl) counterEl.style.display = is3dActive ? "none" : "";
       if (thumbStrip) thumbStrip.style.display = is3dActive ? "none" : "";
-    });
-  }
-
-  /* ── Details Modal ── */
-  var detailsModal = document.getElementById("projectDetailsModal");
-  if (detailsModal) {
-    detailsModal.addEventListener("show.bs.modal", function () {
-      var source = document.getElementById("projectDetails");
-      var target = document.getElementById("detailsModalBody");
-      if (source && target) {
-        target.innerHTML = source.innerHTML;
-      }
     });
   }
 })();

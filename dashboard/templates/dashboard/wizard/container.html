@@ -8,7 +8,7 @@
 {% block footer %}{% endblock footer %}
 
 {% block css %}
-<link rel="stylesheet" href="{% static 'css/wizard.css' %}?v={% now "U" %}">
+<link rel="stylesheet" href="{% static 'css/wizard.css' %}?v={{ ASSET_VERSION }}">
 {% endblock css %}
 
 {% block content %}
@@ -136,5 +136,5 @@
 </div>
 {% endblock content %}
 {% block js %}
-<script src="{% static 'js/wizard.js' %}?v={% now "U" %}"></script>
+<script src="{% static 'js/wizard.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock js %}

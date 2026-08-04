@@ -1,6 +1,7 @@
 {% extends "index.html" %}
 {% load i18n %}
 {% load static %}
+{% load tags %}
 
 {% block title %}{% trans "Marketplace" %}{% endblock title %}
 
@@ -57,6 +58,9 @@
         </div>
         {% endfor %}
     </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="mt-5">{% render_pagination page_obj %}</div>
+    {% endif %}
 </div>
 {% endblock content %}
 

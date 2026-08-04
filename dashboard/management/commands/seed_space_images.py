@@ -1,10 +1,10 @@
 import requests
 import os
-from io import BytesIO
 from django.core.management.base import BaseCommand
 from django.core.files.base import ContentFile
 from django.conf import settings
-from dashboard.models import Space
+from django.utils.text import slugify
+from dashboard.models import Space, SpaceImage
 
 
 SPACE_IMAGES = [
@@ -30,10 +30,10 @@ SPACE_IMAGES = [
 
 
 class Command(BaseCommand):
-    help = "Download real images for all spaces from Unsplash"
+    help = "Download real images for all spaces and store them as SpaceImage gallery records"
 
     def handle(self, *args, **options):
-        media_dir = os.path.join(settings.MEDIA_ROOT, "spaces")
+        media_dir = os.path.join(settings.MEDIA_ROOT, "spaces", "gallery")
         os.makedirs(media_dir, exist_ok=True)
         self.stdout.write(f"Media spaces dir: {media_dir}")
 
@@ -47,12 +47,9 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING(f"No URL for {space.name}"))
                 continue
 
-            # Remove old image if any
-            if space.image and hasattr(space.image, "name") and space.image.name:
-                try:
-                    space.image.delete(save=False)
-                except Exception:
-                    pass
+            if space.gallery_images.exists():
+                self.stdout.write(f"  {space.name} already has gallery images, skipping")
+                continue
 
             self.stdout.write(f"  Downloading {space.name} ... ", ending="")
             try:
@@ -68,7 +65,10 @@ class Command(BaseCommand):
                     continue
 
                 filename = f"{space.slug}.jpg"
-                space.image.save(filename, ContentFile(resp.content), save=True)
+                SpaceImage.objects.create(
+                    space=space,
+                    image=ContentFile(resp.content, name=filename),
+                )
                 self.stdout.write(self.style.SUCCESS("OK"))
             except requests.exceptions.ConnectionError as e:
                 self.stdout.write(self.style.ERROR(f"ConnectionError: {e}"))

@@ -2,38 +2,68 @@
 <div class="wizard-step" data-step="2">
   <div class="text-center mb-4">
     <h2 class="wiz-step-title">{% trans "Choose a Package" %}</h2>
-    <p class="wiz-step-sub">{% trans "Select the service package that fits your needs" %}</p>
-  </div>
-
-  <div class="wiz-summary-card mb-4" id="estimateCard">
-    <div class="d-flex align-items-center mb-3">
-      <div class="wiz-summary-icon me-3"><i class="fas fa-calculator"></i></div>
-      <div>
-        <div class="wiz-summary-title">{% trans "Your Estimate" %}</div>
-        <div class="wiz-text-sm text-muted">{% trans "Based on your selected spaces" %}</div>
-      </div>
-    </div>
-    <div class="d-flex justify-content-between align-items-center py-1">
-      <span class="wiz-text-muted-light">{% trans "Base price (selected spaces)" %}</span>
-      <span class="fw-bold" id="pkgEstimateSubtotal" style="color:var(--wiz-text);">—</span>
-    </div>
-    <div class="d-flex justify-content-between align-items-center py-1">
-      <span class="wiz-text-muted-light">{% trans "Package" %}</span>
-      <span class="fw-bold" id="pkgEstimatePackage" style="color:var(--wiz-text);">—</span>
-    </div>
-    <hr class="my-2" style="border-color:var(--wiz-border);opacity:0.6;">
-    <div class="d-flex justify-content-between align-items-center py-1">
-      <span class="fw-bold">{% trans "Estimated Total" %}</span>
-      <span id="pkgEstimateTotal" style="font-size:1.3rem;font-weight:800;color:var(--wiz-accent);">—</span>
-    </div>
+    <p class="wiz-step-sub">{% trans "Pick a service package, or continue with just your spaces" %}</p>
   </div>
 
   <div class="row g-3">
+    <!-- Basic package card (your estimate, auto-selected add-on default) -->
+    <div class="col-md-3 d-flex">
+      <div class="pkg-card package-card basic-card d-flex flex-column w-100 selected" data-package-id=""
+           data-package-price="0" data-package-name="{% trans 'Basic' %}">
+        <div class="pkg-card-head pkg-card-head-basic">
+          <div class="pkg-card-badge"><i class="fas fa-check"></i></div>
+          <div class="pkg-card-name">{% trans "Basic" %}</div>
+        </div>
+
+        <div class="pkg-card-body d-flex flex-column flex-grow-1">
+          <div class="pkg-card-price-wrap">
+            <span class="pkg-card-price pkg-dynamic-price">—</span>
+            <span class="pkg-card-currency">DA</span>
+          </div>
+          <div class="pkg-card-breakdown pkg-basic-breakdown">—</div>
+
+          <div class="d-flex justify-content-around mb-3 py-2 pkg-card-stats-divider">
+            <div class="text-center">
+              <div class="pkg-card-stat-num" id="basicSpacesCount">0</div>
+              <div class="pkg-card-stat-label">{% trans "Spaces" %}</div>
+            </div>
+            <div class="text-center">
+              <div class="pkg-card-stat-num" id="basicFloorsCount">1</div>
+              <div class="pkg-card-stat-label">{% trans "Floors" %}</div>
+            </div>
+            <div class="text-center">
+              <div class="pkg-card-stat-num" id="basicSubtotal" style="font-size:0.85rem;">—</div>
+              <div class="pkg-card-stat-label">{% trans "Base" %}</div>
+            </div>
+          </div>
+
+          <div class="flex-grow-1">
+            <div class="pkg-card-features-label">{% trans "What's included" %}</div>
+            <div class="pkg-card-feature">
+              <i class="fas fa-check-circle"></i>
+              <span>{% trans "Design for your selected spaces" %}</span>
+            </div>
+            <div class="pkg-card-feature">
+              <i class="fas fa-check-circle"></i>
+              <span>{% trans "Base plan &amp; layout" %}</span>
+            </div>
+          </div>
+
+          <div class="mt-auto pt-3 d-grid gap-2">
+            <span class="pkg-card-btn pkg-card-btn-selected">{% trans "Included" %}</span>
+            <button type="button" class="pkg-card-btn pkg-details-btn">
+              <i class="fas fa-sliders-h me-1"></i>{% trans "View Details" %}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     {% for item in package_data %}
     {% with pkg=item.pkg %}
     {% with tier=forloop.counter %}
     <div class="col-md-3 d-flex">
-      <div class="pkg-card package-card d-flex flex-column w-100" data-package-id="{{ pkg.id }}" data-package-price="{{ item.total_price|unlocalize }}">
+      <div class="pkg-card package-card d-flex flex-column w-100" data-package-id="{{ pkg.id }}" data-package-price="{{ item.total_price|unlocalize }}" data-package-name="{{ pkg.name }}">
 
         <div class="pkg-card-head {% if tier == 1 %}pkg-card-head-tier1{% elif tier == 2 %}pkg-card-head-tier2{% else %}pkg-card-head-tier3{% endif %}">
           <div class="pkg-card-badge"><i class="fas fa-check"></i></div>
@@ -45,6 +75,9 @@
             <span class="pkg-card-price pkg-dynamic-price">—</span>
             <span class="pkg-card-currency">DA</span>
           </div>
+          <div class="pkg-card-breakdown">
+            <span class="pkg-base-price">0</span> <span class="pkg-breakdown-op">+</span> <span class="pkg-addon-price">{{ item.total_price|unlocalize }}</span>
+          </div>
 
           <div class="d-flex justify-content-around mb-3 py-2 pkg-card-stats-divider">
             <div class="text-center">
@@ -52,12 +85,12 @@
               <div class="pkg-card-stat-label">{% trans "Days" %}</div>
             </div>
             <div class="text-center">
-              <div class="pkg-card-stat-num">{{ pkg.package_services.count }}</div>
+              <div class="pkg-card-stat-num">{{ pkg.package_services.all|length }}</div>
               <div class="pkg-card-stat-label">{% trans "Services" %}</div>
             </div>
             <div class="text-center">
-              <div class="pkg-card-stat-num" style="font-size:0.85rem;">{{ item.total_price|unlocalize }}</div>
-              <div class="pkg-card-stat-label">{% trans "Price" %}</div>
+              <div class="pkg-card-stat-num pkg-sum-price" style="font-size:0.85rem;">—</div>
+              <div class="pkg-card-stat-label">{% trans "Total" %}</div>
             </div>
           </div>
 
@@ -78,9 +111,12 @@
           {% endif %}
           {% endwith %}
 
-          <div class="mt-auto pt-3">
+          <div class="mt-auto pt-3 d-grid gap-2">
             <input type="radio" name="package" value="{{ pkg.id }}" class="d-none package-radio" id="pkg{{ pkg.id }}">
-            <label class="pkg-card-btn" for="pkg{{ pkg.id }}">{% trans "Choose" %} {% if tier == 1 %}{% trans "Basic" %}{% elif tier == 2 %}{% trans "Pro" %}{% else %}{% trans "Premium" %}{% endif %}</label>
+            <label class="pkg-card-btn" for="pkg{{ pkg.id }}">{% trans "Add" %} {{ pkg.name }}</label>
+            <button type="button" class="pkg-card-btn pkg-details-btn">
+              <i class="fas fa-sliders-h me-1"></i>{% trans "View Details" %}
+            </button>
           </div>
         </div>
       </div>
@@ -88,5 +124,23 @@
     {% endwith %}
     {% endwith %}
     {% endfor %}
+  </div>
+</div>
+
+<!-- Estimate details modal -->
+<div class="modal fade" id="estimateDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content border-0 rounded-4 overflow-hidden" style="background:var(--wiz-bg);">
+      <div class="modal-header border-0 pb-2" style="background:var(--wiz-bg);">
+        <h5 class="modal-title fw-bold" style="color:var(--wiz-text);">
+          <i class="fas fa-calculator me-2" style="color:var(--wiz-primary);"></i>{% trans "Your Estimate Details" %}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="estimateDetailsBody"></div>
+      <div class="modal-footer border-0 pt-0" style="background:var(--wiz-bg);">
+        <button type="button" class="btn btn-sm btn-outline-secondary rounded-3 px-4" data-bs-dismiss="modal">{% trans "Close" %}</button>
+      </div>
+    </div>
   </div>
 </div>

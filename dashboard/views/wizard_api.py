@@ -1,26 +1,25 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
-from ..models import ProjectType, Space, DesignPackage, DesignOption, InspirationImage, StyleCategory
+from ..models import ProjectType, Space, DesignPackage, DesignOption
 from ..price_engine import calculate_full_price
 
 
 def api_project_types(request):
-    qs = ProjectType.objects.filter(active=True)
+    qs = ProjectType.objects.all()
     data = []
     for pt in qs:
         data.append({
             "id": pt.id,
             "name": pt.name,
             "slug": pt.slug,
-            "sort_order": pt.sort_order,
         })
     return JsonResponse({"data": data})
 
 
 def api_spaces(request):
     project_type_slug = request.GET.get("project_type")
-    qs = Space.objects.filter(active=True)
+    qs = Space.objects.all().prefetch_related("gallery_images")
     if project_type_slug:
         pt = get_object_or_404(ProjectType, slug=project_type_slug)
         space_ids = pt.default_spaces.values_list("space_id", flat=True)
@@ -31,10 +30,8 @@ def api_spaces(request):
             "id": s.id,
             "name": s.name,
             "slug": s.slug,
-            "category": s.category,
             "base_price": str(s.base_price),
-            "estimated_days": s.estimated_days,
-            "image_url": s.image.url if s.image else "",
+            "image_url": s.thumbnail.url if s.thumbnail else "",
         })
     return JsonResponse({"data": data})
 
@@ -47,23 +44,6 @@ def api_packages(request):
 def api_options(request):
     qs = DesignOption.objects.filter(active=True).values("id", "name", "slug", "description", "price", "category")
     return JsonResponse({"data": list(qs)})
-
-
-def api_inspirations(request):
-    space_id = request.GET.get("space_id")
-    qs = InspirationImage.objects.filter(active=True)
-    if space_id:
-        qs = qs.filter(space_id=space_id)
-    data = []
-    for img in qs:
-        data.append({
-            "id": img.id,
-            "title": img.title,
-            "image_url": img.image.url if img.image else "",
-            "space_id": img.space_id,
-            "space_name": img.space.name,
-        })
-    return JsonResponse({"data": data})
 
 
 def api_calculate_price(request):

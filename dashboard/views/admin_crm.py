@@ -79,7 +79,7 @@ def project_detail(request, pk):
     floors = project.floors.prefetch_related("spaces__space").all()
     spaces = project.spaces.select_related("space", "floor").all()
     options = project.options.select_related("option").all()
-    inspirations = project.spaces.prefetch_related("inspirations__inspiration_image").all()
+    inspirations = project.spaces.prefetch_related("space_images__space_image").all()
     files = project.files.all()
     notes = project.notes.select_related("author").order_by("-created_at")
     activity = project.activity_logs.select_related("actor").order_by("-created_at")

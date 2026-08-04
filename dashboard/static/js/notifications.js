@@ -211,7 +211,7 @@
                     </div>
                 </div>
                 <div class="flex-grow-1">
-                    <div class="fw-bold small text-dark">${notification.title}</div>
+                    <div class="fw-bold small text-light">${notification.title}</div>
                     <div class="text-muted smaller text-truncate mb-1">
                         ${notification.message}
                     </div>

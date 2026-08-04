@@ -5,7 +5,7 @@
 {% block body_class %}{% endblock body_class %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static "css/home.css" %}?v={% now "U" %}">
+    <link rel="stylesheet" href="{% static "css/home.css" %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
 
 {% block nav %}{% endblock nav %}
@@ -82,5 +82,5 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{% static "js/order.js" %}?v={% now "U" %}"></script>
+<script src="{% static "js/order.js" %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

@@ -27,18 +27,18 @@ urlpatterns = [
     # Design Catalog - Project Types
     path("design/project-types/", design.project_type_list, name="project_type_list"),
     path("design/project-types/create/", design.project_type_create, name="project_type_create"),
+    path("design/project-types/<int:pk>/", design.project_type_detail, name="project_type_detail"),
     path("design/project-types/<int:pk>/edit/", design.project_type_update, name="project_type_update"),
     path("design/project-types/<int:pk>/delete/", design.project_type_delete, name="project_type_delete"),
-    # Design Catalog - Spaces
-    path("design/spaces/", design.space_list, name="space_list"),
+    path("design/project-types/<int:pk>/home/", design.project_type_home_toggle, name="project_type_home_toggle"),
+    path("design/project-types/<int:pk>/spaces/", design.space_type_spaces, name="space_type_spaces"),
+    # Design Catalog - Spaces (managed from project type detail)
     path("design/spaces/create/", design.space_create, name="space_create"),
     path("design/spaces/<int:pk>/edit/", design.space_update, name="space_update"),
     path("design/spaces/<int:pk>/delete/", design.space_delete, name="space_delete"),
-    # Design Catalog - Space Categories
-    path("design/categories/list/", design.space_category_list, name="space_category_list"),
-    path("design/categories/create/", design.space_category_create, name="space_category_create"),
-    path("design/categories/<int:pk>/edit/", design.space_category_update, name="space_category_update"),
-    path("design/categories/<int:pk>/delete/", design.space_category_delete, name="space_category_delete"),
+    path("design/spaces/<int:pk>/home-save/", design.space_home_save, name="space_home_save"),
+    path("design/spaces/<int:pk>/home-toggle/", design.space_home_toggle, name="space_home_toggle"),
+    path("design/spaces/image/delete/", design.space_image_delete, name="space_image_delete"),
     # Design Catalog - Packages
     path("design/packages/", design.package_list, name="package_list"),
     path("design/packages/create/", design.package_create, name="package_create"),
@@ -47,21 +47,6 @@ urlpatterns = [
     path("design/packages/<int:pk>/delete/", design.package_delete, name="package_delete"),
     path("design/packages/<int:pk>/options/add/", design.package_option_add, name="package_option_add"),
     path("design/packages/<int:pk>/options/<int:opt_pk>/delete/", design.package_option_delete, name="package_option_delete"),
-    # Design Catalog - Service Categories
-    path("design/service-categories/list/", design.service_category_list, name="service_category_list"),
-    path("design/service-categories/create/", design.service_category_create, name="service_category_create"),
-    path("design/service-categories/<int:pk>/edit/", design.service_category_update, name="service_category_update"),
-    path("design/service-categories/<int:pk>/delete/", design.service_category_delete, name="service_category_delete"),
-    # Design Catalog - Styles
-    path("design/styles/", design.style_list, name="style_list"),
-    path("design/styles/create/", design.style_create, name="style_create"),
-    path("design/styles/<int:pk>/edit/", design.style_update, name="style_update"),
-    path("design/styles/<int:pk>/delete/", design.style_delete, name="style_delete"),
-    # Design Catalog - Inspirations
-    path("design/inspirations/", design.inspiration_list, name="inspiration_list"),
-    path("design/inspirations/create/", design.inspiration_create, name="inspiration_create"),
-    path("design/inspirations/<int:pk>/edit/", design.inspiration_update, name="inspiration_update"),
-    path("design/inspirations/<int:pk>/delete/", design.inspiration_delete, name="inspiration_delete"),
     # Pricing
     path("pricing/", pricing.pricing_settings, name="pricing_settings"),
     # Customer Dashboard

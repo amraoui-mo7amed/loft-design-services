@@ -18,6 +18,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var ctx = donutEl.getContext("2d");
 
+  Chart.defaults.color = "#f2f5f8";
+
   new Chart(ctx, {
     type: "doughnut",
     data: {
@@ -37,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
         legend: {
           position: "bottom",
           labels: {
+            color: "#f2f5f8",
             padding: 16,
             usePointStyle: true,
             pointStyle: "circle",
@@ -49,6 +52,8 @@ document.addEventListener("DOMContentLoaded", function () {
                   fillStyle: data.datasets[0].backgroundColor[i],
                   strokeStyle: "transparent",
                   pointStyle: "circle",
+                  color: "#f2f5f8",
+                  fontColor: "#f2f5f8",
                   index: i,
                 };
               });
@@ -56,10 +61,10 @@ document.addEventListener("DOMContentLoaded", function () {
           },
         },
         tooltip: {
-          backgroundColor: "#fff",
-          titleColor: "#111",
-          bodyColor: "#6b7280",
-          borderColor: "rgba(0,0,0,0.06)",
+          backgroundColor: "rgba(20, 24, 29, 0.92)",
+          titleColor: "#f2f5f8",
+          bodyColor: "#a8b2bd",
+          borderColor: "rgba(255, 255, 255, 0.12)",
           borderWidth: 1,
           padding: 12,
           cornerRadius: 10,

@@ -4,8 +4,8 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
-from .base import ProjectType, Space
-from .catalog import DesignPackage, DesignOption, StyleCategory
+from .base import ProjectType, Space, SpaceImage
+from .catalog import DesignPackage, DesignOption
 
 userModel = get_user_model()
 
@@ -118,20 +118,20 @@ class DesignRequestOption(models.Model):
         return f"{self.design_request.project_number} - {self.option.name if self.option else 'N/A'}"
 
 
-class DesignRequestInspiration(models.Model):
+class DesignRequestSpaceImage(models.Model):
     design_request_space = models.ForeignKey(
-        DesignRequestSpace, on_delete=models.CASCADE, related_name="inspirations", verbose_name=_("Request Space")
+        DesignRequestSpace, on_delete=models.CASCADE, related_name="space_images", verbose_name=_("Request Space")
     )
-    inspiration_image = models.ForeignKey(
-        "InspirationImage", on_delete=models.SET_NULL, null=True, related_name="request_inspirations", verbose_name=_("Inspiration Image")
+    space_image = models.ForeignKey(
+        SpaceImage, on_delete=models.SET_NULL, null=True, related_name="request_space_images", verbose_name=_("Gallery Image")
     )
 
     class Meta:
-        verbose_name = _("Request Inspiration")
-        verbose_name_plural = _("Request Inspirations")
+        verbose_name = _("Request Gallery Image")
+        verbose_name_plural = _("Request Gallery Images")
 
     def __str__(self):
-        return f"Inspiration for {self.design_request_space}"
+        return f"Gallery image for {self.design_request_space}"
 
 
 class DesignRequestFile(models.Model):

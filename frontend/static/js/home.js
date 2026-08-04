@@ -200,5 +200,99 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     })();
 
+    // ── Recent Projects Slider Toggle (slide up/down) ──
+    var projectsSection = document.getElementById("projects-section");
+    var projectsToggle = document.getElementById("projectsToggle");
+    var PROJECTS_TOGGLE_GAP = 14;
+    if (projectsSection && projectsToggle) {
+        function positionToggle() {
+            var open = projectsSection.classList.contains("open");
+            projectsToggle.style.bottom = open
+                ? (projectsSection.offsetHeight + PROJECTS_TOGGLE_GAP) + "px"
+                : PROJECTS_TOGGLE_GAP + "px";
+        }
+
+        window.addEventListener("resize", positionToggle);
+
+        projectsToggle.addEventListener("click", function () {
+            var isOpen = projectsSection.classList.contains("open");
+            projectsSection.classList.toggle("open", !isOpen);
+            projectsToggle.classList.toggle("open", !isOpen);
+            projectsToggle.setAttribute("aria-expanded", String(!isOpen));
+            projectsSection.setAttribute("aria-hidden", String(isOpen));
+            setTimeout(positionToggle, 10);
+        });
+    }
+
+    // ── Recent Projects Slider (drag + arrows) ──
+    var track = document.getElementById("projectsTrack");
+    if (track) {
+        var prevBtn = document.querySelector(".projects-prev");
+        var nextBtn = document.querySelector(".projects-next");
+
+        function isRTL() {
+            return document.documentElement.getAttribute("dir") === "rtl";
+        }
+
+        function cardWidth() {
+            var first = track.querySelector(".project-rect-card");
+            if (!first) return 320;
+            return first.getBoundingClientRect().width + 20;
+        }
+
+        function scrollByCards(n) {
+            track.scrollBy({ left: n * cardWidth(), behavior: "smooth" });
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener("click", function () {
+                scrollByCards(isRTL() ? 1 : -1);
+            });
+        }
+        if (nextBtn) {
+            nextBtn.addEventListener("click", function () {
+                scrollByCards(isRTL() ? -1 : 1);
+            });
+        }
+
+        var isDown = false;
+        var startX = 0;
+        var startScroll = 0;
+        var moved = false;
+
+        track.addEventListener("pointerdown", function (e) {
+            if (e.pointerType === "mouse" && e.button !== 0) return;
+            isDown = true;
+            moved = false;
+            startX = e.clientX;
+            startScroll = track.scrollLeft;
+            track.classList.add("dragging");
+            track.setPointerCapture(e.pointerId);
+        });
+
+        track.addEventListener("pointermove", function (e) {
+            if (!isDown) return;
+            var dx = e.clientX - startX;
+            if (Math.abs(dx) > 5) moved = true;
+            track.scrollLeft = startScroll - dx;
+        });
+
+        function endDrag() {
+            if (!isDown) return;
+            isDown = false;
+            track.classList.remove("dragging");
+        }
+
+        track.addEventListener("pointerup", endDrag);
+        track.addEventListener("pointercancel", endDrag);
+
+        track.addEventListener("click", function (e) {
+            if (moved) {
+                e.preventDefault();
+                e.stopPropagation();
+                moved = false;
+            }
+        }, true);
+    }
 
 });

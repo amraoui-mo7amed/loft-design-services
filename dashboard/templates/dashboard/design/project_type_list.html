@@ -6,7 +6,7 @@
 {% block dashTitle %}{% trans "Project Types" %}{% endblock dashTitle %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/project_type_list.css' %}?v={% now "U" %}">
+    <link rel="stylesheet" href="{% static 'css/project_type_list.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
 
 {% block dashContent %}
@@ -14,9 +14,9 @@
     <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
         <div>
             <h5 class="fw-bold mb-0">{% trans "Project Types" %}</h5>
-            <p class="text-muted small mb-0 pt-section-title">{% trans "Manage project types for design requests" %}</p>
+            <p class="text-muted small mb-0 pt-section-title">{% trans "Manage project types and their spaces" %}</p>
         </div>
-        <button class="btn btn-primary rounded-3 px-4 fw-bold shadow-sm catalog-create-btn"
+        <button class="btn dash-btn-primary rounded-3 px-4 fw-bold shadow-sm catalog-create-btn"
                 data-bs-target="#projectTypeModal"
                 data-create-url="{% url 'dash:project_type_create' %}"
                 data-modal-title="{% trans 'New Project Type' %}"
@@ -32,32 +32,39 @@
                 <div class="pt-card-body">
                     <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="pt-card-icon-wrap" style="{% if pt.image %}background:none;{% endif %}">
-                                {% if pt.image %}
-                                <img src="{{ pt.image.url }}" alt="{{ pt.name }}" style="width:48px;height:48px;border-radius:12px;object-fit:cover;">
-                                {% else %}
+                            <div class="pt-card-icon-wrap">
                                 <i class="fas fa-building"></i>
-                                {% endif %}
                             </div>
                             <div>
                                 <h5>{{ pt.name }}</h5>
-                                <span class="badge pt-badge rounded-pill {% if pt.active %}bg-success{% else %}bg-secondary{% endif %}">
-                                    {% if pt.active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
-                                </span>
+                                <span class="badge pt-badge rounded-pill">{{ pt.space_count }} {% trans "spaces" %}</span>
                             </div>
                         </div>
                         <div class="pt-actions">
+                            <button class="btn btn-outline-dark rounded-3 pt-feature-btn{% if pt.featured_on_home %} is-featured{% endif %}"
+                                    title="{% trans 'Feature on home' %}"
+                                    data-feature-url="{% url 'dash:project_type_home_toggle' pt.pk %}"
+                                    data-csrf="{{ csrf_token }}"
+                                    data-action="{% if pt.featured_on_home %}unfeature{% else %}feature{% endif %}"
+                                    data-name="{{ pt.name }}"
+                                    data-featured="{% if pt.featured_on_home %}true{% else %}false{% endif %}"
+                                    data-confirm-title="{% trans 'Remove featured project type?' %}"
+                                    data-confirm-text="{% trans 'This project type will no longer be featured on the homepage.' %}"
+                                    data-confirm-ok="{% trans 'Yes, unfeature' %}"
+                                    data-confirm-cancel="{% trans 'Cancel' %}">
+                                <i class="{% if pt.featured_on_home %}fas fa-star{% else %}far fa-star{% endif %}"></i>
+                            </button>
+                            <a class="btn btn-outline-light rounded-3" title="{% trans 'Manage Spaces' %}"
+                               href="{% url 'dash:project_type_detail' pt.pk %}">
+                                <i class="fas fa-door-open"></i>
+                            </a>
                             <button class="btn btn-outline-primary rounded-3 catalog-edit-btn"
                                     title="{% trans 'Edit' %}"
                                     data-bs-target="#projectTypeModal"
                                     data-update-url="{% url 'dash:project_type_update' pt.pk %}"
                                     data-modal-title="{% trans 'Edit Project Type' %}"
                                     data-submit-text="{% trans 'Save' %}"
-                                    data-name="{{ pt.name }}"
-                                    data-description="{{ pt.description }}"
-                                    data-sort_order="{{ pt.sort_order }}"
-                                    data-active="{{ pt.active|yesno:'true,false' }}"
-                                    {% if pt.image %}data-image_url="{{ pt.image.url }}"{% endif %}>
+                                    data-name="{{ pt.name }}">
                                 <i class="fas fa-pen"></i>
                             </button>
                             <button class="btn btn-outline-danger rounded-3 delete_button"
@@ -69,13 +76,6 @@
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
-                    </div>
-                    {% if pt.description %}
-                    <p class="text-muted small mb-2" style="font-size:0.78rem;line-height:1.4;">{{ pt.description|truncatewords:20 }}</p>
-                    {% endif %}
-                    <div class="d-flex align-items-center gap-2 pt-meta">
-                        <i class="fas fa-sort-numeric-down text-muted" style="font-size:0.7rem;"></i>
-                        <small class="text-muted">{% trans "Order" %}: {{ pt.sort_order }}</small>
                     </div>
                 </div>
             </div>
@@ -98,79 +98,31 @@
     {% endif %}
 </div>
 
-<!-- Project Type Modal (redesigned - matches space modal layout) -->
+<!-- Project Type Modal -->
 <div class="modal fade" id="projectTypeModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
             <div class="pt-modal-header d-flex align-items-center justify-content-between">
                 <div>
                     <h5 class="modal-title fw-bold mb-1"></h5>
-                    <p class="pt-modal-subtitle">{% trans "Configure project type details, image and availability" %}</p>
+                    <p class="pt-modal-subtitle">{% trans "Configure project type details" %}</p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="p-4">
-                <form method="post" action="" enctype="multipart/form-data" class="form" id="projectTypeForm">
+                <form method="post" action="" class="form" id="projectTypeForm">
                     {% csrf_token %}
                     {% include "partials/errorList.html" with form_id="projectTypeForm" %}
-                    <div class="row g-4">
-                        <div class="col-md-7">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                                    <i class="fas fa-tag text-primary" style="font-size:0.8rem;"></i>
-                                    {% trans "Name" %}
-                                </label>
-                                <input type="text" name="name" class="form-control" data-field="name" data-default="" required placeholder="{% trans 'e.g. Residential' %}">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                                    <i class="fas fa-align-left text-muted" style="font-size:0.8rem;"></i>
-                                    {% trans "Description" %}
-                                </label>
-                                <textarea name="description" class="form-control" data-field="description" data-default="" rows="3" placeholder="{% trans 'Brief description of this project type...' %}"></textarea>
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-sm-6">
-                                    <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                                        <i class="fas fa-sort-numeric-down text-muted" style="font-size:0.8rem;"></i>
-                                        {% trans "Sort Order" %}
-                                    </label>
-                                    <input type="number" name="sort_order" class="form-control" data-field="sort_order" data-default="0" min="0">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                                    <i class="fas fa-image text-primary" style="font-size:0.8rem;"></i>
-                                    {% trans "Project Type Image" %}
-                                </label>
-                                <div class="catalog-image-upload border rounded-3 p-3 text-center" style="background:#f8f9fa;cursor:pointer;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed #dee2e6 !important;">
-                                    <div class="catalog-image-preview">
-                                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-2"></i>
-                                        <p class="small text-muted mb-0">{% trans "Click to upload" %}</p>
-                                        <p class="small text-muted" style="font-size:0.7rem;">{% trans "PNG, JPG up to 5MB" %}</p>
-                                    </div>
-                                    <input type="file" name="image" class="d-none" accept="image/*">
-                                </div>
-                            </div>
-                            <div class="card border-0 bg-light rounded-3 p-3">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="form-check mb-0">
-                                        <input type="checkbox" name="active" class="form-check-input" id="ptActiveCheck" data-field="active" data-default="true" checked>
-                                        <label class="form-check-label fw-bold" for="ptActiveCheck">{% trans "Active" %}</label>
-                                    </div>
-                                    <div class="ms-auto">
-                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill status-badge" id="ptStatusBadge" style="font-size:0.65rem;">{% trans "Published" %}</span>
-                                    </div>
-                                </div>
-                                <small class="text-muted d-block mt-2" style="font-size:0.7rem;">{% trans "Available for selection in new design requests" %}</small>
-                            </div>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                            <i class="fas fa-tag text-primary" style="font-size:0.8rem;"></i>
+                            {% trans "Name" %}
+                        </label>
+                        <input type="text" name="name" class="form-control" data-field="name" data-default="" required placeholder="{% trans 'e.g. Residential' %}">
                     </div>
                     <div class="d-flex gap-2 justify-content-end pt-3 mt-3 border-top">
-                        <button type="button" class="btn btn-light rounded-3 px-4" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
-                        <button type="submit" class="btn btn-primary rounded-3 px-4">
+                        <button type="button" class="btn btn-outline-light rounded-3 px-4" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                        <button type="submit" class="btn dash-btn-primary rounded-3 px-4">
                             <i class="fas fa-save me-2"></i><span class="catalog-submit-text"></span>
                         </button>
                     </div>
@@ -182,5 +134,6 @@
 {% endblock dashContent %}
 
 {% block extra_js %}
-<script src="{% static 'js/catalog_modal.js' %}?v={% now "U" %}"></script>
+<script src="{% static 'js/catalog_modal.js' %}?v={{ ASSET_VERSION }}"></script>
+<script src="{% static 'js/project_type_list.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

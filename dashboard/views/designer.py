@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.db import transaction
 
@@ -10,7 +11,12 @@ from ..models import DesignRequest, DesignDeliverable, DesignNote, DesignRevisio
 @login_required
 def designer_projects(request):
     projects = DesignRequest.objects.filter(designer=request.user).select_related("client", "project_type", "package")
-    return render(request, "dashboard/designer/project_list.html", {"projects": projects})
+    paginator = Paginator(projects, 12)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    return render(request, "dashboard/designer/project_list.html", {
+        "projects": page_obj,
+        "page_obj": page_obj,
+    })
 
 
 @login_required

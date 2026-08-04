@@ -18,11 +18,11 @@ from decouple import config
 
 HUMAN_ERROR_MAP = {
     "dashboard_projecttype_slug_key": _("A project type with this name already exists."),
-    "dashboard_projecttype_sort_order": _("This sort order is already taken."),
     "dashboard_space_slug_key": _("A space with this name already exists."),
     "dashboard_designoption_slug_key": _("A design option with this name already exists."),
     "dashboard_stylecategory_slug_key": _("A style category with this name already exists."),
     "dashboard_projecttypespace_project_type_id_space_id_": _("This space is already linked to this project type."),
+    "unique_space_project_type": _("This space already belongs to another project type."),
     "dashboard_productcategory_slug_key": _("A product category with this name already exists."),
     "dashboard_product_slug_key": _("A product with this name already exists."),
     "dashboard_product_sku_key": _("A product with this SKU already exists."),
@@ -47,6 +47,7 @@ def humanize_error(e):
         field_name = sqlite_match.group(1).replace("_", " ").title()
         return [_("%(field)s already exists.") % {"field": field_name}]
     return [_("A record with the same value already exists.")]
+
 
 
 def send_account_activation_email(request, profile):

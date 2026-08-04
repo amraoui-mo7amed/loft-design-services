@@ -119,7 +119,7 @@ def add_designer(request):
             username = f"{base}{i}"
             i += 1
 
-        password = "".join(secrets.choice(string.ascii_letters + string.digits) for _ in range(12))
+        password = "".join(secrets.choice(string.ascii_letters + string.digits) for _i in range(12))
 
         try:
             with transaction.atomic():

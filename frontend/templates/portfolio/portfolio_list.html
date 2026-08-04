@@ -2,9 +2,11 @@
 {% load i18n %}
 {% load static %}
 
+{% block body_class %}landing-page{% endblock body_class %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static "css/home.css" %}?v={% now "U" %}">
-<link rel="stylesheet" href="{% static "css/portfolio_list.css" %}?v={% now "U" %}">
+<link rel="stylesheet" href="{% static "css/home.css" %}?v={{ ASSET_VERSION }}">
+<link rel="stylesheet" href="{% static "css/portfolio_list.css" %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
 
 {% block nav %}
@@ -21,12 +23,12 @@
 {% block sidebar %}{% endblock sidebar %}
 
 {% block content %}
-<div class="portfolio-page-header">
-  <a href="{% url 'frontend:home' %}" class="btn btn-outline-dark rounded-pill px-4 fw-bold mb-3">
-    <i class="fas fa-arrow-left me-2"></i>{% trans "Back to Home" %}
+<div class="portfolio-page">
+<div class="portfolio-page-header container">
+  <a href="{% url 'frontend:home' %}" class="portfolio-back-btn" aria-label="{% trans 'Back to Home' %}" title="{% trans 'Back to Home' %}">
+    <i class="fas fa-arrow-left"></i>
   </a>
   <h1>{% trans "Our Portfolio" %}</h1>
-  <p>{% trans "Explore our curated collection of interior design projects" %}</p>
 </div>
 
 <section class="py-5">
@@ -80,11 +82,12 @@
   <button class="nav-btn nav-next"><i class="fas fa-chevron-right"></i></button>
   <span class="viewer-counter"></span>
 </div>
+</div>
 {% endblock content %}
 
 {% block footer %}{% endblock footer %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{% static "js/portfolio_list.js" %}?v={% now "U" %}"></script>
+<script src="{% static "js/portfolio_list.js" %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

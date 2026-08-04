@@ -25,10 +25,10 @@
       {% for space in spaces %}
       <div class="col-md-4 col-sm-6">
         <div class="wiz-space-card space-checkbox-card" data-space-id="{{ space.id }}"
-             data-price="{{ space.base_price|unlocalize }}" data-days="{{ space.estimated_days }}">
+             data-price="{{ space.base_price|unlocalize }}">
           <div class="wiz-space-img">
-            {% if space.image %}
-            <img src="{{ space.image.url }}" alt="{{ space.name }}" class="wiz-space-img">
+            {% if space.thumbnail %}
+            <img src="{{ space.thumbnail.url }}" alt="{{ space.name }}" class="wiz-space-img">
             {% else %}
             <i class="fas fa-door-open"></i>
             {% endif %}

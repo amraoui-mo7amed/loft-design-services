@@ -11,7 +11,7 @@ from ..models import Portfolio, PortfolioGallery
 @admin_required
 @with_pagination(per_page=10, template="portfolio/list", queryset_name="portfolios")
 def portfolio_list(request):
-    queryset = Portfolio.objects.all().order_by("-created_at")
+    queryset = Portfolio.objects.all().prefetch_related("gallery_images").order_by("-created_at")
     query = request.GET.get("q", "").strip()
     if query:
         queryset = queryset.filter(title__icontains=query)

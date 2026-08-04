@@ -1,0 +1,104 @@
+{% extends "dash/dash_index.html" %}
+{% load i18n %}
+{% load static %}
+{% load tags %}
+
+{% block dashTitle %}{{ pt.name }} - {% trans "Featured Spaces" %}{% endblock dashTitle %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/space_type_spaces.css' %}?v={{ ASSET_VERSION }}">
+{% endblock extra_css %}
+
+{% block dashContent %}
+<div class="container-fluid">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'dash:project_type_list' %}" class="btn btn-outline-dark btn-sm rounded fw-semibold">
+                <i class="fas fa-arrow-left me-2"></i>
+                {% trans "Back" %}
+            </a>
+            <div>
+                <h5 class="fw-bold mb-0">{{ pt.name }}</h5>
+                <p class="text-muted small mb-0 pt-section-title">{% trans "Select the spaces to feature on the homepage" %}</p>
+            </div>
+        </div>
+        <button class="btn btn-primary rounded-3 px-4 fw-bold shadow-sm" id="saveHomeSpacesBtn" disabled
+                data-save-url="{% url 'dash:space_home_save' pt.pk %}"
+                data-csrf="{{ csrf_token }}">
+            <i class="fas fa-save me-2"></i>{% trans "Save featured spaces" %}
+        </button>
+    </div>
+
+    <div class="alert sts-banner d-flex align-items-center gap-2 rounded-3 border-0" style="font-size:0.8rem;">
+        <i class="fas fa-star sts-banner-icon"></i>
+        <span>
+            {% if pt.featured_on_home %}
+                {% blocktrans with name=pt.name %}This project type is featured on the homepage. The spaces you mark below will appear on the "Choose Your Spaces" section.{% endblocktrans %}
+            {% else %}
+                {% blocktrans with name=pt.name %}This project type is not featured yet. Feature it from the project types list to show these spaces on the homepage.{% endblocktrans %}
+            {% endif %}
+        </span>
+    </div>
+
+    <div class="sts-toolbar d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <span class="sts-count small text-muted">
+            <i class="fas fa-door-open me-1"></i><span class="sts-count-value" data-total="{{ spaces|length }}">{{ spaces|length }}</span>
+            <span class="sts-count-text">{% trans "spaces" %}</span>
+        </span>
+        <span class="sts-featured-count small text-muted">
+            <i class="fas fa-star me-1 sts-featured-count-icon"></i>
+            <span class="sts-featured-count-value">{{ featured_count }}</span>
+            <span>{% trans "featured" %}</span>
+        </span>
+    </div>
+
+    <div class="row g-3" id="featuredSpacesGrid">
+        {% for item in spaces %}
+        {% with s=item.space %}
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-4 sts-card h-100">
+                <div class="sts-card-top">
+                    <div class="sts-thumb">
+                        {% if s.thumbnail %}
+                        <img src="{{ s.thumbnail.url }}" alt="{{ s.name }}">
+                        {% else %}
+                        <i class="fas fa-door-open"></i>
+                        {% endif %}
+                    </div>
+                    <div class="sts-name">
+                        <h6 class="mb-0">{{ s.name }}</h6>
+                        <div class="sts-price"><i class="fas fa-dollar-sign me-1"></i>{{ s.base_price }} DA</div>
+                    </div>
+                </div>
+                <div class="sts-body">
+                    <label class="form-check sts-check mb-0" for="sts_check_{{ s.pk }}">
+                        <input class="form-check-input featured-space-toggle" type="checkbox"
+                               id="sts_check_{{ s.pk }}"
+                               data-space-id="{{ s.pk }}"
+                               {% if item.show_on_home %}checked{% endif %}>
+                        <span class="form-check-label">{% trans "Featured on home" %}</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% empty %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm p-5 text-center rounded-4">
+                <div class="mb-4"><i class="fas fa-door-open fa-4x text-light"></i></div>
+                <h4 class="text-muted fw-bold mb-2">{% trans "No spaces for this project type" %}</h4>
+                <p class="text-muted small mb-0">{% trans "Spaces are created from the project type detail page." %}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="mt-5">{% render_pagination page_obj %}</div>
+    {% endif %}
+</div>
+{% endblock dashContent %}
+
+{% block extra_js %}
+<script src="{% static 'js/space_type_spaces.js' %}?v={{ ASSET_VERSION }}"></script>
+{% endblock extra_js %}

@@ -17,7 +17,7 @@
     {% if portfolio.model_3d %}
     <span class="portfolio-card-meta-3d"><i class="fas fa-cube"></i> 3D</span>
     {% endif %}
-    <span><i class="far fa-images"></i> {{ portfolio.gallery_images.count }}</span>
+    <span><i class="far fa-images"></i> {{ portfolio.gallery_images.all|length }}</span>
     <span><i class="far fa-calendar-alt"></i> {{ portfolio.created_at|date:"M d, Y" }}</span>
   </div>
   <div class="portfolio-card-body">

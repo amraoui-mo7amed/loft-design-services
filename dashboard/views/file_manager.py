@@ -54,7 +54,7 @@ def list_files(request, uuid):
     if not can_access:
         return JsonResponse({"success": False, "errors": [_("Access denied.")]})
 
-    files = project.files.all()
+    files = project.files.all().select_related("uploaded_by")
     data = []
     for f in files:
         data.append({

@@ -7,7 +7,7 @@ from dashboard.models import Portfolio
 
 
 def portfolio_list(request):
-    all_portfolios = Portfolio.objects.all().order_by("-created_at")
+    all_portfolios = Portfolio.objects.all().prefetch_related("gallery_images").order_by("-created_at")
     paginator = Paginator(all_portfolios, 6)
     page = request.GET.get("page", 1)
     portfolios = paginator.get_page(page)

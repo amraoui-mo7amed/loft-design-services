@@ -5,13 +5,13 @@
 {% block dashTitle %}{% trans "Edit Portfolio" %}{% endblock dashTitle %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/portfolio.css' %}?v={% now "U" %}">
+  <link rel="stylesheet" href="{% static 'css/portfolio.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
 
 {% block dashContent %}
 <div class="editorial-form-wrapper">
   <div class="d-flex align-items-center gap-3 mb-4 pb-2">
-    <a href="{% url 'dash:portfolio_list' %}" class="btn btn-light rounded-3 px-3 fw-bold shadow-sm">
+    <a href="{% url 'dash:portfolio_list' %}" class="btn btn-outline-light rounded-3 px-3 fw-bold shadow-sm">
       <i class="fas fa-arrow-left me-2"></i>{% trans "Back" %}
     </a>
     <div>
@@ -27,7 +27,7 @@
     <div class="row g-4">
       <div class="col-lg-8">
         <div class="editorial-form-card">
-          <h6 class="editorial-form-card-title"><i class="fas fa-info-circle" style="color:var(--brand-primary);"></i>{% trans "General Information" %}</h6>
+          <h6 class="editorial-form-card-title"><i class="fas fa-info-circle"></i>{% trans "General Information" %}</h6>
           <div class="mb-3">
             <label class="editorial-form-label">{% trans "Title" %}</label>
             <input type="text" name="title" class="form-control" value="{{ portfolio.title }}" required placeholder="{% trans 'e.g. Modern Villa Renovation' %}">
@@ -44,7 +44,7 @@
         </div>
 
         <div class="editorial-form-card mt-4">
-          <h6 class="editorial-form-card-title"><i class="fas fa-images" style="color:var(--brand-primary);"></i>{% trans "Gallery" %}</h6>
+          <h6 class="editorial-form-card-title"><i class="fas fa-images"></i>{% trans "Gallery" %}</h6>
 
           {% if existing_gallery %}
           <div class="mb-3">
@@ -68,7 +68,7 @@
               <div class="progress-ring"></div>
               <span class="progress-text">{% trans "Optimizing images..." %}</span>
             </div>
-            <i class="fas fa-cloud-upload-alt" style="font-size:2rem;color:#ccc;"></i>
+            <i class="fas fa-cloud-upload-alt"></i>
             <p class="fw-semibold mt-2 mb-1">{% trans "Drop images here or click to browse" %}</p>
             <p class="small text-muted">{% trans "JPEG, PNG · Automatically optimized" %}</p>
             <input type="file" name="gallery_images" id="galleryInput" multiple accept="image/*">
@@ -79,7 +79,7 @@
 
       <div class="col-lg-4">
         <div class="editorial-form-card">
-          <h6 class="editorial-form-card-title"><i class="fas fa-cog" style="color:var(--brand-primary);"></i>{% trans "Settings" %}</h6>
+          <h6 class="editorial-form-card-title"><i class="fas fa-cog"></i>{% trans "Settings" %}</h6>
 
           <label class="editorial-form-label">{% trans "Thumbnail" %}</label>
           <div class="thumbnail-preview {% if portfolio.thumbnail %}has-image{% endif %}" id="thumbnailPreview">
@@ -123,7 +123,7 @@
                 <div class="progress-ring"></div>
                 <span class="progress-text">{% trans "Loading..." %}</span>
               </div>
-              <i class="fas fa-cube" style="font-size:1.2rem;color:#ccc;"></i>
+              <i class="fas fa-cube"></i>
               <p class="small mb-0 mt-1">{% if portfolio.model_3d %}{% trans "Replace 3D model" %}{% else %}{% trans "Upload GLB/GLTF model" %}{% endif %}</p>
               <input type="file" name="model_3d" id="model3dInput" accept=".glb,.gltf">
             </div>
@@ -155,8 +155,8 @@
           {% endif %}
 
           <div class="editorial-actions-bar">
-            <a href="{% url 'dash:portfolio_list' %}" class="btn btn-light rounded-3 px-4 fw-bold">{% trans "Cancel" %}</a>
-            <button type="submit" class="btn btn-primary rounded-3 px-4 fw-bold shadow-sm">
+            <a href="{% url 'dash:portfolio_list' %}" class="btn btn-outline-light rounded-3 px-4 fw-bold">{% trans "Cancel" %}</a>
+            <button type="submit" class="dash-btn dash-btn-primary rounded-3 px-4 fw-bold shadow-sm">
               <i class="fas fa-save me-2"></i>{% trans "Save Changes" %}
             </button>
           </div>
@@ -168,5 +168,5 @@
 {% endblock dashContent %}
 
 {% block extra_js %}
-<script src="{% static 'js/portfolio.js' %}?v={% now "U" %}"></script>
+<script src="{% static 'js/portfolio.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

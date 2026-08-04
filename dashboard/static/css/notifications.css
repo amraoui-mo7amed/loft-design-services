@@ -21,16 +21,16 @@
 .notification-toast {
     min-width: 320px;
     max-width: 420px;
-    background: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    background: rgba(20, 24, 29, 0.92) !important;
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
     border-radius: 16px !important;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5) !important;
     padding: 0 !important;
     overflow: hidden;
     animation: slideInBottomLeft 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    color: var(--text-main) !important;
+    color: #f2f5f8 !important;
 }
 
 @keyframes slideInBottomLeft {
@@ -134,12 +134,12 @@
 }
 
 .notification-item:hover {
-    background-color: var(--brand-light) !important;
-    transform: translateX(4px);
+    background: rgba(255, 255, 255, 0.05) !important;
+    box-shadow: inset 3px 0 0 var(--brand-primary);
 }
 
 [dir="rtl"] .notification-item:hover {
-    transform: translateX(-4px);
+    box-shadow: inset -3px 0 0 var(--brand-primary);
 }
 
 .notification-item.bg-light {
@@ -265,12 +265,12 @@
 }
 
 .notification-item:hover {
-    background-color: #f8faff !important;
-    transform: translateX(4px);
+    background: rgba(255, 255, 255, 0.05) !important;
+    box-shadow: inset 3px 0 0 var(--brand-primary);
 }
 
 [dir="rtl"] .notification-item:hover {
-    transform: translateX(-4px);
+    box-shadow: inset -3px 0 0 var(--brand-primary);
 }
 
 .notification-item.bg-light {
@@ -365,4 +365,116 @@
 [dir="rtl"] .notification-text-wrapper {
     padding-right: 0;
     padding-left: 25px;
+}
+
+/* ========================================
+   Dark liquid glass notification dropdown
+   ======================================== */
+
+.nt-trigger {
+    color: #f2f5f8;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.06);
+    width: 40px;
+    height: 40px;
+    transition: all 0.2s ease;
+}
+.nt-trigger:hover {
+    color: #212121;
+    border-color: var(--brand-primary);
+    background: var(--brand-primary);
+}
+.nt-trigger #notification-badge {
+    top: -4px !important;
+    left: auto !important;
+    right: -6px !important;
+    font-size: 0.6rem;
+    min-width: 18px;
+    height: 18px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #0e1013 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.nt-menu {
+    width: 360px;
+    max-width: 92vw;
+    background: linear-gradient(145deg, rgba(30, 35, 42, 0.95), rgba(20, 24, 29, 0.92));
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.nt-header {
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nt-count {
+    background: rgba(255, 214, 90, 0.15);
+    color: var(--brand-primary);
+    font-weight: 700;
+}
+
+.nt-list {
+    max-height: 350px;
+    overflow: hidden;
+    overflow-y: auto;
+}
+.nt-list::-webkit-scrollbar {
+    width: 6px;
+}
+.nt-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+
+.nt-item {
+    background: transparent;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.nt-item:last-of-type {
+    border-bottom: none;
+}
+.nt-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: inset 3px 0 0 var(--brand-primary);
+}
+[dir="rtl"] .nt-item:hover {
+    box-shadow: inset -3px 0 0 var(--brand-primary);
+}
+.nt-item .text-muted {
+    color: #8b95a1 !important;
+}
+.nt-item .icon-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nt-footer {
+    background: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nt-mark-read {
+    color: var(--brand-primary);
+    transition: color 0.2s ease;
+}
+.nt-mark-read:hover {
+    color: #fff;
 }

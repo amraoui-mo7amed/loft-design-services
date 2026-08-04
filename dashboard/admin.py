@@ -4,18 +4,16 @@ from .models import (
     Inquiry,
     Notification,
     ProjectType,
-    SpaceCategory,
     Space,
+    SpaceImage,
     ProjectTypeSpace,
     DesignPackage,
     DesignOption,
-    StyleCategory,
-    InspirationImage,
     DesignRequest,
     DesignRequestFloor,
     DesignRequestSpace,
     DesignRequestOption,
-    DesignRequestInspiration,
+    DesignRequestSpaceImage,
     DesignRequestFile,
     DesignMessage,
     DesignRevision,
@@ -50,24 +48,22 @@ class NotificationAdmin(admin.ModelAdmin):
 
 @admin.register(ProjectType)
 class ProjectTypeAdmin(admin.ModelAdmin):
-    list_display = ["name", "slug", "active", "sort_order"]
-    list_filter = ["active"]
-    search_fields = ["name", "description"]
-    prepopulated_fields = {"slug": ["name"]}
-
-
-@admin.register(SpaceCategory)
-class SpaceCategoryAdmin(admin.ModelAdmin):
-    list_display = ["name", "description", "created_at"]
+    list_display = ["name", "slug"]
     search_fields = ["name"]
+    prepopulated_fields = {"slug": ["name"]}
 
 
 @admin.register(Space)
 class SpaceAdmin(admin.ModelAdmin):
-    list_display = ["name", "slug", "category", "space_category", "base_price", "estimated_days", "active"]
-    list_filter = ["space_category", "active"]
+    list_display = ["name", "slug", "base_price"]
     search_fields = ["name"]
     prepopulated_fields = {"slug": ["name"]}
+
+
+@admin.register(SpaceImage)
+class SpaceImageAdmin(admin.ModelAdmin):
+    list_display = ["space", "image"]
+    list_filter = ["space"]
 
 
 @admin.register(ProjectTypeSpace)
@@ -88,18 +84,6 @@ class DesignOptionAdmin(admin.ModelAdmin):
     list_filter = ["category", "active"]
     search_fields = ["name"]
     prepopulated_fields = {"slug": ["name"]}
-
-
-@admin.register(StyleCategory)
-class StyleCategoryAdmin(admin.ModelAdmin):
-    list_display = ["name", "slug"]
-    prepopulated_fields = {"slug": ["name"]}
-
-
-@admin.register(InspirationImage)
-class InspirationImageAdmin(admin.ModelAdmin):
-    list_display = ["title", "space", "active"]
-    list_filter = ["space", "active"]
 
 
 @admin.register(DesignRequest)
@@ -125,9 +109,9 @@ class DesignRequestOptionAdmin(admin.ModelAdmin):
     list_display = ["design_request", "option", "price_at_time"]
 
 
-@admin.register(DesignRequestInspiration)
-class DesignRequestInspirationAdmin(admin.ModelAdmin):
-    list_display = ["design_request_space", "inspiration_image"]
+@admin.register(DesignRequestSpaceImage)
+class DesignRequestSpaceImageAdmin(admin.ModelAdmin):
+    list_display = ["design_request_space", "space_image"]
 
 
 @admin.register(DesignRequestFile)
