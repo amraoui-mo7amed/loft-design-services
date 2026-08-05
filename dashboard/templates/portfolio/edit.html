@@ -20,7 +20,7 @@
     </div>
   </div>
 
-  <form method="post" action="{% url 'dash:portfolio_update' portfolio.pk %}" enctype="multipart/form-data" class="form" id="portfolioForm">
+  <form method="post" action="{% url 'dash:portfolio_update' portfolio.pk %}" enctype="multipart/form-data" id="portfolioForm">
     {% csrf_token %}
     {% include "partials/errorList.html" with form_id="portfolioForm" %}
 

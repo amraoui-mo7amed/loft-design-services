@@ -37,7 +37,6 @@
                         </div>
                         <div>
                             <h5>{{ opt.name }}</h5>
-                            <span class="fw-bold text-success" style="font-size:0.85rem;">{{ opt.price }} DA</span>
                         </div>
                     </div>
                     <div class="pt-actions">
@@ -49,7 +48,6 @@
                                 data-submit-text="{% trans 'Save' %}"
                                 data-name="{{ opt.name }}"
                                 data-description="{{ opt.description }}"
-                                data-price="{{ opt.price|unlocalize }}"
                                 data-active="{{ opt.active|yesno:'true,false' }}">
                             <i class="fas fa-pen"></i>
                         </button>
@@ -109,16 +107,6 @@
                     <div class="mb-3">
                         <label class="pt-modal-label"><i class="fas fa-align-left text-muted"></i>{% trans "Description" %}</label>
                         <textarea name="description" class="form-control" rows="2" data-field="description" data-default="" placeholder="{% trans 'Brief description of this option...' %}"></textarea>
-                    </div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-sm-6">
-                            <label class="pt-modal-label"><i class="fas fa-dollar-sign text-success"></i>{% trans "Price" %} (DA)</label>
-                            <input type="number" step="0.01" name="price" class="form-control" data-field="price" data-default="0" value="0" placeholder="0">
-                        </div>
-                        <div class="col-sm-6">
-                            <label class="pt-modal-label"><i class="fas fa-clock text-muted"></i>{% trans "Delivery Time (days)" %}</label>
-                            <input type="number" name="delivery_time_days" class="form-control" data-field="delivery_time_days" data-default="1" value="1" min="1">
-                        </div>
                     </div>
                     <div class="pt-modal-card">
                         <div class="d-flex align-items-center justify-content-between">

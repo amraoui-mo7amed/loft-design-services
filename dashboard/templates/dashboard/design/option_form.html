@@ -11,22 +11,14 @@
             <form method="post" class="form">
                 {% csrf_token %}
                 {% include "partials/errorList.html" with form_id="optionForm" %}
-                <div class="mb-3">
-                    <label class="form-label fw-bold">{% trans "Name" %}</label>
-                    <input type="text" name="name" class="form-control" value="{{ object.name|default:'' }}" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold">{% trans "Description" %}</label>
-                    <textarea name="description" class="form-control" rows="2">{{ object.description|default:'' }}</textarea>
-                </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">{% trans "Price" %} (DA)</label>
-                        <input type="number" step="0.01" name="price" class="form-control" value="{{ object.price|default:'0' }}">
+                        <label class="form-label fw-bold">{% trans "Name" %}</label>
+                        <input type="text" name="name" class="form-control" value="{{ object.name|default:'' }}" required>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-bold">{% trans "Delivery Time (days)" %}</label>
-                        <input type="number" name="delivery_time_days" class="form-control" value="{{ object.delivery_time_days|default:'1' }}" min="1">
+                        <label class="form-label fw-bold">{% trans "Description" %}</label>
+                        <textarea name="description" class="form-control" rows="2">{{ object.description|default:'' }}</textarea>
                     </div>
                 </div>
                 <div class="mb-4 form-check">

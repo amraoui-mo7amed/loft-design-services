@@ -21,7 +21,7 @@ from ..models import (
 )
 
 
-def _create_option(name, price, description="", delivery_time_days=1):
+def _create_option(name, description=""):
     base_slug = slugify(name)
     if not base_slug:
         base_slug = "option"
@@ -31,9 +31,8 @@ def _create_option(name, price, description="", delivery_time_days=1):
         slug = f"{base_slug}-{counter}"
         counter += 1
     return DesignOption.objects.create(
-        name=name, slug=slug, price=price,
+        name=name, slug=slug,
         description=description,
-        delivery_time_days=delivery_time_days,
     )
 
 
@@ -368,12 +367,10 @@ def package_option_add(request, pk):
         name = request.POST.get("name", "").strip()
         if not name:
             return JsonResponse({"success": False, "errors": [_("Option name is required.")]})
-        price = request.POST.get("price", 0)
         description = request.POST.get("description", "")
-        delivery_time_days = request.POST.get("delivery_time_days", 1)
         try:
-            opt = _create_option(name=name, price=price, description=description, delivery_time_days=delivery_time_days)
-            ps = PackageService.objects.create(package=pkg, option=opt, price=opt.price)
+            opt = _create_option(name=name, description=description)
+            PackageService.objects.create(package=pkg, option=opt)
             opt_count = pkg.package_services.count()
             return JsonResponse({
                 "success": True,
@@ -381,8 +378,6 @@ def package_option_add(request, pk):
                 "option": {
                     "id": opt.pk,
                     "name": opt.name,
-                    "price": str(opt.price),
-                    "delivery_time_days": opt.delivery_time_days,
                     "description": opt.description,
                 },
                 "option_count": opt_count,

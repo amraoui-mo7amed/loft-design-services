@@ -200,99 +200,56 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     })();
 
-    // ── Recent Projects Slider Toggle (slide up/down) ──
-    var projectsSection = document.getElementById("projects-section");
-    var projectsToggle = document.getElementById("projectsToggle");
-    var PROJECTS_TOGGLE_GAP = 14;
-    if (projectsSection && projectsToggle) {
-        function positionToggle() {
-            var open = projectsSection.classList.contains("open");
-            projectsToggle.style.bottom = open
-                ? (projectsSection.offsetHeight + PROJECTS_TOGGLE_GAP) + "px"
-                : PROJECTS_TOGGLE_GAP + "px";
-        }
-
-        window.addEventListener("resize", positionToggle);
-
-        projectsToggle.addEventListener("click", function () {
-            var isOpen = projectsSection.classList.contains("open");
-            projectsSection.classList.toggle("open", !isOpen);
-            projectsToggle.classList.toggle("open", !isOpen);
-            projectsToggle.setAttribute("aria-expanded", String(!isOpen));
-            projectsSection.setAttribute("aria-hidden", String(isOpen));
-            setTimeout(positionToggle, 10);
+    // ── Hero Background Slider ──
+    var heroSwiperEl = document.getElementById("heroSwiper");
+    if (heroSwiperEl && window.Swiper) {
+        var heroSwiper = new Swiper(heroSwiperEl, {
+            effect: "fade",
+            direction: "horizontal",
+            loop: true,
+            speed: 1400,
+            allowTouchMove: false,
+            fadeEffect: { crossFade: true },
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
         });
     }
 
-    // ── Recent Projects Slider (drag + arrows) ──
-    var track = document.getElementById("projectsTrack");
-    if (track) {
-        var prevBtn = document.querySelector(".projects-prev");
-        var nextBtn = document.querySelector(".projects-next");
-
-        function isRTL() {
-            return document.documentElement.getAttribute("dir") === "rtl";
-        }
-
-        function cardWidth() {
-            var first = track.querySelector(".project-rect-card");
-            if (!first) return 320;
-            return first.getBoundingClientRect().width + 20;
-        }
-
-        function scrollByCards(n) {
-            track.scrollBy({ left: n * cardWidth(), behavior: "smooth" });
-        }
-
-        if (prevBtn) {
-            prevBtn.addEventListener("click", function () {
-                scrollByCards(isRTL() ? 1 : -1);
-            });
-        }
-        if (nextBtn) {
-            nextBtn.addEventListener("click", function () {
-                scrollByCards(isRTL() ? -1 : 1);
-            });
-        }
-
-        var isDown = false;
-        var startX = 0;
-        var startScroll = 0;
-        var moved = false;
-
-        track.addEventListener("pointerdown", function (e) {
-            if (e.pointerType === "mouse" && e.button !== 0) return;
-            isDown = true;
-            moved = false;
-            startX = e.clientX;
-            startScroll = track.scrollLeft;
-            track.classList.add("dragging");
-            track.setPointerCapture(e.pointerId);
+    // ── Recent Projects Swiper (coverflow) ──
+    var projectsSwiperEl = document.getElementById("projectsSwiper");
+    if (projectsSwiperEl && window.Swiper) {
+        var isRTL = document.documentElement.getAttribute("dir") === "rtl";
+        var projectsSwiper = new Swiper(projectsSwiperEl, {
+            effect: "coverflow",
+            direction: "horizontal",
+            loop: true,
+            grabCursor: true,
+            centeredSlides: true,
+            slidesPerView: "auto",
+            rtl: isRTL,
+            speed: 600,
+            mousewheel: {
+                forceToAxis: true,
+            },
+            coverflowEffect: {
+                rotate: 0,
+                stretch: 0,
+                depth: 120,
+                modifier: 1.4,
+                slideShadows: true,
+            },
+            navigation: {
+                prevEl: ".projects-prev",
+                nextEl: ".projects-next",
+            },
+            breakpoints: {
+                320: { slidesPerView: 1.1, coverflowEffect: { depth: 80, modifier: 1.2 } },
+                640: { slidesPerView: 2, coverflowEffect: { depth: 100, modifier: 1.3 } },
+                992: { slidesPerView: 3, coverflowEffect: { depth: 120, modifier: 1.4 } },
+            },
         });
-
-        track.addEventListener("pointermove", function (e) {
-            if (!isDown) return;
-            var dx = e.clientX - startX;
-            if (Math.abs(dx) > 5) moved = true;
-            track.scrollLeft = startScroll - dx;
-        });
-
-        function endDrag() {
-            if (!isDown) return;
-            isDown = false;
-            track.classList.remove("dragging");
-        }
-
-        track.addEventListener("pointerup", endDrag);
-        track.addEventListener("pointercancel", endDrag);
-
-        track.addEventListener("click", function (e) {
-            if (moved) {
-                e.preventDefault();
-                e.stopPropagation();
-                moved = false;
-            }
-        }, true);
     }
 
 });

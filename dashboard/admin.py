@@ -80,7 +80,7 @@ class DesignPackageAdmin(admin.ModelAdmin):
 
 @admin.register(DesignOption)
 class DesignOptionAdmin(admin.ModelAdmin):
-    list_display = ["name", "slug", "price", "category", "active"]
+    list_display = ["name", "slug", "category", "active"]
     list_filter = ["category", "active"]
     search_fields = ["name"]
     prepopulated_fields = {"slug": ["name"]}

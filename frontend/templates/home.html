@@ -9,6 +9,7 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{% static "css/home.css" %}?v={{ ASSET_VERSION }}">
     <link rel="stylesheet" href="{% static "css/portfolio_list.css" %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 {% endblock extra_css %}
 
 {% block nav %}
@@ -57,6 +58,52 @@
 {% block sidebar %}{% endblock sidebar %}
 
 {% block content %}
+    <!-- Full-page Background Slider -->
+    <div class="page-bg-slider" id="heroSwiper">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide">
+                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_1.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
+            </div>
+            <div class="swiper-slide">
+                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_2.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
+            </div>
+            <div class="swiper-slide">
+                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_3.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
+            </div>
+            <div class="swiper-slide">
+                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_4.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
+            </div>
+            <div class="swiper-slide">
+                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_5.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
+            </div>
+            <div class="swiper-slide">
+                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_6.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
+            </div>
+            <div class="swiper-slide">
+                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_7.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
+            </div>
+            <div class="swiper-slide">
+                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_8.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Intro (scrolls over the fixed background) -->
+    <section class="home-hero" id="homeHero">
+        <div class="home-hero-content">
+            <span class="home-hero-eyebrow reveal">{% trans "Interior Design Studio" %}</span>
+            <h1 class="home-hero-title reveal">
+                {% if IS_RTL %}{{ site_config.ar_name }}{% else %}{{ site_config.name }}{% endif %}
+            </h1>
+            <p class="home-hero-sub reveal">
+                {% trans "We turn spaces into experiences — from concept to key handover." %}
+            </p>
+            <a href="#spaces-section" class="btn home-hero-cta reveal">
+                <i class="fas fa-arrow-down me-2"></i>{% trans "Start Your Project" %}
+            </a>
+        </div>
+    </section>
+
     <!-- Spaces Section -->
     <section class="loft-section pt-0" id="spaces-section">
         <div class="container">
@@ -111,44 +158,45 @@
         </div>
     </section>
 
-    <!-- Recent Projects Slider -->
-    <button type="button" class="projects-toggle" id="projectsToggle"
-            aria-expanded="false" aria-controls="projects-section">
-        <i class="fas fa-chevron-up projects-toggle-icon"></i>
-        <span class="projects-toggle-label">{% trans "Recent Projects" %}</span>
-    </button>
-    <section class="projects-section" id="projects-section" aria-hidden="true">
+    <!-- Recent Projects Coverflow -->
+    <section class="projects-section" id="projects-section">
         <div class="container">
-            <div class="projects-slider-nav">
+            <div class="projects-section-head">
+                <div>
+                    <h2 class="loft-section-title reveal">{% trans "Recent Projects" %}</h2>
+                    <p class="loft-section-sub reveal">{% trans "Explore our latest interior design work" %}</p>
+                </div>
+            </div>
+            <div class="swiper projects-swiper" id="projectsSwiper">
                 <button type="button" class="projects-nav-btn projects-prev" aria-label="{% trans 'Previous projects' %}">
                     <i class="fas fa-chevron-left"></i>
                 </button>
                 <button type="button" class="projects-nav-btn projects-next" aria-label="{% trans 'Next projects' %}">
                     <i class="fas fa-chevron-right"></i>
                 </button>
-            </div>
-            <div class="projects-slider">
-                <div class="projects-track" id="projectsTrack">
+                <div class="swiper-wrapper">
                     {% for project in projects %}
-                    <a class="project-rect-card reveal" href="{% url 'frontend:portfolio_detail' project.pk %}">
-                        <div class="project-rect-img">
-                            {% if project.thumbnail %}
-                            <img src="{{ project.thumbnail.url }}" alt="{{ project.title }}" loading="lazy">
-                            {% else %}
-                            <div class="project-rect-fallback"><i class="fas fa-image"></i></div>
-                            {% endif %}
-                            {% if project.is_featured %}
-                            <span class="project-rect-featured">{% trans "Featured" %}</span>
-                            {% endif %}
-                        </div>
-                        <div class="project-rect-body">
-                            <h5>{{ project.title }}</h5>
-                            <p>{{ project.description|truncatewords:14 }}</p>
-                            <span class="project-rect-link">
-                                {% trans "View Project" %} <i class="fas fa-arrow-right"></i>
-                            </span>
-                        </div>
-                    </a>
+                    <div class="swiper-slide">
+                        <a class="project-rect-card" href="{% url 'frontend:portfolio_detail' project.pk %}">
+                            <div class="project-rect-img">
+                                {% if project.thumbnail %}
+                                <img src="{{ project.thumbnail.url }}" alt="{{ project.title }}" loading="lazy">
+                                {% else %}
+                                <div class="project-rect-fallback"><i class="fas fa-image"></i></div>
+                                {% endif %}
+                                {% if project.is_featured %}
+                                <span class="project-rect-featured">{% trans "Featured" %}</span>
+                                {% endif %}
+                            </div>
+                            <div class="project-rect-body">
+                                <h5>{{ project.title }}</h5>
+                                <p>{{ project.description|truncatewords:14 }}</p>
+                                <span class="project-rect-link">
+                                    {% trans "View Project" %} <i class="fas fa-arrow-right"></i>
+                                </span>
+                            </div>
+                        </a>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
@@ -182,5 +230,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="{% static "js/three-sixty-bg.js" %}?v={{ ASSET_VERSION }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script src="{% static "js/home.js" %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

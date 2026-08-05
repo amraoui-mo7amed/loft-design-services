@@ -1,19 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     var optionsList = document.getElementById("optionsList");
 
-    function fetchDeliveryTotal() {
-        var el = document.getElementById("totalDelivery");
-        if (!el) return;
-        var sum = 0;
-        document.querySelectorAll("#optionsList [data-opt-id]").forEach(function (card) {
-            var txt = card.querySelector(".fa-clock") ? card.querySelector(".fa-clock").parentElement.textContent.trim() : "";
-            var match = txt.match(/(\d+)/);
-            if (match) sum += parseInt(match[1], 10);
-        });
-        var daysText = optionsList ? optionsList.dataset.daysText : "days";
-        el.textContent = sum + " " + daysText;
-    }
-
     function updateOptionCount(count) {
         var el = document.getElementById("optCountBadge");
         if (el) el.textContent = count;
@@ -56,7 +43,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         if (!optionsList.querySelector("[data-opt-id]")) {
                             optionsList.innerHTML = '<div class="text-center py-4" id="emptyOptions"><p class="small text-muted mb-0">' + (optionsList.dataset.emptyText || "No options yet. Add one to get started.") + '</p></div>';
                         }
-                        fetchDeliveryTotal();
                         Swal.fire({ title: "Removed!", icon: "success", timer: 1000, showConfirmButton: false });
                     } else {
                         Swal.fire({ title: "Error", text: data.message || "Failed to remove option.", icon: "error" });
@@ -97,15 +83,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     var catHtml = data.option.category_name
                         ? '<span class="small" style="font-size:0.72rem;color:#868e96;"><i class="fas fa-tag me-1"></i>' + data.option.category_name + '</span>'
                         : "";
-                    var daysText = list ? list.dataset.daysText : "days";
                     card.innerHTML =
                         '<div class="d-flex align-items-start justify-content-between gap-2">' +
                             '<div class="flex-grow-1">' +
                                 '<div class="fw-semibold" style="font-size:0.85rem;">' + data.option.name + '</div>' +
                                 '<div class="d-flex align-items-center gap-3 mt-1">' +
                                     catHtml +
-                                    '<span class="small" style="font-size:0.72rem;color:#868e96;"><i class="fas fa-dollar-sign me-1"></i>' + data.option.price + '</span>' +
-                                    '<span class="small" style="font-size:0.72rem;color:#868e96;"><i class="fas fa-clock me-1"></i>' + data.option.delivery_time_days + " " + daysText + '</span>' +
                                     (data.option.description ? '<span class="small" style="font-size:0.72rem;color:#868e96;"><i class="fas fa-align-left me-1"></i>' + data.option.description + '</span>' : "") +
                                 '</div>' +
                             '</div>' +
@@ -113,7 +96,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         '</div>';
                     if (list) list.appendChild(card);
                     updateOptionCount(data.option_count);
-                    fetchDeliveryTotal();
                     var modalEl = document.getElementById("addOptionModal");
                     var modal = bootstrap.Modal.getInstance(modalEl);
                     if (modal) modal.hide();

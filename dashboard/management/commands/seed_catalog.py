@@ -81,25 +81,21 @@ OPTIONS = [
     {
         "name": "3D Walkthrough",
         "description": "Interactive 3D tour of your designed space so you can experience it before it\u2019s built.",
-        "price": 15000,
         "category_name": "visualisation",
     },
     {
         "name": "Furniture Procurement",
         "description": "We source and procure all furniture items at trade prices and coordinate delivery.",
-        "price": 25000,
         "category_name": "procurement",
     },
     {
         "name": "Lighting Design",
         "description": "Custom lighting plan with fixture selection, placement diagrams, and dimming schedules.",
-        "price": 12000,
         "category_name": "electrical",
     },
     {
         "name": "Landscape Concept",
         "description": "Outdoor space concept including planting plans, hardscape materials, and terrace layouts.",
-        "price": 18000,
         "category_name": "outdoor",
     },
 ]
@@ -197,7 +193,6 @@ class Command(BaseCommand):
                     defaults={
                         "name": data["name"],
                         "description": data["description"],
-                        "price": data["price"],
                         "category": category_fk,
                     },
                 )

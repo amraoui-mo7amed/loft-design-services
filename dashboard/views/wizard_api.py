@@ -42,7 +42,7 @@ def api_packages(request):
 
 
 def api_options(request):
-    qs = DesignOption.objects.filter(active=True).values("id", "name", "slug", "description", "price", "category")
+    qs = DesignOption.objects.filter(active=True).values("id", "name", "slug", "description", "category")
     return JsonResponse({"data": list(qs)})
 
 

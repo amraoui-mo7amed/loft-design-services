@@ -58,17 +58,13 @@ class DesignPackage(models.Model):
 
     @property
     def total_delivery_days(self):
-        services = self.package_services.all()
-        total = sum(ps.option.delivery_time_days for ps in services)
-        return total or 0
+        return self.delivery_time_days
 
 
 class DesignOption(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("Name"))
     slug = models.SlugField(max_length=200, unique=True, blank=True, verbose_name=_("Slug"))
     description = models.TextField(blank=True, verbose_name=_("Description"))
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_("Price"))
-    delivery_time_days = models.PositiveIntegerField(default=1, verbose_name=_("Delivery Time (days)"))
     category = models.ForeignKey(
         ServiceCategory, on_delete=models.SET_NULL, null=True, blank=True,
         related_name="design_options", verbose_name=_("Category")

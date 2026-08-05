@@ -30,7 +30,7 @@ def calculate_total(subtotal, package_price, options_total, tax):
 
 
 def calculate_full_price(space_ids=None, package=None, option_ids=None):
-    from .models import Space, DesignOption
+    from .models import Space
 
     subtotal = Decimal("0")
     if space_ids:
@@ -38,9 +38,6 @@ def calculate_full_price(space_ids=None, package=None, option_ids=None):
         subtotal = spaces.aggregate(total=Sum("base_price"))["total"] or Decimal("0")
     package_price = calculate_package_price(subtotal, package)
     options_total = Decimal("0")
-    if option_ids:
-        options = DesignOption.objects.filter(id__in=option_ids, active=True)
-        options_total = options.aggregate(total=Sum("price"))["total"] or Decimal("0")
     tax = calculate_tax(subtotal, package_price, options_total)
     total = calculate_total(subtotal, package_price, options_total, tax)
 
