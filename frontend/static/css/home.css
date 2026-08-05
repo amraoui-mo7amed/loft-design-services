@@ -300,11 +300,19 @@ body.landing-page .space-card-title {
     box-shadow: 0 0 0 3px rgba(255, 214, 90, 0.25), 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
+.space-card-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    text-align: start;
+}
+
 .space-card-img {
-    width: 120px;
-    height: 120px;
-    margin: 20px auto 0;
-    border-radius: 50%;
+    width: 92px;
+    height: 92px;
+    flex-shrink: 0;
+    border-radius: 10px;
     overflow: hidden;
     border: 2px solid rgba(255, 255, 255, 0.18);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
@@ -317,8 +325,9 @@ body.landing-page .space-card-title {
 }
 
 .space-card-body {
-    padding: 16px 20px 14px;
-    text-align: center;
+    flex: 1;
+    min-width: 0;
+    text-align: start;
 }
 
 .space-card-title {
@@ -326,7 +335,10 @@ body.landing-page .space-card-title {
     font-size: 1rem;
     color: #f4f6f8;
     margin: 0;
-    text-align: center;
+    text-align: start;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .space-check {
@@ -353,7 +365,7 @@ body.landing-page .space-card-title {
 
 .space-card-meta {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
 }
 

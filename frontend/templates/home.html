@@ -118,17 +118,19 @@
                         <div class="space-check">
                             <input class="form-check-input space-checkbox" type="checkbox" id="space_{{ space.id }}" value="{{ space.id }}">
                         </div>
-                        {% if space.thumbnail %}
-                        <div class="space-card-img">
-                            <img src="{{ space.thumbnail }}" alt="{{ space.name }}" loading="lazy" data-img-error="hide-parent">
-                        </div>
-                        {% endif %}
-                        <div class="space-card-body">
-                            <h3 class="space-card-title">{{ space.name }}</h3>
-                            <div class="space-card-meta">
-                                <div class="space-card-price">
-                                    <span class="space-card-price-value">{{ space.base_price }}</span>
-                                    <span class="space-card-price-currency">DZD</span>
+                        <div class="space-card-main">
+                            {% if space.thumbnail %}
+                            <div class="space-card-img">
+                                <img src="{{ space.thumbnail }}" alt="{{ space.name }}" loading="lazy" data-img-error="hide-parent">
+                            </div>
+                            {% endif %}
+                            <div class="space-card-body">
+                                <h3 class="space-card-title">{{ space.name }}</h3>
+                                <div class="space-card-meta">
+                                    <div class="space-card-price">
+                                        <span class="space-card-price-value">{{ space.base_price }}</span>
+                                        <span class="space-card-price-currency">DZD</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
