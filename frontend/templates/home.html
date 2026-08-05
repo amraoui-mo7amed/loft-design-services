@@ -113,20 +113,18 @@
             </div>
             <div class="row g-4 justify-content-center" id="spacesGrid">
                 {% for space in spaces %}
-                <div class="col-lg-4 col-md-6">
+                <div class="col-6 col-md-4 col-lg-3">
                     <div class="space-card reveal" data-space-id="{{ space.id }}" data-price="{{ space.base_price }}">
+                        <div class="space-check">
+                            <input class="form-check-input space-checkbox" type="checkbox" id="space_{{ space.id }}" value="{{ space.id }}">
+                        </div>
                         {% if space.thumbnail %}
                         <div class="space-card-img">
                             <img src="{{ space.thumbnail }}" alt="{{ space.name }}" loading="lazy" data-img-error="hide-parent">
                         </div>
                         {% endif %}
                         <div class="space-card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <h3 class="space-card-title">{{ space.name }}</h3>
-                                <div class="space-check">
-                                    <input class="form-check-input space-checkbox" type="checkbox" id="space_{{ space.id }}" value="{{ space.id }}">
-                                </div>
-                            </div>
+                            <h3 class="space-card-title">{{ space.name }}</h3>
                             <div class="space-card-meta">
                                 <div class="space-card-price">
                                     <span class="space-card-price-value">{{ space.base_price }}</span>
