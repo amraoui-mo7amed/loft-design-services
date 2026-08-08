@@ -3,9 +3,9 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Portfolio(models.Model):
-    title = models.CharField(max_length=1000, verbose_name=_("Title"))
+    title = models.CharField(max_length=1000, verbose_name=_("Title"), blank=True)
     thumbnail = models.ImageField(upload_to="portfolio/thumbnails/", verbose_name=_("Thumbnail"), blank=True, null=True)
-    description = models.TextField(verbose_name=_("Description"))
+    description = models.TextField(verbose_name=_("Description"), blank=True)
     tags = models.CharField(max_length=100000, verbose_name=_("Tags"), help_text=_("Comma separated tags"), blank=True)
     external_link = models.URLField(verbose_name=_("External Link"), blank=True, null=True)
     is_featured = models.BooleanField(default=False, verbose_name=_("Is Featured"))

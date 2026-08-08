@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from django.db.models import Max
 from dashboard.models import Portfolio, ProjectType, Space, DesignPackage
 
 
@@ -15,19 +14,13 @@ def home_view(request):
     else:
         spaces = Space.objects.none()
 
-    max_price = spaces.aggregate(Max("base_price"))["base_price__max"] or 1
-
-    spaces_data = []
-    for space in spaces:
-        percentage = int(float(space.base_price) / float(max_price) * 100)
-        spaces_data.append({
-            "id": space.id,
-            "name": space.name,
-            "slug": space.slug,
-            "base_price": space.base_price,
-            "thumbnail": space.thumbnail.url if space.thumbnail else None,
-            "percentage": percentage,
-        })
+    spaces_data = [{
+        "id": space.id,
+        "name": space.name,
+        "slug": space.slug,
+        "base_price": space.base_price,
+        "thumbnail": space.thumbnail.url if space.thumbnail else None,
+    } for space in spaces]
 
     packages = DesignPackage.objects.prefetch_related("package_services__option__category")
     package_data = [

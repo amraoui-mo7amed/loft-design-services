@@ -25,8 +25,10 @@ APP_SECRET = config("APP_SECRET", default="")
 APP_ENV = config("APP_ENV", default="development")
 APP_ALLOWED_HOSTS = config("APP_ALLOWED_HOSTS", default="localhost,127.0.0.1,*").split(",")
 
-# Bump this to invalidate cached static assets (CSS/JS) after a release
-ASSET_VERSION = config("ASSET_VERSION", default="1")
+# Set this to pin a static asset version; when unset (default) the version is
+# derived automatically from the newest static file's mtime so cached CSS/JS
+# always refresh after a release in both development and production.
+ASSET_VERSION = config("ASSET_VERSION", default="")
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Automatically generate one for development if not set

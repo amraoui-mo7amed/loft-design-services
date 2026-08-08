@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     spaceCards.forEach(function (card) {
         card.addEventListener("click", function (e) {
-            if (e.target.type !== "checkbox" && !e.target.closest(".space-check")) {
+            if (e.target.type !== "checkbox" && !e.target.closest(".space-card-check")) {
                 var cb = card.querySelector(".space-checkbox");
                 cb.checked = !cb.checked;
                 card.classList.toggle("selected", cb.checked);
@@ -221,11 +221,6 @@ document.addEventListener("DOMContentLoaded", function () {
             proceedToOrder();
         });
     }
-
-    // ── Bar Width ──
-    document.querySelectorAll("[data-bar-width]").forEach(function (el) {
-        el.style.width = el.dataset.barWidth + "%";
-    });
 
     // ── Image Error Handling ──
     document.querySelectorAll("[data-img-error]").forEach(function (img) {

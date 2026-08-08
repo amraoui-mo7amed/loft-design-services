@@ -30,11 +30,11 @@
           <h6 class="editorial-form-card-title"><i class="fas fa-info-circle"></i>{% trans "General Information" %}</h6>
           <div class="mb-3">
             <label class="editorial-form-label">{% trans "Title" %}</label>
-            <input type="text" name="title" class="form-control" required placeholder="{% trans 'e.g. Modern Villa Renovation' %}">
+            <input type="text" name="title" class="form-control" placeholder="{% trans 'e.g. Modern Villa Renovation' %}">
           </div>
           <div class="mb-3">
             <label class="editorial-form-label">{% trans "Description" %}</label>
-            <textarea name="description" class="form-control" rows="5" required placeholder="{% trans 'Describe the project...' %}"></textarea>
+            <textarea name="description" class="form-control" rows="5" placeholder="{% trans 'Describe the project...' %}"></textarea>
           </div>
           <div class="mb-3">
             <label class="editorial-form-label">{% trans "Tags" %}</label>
@@ -76,7 +76,7 @@
           </div>
           <div class="file-drop-zone thumbnail-zone mb-3" id="thumbnailZone">
             <p class="small mb-0">{% trans "Upload thumbnail image" %}</p>
-            <input type="file" name="thumbnail" id="thumbnailInput" accept="image/*">
+            <input type="file" name="thumbnail" id="thumbnailInput" accept="image/*" required>
           </div>
 
           <div class="mb-3">

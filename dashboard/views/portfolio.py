@@ -33,8 +33,8 @@ def portfolio_create(request):
         thumbnail = request.FILES.get("thumbnail")
         model_3d = request.FILES.get("model_3d")
 
-        if not title or not description:
-            return JsonResponse({"success": False, "message": _("Title and description are required.")})
+        if not thumbnail:
+            return JsonResponse({"success": False, "message": _("Thumbnail is required.")})
 
         try:
             with transaction.atomic():
@@ -45,10 +45,8 @@ def portfolio_create(request):
                     external_link=external_link,
                     is_featured=is_featured,
                     model_3d=model_3d,
+                    thumbnail=thumbnail,
                 )
-                if thumbnail:
-                    portfolio.thumbnail = thumbnail
-                    portfolio.save()
 
                 gallery_images = request.FILES.getlist("gallery_images")
                 for image in gallery_images:
@@ -81,8 +79,8 @@ def portfolio_update(request, pk):
         model_3d = request.FILES.get("model_3d")
         clear_model_3d = request.POST.get("clear_model_3d") == "1"
 
-        if not title or not description:
-            return JsonResponse({"success": False, "message": _("Title and description are required.")})
+        if not thumbnail and not portfolio.thumbnail:
+            return JsonResponse({"success": False, "message": _("Thumbnail is required.")})
 
         try:
             with transaction.atomic():

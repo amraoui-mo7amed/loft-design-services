@@ -115,27 +115,21 @@
                 {% for space in spaces %}
                 <div class="col-6 col-md-4 col-lg-3">
                     <div class="space-card reveal" data-space-id="{{ space.id }}" data-price="{{ space.base_price }}">
-                        <div class="space-check">
-                            <input class="form-check-input space-checkbox" type="checkbox" id="space_{{ space.id }}" value="{{ space.id }}">
-                        </div>
-                        <div class="space-card-main">
+                        <input type="checkbox" class="space-checkbox" id="space_{{ space.id }}" value="{{ space.id }}" aria-label="{{ space.name }}">
+                        <div class="space-card-img">
                             {% if space.thumbnail %}
-                            <div class="space-card-img">
-                                <img src="{{ space.thumbnail }}" alt="{{ space.name }}" loading="lazy" data-img-error="hide-parent">
-                            </div>
+                            <img src="{{ space.thumbnail }}" alt="{{ space.name }}" loading="lazy" data-img-error="hide-parent">
                             {% endif %}
-                            <div class="space-card-body">
-                                <h3 class="space-card-title">{{ space.name }}</h3>
-                                <div class="space-card-meta">
-                                    <div class="space-card-price">
-                                        <span class="space-card-price-value">{{ space.base_price|floatformat:"0u" }}</span>
-                                        <span class="space-card-price-currency">DA</span>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
-                        <div class="space-card-bar">
-                            <div class="space-card-bar-fill" data-bar-width="{{ space.percentage }}"></div>
+                        <div class="space-card-check">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="space-card-body">
+                            <h3 class="space-card-title">{{ space.name }}</h3>
+                            <div class="space-card-price">
+                                <span class="space-card-price-value">{{ space.base_price|floatformat:"0u" }}</span>
+                                <span class="space-card-price-currency">DA</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -187,13 +181,6 @@
                                 {% if project.is_featured %}
                                 <span class="project-rect-featured">{% trans "Featured" %}</span>
                                 {% endif %}
-                            </div>
-                            <div class="project-rect-body">
-                                <h5>{{ project.title }}</h5>
-                                <p>{{ project.description|truncatewords:14 }}</p>
-                                <span class="project-rect-link">
-                                    {% trans "View Project" %} <i class="fas fa-arrow-right"></i>
-                                </span>
                             </div>
                         </a>
                     </div>
