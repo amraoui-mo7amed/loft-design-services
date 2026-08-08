@@ -74,8 +74,8 @@ class ProjectTypeSpaceAdmin(admin.ModelAdmin):
 
 @admin.register(DesignPackage)
 class DesignPackageAdmin(admin.ModelAdmin):
-    list_display = ["name", "active"]
-    list_filter = ["active"]
+    list_display = ["name"]
+    list_filter = []
 
 
 @admin.register(DesignOption)

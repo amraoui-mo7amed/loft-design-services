@@ -76,7 +76,7 @@
             <span class="pkg-card-currency">DA</span>
           </div>
           <div class="pkg-card-breakdown">
-            <span class="pkg-base-price">0</span> <span class="pkg-breakdown-op">+</span> <span class="pkg-addon-price">{{ item.total_price|unlocalize }}</span>
+            <span class="pkg-base-price">0</span> <span class="pkg-breakdown-op">+</span> <span class="pkg-addon-price">{{ item.total_price|floatformat:"0u" }}</span>
           </div>
 
           <div class="d-flex justify-content-around mb-3 py-2 pkg-card-stats-divider">

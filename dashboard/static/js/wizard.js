@@ -25,6 +25,10 @@
   const priceUrl = "/api/design/calculate-price/";
   const submitUrl = "/api/design/requests/";
 
+  function fmt(n) {
+    return Math.round(n).toString();
+  }
+
   function init() {
     const container = document.querySelector(".wizard-container");
     if (!container) return;
@@ -239,7 +243,7 @@
   function updateSpacesSubtotal() {
     var total = calcSubtotal();
     var el = document.getElementById("spacesSubtotal");
-    if (el) el.textContent = Math.round(total).toLocaleString() + " DA";
+    if (el) el.textContent = fmt(total) + " DA";
   }
 
   function restoreCombinedStepSelections() {
@@ -382,12 +386,12 @@
       var addonEl = card.querySelector(".pkg-addon-price");
       var basicEl = card.querySelector(".pkg-basic-breakdown");
       var addon = parseFloat(card.dataset.packagePrice) || 0;
-      var sum = Math.round(subtotal + addon).toLocaleString();
+      var sum = fmt(subtotal + addon);
       if (priceEl) priceEl.textContent = sum;
       if (sumEl) sumEl.textContent = sum;
-      if (baseEl) baseEl.textContent = Math.round(subtotal).toLocaleString();
-      if (addonEl) addonEl.textContent = Math.round(addon).toLocaleString();
-      if (basicEl) basicEl.textContent = Math.round(subtotal).toLocaleString();
+      if (baseEl) baseEl.textContent = fmt(subtotal);
+      if (addonEl) addonEl.textContent = fmt(addon);
+      if (basicEl) basicEl.textContent = fmt(subtotal);
     });
 
     var elSpaces = document.getElementById("basicSpacesCount");
@@ -395,7 +399,7 @@
     var elFloors = document.getElementById("basicFloorsCount");
     if (elFloors) elFloors.textContent = floorsCount;
     var elSub = document.getElementById("basicSubtotal");
-    if (elSub) elSub.textContent = Math.round(subtotal).toLocaleString();
+    if (elSub) elSub.textContent = fmt(subtotal);
   }
 
   function renderEstimateDetailsModal(cardEl) {
@@ -436,7 +440,7 @@
       spaces.forEach(function (s) {
         html += '  <div class="d-flex justify-content-between align-items-center py-1">';
         html += '    <span class="wiz-text-sm">' + (s.name || ("Space #" + s.spaceId)) + '</span>';
-        html += '    <span class="fw-bold" style="color:var(--wiz-text);">' + Math.round(s.price).toLocaleString() + ' DA</span>';
+        html += '    <span class="fw-bold" style="color:var(--wiz-text);">' + fmt(s.price) + ' DA</span>';
         html += '  </div>';
       });
     }
@@ -465,16 +469,16 @@
     html += '<div class="wiz-summary-card mb-3">';
     html += '  <div class="d-flex justify-content-between align-items-center py-1">';
     html += '    <span class="wiz-text-muted-light">' + "Base price (selected spaces)" + '</span>';
-    html += '    <span class="fw-bold" style="color:var(--wiz-text);">' + Math.round(subtotal).toLocaleString() + ' DA</span>';
+    html += '    <span class="fw-bold" style="color:var(--wiz-text);">' + fmt(subtotal) + ' DA</span>';
     html += '  </div>';
     html += '  <div class="d-flex justify-content-between align-items-center py-1">';
     html += '    <span class="wiz-text-muted-light">' + "Package" + '</span>';
-    html += '    <span class="fw-bold" style="color:var(--wiz-text);">' + packageLabel + ' — ' + Math.round(addon).toLocaleString() + ' DA</span>';
+    html += '    <span class="fw-bold" style="color:var(--wiz-text);">' + packageLabel + ' — ' + fmt(addon) + ' DA</span>';
     html += '  </div>';
     html += '  <hr class="my-2" style="border-color:var(--wiz-border);opacity:0.6;">';
     html += '  <div class="d-flex justify-content-between align-items-center py-1">';
     html += '    <span class="fw-bold">' + "Estimated Total" + '</span>';
-    html += '    <span style="font-size:1.3rem;font-weight:800;color:var(--wiz-accent);">' + total.toLocaleString() + ' DA</span>';
+    html += '    <span style="font-size:1.3rem;font-weight:800;color:var(--wiz-accent);">' + fmt(total) + ' DA</span>';
     html += '  </div>';
     html += '</div>';
 
@@ -630,45 +634,142 @@
   }
 
   function bindSummaryStep() {
-    var pt = document.getElementById("summaryProjectType");
-    if (pt) {
-      pt.textContent = wizardData.projectTypeName || wizardData.projectTypeSlug || "Not selected";
-    }
-
-    var floorsEl = document.getElementById("summaryFloors");
-    if (floorsEl) {
-      var names = wizardData.floors;
-      if (names && names.length > 0) {
-        floorsEl.innerHTML = "";
-        names.forEach(function (n) {
-          var li = document.createElement("li");
-          li.textContent = n;
-          floorsEl.appendChild(li);
-        });
-      }
-    }
-
-    var spacesEl = document.getElementById("summarySpaces");
-    if (spacesEl) {
-      var count = (wizardData.spaces || []).length;
-      spacesEl.textContent = count + " space" + (count !== 1 ? "s" : "");
-    }
-
-    var pkgEl = document.getElementById("summaryPackage");
-    if (pkgEl) {
-      pkgEl.textContent = wizardData.packageName || (wizardData.packageId ? wizardData.packageId : "Not selected");
-    }
-
-    var inspEl = document.getElementById("summaryInspirations");
-    if (inspEl) {
-      var total = 0;
-      Object.keys(wizardData.inspirations || {}).forEach(function (key) {
-        total += wizardData.inspirations[key].length;
-      });
-      inspEl.textContent = total + " image" + (total !== 1 ? "s" : "") + " selected";
-    }
-
     updateSummaryTotal();
+    renderFacturationTable();
+    bindFacturationButtons();
+  }
+
+  function renderFacturationTable() {
+    var body = document.getElementById("facturationTableBody");
+    if (!body) return;
+
+    var spaces = wizardData.spaces || [];
+    var pkgName = wizardData.packageName;
+    var pkgPrice = wizardData.packagePrice || 0;
+    var html = "";
+    spaces.forEach(function (s) {
+      html += "<tr><td>" + (s.name || "Space") + "</td><td class=\"text-end\">" +
+        fmt(s.price || 0) + "</td></tr>";
+    });
+
+    var subWithPkg = calcSubtotal();
+    body.innerHTML = html;
+
+    var el = document.getElementById("factSubtotal");
+    if (el) el.textContent = fmt(subWithPkg);
+    el = document.getElementById("factPackage");
+    if (el) el.textContent = pkgName ? fmt(pkgPrice) : "0";
+    el = document.getElementById("factGrandTotal");
+    if (el) el.textContent = fmt(calcTotal(subWithPkg, pkgPrice)) + " DA";
+
+    var clientEl = document.getElementById("facturationClient");
+    var contactEl = document.getElementById("facturationContact");
+    var q = wizardData.questionnaire || {};
+    if (clientEl) {
+      clientEl.textContent = (q.first_name || "") + " " + (q.last_name || "");
+      clientEl.textContent = clientEl.textContent.trim() || "-";
+    }
+    if (contactEl) {
+      contactEl.textContent = [q.email, q.phone].filter(Boolean).join(" • ");
+    }
+    var dateEl = document.getElementById("facturationDate");
+    if (dateEl) {
+      var d = new Date();
+      dateEl.textContent = d.toLocaleDateString();
+    }
+  }
+
+  function buildFacturationPayload() {
+    collectStepData();
+    return {
+      questionnaire: JSON.stringify(wizardData.questionnaire || {}),
+      spaces: JSON.stringify(wizardData.spaces || []),
+      package_id: wizardData.packageId || "",
+      total: document.getElementById("factGrandTotal")
+        ? document.getElementById("factGrandTotal").textContent.replace(/[^0-9]/g, "")
+        : 0,
+    };
+  }
+
+  function bindFacturationButtons() {
+    var dlBtn = document.getElementById("facturationDownloadBtn");
+    var emBtn = document.getElementById("facturationEmailBtn");
+    var statusEl = document.getElementById("facturationStatus");
+    var email = (wizardData.questionnaire || {}).email;
+
+    function setBtnLoading(btn, loading) {
+      if (!btn) return;
+      btn.disabled = loading;
+    }
+
+    function setStatus(html, cls) {
+      if (!statusEl) return;
+      statusEl.textContent = html;
+      statusEl.className = "wiz-fact-status" + (cls ? " " + cls : "");
+    }
+
+    if (dlBtn) {
+      dlBtn.addEventListener("click", function () {
+        setBtnLoading(dlBtn, true);
+        setStatus("Generating PDF...", "");
+        fetch("/request/facturation/download/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
+          body: JSON.stringify(buildFacturationPayload()),
+        })
+          .then(function (r) {
+            if (!r.ok) throw new Error("bad");
+            return r.blob();
+          })
+          .then(function (blob) {
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = "facturation.pdf";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            setStatus("Downloaded", "success");
+          })
+          .catch(function () {
+            setStatus("Could not generate the PDF", "error");
+          })
+          .finally(function () {
+            setBtnLoading(dlBtn, false);
+          });
+      });
+    }
+
+    if (emBtn) {
+      emBtn.addEventListener("click", function () {
+        if (!email) {
+          setStatus("Add your email in the Contact step first", "error");
+          return;
+        }
+        setBtnLoading(emBtn, true);
+        setStatus("Sending...", "");
+        fetch("/request/facturation/email/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
+          body: JSON.stringify(buildFacturationPayload()),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data.success) {
+              setStatus("Sent to " + email, "ok");
+            } else {
+              setStatus(data.errors && data.errors[0] ? data.errors[0] : "Failed to send", "error");
+            }
+          })
+          .catch(function () {
+            setStatus("Failed to send", "error");
+          })
+          .finally(function () {
+            setBtnLoading(emBtn, false);
+          });
+      });
+    }
   }
 
   function updateSummaryTotal() {
@@ -676,7 +777,9 @@
     var pkgPrice = wizardData.packagePrice || 0;
     var total = calcTotal(subtotal, pkgPrice);
     var elTotal = document.getElementById("summaryTotal");
-    if (elTotal) elTotal.textContent = Math.round(total).toLocaleString() + " DA";
+    if (elTotal) elTotal.textContent = fmt(total) + " DA";
+    var elGrand = document.getElementById("factGrandTotal");
+    if (elGrand) elGrand.textContent = fmt(total) + " DA";
   }
 
   function updatePriceSummary() {
@@ -691,11 +794,11 @@
     var total = calcTotal(subtotal, pkgPrice);
     bar.style.display = "block";
     var el = document.getElementById("priceTotal");
-    if (el) el.textContent = Math.round(total).toLocaleString() + " DA";
+    if (el) el.textContent = fmt(total) + " DA";
     el = document.getElementById("priceSubtotal");
-    if (el) el.textContent = Math.round(subtotal).toLocaleString();
+    if (el) el.textContent = fmt(subtotal);
     el = document.getElementById("pricePackage");
-    if (el) el.textContent = Math.round(pkgPrice).toLocaleString();
+    if (el) el.textContent = fmt(pkgPrice);
   }
 
   function collectStepData() {
@@ -846,8 +949,8 @@
       spaces: JSON.stringify(wizardData.spaces),
       inspirations: JSON.stringify(wizardData.inspirations),
       questionnaire: JSON.stringify(wizardData.questionnaire),
-      total: document.getElementById("summaryTotal")
-        ? document.getElementById("summaryTotal").textContent.replace(/[^0-9]/g, "")
+      total: document.getElementById("factGrandTotal")
+        ? document.getElementById("factGrandTotal").textContent.replace(/[^0-9]/g, "")
         : 0,
     };
 
@@ -865,8 +968,8 @@
           document.getElementById("confirmProjectNumber").textContent =
             data.project_number || "—";
           document.getElementById("confirmTotal").textContent =
-            document.getElementById("summaryTotal")
-              ? document.getElementById("summaryTotal").textContent
+            document.getElementById("factGrandTotal")
+              ? document.getElementById("factGrandTotal").textContent
               : "—";
           var cModal = new bootstrap.Modal(
             document.getElementById("confirmationModal")
@@ -883,7 +986,7 @@
           errDiv.className = "alert alert-danger text-center py-2 mb-3";
           errDiv.style.cssText = "font-size:0.85rem;border-radius:10px;";
           errDiv.innerHTML = errMsg;
-          var summaryTotal2 = document.querySelector(".wiz-summary-total");
+          var summaryTotal2 = document.getElementById("facturationCard");
           if (summaryTotal2) summaryTotal2.parentNode.insertBefore(errDiv, summaryTotal2.nextSibling);
           btn.disabled = false;
           btn.innerHTML = "Submit";
@@ -894,7 +997,7 @@
         errDiv2.className = "alert alert-danger text-center py-2 mb-3";
         errDiv2.style.cssText = "font-size:0.85rem;border-radius:10px;";
         errDiv2.textContent = "An error occurred. Please try again.";
-        var summaryTotal3 = document.querySelector(".wiz-summary-total");
+        var summaryTotal3 = document.getElementById("facturationCard");
         if (summaryTotal3) summaryTotal3.parentNode.insertBefore(errDiv2, summaryTotal3.nextSibling);
         btn.disabled = false;
         btn.innerHTML = "Submit";

@@ -140,8 +140,8 @@
                             <i class="fas fa-${icon}"></i>
                         </div>
                         <div class="notification-text-wrapper">
-                            <div class="fw-bold mb-1">${notification.title}</div>
-                            <div class="small text-muted">${notification.message}</div>
+                            <div class="fw-bold mb-1 text-white">${notification.title}</div>
+                            <div class="small text-white-50">${notification.message}</div>
                         </div>
                     </div>
                 </div>
@@ -190,7 +190,7 @@
         createNotificationItem: function(notification) {
             const div = document.createElement('a');
             div.className = 'dropdown-item notification-item d-flex align-items-start py-3 border-bottom';
-            if (!notification.is_read) div.classList.add('bg-light');
+            if (!notification.is_read) div.classList.add('active');
             
             div.href = notification.link || '#';
             div.dataset.id = notification.id;
@@ -225,7 +225,7 @@
                 if (!notification.is_read) {
                     this.markAsRead(notification.id).then(data => {
                         if (data && data.success) {
-                            div.classList.remove('bg-light');
+                            div.classList.remove('active');
                             notification.is_read = true;
                             this.loadUnreadCount();
                         }

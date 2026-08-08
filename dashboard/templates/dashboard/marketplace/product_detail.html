@@ -29,7 +29,7 @@
             <h2 class="fw-bold">{{ product.name }}</h2>
             {% if product.category %}<span class="badge bg-info rounded-pill mb-2">{{ product.category.name }}</span>{% endif %}
             <p class="text-muted">{{ product.description }}</p>
-            <div class="fs-3 fw-bold text-primary mb-3">{{ product.price }} DA</div>
+            <div class="fs-3 fw-bold text-primary mb-3">{{ product.price|floatformat:"0" }} DA</div>
             <p class="small text-muted">SKU: {{ product.sku }}</p>
             <button class="btn btn-primary btn-lg rounded-3 fw-bold px-5 add-to-cart" data-product-id="{{ product.id }}">
                 <i class="fas fa-cart-plus me-2"></i>{% trans "Add to Cart" %}

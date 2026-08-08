@@ -7,6 +7,22 @@
     margin-bottom: 0.25rem;
 }
 
+.catalog-create-btn {
+    color: var(--brand-secondary) !important;
+}
+
+.pkg-back-btn {
+    color: #f2f5f8 !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.pkg-back-btn:hover,
+.pkg-back-btn:focus {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border-color: #f2f5f8 !important;
+    color: #ffffff !important;
+}
+
 .pt-card {
     transition: box-shadow 0.2s ease;
     overflow: hidden;

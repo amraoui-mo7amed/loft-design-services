@@ -13,6 +13,7 @@ class Inquiry(models.Model):
     email = models.EmailField(_("Email"), max_length=254)
     phone = models.CharField(_("Phone Number"), max_length=20)
     spaces = models.JSONField(_("Spaces"), default=list, blank=True)
+    inspirations = models.JSONField(_("Inspirations"), default=dict, blank=True)
     total = models.DecimalField(_("Total"), max_digits=12, decimal_places=2, default=0)
     status = models.CharField(_("Status"), max_length=20, choices=Status.choices, default=Status.PENDING)
     is_read = models.BooleanField(_("Is Read"), default=False)

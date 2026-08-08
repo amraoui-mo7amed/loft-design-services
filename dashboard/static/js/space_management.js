@@ -48,6 +48,8 @@ document.addEventListener("DOMContentLoaded", function () {
             spaceForm.action = btn.dataset.updateUrl;
             titleEl.textContent = "Edit Space";
             submitText.textContent = "Save";
+            // Editing must never resubmit the creation gallery uploader
+            if (spaceGalleryInput) spaceGalleryInput.value = "";
             spaceForm.querySelector("input[name='name']").value = btn.dataset.name || "";
             spaceForm.querySelector("input[name='base_price']").value = btn.dataset.base_price || "0";
             if (btn.dataset.thumbnail) {
@@ -85,6 +87,10 @@ document.addEventListener("DOMContentLoaded", function () {
         spaceForm.addEventListener("submit", function (e) {
             e.preventDefault();
             var fd = new FormData(spaceForm);
+            // Only the create flow should upload gallery images; edit relies on the Gallery modal.
+            if (createGallerySection && createGallerySection.classList.contains("d-none")) {
+                fd.delete("gallery_images");
+            }
             var submitBtn = spaceForm.querySelector("button[type='submit']");
             submitBtn.disabled = true;
             fetch(spaceForm.action, {

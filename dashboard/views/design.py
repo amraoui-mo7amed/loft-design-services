@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -322,14 +323,11 @@ def package_list(request):
 def package_create(request):
     if request.method == "POST":
         name = request.POST.get("name")
-        description = request.POST.get("description", "")
-        active = request.POST.get("active") == "on"
         if not name:
             return JsonResponse({"success": False, "errors": [_("Name is required.")]})
         try:
             pkg = DesignPackage.objects.create(
-                name=name, description=description,
-                active=active,
+                name=name,
             )
             return JsonResponse({"success": True, "message": _("Package created successfully."), "redirect_url": reverse("dash:package_detail", args=[pkg.pk])})
         except Exception as e:
@@ -342,8 +340,6 @@ def package_update(request, pk):
     obj = get_object_or_404(DesignPackage, pk=pk)
     if request.method == "POST":
         obj.name = request.POST.get("name", obj.name)
-        obj.description = request.POST.get("description", obj.description)
-        obj.active = request.POST.get("active") == "on"
         try:
             obj.save()
             return JsonResponse({"success": True, "message": _("Package updated successfully."), "redirect_url": reverse("dash:package_detail", args=[obj.pk])})
@@ -370,7 +366,8 @@ def package_option_add(request, pk):
         description = request.POST.get("description", "")
         try:
             opt = _create_option(name=name, description=description)
-            PackageService.objects.create(package=pkg, option=opt)
+            opt_price = Decimal(request.POST.get("price", "0") or "0")
+            ps = PackageService.objects.create(package=pkg, option=opt, price=opt_price)
             opt_count = pkg.package_services.count()
             return JsonResponse({
                 "success": True,
@@ -380,8 +377,43 @@ def package_option_add(request, pk):
                     "name": opt.name,
                     "description": opt.description,
                 },
+                "price": str(ps.price),
                 "option_count": opt_count,
+                "new_package_total": str(pkg.total_price),
             })
+        except Exception as e:
+            return JsonResponse({"success": False, "errors": humanize_error(e)})
+    return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
+
+
+@admin_required
+def package_option_update(request, pk, opt_pk):
+    pkg = get_object_or_404(DesignPackage, pk=pk)
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        if not name:
+            return JsonResponse({"success": False, "errors": [_("Option name is required.")]})
+        try:
+            ps = pkg.package_services.get(option_id=opt_pk)
+            ps.option.name = name
+            ps.option.description = request.POST.get("description", "")
+            ps.option.save()
+            ps.price = Decimal(request.POST.get("price", "0") or "0")
+            ps.save()
+            return JsonResponse({
+                "success": True,
+                "message": _("Option updated."),
+                "option": {
+                    "id": ps.option_id,
+                    "name": ps.option.name,
+                    "description": ps.option.description,
+                },
+                "price": str(ps.price),
+                "option_count": pkg.package_services.count(),
+                "new_package_total": str(pkg.total_price),
+            })
+        except PackageService.DoesNotExist:
+            return JsonResponse({"success": False, "errors": [_("This option is not part of the package.")]})
         except Exception as e:
             return JsonResponse({"success": False, "errors": humanize_error(e)})
     return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
@@ -395,7 +427,7 @@ def package_option_delete(request, pk, opt_pk):
             pkg.package_services.filter(option_id=opt_pk).delete()
             DesignOption.objects.filter(pk=opt_pk, packages=None).delete()
             opt_count = pkg.package_services.count()
-            return JsonResponse({"success": True, "message": _("Option removed."), "option_count": opt_count})
+            return JsonResponse({"success": True, "message": _("Option removed."), "option_count": opt_count, "new_package_total": str(pkg.total_price)})
         except Exception as e:
             return JsonResponse({"success": False, "errors": humanize_error(e)})
     return JsonResponse({"success": False, "errors": [_("Invalid request.")]})

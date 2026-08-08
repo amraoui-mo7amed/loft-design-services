@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.redirect_url) {
                         setTimeout(() => {
                             window.location.href = data.redirect_url;
-                        }, 400);
+                        }, 3000);
                     } else {
                         // If no redirect, restore button
                         submitBtn.disabled = false;

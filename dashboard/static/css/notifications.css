@@ -131,6 +131,7 @@
 .notification-item {
     transition: all 0.2s ease;
     border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    position: relative;
 }
 
 .notification-item:hover {
@@ -142,8 +143,24 @@
     box-shadow: inset -3px 0 0 var(--brand-primary);
 }
 
-.notification-item.bg-light {
-    background-color: var(--brand-light) !important;
+.notification-item.bg-light,
+.notification-item.active {
+    background-color: rgba(255, 214, 90, 0.12) !important;
+}
+
+.notification-item.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--brand-primary);
+}
+
+[dir="rtl"] .notification-item.active::before {
+    left: auto;
+    right: 0;
 }
 
 /* Notification badge */
@@ -262,6 +279,7 @@
 .notification-item {
     transition: all 0.2s ease;
     border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    position: relative;
 }
 
 .notification-item:hover {

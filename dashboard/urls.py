@@ -46,6 +46,7 @@ urlpatterns = [
     path("design/packages/<int:pk>/edit/", design.package_update, name="package_update"),
     path("design/packages/<int:pk>/delete/", design.package_delete, name="package_delete"),
     path("design/packages/<int:pk>/options/add/", design.package_option_add, name="package_option_add"),
+    path("design/packages/<int:pk>/options/<int:opt_pk>/update/", design.package_option_update, name="package_option_update"),
     path("design/packages/<int:pk>/options/<int:opt_pk>/delete/", design.package_option_delete, name="package_option_delete"),
     # Pricing
     path("pricing/", pricing.pricing_settings, name="pricing_settings"),

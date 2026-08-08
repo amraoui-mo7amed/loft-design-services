@@ -37,7 +37,7 @@ def api_spaces(request):
 
 
 def api_packages(request):
-    qs = DesignPackage.objects.filter(active=True).values("id", "name", "description", "price_multiplier")
+    qs = DesignPackage.objects.values("id", "name", "price_multiplier")
     return JsonResponse({"data": list(qs)})
 
 

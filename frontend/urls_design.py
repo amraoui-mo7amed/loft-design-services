@@ -8,4 +8,6 @@ urlpatterns = [
     path("request/step/inspirations/", wizard.step_inspirations, name="wizard_step_inspirations"),
     path("request/step/questionnaire/", wizard.step_questionnaire, name="wizard_step_questionnaire"),
     path("request/step/summary/", wizard.step_summary, name="wizard_step_summary"),
+    path("request/facturation/download/", wizard.facturation_download, name="facturation_download"),
+    path("request/facturation/email/", wizard.facturation_email, name="facturation_email"),
 ]

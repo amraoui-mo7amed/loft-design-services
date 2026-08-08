@@ -23,6 +23,7 @@ def submit_inquiry(request):
     email = data.get("email", "").strip()
     phone = data.get("phone", "").strip()
     spaces = data.get("spaces", [])
+    inspirations = data.get("inspirations", {})
     total = data.get("total", "0")
 
     if not all([first_name, last_name, email, phone]):
@@ -34,17 +35,19 @@ def submit_inquiry(request):
         email=email,
         phone=phone,
         spaces=spaces,
+        inspirations=inspirations,
         total=total,
     )
 
     space_names = ", ".join(s.get("name", "") for s in spaces)
+    total_display = f"{float(total or 0):g}"
     subject = f"New Design Inquiry from {first_name} {last_name}"
     msg = (
         f"Name: {first_name} {last_name}\n"
         f"Email: {email}\n"
         f"Phone: {phone}\n"
         f"Selected Spaces: {space_names}\n"
-        f"Total Estimate: {total} DZD\n"
+        f"Total Estimate: {total_display} DA\n"
     )
 
     try:
@@ -57,7 +60,7 @@ def submit_inquiry(request):
         notify_user(
             user=user,
             title=f"New Inquiry: {first_name} {last_name}",
-            message=f"Spaces: {space_names} | Total: {total} DZD",
+            message=f"Spaces: {space_names} | Total: {total_display} DA",
             notification_type="info",
             link=config("SITE_URL", default="http://localhost:8000") + "/dashboard/inquiries/" + str(inquiry.id) + "/",
         )

@@ -29,7 +29,7 @@
                                 <input type="text" class="form-control text-center qty-input" value="{{ item.quantity }}" readonly>
                                 <button class="btn btn-outline-secondary qty-plus" data-item-id="{{ item.id }}">+</button>
                             </div>
-                            <span class="fw-bold text-primary">{{ item.price_at_time }} DA</span>
+                            <span class="fw-bold text-primary">{{ item.price_at_time|floatformat:"0" }} DA</span>
                             <button class="btn btn-sm btn-outline-danger remove-item" data-item-id="{{ item.id }}">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -44,12 +44,12 @@
                 <h5 class="fw-bold mb-3">{% trans "Order Summary" %}</h5>
                 <div class="d-flex justify-content-between mb-2">
                     <span>{% trans "Subtotal" %}</span>
-                    <span class="fw-bold">{{ total }} DA</span>
+                    <span class="fw-bold">{{ total|floatformat:"0" }} DA</span>
                 </div>
                 <hr>
                 <div class="d-flex justify-content-between mb-3">
                     <span class="fw-bold fs-5">{% trans "Total" %}</span>
-                    <span class="fw-bold fs-5 text-primary">{{ total }} DA</span>
+                    <span class="fw-bold fs-5 text-primary">{{ total|floatformat:"0" }} DA</span>
                 </div>
                 <a href="{% url 'marketplace_checkout' %}" class="btn btn-primary w-100 rounded-3 fw-bold py-2">
                     {% trans "Proceed to Checkout" %}

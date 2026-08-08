@@ -35,7 +35,7 @@
           </div>
           <div class="wiz-space-info">
             <div class="wiz-space-name">{{ space.name }}</div>
-            <div class="wiz-space-price">{{ space.base_price }} DA</div>
+            <div class="wiz-space-price">{{ space.base_price|floatformat:"0u" }} DA</div>
           </div>
           <div class="wiz-space-check"><i class="fas fa-check"></i></div>
           <input type="checkbox" class="d-none space-checkbox">

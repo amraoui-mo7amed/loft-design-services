@@ -128,8 +128,8 @@
                                 <h3 class="space-card-title">{{ space.name }}</h3>
                                 <div class="space-card-meta">
                                     <div class="space-card-price">
-                                        <span class="space-card-price-value">{{ space.base_price }}</span>
-                                        <span class="space-card-price-currency">DZD</span>
+                                        <span class="space-card-price-value">{{ space.base_price|floatformat:"0u" }}</span>
+                                        <span class="space-card-price-currency">DA</span>
                                     </div>
                                 </div>
                             </div>
@@ -147,7 +147,7 @@
                     <div class="floating-total">
                         <span class="floating-total-label">{% trans "Total" %}</span>
                         <span class="floating-total-amount" id="floatingTotal">0</span>
-                        <span class="floating-total-currency">DZD</span>
+                        <span class="floating-total-currency">DA</span>
                     </div>
                     <div class="floating-actions">
                         <a href="{% url 'design_service' %}" class="btn btn-outline-light rounded-pill px-4 fw-bold">{% trans "Create a custom project" %}</a>
@@ -217,6 +217,60 @@
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-sm btn-dark rounded-3 px-4" id="inspirationSubmitBtn">{% trans "Continue" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Package Selection Modal -->
+    <div class="modal fade" id="homePackageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="homePackageModalTitle">{% trans "Choose a Package" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted mb-4 home-pkg-hint">{% trans "Pick a package to add to your request, or continue without one." %}</p>
+                    <div class="row g-3" id="homePackageGrid">
+                        {% for pkg in packages %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="home-pkg-card" data-package-id="{{ pkg.id }}" data-package-name="{{ pkg.name }}" data-package-price="{{ pkg.total_price }}">
+                                <div class="home-pkg-head">
+                                    <span class="home-pkg-name">{{ pkg.name }}</span>
+                                </div>
+                                <div class="home-pkg-body">
+                                    <div class="home-pkg-price">
+                                        <span class="home-pkg-price-value">{{ pkg.total_price|floatformat:"0u" }}</span>
+                                        <span class="home-pkg-price-currency">DA</span>
+                                    </div>
+                                    <div class="home-pkg-stats">
+                                        <span class="home-pkg-stat"><i class="fas fa-calendar-alt"></i> {{ pkg.delivery_days }} {% trans "days" %}</span>
+                                        <span class="home-pkg-stat"><i class="fas fa-tasks"></i> {{ pkg.services_count }} {% trans "services" %}</span>
+                                    </div>
+                                    {% if pkg.services %}
+                                    <div class="home-pkg-features">
+                                        {% for svc in pkg.services %}
+                                        <div class="home-pkg-feature"><i class="fas fa-check-circle"></i> {{ svc.name }}</div>
+                                        {% endfor %}
+                                        {% if pkg.services_more %}
+                                        <div class="home-pkg-more">+{{ pkg.services_more }} {% trans "more" %}</div>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="home-pkg-action">
+                                    <button type="button" class="home-pkg-select-btn" data-select="{{ pkg.id }}" data-name="{{ pkg.name }}" data-price="{{ pkg.total_price }}">{% trans "Add" %} {{ pkg.name }}</button>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12 text-center text-muted py-4">{% trans "No packages available." %}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-sm btn-light rounded-3 px-4 home-pkg-skip">{% trans "Continue without package" %}</button>
                 </div>
             </div>
         </div>

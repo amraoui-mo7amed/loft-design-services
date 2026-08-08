@@ -146,7 +146,7 @@
                             <div class="crm-stat">
                                 <div class="crm-stat-icon" style="background:rgba(255,193,7,0.1);color:#ffc107;"><i class="fas fa-coins"></i></div>
                                 <div>
-                                    <div class="crm-stat-value">{{ project.budget|default:"--" }} DA</div>
+                                    <div class="crm-stat-value">{{ project.budget|floatformat:"0u"|default:"--" }} DA</div>
                                     <div class="crm-stat-label">{% trans "Budget" %}</div>
                                 </div>
                             </div>
@@ -155,7 +155,7 @@
                             <div class="crm-stat">
                                 <div class="crm-stat-icon" style="background:rgba(42,90,90,0.1);color:var(--brand-primary);"><i class="fas fa-receipt"></i></div>
                                 <div>
-                                    <div class="crm-stat-value crm-stat-total">{{ project.total }} DA</div>
+                                    <div class="crm-stat-value crm-stat-total">{{ project.total|floatformat:"0u" }} DA</div>
                                     <div class="crm-stat-label">{% trans "Total" %}</div>
                                 </div>
                             </div>
@@ -207,7 +207,7 @@
                                 <tr>
                                     <td><span class="badge bg-light text-muted rounded-pill">{{ s.floor.name }}</span></td>
                                     <td class="fw-semibold">{{ s.custom_name|default:s.space.name }}</td>
-                                    <td class="text-end fw-bold">{{ s.price_at_time }} <small class="text-muted fw-normal">DA</small></td>
+                                    <td class="text-end fw-bold">{{ s.price_at_time|floatformat:"0" }} <small class="text-muted fw-normal">DA</small></td>
                                 </tr>
                                 {% empty %}
                                 <tr><td colspan="3" class="text-center text-muted py-3">{% trans "No spaces" %}</td></tr>
@@ -240,7 +240,7 @@
                                 {% for opt in options %}
                                 <tr>
                                     <td class="fw-semibold">{{ opt.option.name }}</td>
-                                    <td class="text-end fw-bold">{{ opt.price_at_time }} <small class="text-muted fw-normal">DA</small></td>
+                                    <td class="text-end fw-bold">{{ opt.price_at_time|floatformat:"0" }} <small class="text-muted fw-normal">DA</small></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

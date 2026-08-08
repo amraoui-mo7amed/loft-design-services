@@ -59,7 +59,7 @@
             <div class="card border-0 shadow-sm mt-4">
                 <div class="card-body p-4 text-center">
                     <small class="text-muted d-block mb-1">{% trans "Total Estimate" %}</small>
-                    <span class="fw-bold fs-3 inquiry-total">{{ inquiry.total }} DZD</span>
+                    <span class="fw-bold fs-3 inquiry-total">{{ inquiry.total|floatformat:"0u" }} DA</span>
                 </div>
             </div>
         </div>
@@ -73,13 +73,30 @@
                         <div class="col-xl-3 col-lg-4 col-md-3 col-sm-4 col-6">
                             <div class="inquiry-space-card">
                                 <div class="inquiry-space-name"><i class="fas fa-cube inquiry-space-icon me-1"></i>{{ s.name }}</div>
-                                <div class="inquiry-space-price">{{ s.price }} DZD</div>
+                                <div class="inquiry-space-price">{{ s.price|floatformat:"0u" }} DA</div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                     {% else %}
                     <p class="text-muted mb-0">{% trans "No spaces selected." %}</p>
+                    {% endif %}
+
+                    {% if inquiry.inspirations %}
+                    <h6 class="fw-bold mb-3 mt-4"><i class="fas fa-images inquiry-space-icon me-1"></i>{% trans "Selected Inspiration Images" %}</h6>
+                    <div class="row g-2">
+                        {% for space_id, imgs in inquiry.inspirations.items %}
+                        {% for img in imgs %}
+                        {% if img.url %}
+                        <div class="col-xl-3 col-lg-4 col-md-6 col-6">
+                            <div class="inquiry-inspo-card">
+                                <img src="{{ img.url }}" alt="{% trans 'Inspiration image' %}" class="inquiry-inspo-img" loading="lazy">
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        {% endfor %}
+                    </div>
                     {% endif %}
                 </div>
             </div>

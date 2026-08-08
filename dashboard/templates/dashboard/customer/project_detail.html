@@ -34,7 +34,7 @@
                     </div>
                     <div class="col-md-4">
                         <small class="text-muted d-block">{% trans "Total" %}</small>
-                        <span class="fw-bold text-primary fs-5">{{ project.total }} DA</span>
+                        <span class="fw-bold text-primary fs-5">{{ project.total|floatformat:"0u" }} DA</span>
                     </div>
                     <div class="col-md-4">
                         <small class="text-muted d-block">{% trans "Budget" %}</small>

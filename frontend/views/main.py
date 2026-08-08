@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.db.models import Max
-from dashboard.models import Portfolio, ProjectType, Space
+from dashboard.models import Portfolio, ProjectType, Space, DesignPackage
 
 
 def home_view(request):
@@ -29,8 +29,30 @@ def home_view(request):
             "percentage": percentage,
         })
 
+    packages = DesignPackage.objects.prefetch_related("package_services__option__category")
+    package_data = [
+        {
+            "id": p.id,
+            "name": p.name,
+            "delivery_days": p.total_delivery_days,
+            "services_count": p.package_services.count(),
+            "total_price": p.total_price,
+            "services": [
+                {
+                    "id": ps.option_id,
+                    "name": ps.option.name,
+                    "price": str(ps.price),
+                }
+                for ps in p.package_services.all()[:6]
+            ],
+            "services_more": max(0, p.package_services.count() - 6),
+        }
+        for p in packages
+    ]
+
     return render(request, "home.html", {
         "spaces": spaces_data,
+        "packages": package_data,
         "projects": Portfolio.objects.prefetch_related("gallery_images").order_by("-created_at")[:12],
     })
 
@@ -45,7 +67,21 @@ def order_view(request):
         for s in selected:
             total += float(s.base_price)
 
+    package = None
+    pkg_id = request.GET.get("pkg", "")
+    if pkg_id.isdigit():
+        package = (
+            DesignPackage.objects.filter(id=int(pkg_id))
+            .prefetch_related("package_services__option__category")
+            .first()
+        )
+        if package:
+            total += float(package.total_price)
+
+    total = round(total)
+
     return render(request, "order.html", {
         "selected_spaces": selected,
         "total": total,
+        "package": package,
     })

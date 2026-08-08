@@ -38,14 +38,12 @@ class PackageService(models.Model):
 
 class DesignPackage(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("Name"))
-    description = models.TextField(blank=True, verbose_name=_("Description"))
     delivery_time_days = models.PositiveIntegerField(default=7, verbose_name=_("Delivery Time (days)"))
     price_multiplier = models.DecimalField(max_digits=5, decimal_places=2, default=1.0, verbose_name=_("Price Multiplier"))
     services_after_payment = models.TextField(blank=True, verbose_name=_("Services After Payment"))
     services = models.ManyToManyField(
         "DesignOption", through="PackageService", blank=True, related_name="packages", verbose_name=_("Services")
     )
-    active = models.BooleanField(default=True, verbose_name=_("Active"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))
 
@@ -59,6 +57,10 @@ class DesignPackage(models.Model):
     @property
     def total_delivery_days(self):
         return self.delivery_time_days
+
+    @property
+    def total_price(self):
+        return sum((ps.price or 0) for ps in self.package_services.all())
 
 
 class DesignOption(models.Model):

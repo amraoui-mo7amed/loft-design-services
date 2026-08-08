@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var spaceCards = document.querySelectorAll(".space-card");
 
     function formatNumber(num) {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return Math.round(num).toString();
     }
 
     function getSelectedSpaces() {
@@ -50,8 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function showSequentialModals(spacesData, index) {
         if (index >= spacesData.length) {
-            var ids = getSelectedSpaces();
-            window.location.href = "/order/?spaces=" + ids.join(",");
+            showHomePackageModal();
             return;
         }
 
@@ -96,7 +95,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         submitBtn.addEventListener("click", function () {
             modalGrid.querySelectorAll(".inspo-card.selected").forEach(function (c) {
-                addInspiration(space.spaceId, parseInt(c.dataset.imgId));
+                var img = c.querySelector("img");
+                addInspiration(space.spaceId, parseInt(c.dataset.imgId), img ? img.src : "");
             });
             var bsModal = bootstrap.Modal.getInstance(modalEl);
             if (bsModal) bsModal.hide();
@@ -107,11 +107,17 @@ document.addEventListener("DOMContentLoaded", function () {
         bsModal.show();
     }
 
-    function addInspiration(spaceId, imgId) {
+    function addInspiration(spaceId, imgId, imgUrl) {
         // Store selected inspiration data (used by the order page later)
         var stored = JSON.parse(sessionStorage.getItem("homeInspirations") || "{}");
         if (!stored[spaceId]) stored[spaceId] = [];
-        if (stored[spaceId].indexOf(imgId) === -1) stored[spaceId].push(imgId);
+        // Normalize legacy entries (plain img ids) into {id, url} objects
+        stored[spaceId] = stored[spaceId].map(function (it) {
+            if (it && typeof it === "object") return it;
+            return { id: it, url: "" };
+        });
+        var exists = stored[spaceId].some(function (it) { return it.id === imgId; });
+        if (!exists) stored[spaceId].push({ id: imgId, url: imgUrl });
         sessionStorage.setItem("homeInspirations", JSON.stringify(stored));
     }
 
@@ -157,7 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
 
                 if (spacesData.length === 0) {
-                    window.location.href = "/order/?spaces=" + ids.join(",");
+                    showHomePackageModal();
                     return;
                 }
 
@@ -166,9 +172,55 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(function () {
                 continueBtn.disabled = false;
                 continueBtn.innerHTML = "Continue";
-                window.location.href = "/order/?spaces=" + ids.join(",");
+                showHomePackageModal();
             });
     });
+
+    // ── Home Package Selection ──
+    var selectedHomePackage = null;
+
+    function proceedToOrder() {
+        var ids = getSelectedSpaces();
+        var pkg = selectedHomePackage ? "&pkg=" + encodeURIComponent(selectedHomePackage.id) : "";
+        window.location.href = "/order/?spaces=" + ids.join(",") + pkg;
+    }
+
+    function showHomePackageModal() {
+        var modalEl = document.getElementById("homePackageModal");
+        if (!modalEl) {
+            proceedToOrder();
+            return;
+        }
+        var bsModal = new bootstrap.Modal(modalEl, { backdrop: "static", keyboard: false });
+        bsModal.show();
+    }
+
+    var homePkgGrid = document.getElementById("homePackageGrid");
+    if (homePkgGrid) {
+        homePkgGrid.addEventListener("click", function (e) {
+            var btn = e.target.closest(".home-pkg-select-btn");
+            if (!btn) return;
+            selectedHomePackage = { id: btn.dataset.select, name: btn.dataset.name, price: btn.dataset.price };
+            var card = btn.closest(".home-pkg-card");
+            if (card) {
+                homePkgGrid.querySelectorAll(".home-pkg-card").forEach(function (c) { c.classList.remove("selected"); });
+                card.classList.add("selected");
+            }
+            var m = bootstrap.Modal.getInstance(document.getElementById("homePackageModal"));
+            if (m) m.hide();
+            proceedToOrder();
+        });
+    }
+
+    var homePkgSkip = document.querySelector(".home-pkg-skip");
+    if (homePkgSkip) {
+        homePkgSkip.addEventListener("click", function () {
+            selectedHomePackage = null;
+            var m = bootstrap.Modal.getInstance(document.getElementById("homePackageModal"));
+            if (m) m.hide();
+            proceedToOrder();
+        });
+    }
 
     // ── Bar Width ──
     document.querySelectorAll("[data-bar-width]").forEach(function (el) {

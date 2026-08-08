@@ -85,7 +85,7 @@
                     </div>
                     <div class="d-flex justify-content-between align-items-center pt-2 border-top mt-auto">
                         <div>
-                            <span class="fw-bold" style="color:var(--brand-primary);">{{ project.total }} DA</span>
+                            <span class="fw-bold" style="color:var(--brand-primary);">{{ project.total|floatformat:"0u" }} DA</span>
                         </div>
                         <div class="d-flex gap-1">
                             <a href="{% url 'dash:admin_project_detail' project.pk %}" class="btn btn-sm btn-outline-primary rounded-3 fw-semibold">

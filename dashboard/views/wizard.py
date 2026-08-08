@@ -1,9 +1,10 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.utils.translation import gettext_lazy as _
 from django.db import transaction
+from django.conf import settings
 import json
 
 from ..models import (
@@ -12,6 +13,7 @@ from ..models import (
     DesignRequestSpaceImage, DesignRequestFile,
 )
 from ..price_engine import calculate_full_price
+from ..pdf_generator import render_facturation_pdf_bytes
 
 
 def wizard_container(request):
@@ -58,7 +60,7 @@ def step_combined(request):
 
 
 def step_packages(request):
-    packages = DesignPackage.objects.filter(active=True).prefetch_related("package_services__option__category")
+    packages = DesignPackage.objects.prefetch_related("package_services__option__category")
     package_data = []
     for pkg in packages:
         total = sum(ps.price for ps in pkg.package_services.all())
@@ -183,3 +185,118 @@ def submit_design_request(request):
         "uuid": str(design_request.uuid),
         "redirect_url": f"/dashboard/my-projects/{design_request.uuid}/",
     })
+
+
+# ──────────────────────────────────────────────
+# Facturation (step 4) - PDF download / email
+# ──────────────────────────────────────────────
+
+def _build_facturation_context(data):
+    questionnaire = json.loads(data.get("questionnaire", "{}"))
+    spaces = json.loads(data.get("spaces", "[]"))
+    package_id = data.get("package_id")
+
+    items = [
+        {
+            "description": s.get("name") or "Space",
+            "amount": f"{float(s.get('price') or 0):g}",
+        }
+        for s in spaces
+    ]
+
+    package_amount = 0
+    package_name = None
+    if package_id:
+        pkg = DesignPackage.objects.filter(id=package_id).first()
+        if pkg:
+            package_name = pkg.name
+            package_amount = float(pkg.total_price)
+
+    subtotal = sum(float(s.get("price") or 0) for s in spaces) + package_amount
+    total = float(data.get("total") or subtotal)
+
+    first = questionnaire.get("first_name", "")
+    last = questionnaire.get("last_name", "")
+    project_name = questionnaire.get("project_name") or (f"{first} {last}".strip() or "Design Request")
+
+    try:
+        from django.utils import timezone
+        date_str = timezone.now().strftime("%Y-%m-%d")
+    except Exception:
+        date_str = ""
+
+    from django.db.models import Max
+    last_pk = DesignRequest.objects.aggregate(m=Max("pk"))["m"] or 0
+    doc_number = f"LOFT-FAC-{last_pk + 1}"
+
+    return {
+        "studio_name": getattr(settings, "SITE_NAME", "LoftDesign"),
+        "tagline": _("Interior Design Studio"),
+        "doc_number": doc_number,
+        "date": date_str,
+        "client_name": f"{first} {last}".strip() or _("Client"),
+        "email": questionnaire.get("email", ""),
+        "phone": questionnaire.get("phone", ""),
+        "project_name": project_name,
+        "items": items,
+        "package_name": package_name,
+        "package_amount": f"{package_amount:g}",
+        "total": f"{total:g}",
+        "thank_you_message": _("Thank you for choosing our design service!"),
+    }
+
+
+def _facturation_filename():
+    from django.utils import timezone
+    return f"facturation-{timezone.now().strftime('%Y%m%d-%H%M%S')}.pdf"
+
+
+@require_POST
+def facturation_download(request):
+    try:
+        data = json.loads(request.body) if request.body else request.POST
+    except json.JSONDecodeError:
+        data = request.POST
+    try:
+        pdf_bytes = render_facturation_pdf_bytes(_build_facturation_context(data))
+        response = HttpResponse(pdf_bytes, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{_facturation_filename()}"'
+        return response
+    except Exception:
+        return JsonResponse({"success": False, "errors": [_("Could not generate the PDF.")]})
+
+
+@require_POST
+def facturation_email(request):
+    try:
+        data = json.loads(request.body) if request.body else request.POST
+    except json.JSONDecodeError:
+        data = request.POST
+
+    questionnaire = json.loads(data.get("questionnaire", "{}"))
+    to_email = questionnaire.get("email", "")
+    if not to_email:
+        return JsonResponse({"success": False, "errors": [_("No email address provided.")]})
+    try:
+        context = _build_facturation_context(data)
+        pdf_bytes = render_facturation_pdf_bytes(context)
+        sent = _send_email_with_attachment(
+            to_email,
+            subject=_(f"Your LoftDesign Facturation - {context['doc_number']}"),
+            text=f"Hi {context['client_name']},\n\nFind attached your facturation estimate.\n\n{context['thank_you_message']}",
+            attachment=(_facturation_filename(), pdf_bytes, "application/pdf"),
+        )
+        return JsonResponse({
+            "success": sent,
+            "message": _("Facturation sent to your email") if sent else _("Failed to send the email."),
+        })
+    except Exception:
+        return JsonResponse({"success": False, "errors": [_("Could not generate or send the PDF.")]})
+
+
+def _send_email_with_attachment(to_email, subject, text, attachment):
+    from django.core.mail import EmailMultiAlternatives
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@example.com")
+    email = EmailMultiAlternatives(subject, text, from_email, [to_email])
+    email.attach(*attachment)
+    return email.send() == 1

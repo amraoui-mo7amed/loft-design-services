@@ -972,6 +972,18 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+#estimateDetailsBody {
+  color: var(--wiz-text);
+}
+#estimateDetailsBody .text-muted,
+#estimateDetailsBody .wiz-text-sm.text-muted,
+#estimateDetailsBody .wiz-text-sm {
+  color: var(--wiz-text-muted) !important;
+}
+#estimateDetailsBody .wiz-text-muted-light {
+  color: var(--wiz-text-muted) !important;
+}
+
 .wiz-summary-card {
   background: var(--wiz-surface);
   border-radius: var(--wiz-radius);
@@ -1282,7 +1294,8 @@ body {
   font-weight: 700;
   font-size: 1.05rem;
   margin-bottom: 0.2rem;
-  color: var(--wiz-text-muted);
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 .pkg-card-desc {
   font-size: 0.72rem;
@@ -1566,4 +1579,225 @@ body {
   #inspirationGalleryModal .modal-body {
     max-height: 70vh;
   }
+}
+.wiz-fact-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.1rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--wiz-text);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.wiz-fact-btn:hover {
+  transform: translateY(-1px);
+}
+.wiz-fact-btn-download {
+  background: var(--wiz-primary);
+  color: #212121;
+}
+.wiz-fact-btn-download:hover {
+  background: #e6c04a;
+  box-shadow: 0 6px 18px rgba(255, 214, 90, 0.35);
+}
+.wiz-fact-btn-email {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--wiz-border);
+}
+.wiz-fact-btn-email:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+.wiz-fact-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+.wiz-fact-status {
+  align-self: center;
+  font-size: 0.8rem;
+  color: var(--wiz-text-muted, #a8b2bd);
+}
+.wiz-fact-status.success, .wiz-fact-status.ok {
+  color: #28a745;
+}
+.wiz-fact-status.error {
+  color: #dc3545;
+}
+.wiz-fact-title-icon {
+  color: var(--wiz-primary);
+}
+
+/* Facturation card — liquid glass dark theme */
+#facturationCard {
+  position: relative;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035) 55%, rgba(255, 214, 90, 0.05)),
+    rgba(16, 19, 24, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 20px;
+  padding: 1.4rem 1.35rem 1.3rem;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 18px 44px rgba(0, 0, 0, 0.45);
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+  backdrop-filter: blur(20px) saturate(165%);
+  overflow: hidden;
+}
+#facturationCard::before {
+  content: "";
+  position: absolute;
+  top: -70px;
+  right: -70px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255, 214, 90, 0.16), transparent 65%);
+  pointer-events: none;
+}
+#facturationCard::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--wiz-primary), rgba(255, 214, 90, 0.05));
+  border-radius: 0 4px 4px 0;
+  pointer-events: none;
+}
+#facturationCard > .wiz-summary-title {
+  position: relative;
+  z-index: 1;
+  font-size: 1.05rem;
+  letter-spacing: 0.3px;
+}
+#facturationCard .wiz-summary-value {
+  color: var(--wiz-text);
+  font-weight: 600;
+}
+#facturationCard .wiz-text-sm.text-muted {
+  color: var(--wiz-text-muted) !important;
+  font-size: 0.78rem;
+}
+/* Facturation table — fully custom glass design */
+.wiz-fact-scroll {
+  position: relative;
+  z-index: 1;
+  max-height: 340px;
+  overflow: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 11, 15, 0.5);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 214, 90, 0.45) rgba(255, 255, 255, 0.06);
+}
+.wiz-fact-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.wiz-fact-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+.wiz-fact-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(255, 214, 90, 0.6), rgba(255, 214, 90, 0.25));
+  border-radius: 8px;
+}
+.wiz-fact-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9rem;
+}
+.wiz-fact-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(14, 18, 24, 0.92);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.wiz-fact-table thead th {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  font-weight: 800;
+  color: var(--wiz-primary);
+  padding: 0.8rem 0.85rem;
+  border-bottom: 1px solid rgba(255, 214, 90, 0.3);
+  white-space: nowrap;
+}
+.wiz-fact-table tbody tr {
+  transition: background-color 0.2s ease;
+  cursor: default;
+}
+.wiz-fact-table tbody td {
+  color: #eef2f7;
+  padding: 0.62rem 0.85rem;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+}
+.wiz-fact-table tbody tr:nth-child(odd) td {
+  background: rgba(255, 255, 255, 0.03);
+}
+.wiz-fact-table tbody tr:hover td {
+  background: linear-gradient(90deg, rgba(255, 214, 90, 0.1), rgba(255, 214, 90, 0.03));
+}
+.wiz-fact-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.wiz-fact-table tbody td:last-child {
+  text-align: right;
+}
+/* Amount cell — glass chip per row */
+.wiz-fact-table tbody td:last-child {
+  position: relative;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: #fff;
+}
+.wiz-fact-table tbody td:last-child::after {
+  content: "DA";
+  margin-left: 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--wiz-primary);
+  letter-spacing: 1px;
+  opacity: 0.9;
+}
+/* Header amount column keeps the right alignment */
+.wiz-fact-table .wiz-fact-th-amount {
+  text-align: right;
+}
+.wiz-fact-total {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.85rem !important;
+  padding: 0.65rem 0.9rem;
+  border-radius: 14px;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.wiz-fact-total .subrow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  font-size: 0.88rem;
+  color: #c6cfda;
+}
+.wiz-fact-total .grand {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0 0.25rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--wiz-primary);
+  border-top: 2px solid rgba(255, 214, 90, 0.35);
+  margin-top: 0.45rem;
+  text-shadow: 0 0 18px rgba(255, 214, 90, 0.25);
+}
+.wiz-fact-actions {
+  position: relative;
+  z-index: 1;
+  border-color: rgba(255, 255, 255, 0.12) !important;
 }

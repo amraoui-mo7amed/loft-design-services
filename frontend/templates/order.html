@@ -22,9 +22,15 @@
                     {% for space in selected_spaces %}
                     <div class="order-summary-row" data-space-id="{{ space.id }}" data-space-name="{{ space.name }}" data-space-price="{{ space.base_price }}">
                         <span>{{ space.name }}</span>
-                        <span class="order-summary-price">{{ space.base_price }} DZD</span>
+                        <span class="order-summary-price">{{ space.base_price|floatformat:"0u" }} DA</span>
                     </div>
                     {% endfor %}
+                    {% if package %}
+                    <div class="order-summary-row order-summary-pkg" data-package-id="{{ package.id }}" data-package-name="{{ package.name }}" data-package-price="{{ package.total_price }}">
+                        <span>{{ package.name }}</span>
+                        <span class="order-summary-price">{{ package.total_price|floatformat:"0u" }} DA</span>
+                    </div>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>
@@ -68,7 +74,7 @@
                     </div>
                     <div class="order-summary-total">
                         <span>{% trans "Total" %}</span>
-                        <span class="order-summary-total-price">{{ total }} DZD</span>
+                        <span class="order-summary-total-price">{{ total|floatformat:"0u" }} DA</span>
                     </div>
                     <button type="submit" class="order-submit" id="submitOrderBtn">{% trans "Submit Inquiry" %}</button>
                 </form>

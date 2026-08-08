@@ -75,9 +75,12 @@
 
                 <!-- Sidebar Footer -->
                 <div class="sidebar-footer">
+                    <a href="{% url 'frontend:home' %}" class="sidebar-view-site" target="_blank" rel="noopener">
+                        <i class="fas fa-globe sidebar-view-site-icon"></i><span class="sidebar-view-site-text">{% trans "View Website" %}</span>
+                    </a>
                     <div class="sidebar-user">
                         <div class="sidebar-user-avatar">
-                            {{ request.user.username|slice:":1"|upper }}
+                            <span>{{ request.user.username|slice:":1"|upper }}</span>
                         </div>
                         <div class="sidebar-user-info">
                             <span class="sidebar-user-name">{{ request.user.get_full_name|default:request.user.username }}</span>

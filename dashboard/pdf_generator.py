@@ -37,3 +37,10 @@ def generate_invoice_pdf(payment):
         return os.path.join(settings.MEDIA_URL, "pdf", "invoices", filename)
     except Exception as e:
         return None
+
+
+def render_facturation_pdf_bytes(context):
+    """Render the wizard facturation (invoice) to PDF bytes using WeasyPrint."""
+    from weasyprint import HTML
+    html = render_to_string("dashboard/pdf/facturation.html", context)
+    return HTML(string=html).write_pdf()

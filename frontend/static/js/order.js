@@ -18,6 +18,22 @@ document.addEventListener("DOMContentLoaded", function () {
         return spaces;
     }
 
+    function getSelectedInspirations() {
+        try {
+            var stored = JSON.parse(sessionStorage.getItem("homeInspirations") || "{}");
+            var cleaned = {};
+            Object.keys(stored).forEach(function (spaceId) {
+                var imgs = (stored[spaceId] || []).filter(function (it) {
+                    return it && typeof it === "object" && it.id && it.url;
+                });
+                if (imgs.length) cleaned[spaceId] = imgs;
+            });
+            return cleaned;
+        } catch (err) {
+            return {};
+        }
+    }
+
     orderForm.addEventListener("submit", function (e) {
         e.preventDefault();
         var formData = new FormData(orderForm);
@@ -27,6 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
             email: formData.get("email"),
             phone: formData.get("phone"),
             spaces: getSelectedSpaces(),
+            inspirations: getSelectedInspirations(),
             total: d.total || "0",
         };
 
