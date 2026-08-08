@@ -1,0 +1,17 @@
+{% load i18n %}
+<div class="inspo-lightbox" id="inspirationLightbox" aria-hidden="true" role="dialog" aria-label="{% trans 'Image preview' %}">
+    <button type="button" class="inspo-lightbox-close" data-lb-close aria-label="{% trans 'Close' %}">
+        <i class="fas fa-times"></i>
+    </button>
+    <button type="button" class="inspo-lightbox-nav inspo-lightbox-prev" data-lb-prev aria-label="{% trans 'Previous image' %}">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <figure class="inspo-lightbox-figure">
+        <img src="" alt="" class="inspo-lightbox-img">
+        <figcaption class="inspo-lightbox-caption"></figcaption>
+    </figure>
+    <button type="button" class="inspo-lightbox-nav inspo-lightbox-next" data-lb-next aria-label="{% trans 'Next image' %}">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+    <span class="inspo-lightbox-counter">1 / 1</span>
+</div>
