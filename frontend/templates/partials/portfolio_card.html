@@ -1,6 +1,5 @@
 {% load i18n %}
 {% load static %}
-{% load tags %}
 
 <div class="portfolio-card">
   <div class="portfolio-card-img">
@@ -9,31 +8,17 @@
     {% else %}
     <div class="portfolio-card-fallback"><i class="fas fa-image"></i></div>
     {% endif %}
-    {% if portfolio.is_featured %}
-    <span class="portfolio-card-featured">{% trans "Featured" %}</span>
-    {% endif %}
   </div>
-  <div class="portfolio-card-meta">
-    {% if portfolio.model_3d %}
-    <span class="portfolio-card-meta-3d"><i class="fas fa-cube"></i> 3D</span>
-    {% endif %}
-    <span><i class="far fa-images"></i> {{ portfolio.gallery_images.all|length }}</span>
-    <span><i class="far fa-calendar-alt"></i> {{ portfolio.created_at|date:"M d, Y" }}</span>
-  </div>
+  {% if portfolio.is_featured %}
+  <span class="portfolio-card-featured">{% trans "Featured" %}</span>
+  {% endif %}
   <div class="portfolio-card-body">
     <h5>{{ portfolio.title }}</h5>
-    <p>{{ portfolio.description|truncatewords:18 }}</p>
-    {% with tags=portfolio.tags|split:"," %}
-    {% if tags %}
-    <div class="portfolio-card-tags">
-      {% for tag in tags|slice:":4" %}
-      <span>{{ tag|truncatechars:14 }}</span>
-      {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
-    <a href="{% url 'frontend:portfolio_detail' portfolio.pk %}" class="portfolio-card-btn">
-      {% trans "View Projects" %} <i class="fas fa-arrow-right"></i>
-    </a>
   </div>
+  <a class="portfolio-card-link" href="{% url 'frontend:portfolio_detail' portfolio.pk %}" aria-label="{{ portfolio.title }}"></a>
+  {% if portfolio.external_link %}
+  <a class="portfolio-card-360" href="{{ portfolio.external_link }}" target="_blank" rel="noopener" aria-label="{% trans 'View in 360' %}" title="{% trans 'View in 360' %}">
+    <i class="fas fa-vr-cardboard"></i><span>360&deg;</span>
+  </a>
+  {% endif %}
 </div>

@@ -17,20 +17,18 @@
 {% block content %}
 <div class="detail-viewer" id="portfolioViewer">
   <div class="viewer-top-left">
-    <a href="{% url 'frontend:portfolio_list' %}" class="viewer-icon-btn" aria-label="{% trans 'Back' %}" title="{% trans 'Back' %}">
+    <a href="{% url 'frontend:portfolio_list' %}" class="viewer-icon-btn viewer-back-btn" aria-label="{% trans 'Back' %}" title="{% trans 'Back' %}">
       <i class="fas fa-arrow-left"></i>
     </a>
-    {% if portfolio.external_link %}
-    <a href="{{ portfolio.external_link }}" target="_blank" rel="noopener" class="viewer-icon-btn viewer-external-btn" aria-label="{% trans 'View in 360' %}" title="{% trans 'View in 360' %}">
-      <i class="fas fa-vr-cardboard me-1"></i>360&deg;
-    </a>
-    {% endif %}
   </div>
 
+  {% if portfolio.external_link %}
+  <a href="{{ portfolio.external_link }}" target="_blank" rel="noopener" class="viewer-icon-btn viewer-external-btn" aria-label="{% trans 'View in 360' %}" title="{% trans 'View in 360' %}">
+    <i class="fas fa-vr-cardboard me-1"></i>360&deg;
+  </a>
+  {% endif %}
+
   <div class="viewer-actions">
-    <button class="viewer-action-btn" id="galleryToggle" aria-label="{% trans 'Gallery' %}" title="{% trans 'Gallery' %}">
-      <i class="fas fa-images"></i>
-    </button>
     {% if model_3d_url %}
     <button class="viewer-action-btn" id="view3dBtn" title="{% trans 'View in 3D' %}">
       <i class="fas fa-cube"></i>
@@ -41,7 +39,8 @@
   <button class="nav-btn nav-prev"><i class="fas fa-chevron-left"></i></button>
   <img class="viewer-main-img" id="heroImage" src="{{ gallery_images|first }}" alt="{{ portfolio.title }}">
   <button class="nav-btn nav-next"><i class="fas fa-chevron-right"></i></button>
-  <span class="viewer-counter">1 / {{ gallery_images|length }}</span>
+
+  <div class="viewer-gallery-zone" id="galleryZone" role="button" tabindex="0" aria-label="{% trans 'View gallery' %}"></div>
 
   {% if model_3d_url %}
   <div class="model-viewer-overlay" id="modelViewerOverlay">

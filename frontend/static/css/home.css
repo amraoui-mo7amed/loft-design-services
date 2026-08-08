@@ -377,9 +377,28 @@ body.landing-page .space-card-title {
 }
 
 .space-card-price {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
     display: flex;
     align-items: baseline;
     gap: 4px;
+    padding: 8px 18px;
+    border-radius: 20px;
+    background: rgba(8, 10, 13, 0.62);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid rgba(255, 214, 90, 0.35);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.space-card.selected .space-card-price {
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -50%) scale(0.9);
 }
 
 .space-card-price-value {
@@ -455,6 +474,39 @@ body.landing-page .space-card-title {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+@media (max-width: 767.98px) {
+    .floating-bottom-bar {
+        padding: 14px 16px;
+    }
+    .floating-bottom-inner {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    .floating-total {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .floating-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .floating-actions .btn {
+        flex: 1 1 auto;
+        padding-inline: 16px;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 419.98px) {
+    .floating-actions {
+        flex-direction: column;
+    }
+    .floating-actions .btn {
+        width: 100%;
+    }
 }
 
 .loft-section {
@@ -958,8 +1010,8 @@ body:has(.order-page) {
 
 .projects-section-head {
     display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
+    align-items: center;
+    justify-content: center;
     gap: 20px;
     flex-wrap: wrap;
     margin-bottom: 34px;

@@ -124,12 +124,12 @@
                         <div class="space-card-check">
                             <i class="fas fa-check"></i>
                         </div>
+                        <div class="space-card-price">
+                            <span class="space-card-price-value">{{ space.base_price|floatformat:"0u" }}</span>
+                            <span class="space-card-price-currency">DA</span>
+                        </div>
                         <div class="space-card-body">
                             <h3 class="space-card-title">{{ space.name }}</h3>
-                            <div class="space-card-price">
-                                <span class="space-card-price-value">{{ space.base_price|floatformat:"0u" }}</span>
-                                <span class="space-card-price-currency">DA</span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -156,10 +156,7 @@
     <section class="projects-section" id="projects-section">
         <div class="container">
             <div class="projects-section-head">
-                <div>
-                    <h2 class="loft-section-title reveal">{% trans "Recent Projects" %}</h2>
-                    <p class="loft-section-sub reveal">{% trans "Explore our latest interior design work" %}</p>
-                </div>
+                <h2 class="loft-section-title reveal">{% trans "Recent Projects" %}</h2>
             </div>
             <div class="swiper projects-swiper" id="projectsSwiper">
                 <button type="button" class="projects-nav-btn projects-prev" aria-label="{% trans 'Previous projects' %}">

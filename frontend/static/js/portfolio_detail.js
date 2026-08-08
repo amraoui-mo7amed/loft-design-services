@@ -8,8 +8,6 @@
   var viewerImg = viewer.querySelector(".viewer-main-img");
   var prevBtn = viewer.querySelector(".nav-prev");
   var nextBtn = viewer.querySelector(".nav-next");
-  var closeBtn = viewer.querySelector(".viewer-close");
-  var counterEl = viewer.querySelector(".viewer-counter");
   var thumbStrip = document.getElementById("thumbStrip");
 
   var images = [];
@@ -38,7 +36,6 @@
     setTimeout(function () {
       viewerImg.src = images[index];
       viewerImg.style.opacity = "1";
-      if (counterEl) counterEl.textContent = (index + 1) + " / " + images.length;
       updateThumbs(index);
     }, 150);
   }
@@ -64,12 +61,14 @@
 
   if (prevBtn) prevBtn.addEventListener("click", prevImage);
   if (nextBtn) nextBtn.addEventListener("click", nextImage);
-  if (closeBtn) closeBtn.addEventListener("click", closeViewer);
 
   if (thumbStrip) {
     thumbStrip.addEventListener("click", function (e) {
       var thumb = e.target.closest(".thumb-item");
-      if (!thumb) return;
+      if (!thumb) {
+        setGalleryVisible(false);
+        return;
+      }
       var idx = parseInt(thumb.dataset.index, 10);
       if (!isNaN(idx)) openViewer(idx);
     });
@@ -83,23 +82,27 @@
     });
   }
 
-  /* ── Gallery auto-hide + toggle ── */
-  var galleryToggleBtn = document.getElementById("galleryToggle");
-  var galleryVisible = true;
+  /* ── Gallery toggle via bottom-of-screen zone ── */
+  var galleryZone = document.getElementById("galleryZone");
+  var galleryVisible = false;
 
   function setGalleryVisible(visible) {
     galleryVisible = visible;
     if (thumbStrip) thumbStrip.style.display = visible ? "" : "none";
-    if (galleryToggleBtn) galleryToggleBtn.classList.toggle("active-3d", visible);
+    if (galleryZone) galleryZone.classList.toggle("active", visible);
   }
 
-  setTimeout(function () {
-    setGalleryVisible(false);
-  }, 5000);
+  setGalleryVisible(false);
 
-  if (galleryToggleBtn) {
-    galleryToggleBtn.addEventListener("click", function () {
-      setGalleryVisible(!galleryVisible);
+  if (galleryZone) {
+    galleryZone.addEventListener("click", function () {
+      setGalleryVisible(true);
+    });
+    galleryZone.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        setGalleryVisible(true);
+      }
     });
   }
 
@@ -129,8 +132,8 @@
       if (viewerImg) viewerImg.style.display = is3dActive ? "none" : "";
       if (prevBtn) prevBtn.style.display = is3dActive ? "none" : "";
       if (nextBtn) nextBtn.style.display = is3dActive ? "none" : "";
-      if (counterEl) counterEl.style.display = is3dActive ? "none" : "";
       if (thumbStrip) thumbStrip.style.display = is3dActive ? "none" : "";
+      if (galleryZone) galleryZone.style.display = is3dActive ? "none" : "";
     });
   }
 })();
