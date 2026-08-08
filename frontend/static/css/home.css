@@ -310,8 +310,8 @@ body.landing-page .space-card-title {
 }
 
 .space-card-img {
-    width: 56px;
-    height: 56px;
+     width: 50%;
+    aspect-ratio: 1 / 1;
     flex-shrink: 0;
     border-radius: 8px;
     overflow: hidden;
