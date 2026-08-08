@@ -13,7 +13,7 @@
     background: rgba(6, 8, 12, 0.92);
     -webkit-backdrop-filter: blur(20px) saturate(150%);
     backdrop-filter: blur(20px) saturate(150%);
-    padding: 3rem 4.5rem 4.5rem;
+    overflow: hidden;
 }
 
 .inspo-lightbox.is-open {
@@ -21,33 +21,40 @@
 }
 
 .inspo-lightbox-figure {
+    position: absolute;
+    inset: 0;
     margin: 0;
-    max-width: 100%;
-    max-height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.9rem;
+    display: block;
+    max-width: none;
+    max-height: none;
 }
 
 .inspo-lightbox-img {
-    max-width: 100%;
-    max-height: calc(100vh - 11rem);
-    object-fit: contain;
-    border-radius: 16px;
-    box-shadow:
-        0 30px 80px rgba(0, 0, 0, 0.65),
-        inset 0 1px 0 rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(255, 255, 255, 0.03);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .inspo-lightbox-caption {
-    font-size: 0.9rem;
-    color: #c9d2dc;
-    text-align: center;
+    position: absolute;
+    bottom: 4.5rem;
+    left: 50%;
+    transform: translateX(-50%);
     max-width: 80vw;
+    font-size: 0.9rem;
+    color: #f2f5f8;
+    text-align: center;
+    background: rgba(10, 13, 18, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    padding: 0.45rem 1.1rem;
+    border-radius: 20px;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    z-index: 5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .inspo-lightbox-close {
@@ -58,7 +65,7 @@
     height: 44px;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.16);
-    background: rgba(255, 255, 255, 0.07);
+    background: rgba(10, 13, 18, 0.5);
     color: #f2f5f8;
     font-size: 1.1rem;
     display: flex;
@@ -66,10 +73,11 @@
     justify-content: center;
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    z-index: 5;
 }
 
 .inspo-lightbox-close:hover {
-    background: rgba(239, 68, 68, 0.22);
+    background: rgba(239, 68, 68, 0.3);
     border-color: rgba(239, 68, 68, 0.5);
     transform: rotate(90deg);
 }
@@ -82,7 +90,7 @@
     height: 52px;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.16);
-    background: rgba(255, 255, 255, 0.07);
+    background: rgba(10, 13, 18, 0.5);
     color: #f2f5f8;
     font-size: 1.15rem;
     display: flex;
@@ -90,7 +98,7 @@
     justify-content: center;
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    z-index: 2;
+    z-index: 5;
 }
 
 .inspo-lightbox-nav:hover {
@@ -148,9 +156,6 @@
 }
 
 @media (max-width: 576px) {
-    .inspo-lightbox {
-        padding: 3rem 1.1rem 4rem;
-    }
     .inspo-lightbox-prev {
         left: 0.5rem;
     }
@@ -164,5 +169,10 @@
     .inspo-lightbox-close {
         top: 1rem;
         right: 1rem;
+    }
+    .inspo-lightbox-caption {
+        bottom: 3.5rem;
+        font-size: 0.8rem;
+        max-width: 68vw;
     }
 }
