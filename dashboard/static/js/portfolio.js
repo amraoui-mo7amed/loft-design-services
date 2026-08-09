@@ -1,26 +1,3 @@
-function compressImage(file, maxW, maxH, quality, callback) {
-  var reader = new FileReader();
-  reader.onload = function (e) {
-    var img = new Image();
-    img.onload = function () {
-      var w = img.width, h = img.height;
-      if (w > maxW) { h = h * maxW / w; w = maxW; }
-      if (h > maxH) { w = w * maxH / h; h = maxH; }
-      var canvas = document.createElement("canvas");
-      canvas.width = w;
-      canvas.height = h;
-      var ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, w, h);
-      canvas.toBlob(function (blob) {
-        blob.name = file.name.replace(/\.[^.]+$/, ".jpg");
-        callback(blob);
-      }, "image/jpeg", quality);
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
 function showSpinner(el) {
   var prog = el.querySelector(".upload-progress");
   if (prog) prog.classList.add("active");
@@ -65,13 +42,8 @@ function hideSpinner(el) {
 
     function handleThumbFile(file) {
       showSpinner(thumbPreview || thumbZone);
-      compressImage(file, 800, 600, 0.82, function (compressed) {
-        var container = new DataTransfer();
-        container.items.add(new File([compressed], file.name, { type: "image/jpeg" }));
-        thumbInput.files = container.files;
-        hideSpinner(thumbPreview || thumbZone);
-        showThumbPreview(compressed);
-      });
+      showThumbPreview(file);
+      hideSpinner(thumbPreview || thumbZone);
     }
 
     function showThumbPreview(file) {
@@ -143,7 +115,7 @@ function hideSpinner(el) {
   var galleryZone = document.getElementById("galleryZone");
   var galleryInput = document.getElementById("galleryInput");
   var galleryPreview = document.getElementById("galleryPreview");
-  var pendingCompressions = 0;
+  var pendingGalleryFiles = [];
 
   if (galleryZone && galleryInput) {
     galleryZone.addEventListener("click", function () { galleryInput.click(); });
@@ -167,18 +139,12 @@ function hideSpinner(el) {
 
     function addGalleryFiles(files) {
       showSpinner(galleryZone);
-      pendingCompressions = files.length;
-
       Array.from(files).forEach(function (file) {
-        compressImage(file, 1920, 1080, 0.82, function (compressed) {
-          showGalleryPreview(compressed);
-          pendingCompressions--;
-          if (pendingCompressions <= 0) {
-            rebuildGalleryFileList();
-            hideSpinner(galleryZone);
-          }
-        });
+        pendingGalleryFiles.push(file);
+        showGalleryPreview(file);
       });
+      rebuildGalleryFileList();
+      hideSpinner(galleryZone);
     }
 
     function showGalleryPreview(file) {
@@ -190,6 +156,8 @@ function hideSpinner(el) {
         + '<button type="button" class="preview-remove" title="Remove">&times;</button>';
       div.querySelector(".preview-remove").addEventListener("click", function () {
         div.remove();
+        var idx = pendingGalleryFiles.indexOf(file);
+        if (idx !== -1) pendingGalleryFiles.splice(idx, 1);
         rebuildGalleryFileList();
       });
       galleryPreview.appendChild(div);
@@ -197,22 +165,11 @@ function hideSpinner(el) {
 
     function rebuildGalleryFileList() {
       if (!galleryPreview || !galleryInput) return;
-      var items = galleryPreview.querySelectorAll(".preview-item");
-      if (!items.length) { galleryInput.files = new DataTransfer().files; return; }
       var container = new DataTransfer();
-      var pending = 0;
-      items.forEach(function (item) {
-        var img = item.querySelector("img");
-        if (img && img.src.startsWith("blob:")) {
-          pending++;
-          fetch(img.src).then(function (r) { return r.blob(); }).then(function (blob) {
-            container.items.add(new File([blob], "gallery.jpg", { type: "image/jpeg" }));
-            pending--;
-            if (pending <= 0) galleryInput.files = container.files;
-          });
-        }
+      pendingGalleryFiles.forEach(function (file) {
+        container.items.add(file);
       });
-      if (!pending) galleryInput.files = container.files;
+      galleryInput.files = container.files;
     }
   }
 

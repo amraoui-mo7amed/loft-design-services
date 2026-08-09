@@ -1,6 +1,8 @@
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
+import hashlib
 import json
 
 
@@ -63,6 +65,7 @@ class Space(models.Model):
                 "id": img.pk,
                 "url": img.image.url,
                 "is_thumbnail": img.pk == thumb_id,
+                "hash": img.content_hash,
             }
             for img in images
         ]
@@ -79,14 +82,42 @@ class SpaceImage(models.Model):
     )
     image = models.ImageField(upload_to="spaces/gallery/", verbose_name=_("Image"))
     is_thumbnail = models.BooleanField(default=False, verbose_name=_("Is Thumbnail"))
+    content_hash = models.CharField(max_length=64, blank=True, default="", editable=False, verbose_name=_("Content Hash"))
 
     class Meta:
         verbose_name = _("Space Image")
         verbose_name_plural = _("Space Images")
         ordering = ["id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["space", "content_hash"],
+                condition=~Q(content_hash=""),
+                name="unique_space_image_content_hash",
+            ),
+        ]
 
     def __str__(self):
         return f"Image for {self.space.name}"
+
+    def save(self, *args, **kwargs):
+        if not self.content_hash and self.image:
+            try:
+                self.image.seek(0)
+                self.content_hash = hashlib.sha256(self.image.read()).hexdigest()
+                self.image.seek(0)
+            except Exception:
+                pass
+        super().save(*args, **kwargs)
+
+    @staticmethod
+    def compute_hash(uploaded_file):
+        try:
+            uploaded_file.seek(0)
+            digest = hashlib.sha256(uploaded_file.read()).hexdigest()
+            uploaded_file.seek(0)
+            return digest
+        except Exception:
+            return ""
 
 
 class ProjectTypeSpace(models.Model):

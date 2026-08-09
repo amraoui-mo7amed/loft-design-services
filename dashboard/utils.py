@@ -5,10 +5,15 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.db import IntegrityError
+from django.core.files.base import ContentFile
 from django_eventstream import send_event
 from .models import Notification
+import os
 import re
 import logging
+from io import BytesIO
+
+from PIL import Image, ImageOps
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +21,7 @@ logger = logging.getLogger(__name__)
 from decouple import config
 
 
-HUMAN_ERROR_MAP = {
-    "dashboard_projecttype_slug_key": _("A project type with this name already exists."),
+HUMAN_ERROR_MAP = {    "dashboard_projecttype_slug_key": _("A project type with this name already exists."),
     "dashboard_space_slug_key": _("A space with this name already exists."),
     "dashboard_designoption_slug_key": _("A design option with this name already exists."),
     "dashboard_stylecategory_slug_key": _("A style category with this name already exists."),
@@ -47,6 +51,48 @@ def humanize_error(e):
         field_name = sqlite_match.group(1).replace("_", " ").title()
         return [_("%(field)s already exists.") % {"field": field_name}]
     return [_("A record with the same value already exists.")]
+
+
+def optimize_image(uploaded_file, max_dimension=1920, quality=0.9):
+    """
+    Re-encode an uploaded image with Pillow preserving format/alpha and
+    a high quality. Returns a ContentFile; falls back to the original file
+    on any processing error.
+    """
+    try:
+        img = Image.open(uploaded_file)
+        img = ImageOps.exif_transpose(img)
+        img.load()
+
+        original_format = (img.format or "JPEG").upper()
+        has_alpha = img.mode in ("RGBA", "LA") or (
+            img.mode == "P" and "transparency" in img.info
+        )
+
+        if img.width > max_dimension or img.height > max_dimension:
+            img.thumbnail((max_dimension, max_dimension), Image.LANCZOS)
+
+        buffer = BytesIO()
+        if original_format == "PNG" or has_alpha:
+            if img.mode != "RGBA":
+                img = img.convert("RGBA")
+            img.save(buffer, "PNG", optimize=True)
+            ext = ".png"
+            content_type = "image/png"
+        else:
+            if img.mode not in ("RGB", "L"):
+                img = img.convert("RGB")
+            img.save(buffer, "JPEG", quality=int(quality * 100), optimize=True, progressive=True)
+            ext = ".jpg"
+            content_type = "image/jpeg"
+
+        buffer.seek(0)
+        base = os.path.splitext(os.path.basename(uploaded_file.name or "image"))[0]
+        return ContentFile(buffer.getvalue(), name=f"{base}{ext}")
+    except Exception:
+        uploaded_file.seek(0)
+        return uploaded_file
+
 
 
 

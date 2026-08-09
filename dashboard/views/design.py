@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 from django.db import transaction
 from django.db.models import Count
+from django.db import IntegrityError
 
 from ..utils import humanize_error
 from ..decorator import admin_required, with_pagination
@@ -38,8 +39,18 @@ def _create_option(name, description=""):
 
 
 def _handle_space_gallery(space, files, delete_ids, thumbnail_image_id=None):
+    existing_hashes = set(
+        space.gallery_images.exclude(content_hash="").values_list("content_hash", flat=True)
+    )
     for f in files:
-        SpaceImage.objects.create(space=space, image=f)
+        digest = SpaceImage.compute_hash(f)
+        if not digest or digest in existing_hashes:
+            continue
+        try:
+            SpaceImage.objects.create(space=space, image=f, content_hash=digest)
+            existing_hashes.add(digest)
+        except IntegrityError:
+            continue
     if delete_ids:
         SpaceImage.objects.filter(space=space, pk__in=delete_ids).delete()
     if thumbnail_image_id and SpaceImage.objects.filter(space=space, pk=thumbnail_image_id).exists():

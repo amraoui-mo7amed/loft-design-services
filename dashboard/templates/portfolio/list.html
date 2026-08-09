@@ -31,51 +31,41 @@
 </div>
 
 {% if page_obj.object_list %}
-<div class="editorial-grid">
+<div class="editorial-grid portfolio-card-grid">
   {% for portfolio in page_obj %}
-  <div class="editorial-item" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|stringformat:'i'|slice:':1' }}0">
-    <div class="editorial-img-container">
+  <div class="portfolio-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|stringformat:'i'|slice:':1' }}0">
+    <div class="portfolio-card-img">
       {% if portfolio.thumbnail %}
       <img src="{{ portfolio.thumbnail.url }}" alt="{{ portfolio.title }}" loading="lazy">
       {% else %}
-      <div class="editorial-img-fallback"><i class="fas fa-image"></i></div>
-      {% endif %}
-      {% if portfolio.is_featured %}
-      <span class="editorial-featured-badge">{% trans "Featured" %}</span>
+      <div class="portfolio-card-fallback"><i class="fas fa-image"></i></div>
       {% endif %}
     </div>
-    <div class="editorial-meta-bar">
+    {% if portfolio.is_featured %}
+    <span class="portfolio-card-featured">{% trans "Featured" %}</span>
+    {% endif %}
+    <div class="portfolio-card-meta">
       {% if portfolio.model_3d %}
-      <span class="editorial-meta-3d"><i class="fas fa-cube"></i> 3D</span>
+      <span class="portfolio-card-meta-3d" title="{% trans '3D Model' %}"><i class="fas fa-cube"></i> 3D</span>
       {% endif %}
-      <span><i class="far fa-images"></i> {{ portfolio.gallery_images.all|length }}</span>
-      <span><i class="far fa-calendar-alt"></i> {{ portfolio.created_at|date:"M d, Y" }}</span>
+      <span title="{% trans 'Gallery images' %}"><i class="far fa-images"></i> {{ portfolio.gallery_images.all|length }}</span>
+      <span title="{% trans 'Created' %}"><i class="far fa-calendar-alt"></i> {{ portfolio.created_at|date:"M d, Y" }}</span>
     </div>
-    <div class="editorial-content">
+    <div class="portfolio-card-body">
       <h5>{{ portfolio.title }}</h5>
-      <p>{{ portfolio.description|truncatewords:18 }}</p>
-      {% with tags=portfolio.tags|split:"," %}
-      {% if tags %}
-      <div class="editorial-tags">
-        {% for tag in tags|slice:":4" %}
-        <span>{{ tag|truncatechars:14 }}</span>
-        {% endfor %}
-      </div>
-      {% endif %}
-      {% endwith %}
-      <div class="editorial-card-actions">
-        <a href="{% url 'dash:portfolio_update' portfolio.pk %}" class="editorial-card-action" title="{% trans 'Edit' %}">
-          <i class="fas fa-pen"></i> {% trans "Edit" %}
-        </a>
-        <button class="editorial-card-action editorial-card-action--delete delete_button"
-          title="{% trans 'Delete' %}"
-          data-delete-url="{% url 'dash:portfolio_delete' portfolio.pk %}"
-          data-csrf-token="{{ csrf_token }}"
-          data-swal-title="{% trans 'Delete Portfolio?' %}"
-          data-swal-text="{% trans 'This will permanently delete this portfolio and all its images.' %}">
-          <i class="fas fa-trash"></i> {% trans "Delete" %}
-        </button>
-      </div>
+    </div>
+    <div class="portfolio-card-actions">
+      <a href="{% url 'dash:portfolio_update' portfolio.pk %}" class="portfolio-card-action" title="{% trans 'Edit' %}">
+        <i class="fas fa-pen"></i>
+      </a>
+      <button class="portfolio-card-action portfolio-card-action--delete delete_button"
+        title="{% trans 'Delete' %}"
+        data-delete-url="{% url 'dash:portfolio_delete' portfolio.pk %}"
+        data-csrf-token="{{ csrf_token }}"
+        data-swal-title="{% trans 'Delete Portfolio?' %}"
+        data-swal-text="{% trans 'This will permanently delete this portfolio and all its images.' %}">
+        <i class="fas fa-trash"></i>
+      </button>
     </div>
   </div>
   {% endfor %}

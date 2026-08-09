@@ -6,6 +6,11 @@ from django.db import transaction
 
 from ..decorator import admin_required, with_pagination
 from ..models import Portfolio, PortfolioGallery
+from ..utils import optimize_image
+
+
+THUMBNAIL_MAX = 1600
+GALLERY_MAX = 2560
 
 
 @admin_required
@@ -45,12 +50,13 @@ def portfolio_create(request):
                     external_link=external_link,
                     is_featured=is_featured,
                     model_3d=model_3d,
-                    thumbnail=thumbnail,
+                    thumbnail=optimize_image(thumbnail, max_dimension=THUMBNAIL_MAX),
                 )
 
                 gallery_images = request.FILES.getlist("gallery_images")
                 for image in gallery_images:
-                    PortfolioGallery.objects.create(portfolio=portfolio, image=image)
+                    processed = optimize_image(image, max_dimension=GALLERY_MAX)
+                    PortfolioGallery.objects.create(portfolio=portfolio, image=processed)
 
             return JsonResponse({
                 "success": True,
@@ -90,7 +96,7 @@ def portfolio_update(request, pk):
                 portfolio.external_link = external_link
                 portfolio.is_featured = is_featured
                 if thumbnail:
-                    portfolio.thumbnail = thumbnail
+                    portfolio.thumbnail = optimize_image(thumbnail, max_dimension=THUMBNAIL_MAX)
                 if model_3d:
                     portfolio.model_3d = model_3d
                 elif clear_model_3d and portfolio.model_3d:
@@ -104,7 +110,8 @@ def portfolio_update(request, pk):
 
                 gallery_images = request.FILES.getlist("gallery_images")
                 for image in gallery_images:
-                    PortfolioGallery.objects.create(portfolio=portfolio, image=image)
+                    processed = optimize_image(image, max_dimension=GALLERY_MAX)
+                    PortfolioGallery.objects.create(portfolio=portfolio, image=processed)
 
             return JsonResponse({
                 "success": True,
