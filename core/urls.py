@@ -9,7 +9,6 @@ from frontend.views import inquiry
 
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
     path("auth/", include("user_auth.urls", namespace="user_auth")),
     path("dashboard/", include("dashboard.urls", namespace="dash")),
     path("", include("frontend.urls")),
