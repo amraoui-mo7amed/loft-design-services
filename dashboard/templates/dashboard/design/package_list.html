@@ -39,11 +39,35 @@
                         </div>
                         <div>
                             <a href="{% url 'dash:package_detail' pkg.pk %}" class="text-decoration-none" style="color:inherit;">
-                                <h5 class="mb-0">{{ pkg.name }}</h5>
+                                <h5 class="mb-0">
+                                    {{ pkg.name }}
+                                    {% if pkg.is_default %}
+                                    <span class="badge rounded-pill ms-1" style="font-size:0.62rem;background:rgba(255,214,90,0.16);color:#b8860b;">
+                                        <i class="fas fa-star me-1" style="font-size:0.55rem;"></i>{% trans "Default" %}
+                                    </span>
+                                    {% endif %}
+                                </h5>
                             </a>
                         </div>
                     </div>
-                    <div class="pt-actions">
+                    <div class="pt-actions d-flex align-items-center gap-1">
+                        <button type="button"
+                                class="btn pt-feature-btn rounded-3 default-package-btn{% if pkg.is_default %} is-featured{% endif %}"
+                                title="{% if pkg.is_default %}{% trans 'Remove as default' %}{% else %}{% trans 'Set as default' %}{% endif %}"
+                                data-default-url="{% url 'dash:package_set_default' pkg.pk %}"
+                                data-csrf-token="{{ csrf_token }}"
+                                data-is-default="{{ pkg.is_default|yesno:'true,false' }}"
+                                data-title-set="{% trans 'Set as default?' %}"
+                                data-title-clear="{% trans 'Remove as default?' %}"
+                                data-text-set="{% trans 'This package will be shown as the main basic pack on the request page.' %}"
+                                data-text-clear="{% trans 'This package will no longer be the default basic pack.' %}"
+                                data-confirm-set="{% trans 'Yes, make default' %}"
+                                data-confirm-clear="{% trans 'Yes, unset' %}"
+                                data-cancel-text="{% trans 'Cancel' %}"
+                                data-error-title="{% trans 'Error' %}"
+                                data-error-text="{% trans 'Operation failed' %}">
+                            <i class="fas {% if pkg.is_default %}fa-star{% else %}fa-star-half-alt{% endif %}"></i>
+                        </button>
                         <a href="{% url 'dash:package_detail' pkg.pk %}" class="btn btn-outline-primary rounded-3" title="{% trans 'Manage' %}">
                             <i class="fas fa-cog"></i>
                         </a>
@@ -122,4 +146,5 @@
 
 {% block extra_js %}
 <script src="{% static 'js/catalog_modal.js' %}?v={{ ASSET_VERSION }}"></script>
+<script src="{% static 'js/package_default.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

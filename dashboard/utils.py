@@ -7,9 +7,10 @@ from django.utils.translation import gettext as _
 from django.db import IntegrityError
 from django.core.files.base import ContentFile
 from django_eventstream import send_event
-from .models import Notification
+from .models import Notification, DesignPackage
 import os
 import re
+import json
 import logging
 from io import BytesIO
 
@@ -32,6 +33,39 @@ HUMAN_ERROR_MAP = {    "dashboard_projecttype_slug_key": _("A project type with 
     "dashboard_product_sku_key": _("A product with this SKU already exists."),
     "dashboard_spaceproductrecommendation_space_id_product_id_": _("This product is already recommended for this space."),
 }
+
+def build_packages_context():
+    """Shared package payload used by the wizard step 4 and the public pack page."""
+    packages = DesignPackage.objects.prefetch_related("package_services__option__category")
+    default_pkg = packages.filter(is_default=True).first()
+    package_data = []
+    for pkg in packages:
+        if default_pkg and pkg.pk == default_pkg.pk:
+            continue
+        services = [
+            {"id": ps.option_id, "name": ps.option.name, "price": str(ps.price or 0)}
+            for ps in pkg.package_services.all()
+        ]
+        package_data.append({
+            "pkg": pkg,
+            "total_price": sum(ps.price or 0 for ps in pkg.package_services.all()),
+            "services_json": json.dumps(services),
+        })
+    default_services = []
+    default_total = 0
+    if default_pkg:
+        default_services = [
+            {"id": ps.option_id, "name": ps.option.name, "price": str(ps.price or 0)}
+            for ps in default_pkg.package_services.all()
+        ]
+        default_total = sum(ps.price or 0 for ps in default_pkg.package_services.all())
+    return {
+        "default_pkg": default_pkg,
+        "default_total": default_total,
+        "default_services_json": json.dumps(default_services),
+        "package_data": package_data,
+    }
+
 
 def humanize_error(e):
     if not isinstance(e, IntegrityError):

@@ -38,6 +38,7 @@ class PackageService(models.Model):
 
 class DesignPackage(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("Name"))
+    is_default = models.BooleanField(default=False, verbose_name=_("Default Package"))
     delivery_time_days = models.PositiveIntegerField(default=7, verbose_name=_("Delivery Time (days)"))
     price_multiplier = models.DecimalField(max_digits=5, decimal_places=2, default=1.0, verbose_name=_("Price Multiplier"))
     services_after_payment = models.TextField(blank=True, verbose_name=_("Services After Payment"))
@@ -53,6 +54,11 @@ class DesignPackage(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if self.is_default:
+            DesignPackage.objects.filter(is_default=True).exclude(pk=self.pk).update(is_default=False)
+        super().save(*args, **kwargs)
 
     @property
     def total_delivery_days(self):

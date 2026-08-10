@@ -377,8 +377,8 @@ body {
 }
 
 .btn-outline-primary {
-  color: #6c757d;
-  border-color: #d4d4d4;
+  color: var(--brand-primary);
+  border-color: var(--brand-primary);
   background: transparent;
 }
 
@@ -399,8 +399,8 @@ body {
 
 .btn-outline-primary:disabled,
 .btn-outline-primary.disabled {
-  border-color: #d4c48a !important;
-  color: #d4c48a !important;
+  border-color: var(--brand-primary) !important;
+  color: var(--brand-primary) !important;
   opacity: 0.65;
   pointer-events: none;
   background: transparent !important;

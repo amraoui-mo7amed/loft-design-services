@@ -111,6 +111,7 @@
                 <h2 class="loft-section-title reveal">{% trans "Choose Your Spaces" %}</h2>
                 <p class="loft-section-sub reveal">{% trans "Select the rooms you want to design and get an instant price" %}</p>
             </div>
+
             <div class="row g-4 justify-content-center" id="spacesGrid">
                 {% for space in spaces %}
                 <div class="col-6 col-md-4 col-lg-3">
@@ -136,16 +137,18 @@
                 {% endfor %}
             </div>
 
+            <div class="floating-total" id="floatingTotalBadge">
+                <span class="floating-total-value" id="floatingTotalValue">
+                    <span class="floating-total-amount" id="floatingTotal">0</span>
+                    <span class="floating-total-currency">DA</span>
+                </span>
+            </div>
+
             <div class="floating-bottom-bar" id="floatingBar">
                 <div class="floating-bottom-inner">
-                    <div class="floating-total">
-                        <span class="floating-total-label">{% trans "Total" %}</span>
-                        <span class="floating-total-amount" id="floatingTotal">0</span>
-                        <span class="floating-total-currency">DA</span>
-                    </div>
                     <div class="floating-actions">
-                        <a href="{% url 'design_service' %}" class="btn btn-outline-light rounded-pill px-4 fw-bold">{% trans "Create a custom project" %}</a>
-                        <button class="btn btn-primary rounded-pill px-4 fw-bold shadow" id="continueBtn">{% trans "Continue" %}</button>
+                        <a href="{% url 'design_service' %}" class="btn btn-outline-primary rounded px-4 fw-bold">{% trans "Create a custom project" %}</a>
+                        <button class="btn btn-primary rounded px-4 fw-bold shadow" id="continueBtn">{% trans "Continue" %}</button>
                     </div>
                 </div>
             </div>
@@ -201,60 +204,6 @@
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-sm btn-dark rounded-3 px-4" id="inspirationSubmitBtn">{% trans "Continue" %}</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Package Selection Modal -->
-    <div class="modal fade" id="homePackageModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold" id="homePackageModalTitle">{% trans "Choose a Package" %}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="text-muted mb-4 home-pkg-hint">{% trans "Pick a package to add to your request, or continue without one." %}</p>
-                    <div class="row g-3" id="homePackageGrid">
-                        {% for pkg in packages %}
-                        <div class="col-md-6 col-lg-4">
-                            <div class="home-pkg-card" data-package-id="{{ pkg.id }}" data-package-name="{{ pkg.name }}" data-package-price="{{ pkg.total_price }}">
-                                <div class="home-pkg-head">
-                                    <span class="home-pkg-name">{{ pkg.name }}</span>
-                                </div>
-                                <div class="home-pkg-body">
-                                    <div class="home-pkg-price">
-                                        <span class="home-pkg-price-value">{{ pkg.total_price|floatformat:"0u" }}</span>
-                                        <span class="home-pkg-price-currency">DA</span>
-                                    </div>
-                                    <div class="home-pkg-stats">
-                                        <span class="home-pkg-stat"><i class="fas fa-calendar-alt"></i> {{ pkg.delivery_days }} {% trans "days" %}</span>
-                                        <span class="home-pkg-stat"><i class="fas fa-tasks"></i> {{ pkg.services_count }} {% trans "services" %}</span>
-                                    </div>
-                                    {% if pkg.services %}
-                                    <div class="home-pkg-features">
-                                        {% for svc in pkg.services %}
-                                        <div class="home-pkg-feature"><i class="fas fa-check-circle"></i> {{ svc.name }}</div>
-                                        {% endfor %}
-                                        {% if pkg.services_more %}
-                                        <div class="home-pkg-more">+{{ pkg.services_more }} {% trans "more" %}</div>
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                <div class="home-pkg-action">
-                                    <button type="button" class="home-pkg-select-btn" data-select="{{ pkg.id }}" data-name="{{ pkg.name }}" data-price="{{ pkg.total_price }}">{% trans "Add" %} {{ pkg.name }}</button>
-                                </div>
-                            </div>
-                        </div>
-                        {% empty %}
-                        <div class="col-12 text-center text-muted py-4">{% trans "No packages available." %}</div>
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-sm btn-light rounded-3 px-4 home-pkg-skip">{% trans "Continue without package" %}</button>
                 </div>
             </div>
         </div>

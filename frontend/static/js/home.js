@@ -1,8 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
     var floatingTotal = document.getElementById("floatingTotal");
+    var floatingBadge = document.getElementById("floatingTotalBadge");
+    var spacesSection = document.getElementById("spaces-section");
     var continueBtn = document.getElementById("continueBtn");
     var checkboxes = document.querySelectorAll(".space-checkbox");
     var spaceCards = document.querySelectorAll(".space-card");
+    var currentTotal = 0;
+    var sectionInView = true;
 
     function formatNumber(num) {
         return Math.round(num).toString();
@@ -16,6 +20,12 @@ document.addEventListener("DOMContentLoaded", function () {
         return ids;
     }
 
+    function updateFloatingBadge() {
+        if (!floatingBadge) return;
+        var show = sectionInView && currentTotal > 0;
+        floatingBadge.classList.toggle("is-visible", show);
+    }
+
     function updateTotal() {
         var total = 0;
         checkboxes.forEach(function (cb) {
@@ -24,8 +34,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 total += parseFloat(card.dataset.price) || 0;
             }
         });
+        currentTotal = total;
         floatingTotal.textContent = formatNumber(total);
+        updateFloatingBadge();
     }
+
+    if (spacesSection && floatingBadge && "IntersectionObserver" in window) {
+        new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                sectionInView = entry.isIntersecting;
+                updateFloatingBadge();
+            });
+        }, { threshold: 0.05 }).observe(spacesSection);
+    }
+
+    updateFloatingBadge();
 
     checkboxes.forEach(function (cb) {
         cb.addEventListener("change", function () {
@@ -48,9 +71,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ── Inspiration Modals ──
 
+    function goToPackSelect() {
+        var ids = getSelectedSpaces();
+        window.location.href = "/order/pack/?spaces=" + ids.join(",");
+    }
+
     function showSequentialModals(spacesData, index) {
         if (index >= spacesData.length) {
-            showHomePackageModal();
+            goToPackSelect();
             return;
         }
 
@@ -163,7 +191,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
 
                 if (spacesData.length === 0) {
-                    showHomePackageModal();
+                    goToPackSelect();
                     return;
                 }
 
@@ -172,55 +200,11 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(function () {
                 continueBtn.disabled = false;
                 continueBtn.innerHTML = "Continue";
-                showHomePackageModal();
+                goToPackSelect();
             });
     });
 
-    // ── Home Package Selection ──
-    var selectedHomePackage = null;
-
-    function proceedToOrder() {
-        var ids = getSelectedSpaces();
-        var pkg = selectedHomePackage ? "&pkg=" + encodeURIComponent(selectedHomePackage.id) : "";
-        window.location.href = "/order/?spaces=" + ids.join(",") + pkg;
-    }
-
-    function showHomePackageModal() {
-        var modalEl = document.getElementById("homePackageModal");
-        if (!modalEl) {
-            proceedToOrder();
-            return;
-        }
-        var bsModal = new bootstrap.Modal(modalEl, { backdrop: "static", keyboard: false });
-        bsModal.show();
-    }
-
-    var homePkgGrid = document.getElementById("homePackageGrid");
-    if (homePkgGrid) {
-        homePkgGrid.addEventListener("click", function (e) {
-            var btn = e.target.closest(".home-pkg-select-btn");
-            if (!btn) return;
-            selectedHomePackage = { id: btn.dataset.select, name: btn.dataset.name, price: btn.dataset.price };
-            var card = btn.closest(".home-pkg-card");
-            if (card) {
-                homePkgGrid.querySelectorAll(".home-pkg-card").forEach(function (c) { c.classList.remove("selected"); });
-                card.classList.add("selected");
-            }
-            var m = bootstrap.Modal.getInstance(document.getElementById("homePackageModal"));
-            if (m) m.hide();
-            proceedToOrder();
-        });
-    }
-
-    var homePkgSkip = document.querySelector(".home-pkg-skip");
-    if (homePkgSkip) {
-        homePkgSkip.addEventListener("click", function () {
-            selectedHomePackage = null;
-            var m = bootstrap.Modal.getInstance(document.getElementById("homePackageModal"));
-            if (m) m.hide();
-            proceedToOrder();
-        });
-    }
+    // ── Pack selection handled on /order/pack/ ──
 
     // ── Image Error Handling ──
     document.querySelectorAll("[data-img-error]").forEach(function (img) {

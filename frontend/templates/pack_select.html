@@ -1,0 +1,78 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block body_class %}pack-select-page{% endblock body_class %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static "css/wizard.css" %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet" href="{% static "css/pack_select.css" %}?v={{ ASSET_VERSION }}">
+{% endblock extra_css %}
+
+{% block nav %}{% endblock nav %}
+{% block sidebar %}{% endblock sidebar %}
+
+{% block content %}
+<div class="pack-select-page-wrap" id="packSelectPage"
+     data-subtotal="{{ subtotal|floatformat:'0' }}"
+     data-spaces="{{ space_ids }}">
+
+  <div class="pack-select-header">
+    <div class="container">
+      <div class="pack-select-topbar">
+        <a href="{% url 'frontend:home' %}" class="pack-back-link">
+          <i class="fas fa-arrow-left"></i>
+          <span>{% trans "Back to Home" %}</span>
+        </a>
+        <div class="pack-select-brand">
+          <i class="fas fa-boxes"></i>
+          <span>{% trans "Choose a Package" %}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pack-select-body">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-12 col-xl-11">
+          <div class="pack-select-intro text-center mb-4">
+            <h2 class="pack-select-title">{% trans "Pick your service package" %}</h2>
+            <p class="pack-select-sub">{% trans "Choose a package, or continue with just your spaces." %}</p>
+          </div>
+
+          {% for space in spaces %}
+          <div class="d-none" data-space-row data-space-id="{{ space.id }}"
+               data-space-name="{{ space.name }}"
+               data-space-price="{{ space.base_price|floatformat:'0' }}"></div>
+          {% endfor %}
+
+          {% include "dashboard/wizard/step4_packages.html" %}
+
+          <div class="pack-select-footerbar">
+            <div class="pack-select-total">
+              <div class="pack-select-total-label">{% trans "Estimated Total" %}</div>
+              <div class="pack-select-total-line">
+                <span id="packSubtotal">0 DA</span>
+                <span class="pack-select-total-sep">+</span>
+                <span id="packPkgPrice">0 DA</span>
+              </div>
+            </div>
+            <div class="pack-select-cta">
+              <button type="button" class="btn btn-primary" id="packContinueBtn">
+                {% trans "Continue to Order" %} <i class="fas fa-arrow-right ms-1"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block footer %}{% endblock footer %}
+
+{% block js %}
+<script src="{% static "js/pack_select.js" %}?v={{ ASSET_VERSION }}"></script>
+{% endblock js %}

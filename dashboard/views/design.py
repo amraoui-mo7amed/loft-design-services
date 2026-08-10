@@ -454,3 +454,29 @@ def package_delete(request, pk):
         except Exception as e:
             return JsonResponse({"success": False, "errors": humanize_error(e)})
     return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
+
+
+@admin_required
+def package_set_default(request, pk):
+    obj = get_object_or_404(DesignPackage, pk=pk)
+    if request.method == "POST":
+        action = request.POST.get("action")
+        try:
+            with transaction.atomic():
+                if action == "set":
+                    obj.is_default = True
+                    obj.save()
+                    message = _("“%(name)s” is now the default package.") % {"name": obj.name}
+                else:
+                    obj.is_default = False
+                    obj.save(update_fields=["is_default"])
+                    message = _("“%(name)s” is no longer the default package.") % {"name": obj.name}
+            return JsonResponse({
+                "success": True,
+                "message": message,
+                "is_default": obj.is_default,
+                "default_pk": obj.pk if obj.is_default else None,
+            })
+        except Exception as e:
+            return JsonResponse({"success": False, "errors": humanize_error(e)})
+    return JsonResponse({"success": False, "errors": [_("Invalid request.")]})

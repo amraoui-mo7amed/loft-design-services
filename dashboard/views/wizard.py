@@ -14,6 +14,7 @@ from ..models import (
 )
 from ..price_engine import calculate_full_price
 from ..pdf_generator import render_facturation_pdf_bytes
+from ..utils import build_packages_context
 
 
 def wizard_container(request):
@@ -60,18 +61,8 @@ def step_combined(request):
 
 
 def step_packages(request):
-    packages = DesignPackage.objects.prefetch_related("package_services__option__category")
-    package_data = []
-    for pkg in packages:
-        total = sum(ps.price for ps in pkg.package_services.all())
-        package_data.append({
-            "pkg": pkg,
-            "total_price": total,
-        })
-    return render(request, "dashboard/wizard/step4_packages.html", {
-        "packages": packages,
-        "package_data": package_data,
-    })
+    context = build_packages_context()
+    return render(request, "dashboard/wizard/step4_packages.html", context)
 
 
 def step_inspirations(request):

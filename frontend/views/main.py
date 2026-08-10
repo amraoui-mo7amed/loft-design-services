@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from dashboard.models import Portfolio, ProjectType, Space, DesignPackage
+from dashboard.utils import build_packages_context
 
 
 def home_view(request):
@@ -78,3 +79,20 @@ def order_view(request):
         "total": total,
         "package": package,
     })
+
+
+def pack_select_view(request):
+    space_ids = [s for s in request.GET.get("spaces", "").split(",") if s.isdigit()]
+    spaces = Space.objects.filter(id__in=space_ids)
+    subtotal = sum(float(s.base_price) for s in spaces)
+    spaces_data = [
+        {"id": s.id, "name": s.name, "base_price": float(s.base_price)}
+        for s in spaces
+    ]
+    context = build_packages_context()
+    context.update({
+        "spaces": spaces_data,
+        "subtotal": subtotal,
+        "space_ids": ",".join(space_ids),
+    })
+    return render(request, "pack_select.html", context)

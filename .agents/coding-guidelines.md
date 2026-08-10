@@ -26,12 +26,33 @@ djlint . --reformat                        # auto-format templates
 python -m py_compile <file>.py             # quick syntax check
 python -m compileall .                     # compile all python
 
-# Run the full stack (recommended)
-docker compose up --build                  # db + redis + web (or podman-compose)
+# Run the full stack (REQUIRED for AI agents)
+podman compose up --build                  # db + redis + web (docker compose on non-podman hosts)
 ```
 
-Verify changes by hitting the podman/docker stack at `http://localhost:8000` and hard-refreshing
-(`Cmd+Shift+R`) — asset URLs are cache-busted by `ASSET_VERSION`.
+### Mandatory rule for feature AI agents: run inside the container stack
+
+**All feature AI agents MUST run Django commands (migrations, tests, seed, server) through
+the podman/docker stack — never against a bare/host `python manage.py` venv.**
+
+- Stand up the stack first: `podman compose up --build` (or `docker compose up --build`).
+- Run every Django command inside the web container, e.g.:
+  ```bash
+  # migrations / makemigrations
+  podman exec -it <web-container> python manage.py makemigrations
+  podman exec -it <web-container> python manage.py migrate
+
+  # tests (always SQLite-backed in the container)
+  podman exec -it <web-container> python manage.py test
+
+  # management commands
+  podman exec -it <web-container> python manage.py seed_catalog
+  ```
+- Do **not** rely on a local virtualenv for anything other than quick syntax checks
+  (`python -m py_compile`) — the container stack is the source of truth for DB, Redis,
+  django-eventstream and every third-party dependency.
+- Verify UI changes by hitting the podman/docker stack at `http://localhost:8000` and
+  hard-refreshing (`Cmd+Shift+R`) — asset URLs are cache-busted by `ASSET_VERSION`.
 
 ## Python / Django style
 

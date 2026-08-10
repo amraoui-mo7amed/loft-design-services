@@ -275,22 +275,36 @@
 
   function bindPackagesStep() {
     var cards = document.querySelectorAll(".pkg-card");
-    var basicCard = document.querySelector('.pkg-card[data-package-id=""]');
+    var basicCard = document.querySelector(".pkg-card.basic-card");
+    var basicPkgId = basicCard && basicCard.dataset.packageId ? basicCard.dataset.packageId : null;
+    var basicPkgPrice = basicCard ? (parseFloat(basicCard.dataset.packagePrice) || 0) : 0;
+
+    function selectBasic() {
+      cards.forEach(function (c) {
+        if (c !== basicCard) c.classList.remove("selected");
+      });
+      if (basicCard) basicCard.classList.add("selected");
+      wizardData.packageId = basicPkgId;
+      wizardData.packagePrice = basicPkgPrice;
+      var bn = basicCard ? basicCard.querySelector(".pkg-card-name") : null;
+      wizardData.packageName = bn ? bn.textContent.trim() : null;
+    }
 
     // Pre-fill each card's price = base (spaces) + package add-on on load
     renderPackageCardPrices();
 
-    // Basic is always included (auto-selected, cannot be unselected).
-    // A package card is a complementary add-on that can be toggled on/off.
+    // The basic card (default pack) is auto-selected unless the user picks another pack.
     if (wizardData.packageId) {
+      var matched = false;
       cards.forEach(function (c) {
-        if (c.dataset.packageId === wizardData.packageId) c.classList.add("selected");
+        if (c.dataset.packageId === wizardData.packageId) {
+          c.classList.add("selected");
+          matched = true;
+        }
       });
+      if (!matched) selectBasic();
     } else {
-      wizardData.packageId = null;
-      wizardData.packagePrice = 0;
-      var basicNameEl = basicCard ? basicCard.querySelector(".pkg-card-name") : null;
-      wizardData.packageName = basicNameEl ? basicNameEl.textContent.trim() : null;
+      selectBasic();
     }
 
     // Show estimate in sticky bar based on selected spaces
@@ -301,26 +315,16 @@
         if (e.target.closest(".pkg-details-btn")) return;
 
         if (this === basicCard) {
-          // Deselect any add-on package, back to basic only
-          cards.forEach(function (c) {
-            if (c !== basicCard) c.classList.remove("selected");
-          });
-          basicCard.classList.add("selected");
-          wizardData.packageId = null;
-          wizardData.packagePrice = 0;
-          wizardData.packageName = basicCard.querySelector(".pkg-card-name").textContent.trim();
+          // Back to the default pack
+          selectBasic();
         } else {
           var isActive = this.classList.contains("selected");
           cards.forEach(function (c) {
             if (c !== basicCard) c.classList.remove("selected");
           });
           if (isActive) {
-            // toggle off -> back to basic only
-            basicCard.classList.add("selected");
-            wizardData.packageId = null;
-            wizardData.packagePrice = 0;
-            var bn = basicCard.querySelector(".pkg-card-name");
-            wizardData.packageName = bn ? bn.textContent.trim() : null;
+            // toggle off -> back to the default pack
+            selectBasic();
           } else {
             this.classList.add("selected");
             wizardData.packageId = this.dataset.packageId;
@@ -446,20 +450,30 @@
     }
     html += '</div>';
 
-    // Included services for this specific package
+    // Included services for this specific package (each with its own price)
     var services = [];
     if (cardEl) {
-      cardEl.querySelectorAll(".pkg-card-feature span").forEach(function (s) {
-        services.push(s.textContent.trim());
-      });
+      if (cardEl.dataset.packageServices) {
+        try {
+          services = JSON.parse(cardEl.dataset.packageServices);
+        } catch (err) {
+          services = [];
+        }
+      } else {
+        cardEl.querySelectorAll(".pkg-card-feature span").forEach(function (s) {
+          services.push({ name: s.textContent.trim(), price: 0 });
+        });
+      }
     }
     if (services.length > 0) {
       html += '<div class="wiz-summary-card mb-3">';
       html += '  <div class="wiz-summary-title mb-2">' + packageLabel + ' — ' + "What's included" + '</div>';
-      services.forEach(function (name) {
-        html += '  <div class="d-flex align-items-center gap-2 py-1 wiz-text-sm">';
-        html += '    <i class="fas fa-check-circle" style="color:var(--wiz-success);font-size:0.6rem;flex-shrink:0;"></i>';
-        html += '    <span>' + name + '</span>';
+      services.forEach(function (s) {
+        var nm = typeof s === "string" ? s : (s.name || "");
+        var pr = typeof s === "string" ? 0 : (parseFloat(s.price) || 0);
+        html += '  <div class="d-flex justify-content-between align-items-center py-1 wiz-text-sm">';
+        html += '    <span class="d-flex align-items-center gap-2"><i class="fas fa-check-circle" style="color:var(--wiz-success);font-size:0.6rem;flex-shrink:0;"></i>' + nm + '</span>';
+        if (pr > 0) html += '    <span class="fw-bold" style="color:var(--wiz-text);">' + fmt(pr) + ' DA</span>';
         html += '  </div>';
       });
       html += '</div>';

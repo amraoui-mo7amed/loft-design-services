@@ -45,6 +45,7 @@ urlpatterns = [
     path("design/packages/<int:pk>/", design.package_detail, name="package_detail"),
     path("design/packages/<int:pk>/edit/", design.package_update, name="package_update"),
     path("design/packages/<int:pk>/delete/", design.package_delete, name="package_delete"),
+    path("design/packages/<int:pk>/default/", design.package_set_default, name="package_set_default"),
     path("design/packages/<int:pk>/options/add/", design.package_option_add, name="package_option_add"),
     path("design/packages/<int:pk>/options/<int:opt_pk>/update/", design.package_option_update, name="package_option_update"),
     path("design/packages/<int:pk>/options/<int:opt_pk>/delete/", design.package_option_delete, name="package_option_delete"),
