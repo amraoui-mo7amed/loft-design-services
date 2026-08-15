@@ -66,6 +66,9 @@ class Space(models.Model):
                 "url": img.image.url,
                 "is_thumbnail": img.pk == thumb_id,
                 "hash": img.content_hash,
+                "description": img.description,
+                "tags": img.tags,
+                "reference": img.reference,
             }
             for img in images
         ]
@@ -83,6 +86,9 @@ class SpaceImage(models.Model):
     image = models.ImageField(upload_to="spaces/gallery/", verbose_name=_("Image"))
     is_thumbnail = models.BooleanField(default=False, verbose_name=_("Is Thumbnail"))
     content_hash = models.CharField(max_length=64, blank=True, default="", editable=False, verbose_name=_("Content Hash"))
+    description = models.TextField(blank=True, default="", verbose_name=_("Description"))
+    tags = models.CharField(max_length=500, blank=True, default="", verbose_name=_("Tags"))
+    reference = models.CharField(max_length=500, blank=True, default="", verbose_name=_("Reference"))
 
     class Meta:
         verbose_name = _("Space Image")
@@ -108,6 +114,12 @@ class SpaceImage(models.Model):
             except Exception:
                 pass
         super().save(*args, **kwargs)
+        if self.image and not self.reference:
+            try:
+                self.reference = self.image.path
+                super().save(update_fields=["reference"])
+            except Exception:
+                pass
 
     @staticmethod
     def compute_hash(uploaded_file):

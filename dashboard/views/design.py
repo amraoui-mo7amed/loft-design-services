@@ -70,7 +70,7 @@ def _handle_space_gallery(space, files, delete_ids, thumbnail_image_id=None):
 @admin_required
 @with_pagination(per_page=12, template="dashboard/design/project_type_list", queryset_name="project_types")
 def project_type_list(request):
-    queryset = ProjectType.objects.annotate(space_count=Count("default_spaces"))
+    queryset = ProjectType.objects.annotate(space_count=Count("default_spaces")).order_by("name")
     return { "project_types": queryset }
 
 
@@ -177,6 +177,18 @@ def space_update(request, pk):
             with transaction.atomic():
                 obj.save()
                 _handle_space_gallery(obj, gallery_files, delete_ids, thumbnail_image_id=thumbnail_image_id)
+                for img in obj.gallery_images.all():
+                    desc_key = f"description_{img.pk}"
+                    tags_key = f"tags_{img.pk}"
+                    updated = False
+                    if desc_key in request.POST:
+                        img.description = request.POST.get(desc_key, "").strip()
+                        updated = True
+                    if tags_key in request.POST:
+                        img.tags = request.POST.get(tags_key, "").strip()
+                        updated = True
+                    if updated:
+                        img.save()
             redirect_url = reverse("dash:project_type_detail", args=[project_type_id]) if project_type_id else reverse("dash:project_type_list")
             return JsonResponse({"success": True, "message": _("Space updated successfully."), "redirect_url": redirect_url})
         except Exception as e:
@@ -326,7 +338,7 @@ def space_home_toggle(request, pk):
 @admin_required
 @with_pagination(per_page=12, template="dashboard/design/package_list", queryset_name="packages")
 def package_list(request):
-    queryset = DesignPackage.objects.prefetch_related("package_services__option__category").all()
+    queryset = DesignPackage.objects.prefetch_related("package_services__option__category").order_by("name")
     return {"packages": queryset}
 
 
@@ -339,6 +351,7 @@ def package_create(request):
         try:
             pkg = DesignPackage.objects.create(
                 name=name,
+                link=request.POST.get("link", ""),
             )
             return JsonResponse({"success": True, "message": _("Package created successfully."), "redirect_url": reverse("dash:package_detail", args=[pkg.pk])})
         except Exception as e:
@@ -351,6 +364,7 @@ def package_update(request, pk):
     obj = get_object_or_404(DesignPackage, pk=pk)
     if request.method == "POST":
         obj.name = request.POST.get("name", obj.name)
+        obj.link = request.POST.get("link", obj.link)
         try:
             obj.save()
             return JsonResponse({"success": True, "message": _("Package updated successfully."), "redirect_url": reverse("dash:package_detail", args=[obj.pk])})

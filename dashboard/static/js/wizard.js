@@ -312,7 +312,7 @@
 
     cards.forEach(function (card) {
       card.addEventListener("click", function (e) {
-        if (e.target.closest(".pkg-details-btn")) return;
+        if (e.target.closest(".pkg-details-btn") || e.target.closest("[data-video-url]")) return;
 
         if (this === basicCard) {
           // Back to the default pack

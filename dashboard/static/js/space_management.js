@@ -169,17 +169,35 @@ document.addEventListener("DOMContentLoaded", function () {
             images.forEach(function (img) {
                 var isThumb = img.is_thumbnail === true;
                 var col = document.createElement("div");
-                col.className = "col-6 col-md-4 col-lg-3";
+                col.className = "col-12 col-md-6";
                 col.innerHTML =
-                    '<div class="ptd-gallery-view-wrap position-relative">' +
-                    '<img src="' + img.url + '" alt="" class="ptd-gallery-view-img' + (isThumb ? " ptd-gallery-view-img--active" : "") + '" loading="lazy">' +
-                    (isThumb ? '<span class="ptd-thumb-badge--view">Thumbnail</span>' : "") +
-                    '<div class="form-check ptd-thumb-select">' +
-                    '<input class="form-check-input ptd-thumb-radio" type="radio" name="thumbnail_image_id" value="' + img.id + '" id="gthumb_' + img.id + '"' + (isThumb ? " checked" : "") + ">" +
-                    '<label class="form-check-label" for="gthumb_' + img.id + '" title="Set as default"></label>' +
-                    "</div>" +
-                    '<button type="button" class="ptd-gallery-del" data-img-id="' + img.id + '" title="Delete"><i class="fas fa-trash"></i></button>' +
-                    "</div>";
+                    '<div class="ptd-gallery-view-wrap position-relative p-2 border rounded-3 mb-3" style="background: rgba(255,255,255,0.03);">' +
+                      '<div class="row g-2">' +
+                        '<div class="col-4">' +
+                          '<div class="position-relative" style="aspect-ratio: 1/1; overflow: hidden; border-radius: 8px;">' +
+                            '<img src="' + img.url + '" alt="" class="ptd-gallery-view-img w-100 h-100' + (isThumb ? " ptd-gallery-view-img--active" : "") + '" style="object-fit: cover;" loading="lazy">' +
+                            (isThumb ? '<span class="ptd-thumb-badge--view" style="font-size:0.6rem; padding:2px 4px;">Thumbnail</span>' : "") +
+                            '<div class="form-check ptd-thumb-select">' +
+                              '<input class="form-check-input ptd-thumb-radio" type="radio" name="thumbnail_image_id" value="' + img.id + '" id="gthumb_' + img.id + '"' + (isThumb ? " checked" : "") + ">" +
+                              '<label class="form-check-label" for="gthumb_' + img.id + '" title="Set as default"></label>' +
+                            '</div>' +
+                            '<button type="button" class="ptd-gallery-del" data-img-id="' + img.id + '" title="Delete"><i class="fas fa-trash"></i></button>' +
+                          '</div>' +
+                        '</div>' +
+                        '<div class="col-8 d-flex flex-column justify-content-between">' +
+                          '<div>' +
+                            '<div class="mb-2">' +
+                              '<label class="form-label mb-0" style="font-size:0.75rem;">Description</label>' +
+                              '<input type="text" name="description_' + img.id + '" class="form-control form-control-sm" value="' + (img.description || "") + '" placeholder="Image description...">' +
+                            '</div>' +
+                            '<div>' +
+                              '<label class="form-label mb-0" style="font-size:0.75rem;">Tags (comma separated)</label>' +
+                              '<input type="text" name="tags_' + img.id + '" class="form-control form-control-sm" value="' + (img.tags || "") + '" placeholder="e.g. modern, lighting, wood">' +
+                            '</div>' +
+                          '</div>' +
+                        '</div>' +
+                      '</div>' +
+                    '</div>';
                 grid.appendChild(col);
             });
         }
@@ -225,15 +243,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 var badge = wrap.querySelector(".ptd-thumb-badge--view");
                 var isSel = radio === cb && cb.checked;
                 img.classList.toggle("ptd-gallery-view-img--active", isSel);
+                var imgContainer = img.parentElement;
                 if (isSel && !badge) {
                     var b = document.createElement("span");
                     b.className = "ptd-thumb-badge--view";
+                    b.style.cssText = "font-size:0.6rem; padding:2px 4px;";
                     b.innerHTML = 'Thumbnail';
-                    wrap.insertBefore(b, wrap.firstChild);
+                    imgContainer.insertBefore(b, imgContainer.firstChild);
                 } else if (!isSel && badge) {
                     badge.remove();
                 }
-                images.push({ id: parseInt(radio.value, 10), url: img.src, is_thumbnail: isSel });
+                var descInput = wrap.querySelector('input[name="description_' + radio.value + '"]');
+                var tagsInput = wrap.querySelector('input[name="tags_' + radio.value + '"]');
+                images.push({
+                    id: parseInt(radio.value, 10),
+                    url: img.src,
+                    is_thumbnail: isSel,
+                    description: descInput ? descInput.value : "",
+                    tags: tagsInput ? tagsInput.value : ""
+                });
             });
             syncGalleryButtons(images);
         });

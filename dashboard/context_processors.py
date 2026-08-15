@@ -1,15 +1,21 @@
+import copy
 from functools import lru_cache
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, get_language
 
 
 def build_section(title, items):
+    out = []
     for item in items:
-        item["section"] = title
-    return items
+        entry = dict(item)
+        entry["section"] = title
+        if "children" in item:
+            entry["children"] = [dict(c) for c in item["children"]]
+        out.append(entry)
+    return out
 
 
-@lru_cache(maxsize=8)
-def _build_menu(is_admin, is_designer, is_customer):
+@lru_cache(maxsize=32)
+def _build_menu(is_admin, is_designer, is_customer, lang=None):
     menu = []
 
     menu += build_section(
@@ -56,6 +62,24 @@ def _build_menu(is_admin, is_designer, is_customer):
                     "url_name": "dash:portfolio_list",
                     "admin_only": True,
                 },
+                {
+                    "title": _("Videos"),
+                    "icon": "fas fa-video",
+                    "url_name": "dash:video_list",
+                    "admin_only": True,
+                },
+                {
+                    "title": _("Contacts"),
+                    "icon": "fas fa-envelope-open-text",
+                    "url_name": "dash:contact_list",
+                    "admin_only": True,
+                },
+                {
+                    "title": _("Leads"),
+                    "icon": "fas fa-user-plus",
+                    "url_name": "dash:lead_list",
+                    "admin_only": True,
+                },
             ],
         )
 
@@ -83,9 +107,15 @@ def _build_menu(is_admin, is_designer, is_customer):
 
 
 def dashboard_sidebar(request):
-    profile = getattr(request.user, "profile", None)
-    is_admin = request.user.is_superuser or (profile and profile.is_admin_role)
-    is_designer = profile and profile.is_designer
-    is_customer = profile and profile.is_customer
+    if not getattr(request, "user", None) or not request.user.is_authenticated:
+        return {"dashboard_menu": []}
 
-    return {"dashboard_menu": _build_menu(is_admin, is_designer, is_customer)}
+    profile = getattr(request.user, "profile", None)
+    is_admin = bool(request.user.is_superuser or (profile and profile.is_admin_role))
+    is_designer = bool(profile and profile.is_designer)
+    is_customer = bool(profile and profile.is_customer)
+    lang = get_language()
+
+    # Deep copy cached menu so template tags or mutations don't alter the cache
+    cached_menu = _build_menu(is_admin, is_designer, is_customer, lang)
+    return {"dashboard_menu": [dict(m) for m in cached_menu]}

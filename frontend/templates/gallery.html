@@ -1,0 +1,420 @@
+{% extends "index.html" %}
+{% load i18n %}
+{% load static %}
+
+{% get_current_language_bidi as IS_RTL %}
+
+{% block body_class %}landing-page{% endblock body_class %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static "css/home.css" %}?v={{ ASSET_VERSION }}">
+<link rel="stylesheet" href="{% static "css/gallery.css" %}?v={{ ASSET_VERSION }}">
+{% endblock extra_css %}
+
+{% block nav %}
+    <nav class="home-navbar">
+        <div class="container home-navbar-inner">
+            <a class="home-navbar-brand" href="{% url 'frontend:home' %}">
+                {% if site_config.logo %}
+                    <img src="{{ site_config.logo }}" alt="{% trans 'Logo' %}" class="home-navbar-logo me-2">
+                {% else %}
+                    <img src="{% static 'img/icon.jpeg' %}" alt="{% trans 'Logo' %}" class="home-navbar-logo me-2">
+                {% endif %}
+                <span class="home-navbar-brand-name">
+                    {% if IS_RTL %}{{ site_config.ar_name }}{% else %}{{ site_config.name }}{% endif %}
+                </span>
+            </a>
+
+            <ul class="home-navbar-links list-unstyled mb-0">
+                <li>
+                    <a href="{% url 'frontend:home' %}" class="home-nav-link">
+                        {% trans "Home" %}
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'frontend:space_gallery' %}" class="home-nav-link active">
+                        {% trans "Gallery" %}
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'frontend:portfolio_list' %}" class="home-nav-link">
+                        {% trans "Portfolio" %}
+                    </a>
+                </li>
+            </ul>
+
+            <div class="home-navbar-actions d-flex align-items-center gap-2">
+                {% include 'partials/language_switcher.html' %}
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dash:dash_home' %}" class="home-navbar-btn" title="{% trans 'Dashboard' %}">
+                        <span class="home-navbar-btn-label">{% trans "Dashboard" %}</span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'user_auth:login' %}" class="home-navbar-btn" title="{% trans 'Login' %}">
+                        <span class="home-navbar-btn-label">{% trans "Login" %}</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+{% endblock nav %}
+
+{% block sidebar %}{% endblock sidebar %}
+
+{% block content %}
+<div class="gallery-page" data-is-single-space="{% if is_single_space %}true{% else %}false{% endif %}">
+  <!-- Header Section (without tagline) -->
+  <div class="gallery-header-section">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+          {% if is_single_space %}
+          <a href="{% url 'frontend:space_gallery' %}" class="gallery-back-btn" aria-label="{% trans 'Back to Gallery' %}" title="{% trans 'Back to Gallery' %}">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <div>
+            <h1 class="gallery-title">{{ space.name }}</h1>
+          </div>
+          {% else %}
+          <a href="{% url 'frontend:home' %}" class="gallery-back-btn" aria-label="{% trans 'Back to Home' %}" title="{% trans 'Back to Home' %}">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <div>
+            <h1 class="gallery-title">{% trans "Design Inspiration Gallery" %}</h1>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if is_single_space %}
+        <button class="btn gallery-filter-btn {% if q %}active{% endif %}" data-bs-toggle="modal" data-bs-target="#spaceSearchModal">
+          <i class="fas fa-search me-1"></i> {% trans "Search in" %} {{ space.name }}
+        </button>
+        {% else %}
+        <!-- Mobile Filter Button -->
+        <button class="btn gallery-filter-btn d-lg-none {% if q or selected_spaces %}active{% endif %}" data-bs-toggle="modal" data-bs-target="#galleryFilterModal">
+          <i class="fas fa-filter me-1"></i> {% trans "Filter & Search" %}
+        </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-4">
+    {% if is_single_space %}
+    <!-- Single Space Mode -->
+    <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div class="gallery-breadcrumb">
+        <a href="{% url 'frontend:home' %}">{% trans "Home" %}</a>
+        <span class="breadcrumb-divider">/</span>
+        <a href="{% url 'frontend:space_gallery' %}">{% trans "Gallery" %}</a>
+        <span class="breadcrumb-divider">/</span>
+        <span class="breadcrumb-current">{{ space.name }}</span>
+      </div>
+
+      {% if q %}
+      <div class="gallery-chips-bar mb-0">
+        <span class="gallery-chip">
+          <i class="fas fa-search"></i> {{ q }}
+          <a href="{% url 'frontend:space_gallery_space' space_pk=space.pk %}" class="gallery-chip-remove" aria-label="{% trans 'Clear search' %}">
+            <i class="fas fa-times"></i>
+          </a>
+        </span>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if images %}
+    <div class="gallery-grid">
+      {% for img in images %}
+      <div class="gallery-card" data-mode="single" data-image-id="{{ img.pk }}" data-image-url="{{ img.image.url }}" data-space-name="{{ img.space.name }}" data-reference="{{ img.reference }}" data-hash="{{ img.content_hash }}" data-title="{{ img.description|default:img.space.name }}">
+        <img src="{{ img.image.url }}" alt="{{ img.space.name }}" loading="lazy">
+        <div class="gallery-card-overlay">
+          <div class="gallery-card-top">
+            <div class="gallery-select-indicator" title="{% trans 'Select image' %}">
+              <i class="fas fa-check"></i>
+            </div>
+            <button type="button" class="gallery-action-btn lightbox-trigger" data-href="{{ img.image.url }}" aria-label="{% trans 'Preview in viewer' %}">
+              <i class="fas fa-search-plus"></i>
+            </button>
+          </div>
+          <div class="gallery-card-bottom">
+            <div class="gallery-card-space">{{ img.space.name }}</div>
+            {% if img.description %}
+            <p class="gallery-card-title">{{ img.description }}</p>
+            {% else %}
+            <p class="gallery-card-title">{% trans "Reference" %}: {{ img.content_hash|slice:":8" }}</p>
+            {% endif %}
+            {% if img.tags %}
+            <div class="gallery-card-tags">
+              {% for tag in img.tags.split %}
+                {% if tag %}
+                <span class="gallery-tag-badge">#{{ tag }}</span>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+      <i class="fas fa-images fa-4x text-light mb-3 opacity-50"></i>
+      <h4 class="text-muted fw-bold mb-2">{% trans "No Images Found" %}</h4>
+      <p class="text-muted small">{% trans "Try adjusting your search query." %}</p>
+      <a href="{% url 'frontend:space_gallery_space' space_pk=space.pk %}" class="btn btn-sm btn-outline-light rounded-pill px-4 mt-2">{% trans "Reset Search" %}</a>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Multi-Space Mode with Left Widget on Desktop & Modal on Mobile -->
+    <div class="row g-4">
+      <!-- Left Widget (Desktop) -->
+      <div class="col-lg-3 d-none d-lg-block">
+        <div class="gallery-sidebar-widget">
+          <div class="gallery-widget-title">
+            <i class="fas fa-sliders-h text-warning"></i> {% trans "Filter & Search" %}
+          </div>
+          <form class="form" method="GET" action="{% url 'frontend:space_gallery' %}">
+            <div class="mb-4">
+              <label for="desktopSearchQuery" class="gallery-widget-label">{% trans "Search Tags & Notes" %}</label>
+              <input type="text" class="form-control gallery-search-input" id="desktopSearchQuery" name="q" value="{{ q }}" placeholder="{% trans 'e.g. cozy, modern, wood...' %}">
+            </div>
+
+            <div class="mb-4">
+              <label class="gallery-widget-label">{% trans "Filter by Spaces" %}</label>
+              <div class="gallery-spaces-list">
+                {% for sp in spaces %}
+                <label class="gallery-checkbox-item" for="desk_space_{{ sp.pk }}">
+                  <input class="form-check-input" type="checkbox" name="spaces" value="{{ sp.pk }}" id="desk_space_{{ sp.pk }}" {% if sp.pk in selected_spaces %}checked{% endif %}>
+                  <span class="form-check-label">{{ sp.name }}</span>
+                </label>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-gallery-primary">
+                <i class="fas fa-check me-1"></i> {% trans "Apply Filters" %}
+              </button>
+              {% if q or selected_spaces %}
+              <a href="{% url 'frontend:space_gallery' %}" class="btn btn-outline-light btn-sm rounded-pill text-center">
+                {% trans "Reset All" %}
+              </a>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Main Gallery Content -->
+      <div class="col-lg-9 col-12">
+        {% if q or selected_spaces %}
+        <div class="gallery-chips-bar">
+          <span class="text-muted small me-2">{% trans "Active filters:" %}</span>
+          {% if q %}
+          <span class="gallery-chip">
+            <i class="fas fa-search"></i> {{ q }}
+          </span>
+          {% endif %}
+          {% for sp in spaces %}
+            {% if sp.pk in selected_spaces %}
+            <span class="gallery-chip">
+              <i class="fas fa-door-open"></i> {{ sp.name }}
+            </span>
+            {% endif %}
+          {% endfor %}
+          <a href="{% url 'frontend:space_gallery' %}" class="btn btn-sm btn-link text-warning text-decoration-none ms-2">{% trans "Clear all" %}</a>
+        </div>
+        {% endif %}
+
+        {% if images %}
+        <div class="gallery-grid">
+          {% for img in images %}
+          <a href="{% url 'frontend:space_gallery_space' space_pk=img.space.pk %}" class="gallery-card" data-mode="all" data-image-id="{{ img.pk }}" data-image-url="{{ img.image.url }}" data-space-name="{{ img.space.name }}" data-reference="{{ img.reference }}" data-hash="{{ img.content_hash }}" data-title="{{ img.description|default:img.space.name }}">
+            <img src="{{ img.image.url }}" alt="{{ img.space.name }}" loading="lazy">
+            <div class="gallery-card-overlay">
+              <div class="gallery-card-top">
+                <div class="gallery-select-indicator" title="{% trans 'Select image' %}">
+                  <i class="fas fa-check"></i>
+                </div>
+                <button type="button" class="gallery-action-btn lightbox-trigger" data-href="{{ img.image.url }}" aria-label="{% trans 'Preview in viewer' %}" href="{{ img.image.url }}">
+                  <i class="fas fa-search-plus"></i>
+                </button>
+              </div>
+              <div class="gallery-card-bottom">
+                <div class="gallery-card-space">{{ img.space.name }}</div>
+                {% if img.description %}
+                <p class="gallery-card-title">{{ img.description }}</p>
+                {% else %}
+                <p class="gallery-card-title">{% trans "Explore Space Gallery" %}</p>
+                {% endif %}
+                {% if img.tags %}
+                <div class="gallery-card-tags">
+                  {% for tag in img.tags.split %}
+                    {% if tag %}
+                    <span class="gallery-tag-badge">#{{ tag }}</span>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+          <i class="fas fa-images fa-4x text-light mb-3 opacity-50"></i>
+          <h4 class="text-muted fw-bold mb-2">{% trans "No Images Found" %}</h4>
+          <p class="text-muted small">{% trans "Try adjusting your search filters or check back later." %}</p>
+          <a href="{% url 'frontend:space_gallery' %}" class="btn btn-sm btn-outline-light rounded-pill px-4 mt-2">{% trans "Reset Filters" %}</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Floating Selection Action Bar -->
+<div class="gallery-selection-bar" id="gallerySelectionBar">
+  <div class="gallery-selection-count">
+    <i class="fas fa-check-circle text-warning"></i>
+    <span id="selectedCount">0</span> {% trans "items selected" %}
+  </div>
+  <div class="gallery-selection-actions">
+    <button class="btn btn-sm btn-outline-light rounded-pill px-3" id="clearSelectionBtn">
+      {% trans "Clear" %}
+    </button>
+    <button class="btn btn-sm btn-gallery-primary px-3" id="copyReferencesBtn" data-copy-title="{% trans 'Copied!' %}" data-copy-msg="{% trans 'Reference paths/hashes copied to clipboard' %}">
+      <i class="fas fa-copy me-1"></i> {% trans "Copy References" %}
+    </button>
+  </div>
+</div>
+
+<!-- Mobile Filter Modal (Phone screens) -->
+<div class="modal fade" id="galleryFilterModal" tabindex="-1" aria-labelledby="galleryFilterModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-content-glass">
+      <div class="modal-header">
+        <h5 class="modal-title" id="galleryFilterModalLabel">{% trans "Filter & Search Gallery" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form class="form" method="GET" action="{% url 'frontend:space_gallery' %}">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="mobileSearchQuery" class="form-label text-warning fw-bold small text-uppercase">{% trans "Search tags or description" %}</label>
+            <input type="text" class="form-control gallery-search-input" id="mobileSearchQuery" name="q" value="{{ q }}" placeholder="{% trans 'e.g. cozy, kitchen, modern...' %}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label d-block text-warning fw-bold small text-uppercase">{% trans "Filter by Spaces" %}</label>
+            <div class="row g-2 gallery-spaces-list">
+              {% for sp in spaces %}
+              <div class="col-6">
+                <label class="gallery-checkbox-item" for="mobile_space_{{ sp.pk }}">
+                  <input class="form-check-input" type="checkbox" name="spaces" value="{{ sp.pk }}" id="mobile_space_{{ sp.pk }}" {% if sp.pk in selected_spaces %}checked{% endif %}>
+                  <span class="form-check-label">{{ sp.name }}</span>
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a href="{% url 'frontend:space_gallery' %}" class="btn btn-outline-light rounded-pill">
+            {% trans "Reset" %}
+          </a>
+          <button type="submit" class="btn btn-gallery-primary">
+            {% trans "Apply Filters" %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Single Space Search Modal -->
+{% if is_single_space %}
+<div class="modal fade" id="spaceSearchModal" tabindex="-1" aria-labelledby="spaceSearchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-content-glass">
+      <div class="modal-header">
+        <h5 class="modal-title" id="spaceSearchModalLabel">{% trans "Search in" %} {{ space.name }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form class="form" method="GET" action="{% url 'frontend:space_gallery_space' space_pk=space.pk %}">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="spaceSearchQuery" class="form-label text-warning fw-bold small text-uppercase">{% trans "Search tags or description" %}</label>
+            <input type="text" class="form-control gallery-search-input" id="spaceSearchQuery" name="q" value="{{ q }}" placeholder="{% trans 'e.g. cozy, minimal, light...' %}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a href="{% url 'frontend:space_gallery_space' space_pk=space.pk %}" class="btn btn-outline-light rounded-pill">
+            {% trans "Reset" %}
+          </a>
+          <button type="submit" class="btn btn-gallery-primary">
+            {% trans "Search" %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Redesigned Liquid-Glass Fullscreen Viewer -->
+<div class="viewer-container" id="portfolioViewer" role="dialog" aria-modal="true" aria-label="{% trans 'Image Lightbox' %}">
+  <div class="viewer-topbar">
+    <div class="viewer-meta">
+      <span class="viewer-space-badge" id="viewerSpaceBadge">{% trans "Space" %}</span>
+      <span class="viewer-ref-badge" id="viewerRefBadge">#REF</span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <span class="viewer-counter-pill" id="viewerCounter">1 / 1</span>
+      <button type="button" class="viewer-close-btn" id="viewerCloseBtn" aria-label="{% trans 'Close Viewer' %}">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="viewer-stage">
+    <button type="button" class="viewer-nav-btn nav-prev" id="viewerPrevBtn" aria-label="{% trans 'Previous image' %}">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+
+    <div class="viewer-main-img-wrapper">
+      <img class="viewer-main-img" id="viewerMainImg" src="" alt="{% trans 'Design Preview' %}">
+    </div>
+
+    <button type="button" class="viewer-nav-btn nav-next" id="viewerNextBtn" aria-label="{% trans 'Next image' %}">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
+
+  <div class="viewer-footer">
+    <p class="viewer-caption" id="viewerCaption"></p>
+    <div class="viewer-footer-actions">
+      <div class="viewer-shortcuts d-none d-md-flex">
+        <span><kbd class="viewer-kbd">←</kbd> <kbd class="viewer-kbd">→</kbd> {% trans "Navigate" %}</span>
+        <span><kbd class="viewer-kbd">Esc</kbd> {% trans "Close" %}</span>
+      </div>
+      <button type="button" class="viewer-btn" id="viewerCopyBtn">
+        <i class="fas fa-copy"></i> {% trans "Copy Reference" %}
+      </button>
+      <a href="" target="_blank" class="viewer-btn" id="viewerOpenFullBtn">
+        <i class="fas fa-external-link-alt"></i> {% trans "Full Image" %}
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block footer %}{% endblock footer %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{% static "js/gallery.js" %}?v={{ ASSET_VERSION }}"></script>
+{% endblock extra_js %}

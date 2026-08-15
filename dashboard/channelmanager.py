@@ -21,50 +21,34 @@ class NotificationChannelManager(DefaultChannelManager):
     def can_read_channel(self, user, channel):
         """
         Check if user has permission to read from a channel.
-
-        Args:
-            user: The authenticated user (None if not authenticated)
-            channel: The channel name
-
-        Returns:
-            bool: True if user can read from this channel
         """
-        # Superusers can read any channel (for debugging)
+        # Superusers can read any channel
         if user and user.is_superuser:
             return True
 
-        # Channel must start with "user-" prefix
-        if not channel.startswith("user-"):
-            # Deny access to non-user channels
-            logger.warning(
-                f"Access denied: Channel '{channel}' does not start with 'user-'"
-            )
+        if not user or not user.is_authenticated:
             return False
 
-        # User must be authenticated
-        if user is None:
-            logger.warning(
-                f"Access denied: Anonymous user trying to access channel '{channel}'"
-            )
-            return False
+        # 1. User notifications channel: user-{user_id}
+        if channel.startswith("user-"):
+            try:
+                channel_user_id = int(channel.split("-")[1])
+                return user.id == channel_user_id
+            except (IndexError, ValueError):
+                return False
 
-        # Extract user_id from channel name
-        try:
-            channel_user_id = int(channel.split("-")[1])
-        except (IndexError, ValueError):
-            logger.warning(f"Access denied: Invalid channel format '{channel}'")
-            return False
+        # 2. Design Request Chat channel: design-request-{uuid}
+        if channel.startswith("design-request-"):
+            uuid_str = channel.replace("design-request-", "").strip()
+            if not uuid_str:
+                return False
+            try:
+                from dashboard.models import DesignRequest
+                dr = DesignRequest.objects.filter(uuid=uuid_str).select_related("client", "designer").first()
+                if not dr:
+                    return False
+                return bool(dr.client_id == user.id or dr.designer_id == user.id or user.is_staff or getattr(getattr(user, "profile", None), "is_admin_role", False))
+            except Exception:
+                return False
 
-        # User can only read their own channel
-        if user.id == channel_user_id:
-            logger.info(
-                f"Access granted: User {user.username} accessing channel '{channel}'"
-            )
-            return True
-
-        # User trying to access another user's channel
-        logger.warning(
-            f"Access denied: User {user.username} (ID: {user.id}) tried to access channel '{channel}' "
-            f"which belongs to user ID {channel_user_id}"
-        )
         return False

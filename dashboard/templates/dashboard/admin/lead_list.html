@@ -1,0 +1,113 @@
+{% extends "dash/dash_index.html" %}
+{% load i18n %}
+{% load static %}
+{% load tags %}
+
+{% block dashTitle %}{% trans "Leads" %}{% endblock dashTitle %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/content_admin.css' %}?v={{ ASSET_VERSION }}">
+{% endblock extra_css %}
+
+{% block dashContent %}
+<div class="container-fluid">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <h5 class="fw-bold mb-1 text-white">{% trans "Leads & Subscribers" %}</h5>
+            <p class="text-muted small mb-0">{% trans "Contacts who opted in to project updates and newsletter" %}</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge rounded-pill ca-count-badge">
+                <i class="fas fa-user-check me-1"></i> {{ page_obj.paginator.count }} {% trans "leads" %}
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for lead in page_obj %}
+        <div class="col-xl-4 col-md-6">
+            <div class="lead-glass-card h-100">
+                <div class="lead-card-header">
+                    <div class="lead-avatar-wrap">
+                        <div class="lead-avatar">{{ lead.name|slice:":1"|upper }}</div>
+                        <span class="lead-status-indicator" title="{% trans 'Active Lead' %}"></span>
+                    </div>
+                    <div class="lead-info min-width-0 flex-grow-1">
+                        <h6 class="lead-name text-truncate mb-1" title="{{ lead.name }}">{{ lead.name }}</h6>
+                        <span class="lead-badge">
+                            <span class="lead-badge-dot"></span>{% trans "Subscriber" %}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="lead-card-body">
+                    <div class="lead-email-row">
+                        <i class="fas fa-envelope lead-email-icon"></i>
+                        <a href="mailto:{{ lead.email }}" class="lead-email-link text-truncate" title="{{ lead.email }}">
+                            {{ lead.email }}
+                        </a>
+                        <button type="button" class="lead-copy-btn copy-lead-email" data-email="{{ lead.email }}" title="{% trans 'Copy email' %}">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lead-card-footer">
+                    <div class="lead-date">
+                        <i class="far fa-calendar-alt me-1.5"></i>
+                        <span>{{ lead.created_at|date:"d M Y" }}</span>
+                    </div>
+                    <div class="lead-actions">
+                        <a href="mailto:{{ lead.email }}" class="lead-btn lead-btn-mail" title="{% trans 'Compose Email' %}">
+                            <i class="fas fa-paper-plane"></i>
+                        </a>
+                        <button type="button"
+                                class="lead-btn lead-btn-delete delete_button"
+                                title="{% trans 'Delete Lead' %}"
+                                data-delete-url="{% url 'dash:lead_delete' lead.pk %}"
+                                data-csrf-token="{{ csrf_token }}"
+                                data-item-title="{{ lead.name }} ({{ lead.email }})"
+                                data-swal-title="{% trans 'Delete Lead?' %}"
+                                data-swal-text="{% trans 'Are you sure you want to remove this lead?' %}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm p-5 text-center rounded-4 ca-empty-card">
+                <div class="mb-3"><i class="fas fa-user-plus fa-3x text-warning opacity-75"></i></div>
+                <h5 class="text-white fw-bold mb-2">{% trans "No leads yet" %}</h5>
+                <p class="text-muted small mb-0">{% trans "People who join the newsletter will appear here automatically." %}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="mt-5">{% render_pagination page_obj %}</div>
+    {% endif %}
+</div>
+{% endblock dashContent %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.copy-lead-email').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            var email = this.getAttribute('data-email');
+            if (!email) return;
+            navigator.clipboard.writeText(email).then(function () {
+                btn.innerHTML = '<i class="fas fa-check text-success"></i>';
+                setTimeout(function () {
+                    btn.innerHTML = '<i class="fas fa-copy"></i>';
+                }, 1800);
+            });
+        });
+    });
+});
+</script>
+{% endblock extra_js %}

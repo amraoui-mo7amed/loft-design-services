@@ -64,9 +64,23 @@
         connectEventStream: function () {
             var self = this;
             if (typeof EventSource !== "undefined") {
-                var es = new EventSource("/events/?channel=design-request-" + this.uuid);
-                es.addEventListener("new_message", function () {
+                if (this.es) {
+                    try { this.es.close(); } catch (e) {}
+                }
+                this.es = new EventSource("/events/?channel=design-request-" + this.uuid);
+                this.es.addEventListener("new_message", function () {
                     self.loadMessages();
+                });
+                this.es.onerror = function () {
+                    // Close gracefully on persistent error to avoid hammering the server
+                    if (self.es && self.es.readyState === 2) {
+                        self.es.close();
+                    }
+                };
+                window.addEventListener("beforeunload", function () {
+                    if (self.es) {
+                        self.es.close();
+                    }
                 });
             }
         },

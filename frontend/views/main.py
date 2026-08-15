@@ -1,5 +1,11 @@
+import json
+
+from django.http import JsonResponse
 from django.shortcuts import render
-from dashboard.models import Portfolio, ProjectType, Space, DesignPackage
+from django.core.validators import validate_email, ValidationError
+from django.utils.translation import gettext as _
+from django.utils.html import escape
+from dashboard.models import Portfolio, ProjectType, Space, DesignPackage, Contact, Lead, Video
 from dashboard.utils import build_packages_context
 
 
@@ -24,12 +30,15 @@ def home_view(request):
     } for space in spaces]
 
     packages = DesignPackage.objects.prefetch_related("package_services__option__category")
-    package_data = [
-        {
+    package_data = []
+    for p in packages:
+        all_services = list(p.package_services.all())
+        package_data.append({
             "id": p.id,
             "name": p.name,
+            "link": p.link or "",
             "delivery_days": p.total_delivery_days,
-            "services_count": p.package_services.count(),
+            "services_count": len(all_services),
             "total_price": p.total_price,
             "services": [
                 {
@@ -37,18 +46,78 @@ def home_view(request):
                     "name": ps.option.name,
                     "price": str(ps.price),
                 }
-                for ps in p.package_services.all()[:6]
+                for ps in all_services[:6]
             ],
-            "services_more": max(0, p.package_services.count() - 6),
-        }
-        for p in packages
-    ]
+            "services_more": max(0, len(all_services) - 6),
+        })
+
+    gallery_spaces = (
+        Space.objects.prefetch_related("gallery_images")
+        .order_by("name")
+    )
+    gallery_spaces_data = []
+    for sp in gallery_spaces:
+        thumb = sp.thumbnail
+        if thumb:
+            gallery_spaces_data.append({
+                "id": sp.id,
+                "name": sp.name,
+                "thumbnail_url": thumb.url,
+                "images_count": len(sp.gallery_images.all()),
+            })
 
     return render(request, "home.html", {
         "spaces": spaces_data,
         "packages": package_data,
         "projects": Portfolio.objects.prefetch_related("gallery_images").order_by("-created_at")[:12],
+        "videos": Video.objects.all(),
+        "gallery_spaces": gallery_spaces_data,
     })
+
+
+def submit_contact(request):
+    """Create a Contact message (and optionally a Lead) from the homepage form."""
+    if request.method != "POST":
+        return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
+
+    name = request.POST.get("name", "").strip()
+    email = request.POST.get("email", "").strip()
+    phone = request.POST.get("phone", "").strip()
+    message = request.POST.get("message", "").strip()
+    join_lead = request.POST.get("join_lead") in ("1", "on", "true")
+
+    errors = []
+    if not name:
+        errors.append(_("Name is required."))
+    if not email:
+        errors.append(_("Email is required."))
+    else:
+        try:
+            validate_email(email)
+        except ValidationError:
+            errors.append(_("Please provide a valid email address."))
+    if not message:
+        errors.append(_("Message is required."))
+
+    if errors:
+        return JsonResponse({"success": False, "errors": errors})
+
+    try:
+        contact = Contact.objects.create(
+            name=name,
+            email=email,
+            phone=phone,
+            message=message,
+        )
+        if join_lead:
+            Lead.objects.create(name=name, email=email)
+        return JsonResponse({
+            "success": True,
+            "message": _("Thank you! Your message has been sent successfully."),
+            "contact_id": contact.pk,
+        })
+    except Exception as e:
+        return JsonResponse({"success": False, "errors": [escape(str(e))]})
 
 
 def order_view(request):

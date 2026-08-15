@@ -59,10 +59,10 @@ def update_status(request, pk):
                 with transaction.atomic():
                     project.status = new_status
                     project.save(update_fields=["status"])
-                    if new_status != old_status:
-                        send_status_update_email(project)
-            except RuntimeError:
-                return JsonResponse({"success": False, "errors": [_("Status update failed. Email could not be sent.")]})
+                if new_status != old_status:
+                    send_status_update_email(project)
+            except Exception as e:
+                return JsonResponse({"success": False, "errors": humanize_error(e)})
 
             status_label = dict(DesignRequest.Status.choices).get(new_status, new_status)
             return JsonResponse({"success": True, "message": _("Status updated to %(status)s.") % {"status": status_label}})
@@ -77,9 +77,8 @@ def project_detail(request, pk):
         pk=pk,
     )
     floors = project.floors.prefetch_related("spaces__space").all()
-    spaces = project.spaces.select_related("space", "floor").all()
+    spaces = project.spaces.select_related("space", "floor").prefetch_related("space_images__space_image").all()
     options = project.options.select_related("option").all()
-    inspirations = project.spaces.prefetch_related("space_images__space_image").all()
     files = project.files.all()
     notes = project.notes.select_related("author").order_by("-created_at")
     activity = project.activity_logs.select_related("actor").order_by("-created_at")
@@ -89,7 +88,7 @@ def project_detail(request, pk):
         "floors": floors,
         "spaces": spaces,
         "options": options,
-        "inspirations": inspirations,
+        "inspirations": spaces,
         "notes": notes,
         "files": files,
         "activity": activity,
@@ -141,7 +140,7 @@ def assign_designer(request, pk):
 
 @admin_required
 def inquiry_list(request):
-    qs = Inquiry.objects.all()
+    qs = Inquiry.objects.all().order_by("-created_at")
 
     status_filter = request.GET.get("status", "")
     if status_filter in dict(Inquiry.Status.choices):

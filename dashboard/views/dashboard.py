@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext as _
-from django.db.models import Count
+from django.db import models
+from django.db.models import Count, Q
 from django.utils import timezone
 import json
 
@@ -14,13 +15,21 @@ from dashboard.models.portfolio import Portfolio
 def dash_home(request):
     today = timezone.now().date()
 
-    total_projects = DesignRequest.objects.count()
-    pending_projects = DesignRequest.objects.filter(status=DesignRequest.Status.PENDING).count()
-    approved_projects = DesignRequest.objects.filter(status=DesignRequest.Status.APPROVED).count()
-    declined_projects = DesignRequest.objects.filter(status=DesignRequest.Status.DECLINED).count()
+    counts = DesignRequest.objects.aggregate(
+        total=Count("id"),
+        pending=Count("id", filter=models.Q(status=DesignRequest.Status.PENDING)),
+        approved=Count("id", filter=models.Q(status=DesignRequest.Status.APPROVED)),
+        declined=Count("id", filter=models.Q(status=DesignRequest.Status.DECLINED)),
+        today=Count("id", filter=models.Q(created_at__date=today)),
+    )
+    total_projects = counts["total"] or 0
+    pending_projects = counts["pending"] or 0
+    approved_projects = counts["approved"] or 0
+    declined_projects = counts["declined"] or 0
+    projects_today = counts["today"] or 0
+
     total_inquiries = Inquiry.objects.count()
     total_portfolios = Portfolio.objects.count()
-    projects_today = DesignRequest.objects.filter(created_at__date=today).count()
 
     recent_projects = DesignRequest.objects.select_related("project_type", "package").order_by("-created_at")[:5]
 

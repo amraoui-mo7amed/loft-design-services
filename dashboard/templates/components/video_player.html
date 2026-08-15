@@ -1,0 +1,22 @@
+{% load i18n %}
+<div class="video-widget-overlay video-player-widget" style="display: none;" video-url="{{ video_url }}" target-btn="{{ target_btn }}">
+    <div class="video-widget-container">
+        <div class="video-widget-header">
+            <h5 class="video-widget-title">
+                <i class="fas fa-play-circle me-2 video-player-title-icon"></i>
+                <span id="videoPlayerWidgetTitle">{% trans "Video Preview" %}</span>
+            </h5>
+            <button type="button" class="video-widget-close" id="closeVideoWidget" aria-label="{% trans 'Close' %}">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="video-widget-body">
+            <div class="video-widget-stage" id="videoPlayerWidgetStage">
+                <div class="video-widget-empty">
+                    <i class="fas fa-video"></i>
+                    <p>{% trans "No video available." %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

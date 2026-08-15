@@ -87,6 +87,7 @@ def with_pagination(
                 page_obj = paginator.page(paginator.num_pages)
 
             response[context_name] = page_obj
+            response[queryset_name] = page_obj
             return render(request, f"{template}.html", response)
 
         return _wrapped_view

@@ -17,6 +17,13 @@
         <div class="pkg-card-head pkg-card-head-basic">
           <div class="pkg-card-badge"><i class="fas fa-check"></i></div>
           <div class="pkg-card-name">{{ default_pkg.name }}</div>
+          {% if default_pkg.link %}
+          <button type="button" class="pkg-card-btn pkg-video-btn video-player-trigger"
+                  data-video-url="{{ default_pkg.link }}"
+                  data-video-title="{{ default_pkg.name }}">
+            <i class="fas fa-play-circle me-1"></i>{% trans "Watch Video" %}
+          </button>
+          {% endif %}
         </div>
 
         <div class="pkg-card-body d-flex flex-column flex-grow-1">
@@ -76,6 +83,9 @@
               <i class="fas fa-sliders-h me-1"></i>{% trans "View Details" %}
             </button>
           </div>
+          n{% if default_pkg.link %}
+          {% include "components/video_player.html" with video_url=default_pkg.link target_btn=".pkg-video-btn" %}
+          {% endif %}
         </div>
       </div>
     </div>
@@ -143,6 +153,13 @@
         <div class="pkg-card-head {% if tier == 1 %}pkg-card-head-tier1{% elif tier == 2 %}pkg-card-head-tier2{% else %}pkg-card-head-tier3{% endif %}">
           <div class="pkg-card-badge"><i class="fas fa-check"></i></div>
           <div class="pkg-card-name">{{ pkg.name }}</div>
+          {% if pkg.link %}
+          <button type="button" class="pkg-card-btn pkg-video-btn video-player-trigger"
+                  data-video-url="{{ pkg.link }}"
+                  data-video-title="{{ pkg.name }}">
+            <i class="fas fa-play-circle me-1"></i>{% trans "Watch Video" %}
+          </button>
+          {% endif %}
         </div>
 
         <div class="pkg-card-body d-flex flex-column flex-grow-1">
@@ -192,6 +209,9 @@
               <i class="fas fa-sliders-h me-1"></i>{% trans "View Details" %}
             </button>
           </div>
+          {% if pkg.link %}
+          {% include "components/video_player.html" with video_url=pkg.link target_btn=".pkg-video-btn" %}
+          {% endif %}
         </div>
       </div>
     </div>

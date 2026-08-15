@@ -248,28 +248,41 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ── Recent Projects Swiper (coverflow) ──
+    // ── Recent Projects Swiper (coverflow effect) ──
     var projectsSwiperEl = document.getElementById("projectsSwiper");
     if (projectsSwiperEl && window.Swiper) {
         var isRTL = document.documentElement.getAttribute("dir") === "rtl";
+        var projectSlides = projectsSwiperEl.querySelectorAll(".swiper-slide").length;
+        var projectsPaginationEl = projectsSwiperEl.querySelector(".projects-pagination") || document.querySelector(".projects-pagination");
         var projectsSwiper = new Swiper(projectsSwiperEl, {
             effect: "coverflow",
             direction: "horizontal",
-            loop: true,
+            loop: projectSlides > 2,
             grabCursor: true,
             centeredSlides: true,
             slidesPerView: "auto",
-            rtl: isRTL,
-            speed: 600,
-            mousewheel: {
-                forceToAxis: true,
-            },
+            watchOverflow: false,
             coverflowEffect: {
                 rotate: 0,
                 stretch: 0,
                 depth: 120,
                 modifier: 1.4,
                 slideShadows: true,
+            },
+            autoplay: {
+                delay: 4000,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+            },
+            pagination: {
+                el: projectsPaginationEl,
+                clickable: true,
+                dynamicBullets: false,
+            },
+            rtl: isRTL,
+            speed: 600,
+            mousewheel: {
+                forceToAxis: true,
             },
             navigation: {
                 prevEl: ".projects-prev",
@@ -280,6 +293,152 @@ document.addEventListener("DOMContentLoaded", function () {
                 640: { slidesPerView: 2, coverflowEffect: { depth: 100, modifier: 1.3 } },
                 992: { slidesPerView: 3, coverflowEffect: { depth: 120, modifier: 1.4 } },
             },
+        });
+    }
+
+    // ── Gallery Swiper (slide effect) ──
+    var gallerySwiperEl = document.getElementById("gallerySwiper");
+    if (gallerySwiperEl && window.Swiper) {
+        var isRTL = document.documentElement.getAttribute("dir") === "rtl";
+        var gallerySlides = gallerySwiperEl.querySelectorAll(".swiper-slide").length;
+        var galleryPaginationEl = gallerySwiperEl.querySelector(".gallery-pagination") || document.querySelector(".gallery-pagination");
+        var gallerySwiper = new Swiper(gallerySwiperEl, {
+            effect: "slide",
+            direction: "horizontal",
+            loop: gallerySlides > 2,
+            grabCursor: true,
+            slidesPerView: 1.1,
+            spaceBetween: 20,
+            watchOverflow: false,
+            autoplay: {
+                delay: 3500,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+            },
+            pagination: {
+                el: galleryPaginationEl,
+                clickable: true,
+                dynamicBullets: false,
+            },
+            rtl: isRTL,
+            speed: 600,
+            navigation: {
+                prevEl: ".gallery-prev",
+                nextEl: ".gallery-next",
+            },
+            breakpoints: {
+                320: { slidesPerView: 1.1, spaceBetween: 14 },
+                576: { slidesPerView: 2, spaceBetween: 16 },
+                768: { slidesPerView: 2.5, spaceBetween: 18 },
+                992: { slidesPerView: 3.2, spaceBetween: 20 },
+                1200: { slidesPerView: 4, spaceBetween: 24 },
+            },
+        });
+    }
+
+    // ── Videos Swiper (slide effect) ──
+    var videosSwiperEl = document.getElementById("videosSwiper");
+    if (videosSwiperEl && window.Swiper) {
+        var isRTL = document.documentElement.getAttribute("dir") === "rtl";
+        var videoSlides = videosSwiperEl.querySelectorAll(".swiper-slide").length;
+        var videosPaginationEl = videosSwiperEl.querySelector(".videos-pagination") || document.querySelector(".videos-pagination");
+        var videosSwiper = new Swiper(videosSwiperEl, {
+            effect: "slide",
+            direction: "horizontal",
+            loop: videoSlides > 1,
+            grabCursor: true,
+            slidesPerView: 1.1,
+            spaceBetween: 20,
+            watchOverflow: false,
+            autoplay: {
+                delay: 4500,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+            },
+            pagination: {
+                el: videosPaginationEl,
+                clickable: true,
+                dynamicBullets: false,
+            },
+            rtl: isRTL,
+            speed: 600,
+            navigation: {
+                prevEl: ".videos-prev",
+                nextEl: ".videos-next",
+            },
+            breakpoints: {
+                320: { slidesPerView: 1.1, spaceBetween: 14 },
+                576: { slidesPerView: 2, spaceBetween: 16 },
+                768: { slidesPerView: 2.5, spaceBetween: 18 },
+                992: { slidesPerView: 3.2, spaceBetween: 20 },
+                1200: { slidesPerView: 4, spaceBetween: 24 },
+            },
+        });
+    }
+
+    // ── Contact Form (AJAX without SweetAlert) ──
+    var contactForm = document.getElementById("contactForm");
+    if (contactForm) {
+        var submitBtn = document.getElementById("contactSubmitBtn");
+        var statusEl = document.getElementById("contactFormStatus");
+
+        function getCookie(name) {
+            var value = "; " + document.cookie;
+            var parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift();
+            return null;
+        }
+
+        contactForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            if (!contactForm.checkValidity()) {
+                contactForm.reportValidity();
+                return;
+            }
+
+            if (statusEl) {
+                statusEl.className = "contact-form-status d-none";
+                statusEl.innerHTML = "";
+            }
+
+            var origBtnHtml = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Sending...';
+
+            fetch(contactForm.getAttribute("action"), {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCookie("csrftoken"),
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                body: new FormData(contactForm),
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = origBtnHtml;
+                    if (statusEl) {
+                        if (data.success) {
+                            contactForm.reset();
+                            statusEl.className = "contact-form-status alert-glass-success mb-3";
+                            statusEl.innerHTML = '<i class="fas fa-check-circle me-2"></i>' + (data.message || "Thank you! Your message has been sent successfully.");
+                        } else {
+                            var errMsg = data.errors || data.message || "Something went wrong. Please try again.";
+                            if (Array.isArray(errMsg)) errMsg = errMsg.join("<br>");
+                            statusEl.className = "contact-form-status alert-glass-danger mb-3";
+                            statusEl.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>' + errMsg;
+                        }
+                    }
+                })
+                .catch(function () {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = origBtnHtml;
+                    if (statusEl) {
+                        statusEl.className = "contact-form-status alert-glass-danger mb-3";
+                        statusEl.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i> Network error. Please try again.';
+                    }
+                });
         });
     }
 

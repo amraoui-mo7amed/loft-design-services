@@ -11,8 +11,8 @@ from ..models import ProductCategory, Product, SpaceProductRecommendation, Cart,
 
 def product_list(request):
     category_slug = request.GET.get("category")
-    products = Product.objects.filter(active=True).select_related("category")
-    categories = ProductCategory.objects.all()
+    products = Product.objects.filter(active=True).select_related("category").order_by("-created_at", "name")
+    categories = ProductCategory.objects.all().order_by("name")
     if category_slug:
         products = products.filter(category__slug=category_slug)
     paginator = Paginator(products, 12)

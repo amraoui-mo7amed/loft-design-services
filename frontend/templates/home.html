@@ -9,6 +9,7 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{% static "css/home.css" %}?v={{ ASSET_VERSION }}">
     <link rel="stylesheet" href="{% static "css/portfolio_list.css" %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet" href="{% static "css/video_player.css" %}?v={{ ASSET_VERSION }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 {% endblock extra_css %}
 
@@ -30,6 +31,11 @@
                 <li>
                     <a href="{% url 'frontend:home' %}" class="home-nav-link active">
                         {% trans "Home" %}
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'frontend:space_gallery' %}" class="home-nav-link">
+                        {% trans "Gallery" %}
                     </a>
                 </li>
                 <li>
@@ -115,22 +121,24 @@
             <div class="row g-4 justify-content-center" id="spacesGrid">
                 {% for space in spaces %}
                 <div class="col-6 col-md-4 col-lg-3">
-                    <div class="space-card reveal" data-space-id="{{ space.id }}" data-price="{{ space.base_price }}">
-                        <input type="checkbox" class="space-checkbox" id="space_{{ space.id }}" value="{{ space.id }}" aria-label="{{ space.name }}">
-                        <div class="space-card-img">
-                            {% if space.thumbnail %}
-                            <img src="{{ space.thumbnail }}" alt="{{ space.name }}" loading="lazy" data-img-error="hide-parent">
-                            {% endif %}
-                        </div>
-                        <div class="space-card-check">
-                            <i class="fas fa-check"></i>
+                    <div class="space-card-wrap reveal">
+                        <div class="space-card" data-space-id="{{ space.id }}" data-price="{{ space.base_price }}">
+                            <input type="checkbox" class="space-checkbox" id="space_{{ space.id }}" value="{{ space.id }}" aria-label="{{ space.name }}">
+                            <div class="space-card-img">
+                                {% if space.thumbnail %}
+                                <img src="{{ space.thumbnail }}" alt="{{ space.name }}" loading="lazy" data-img-error="hide-parent">
+                                {% endif %}
+                            </div>
+                            <div class="space-card-check">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="space-card-body">
+                                <h3 class="space-card-title">{{ space.name }}</h3>
+                            </div>
                         </div>
                         <div class="space-card-price">
                             <span class="space-card-price-value">{{ space.base_price|floatformat:"0u" }}</span>
                             <span class="space-card-price-currency">DA</span>
-                        </div>
-                        <div class="space-card-body">
-                            <h3 class="space-card-title">{{ space.name }}</h3>
                         </div>
                     </div>
                 </div>
@@ -158,37 +166,230 @@
     <!-- Recent Projects Coverflow -->
     <section class="projects-section" id="projects-section">
         <div class="container">
-            <div class="projects-section-head">
-                <h2 class="loft-section-title reveal">{% trans "Recent Projects" %}</h2>
+            <div class="projects-section-head text-center mb-4">
+                <h2 class="loft-section-title reveal mb-0">{% trans "Recent Projects" %}</h2>
             </div>
-            <div class="swiper projects-swiper" id="projectsSwiper">
+            <div class="projects-slider-container position-relative">
                 <button type="button" class="projects-nav-btn projects-prev" aria-label="{% trans 'Previous projects' %}">
                     <i class="fas fa-chevron-left"></i>
                 </button>
                 <button type="button" class="projects-nav-btn projects-next" aria-label="{% trans 'Next projects' %}">
                     <i class="fas fa-chevron-right"></i>
                 </button>
-                <div class="swiper-wrapper">
-                    {% for project in projects %}
-                    <div class="swiper-slide">
-                        <a class="project-rect-card" href="{% url 'frontend:portfolio_detail' project.pk %}">
-                            <div class="project-rect-img">
-                                {% if project.thumbnail %}
-                                <img src="{{ project.thumbnail.url }}" alt="{{ project.title }}" loading="lazy">
-                                {% else %}
-                                <div class="project-rect-fallback"><i class="fas fa-image"></i></div>
-                                {% endif %}
-                                {% if project.is_featured %}
-                                <span class="project-rect-featured">{% trans "Featured" %}</span>
-                                {% endif %}
-                            </div>
-                        </a>
+                <div class="swiper projects-swiper" id="projectsSwiper">
+                    <div class="swiper-wrapper">
+                        {% for project in projects %}
+                        <div class="swiper-slide">
+                            <a class="project-rect-card" href="{% url 'frontend:portfolio_detail' project.pk %}">
+                                <div class="project-rect-img">
+                                    {% if project.thumbnail %}
+                                    <img src="{{ project.thumbnail.url }}" alt="{{ project.title }}" loading="lazy">
+                                    {% else %}
+                                    <div class="project-rect-fallback"><i class="fas fa-image"></i></div>
+                                    {% endif %}
+                                    {% if project.is_featured %}
+                                    <span class="project-rect-featured">{% trans "Featured" %}</span>
+                                    {% endif %}
+                                    <div class="project-rect-overlay">
+                                        <h4 class="project-rect-title">{{ project.title }}</h4>
+                                        <span class="project-rect-cta">
+                                            {% trans "View Project" %} <i class="fas fa-arrow-right ms-1"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
+                    <!-- Projects Slider Pagination Indicator -->
+                    <div class="swiper-pagination projects-pagination"></div>
+                </div>
+            </div>
+            <div class="text-center mt-4 pt-2 reveal">
+                <a href="{% url 'frontend:portfolio_list' %}" class="btn btn-outline-primary rounded-pill px-5 py-3 fw-bold shadow-sm">
+                    <i class="fas fa-layer-group me-2"></i>{% trans "View All Projects" %}
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Design Inspiration Gallery Slider -->
+    <section class="projects-section gallery-slider-section" id="gallery-section">
+        <div class="container">
+            <div class="projects-section-head text-center mb-4">
+                <h2 class="loft-section-title reveal mb-0">{% trans "Design Inspiration Gallery" %}</h2>
+            </div>
+            <div class="gallery-slider-container position-relative">
+                <button type="button" class="projects-nav-btn gallery-prev" aria-label="{% trans 'Previous gallery spaces' %}">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button type="button" class="projects-nav-btn gallery-next" aria-label="{% trans 'Next gallery spaces' %}">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <div class="swiper projects-swiper gallery-swiper" id="gallerySwiper">
+                    <div class="swiper-wrapper">
+                        {% for sp in gallery_spaces %}
+                        <div class="swiper-slide">
+                            <a class="gallery-slide-card" href="{% url 'frontend:space_gallery' space_pk=sp.id %}">
+                                <div class="gallery-slide-img">
+                                    <img src="{{ sp.thumbnail_url }}" alt="{{ sp.name }}" loading="lazy">
+                                    <div class="gallery-slide-overlay">
+                                        <div class="gallery-slide-badge">
+                                            <i class="fas fa-images me-1"></i> {{ sp.images_count }} {% trans "photos" %}
+                                        </div>
+                                        <div class="gallery-slide-bottom">
+                                            <h4 class="gallery-slide-title">{{ sp.name }}</h4>
+                                            <span class="gallery-slide-cta">
+                                                {% trans "Explore Space" %} <i class="fas fa-arrow-right ms-1"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        {% empty %}
+                        <div class="swiper-slide">
+                            <div class="video-card-empty">{% trans "No gallery spaces available yet." %}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <!-- Gallery Slider Pagination Indicator -->
+                    <div class="swiper-pagination gallery-pagination"></div>
+                </div>
+            </div>
+            <div class="text-center mt-4 pt-2 reveal">
+                <a href="{% url 'frontend:space_gallery' %}" class="btn btn-outline-primary rounded-pill px-5 py-3 fw-bold shadow-sm">
+                    <i class="fas fa-th-large me-2"></i>{% trans "View Full Gallery" %}
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Videos Slider -->
+    <section class="projects-section videos-section" id="videos-section">
+        <div class="container">
+            <div class="projects-section-head text-center mb-4">
+                <h2 class="loft-section-title reveal mb-0">{% trans "Our Videos" %}</h2>
+            </div>
+            <div class="videos-slider-container position-relative">
+                <button type="button" class="projects-nav-btn videos-prev" aria-label="{% trans 'Previous videos' %}">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button type="button" class="projects-nav-btn videos-next" aria-label="{% trans 'Next videos' %}">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <div class="swiper projects-swiper videos-swiper" id="videosSwiper">
+                    <div class="swiper-wrapper">
+                        {% for video in videos %}
+                        <div class="swiper-slide">
+                            <button type="button" class="video-card video-player-trigger"
+                                    data-video-url="{{ video.play_link }}"
+                                    data-video-title="{{ video.title }}">
+                                <span class="video-card-media">
+                                    {% if video.thumbnail_url %}
+                                    <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" loading="lazy">
+                                    {% else %}
+                                    <span class="video-card-fallback"><i class="fas fa-video"></i></span>
+                                    {% endif %}
+                                    <span class="video-card-play"><i class="fas fa-play"></i></span>
+                                </span>
+                                <span class="video-card-body">
+                                    <span class="video-card-title">{{ video.title }}</span>
+                                    {% if video.description %}
+                                    <span class="video-card-desc">{{ video.description|truncatechars:90 }}</span>
+                                    {% endif %}
+                                </span>
+                            </button>
+                        </div>
+                        {% empty %}
+                        <div class="swiper-slide">
+                            <div class="video-card-empty">{% trans "No videos available yet." %}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <!-- Videos Slider Pagination Indicator -->
+                    <div class="swiper-pagination videos-pagination"></div>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact-section">
+        <div class="container">
+            <div class="contact-section-head">
+                <h2 class="loft-section-title reveal">{% trans "Get in Touch" %}</h2>
+                <p class="loft-section-sub reveal text-center">{% trans "Tell us about your project, we will get back to you shortly" %}</p>
+            </div>
+            <div class="row g-4 align-items-stretch">
+                <div class="col-lg-5">
+                    <div class="contact-info-card reveal">
+                        <h5 class="contact-info-title">{% trans "Let's talk about your space" %}</h5>
+                        <p class="contact-info-text">{% trans "Follow us on social media or drop us a message. We love hearing from you." %}</p>
+                        <div class="contact-socials">
+                            {% for key, value in site_config.social.items %}
+                            {% if value %}
+                            <a href="{{ value }}" target="_blank" rel="noopener" class="contact-social-link" aria-label="{{ key }}">
+                                <i class="fab fa-{{ key }}"></i>
+                            </a>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="contact-info-line">
+                            <i class="fas fa-envelope"></i>
+                            <span>{{ site_config.contact_email }}</span>
+                        </div>
+                        {% if site_config.phone %}
+                        <div class="contact-info-line">
+                            <i class="fas fa-phone-alt"></i>
+                            <span>{{ site_config.phone }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <form class="form contact-form reveal" id="contactForm" method="post" action="{% url 'frontend:contact_submit' %}">
+                        {% csrf_token %}
+                        {% include "partials/errorList.html" with form_id="contactForm" %}
+                        <div id="contactFormStatus" class="contact-form-status d-none" role="alert"></div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="contact-label" for="contactName">{% trans "Name" %}</label>
+                                <input type="text" id="contactName" name="name" class="form-control contact-input" required placeholder="{% trans 'Your full name' %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="contact-label" for="contactPhone">{% trans "Phone (optional)" %}</label>
+                                <input type="tel" id="contactPhone" name="phone" class="form-control contact-input" placeholder="{% trans '+213 ...' %}">
+                            </div>
+                            <div class="col-12">
+                                <label class="contact-label" for="contactEmail">{% trans "Email" %}</label>
+                                <input type="email" id="contactEmail" name="email" class="form-control contact-input" required placeholder="{% trans 'you@example.com' %}">
+                            </div>
+                            <div class="col-12">
+                                <label class="contact-label" for="contactMessage">{% trans "Message" %}</label>
+                                <textarea id="contactMessage" name="message" class="form-control contact-input" rows="4" required placeholder="{% trans 'Tell us about your project...' %}"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check contact-lead-check">
+                                    <input class="form-check-input" type="checkbox" name="join_lead" value="1" id="contactJoinLead">
+                                    <label class="form-check-label" for="contactJoinLead">
+                                        {% trans "Also keep me updated with your latest projects" %}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn contact-submit-btn rounded-3 px-4 fw-bold" id="contactSubmitBtn">
+                                    <i class="fas fa-paper-plane me-2"></i>{% trans "Send Message" %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% include "components/video_player.html" %}
 
     <!-- Inspiration Gallery Modal -->
     <div class="modal fade" id="inspirationGalleryModal" tabindex="-1" aria-hidden="true">
@@ -218,5 +419,6 @@
 <script src="{% static "js/three-sixty-bg.js" %}?v={{ ASSET_VERSION }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="{% static "js/video_player.js" %}?v={{ ASSET_VERSION }}"></script>
 <script src="{% static "js/home.js" %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

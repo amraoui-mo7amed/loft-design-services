@@ -4,8 +4,9 @@ from functools import lru_cache
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _, get_language
 
-@lru_cache(maxsize=1)
-def _get_site_config():
+
+@lru_cache(maxsize=8)
+def _get_site_config(lang=None):
     return {
         "name": _("Loft Design"),
         "ar_name": "لوفت ديزاين",
@@ -28,24 +29,26 @@ def _get_site_config():
             ),
         },
         "branding": {
-                 "primary_color": "#FFD65A",
-                "secondary_color": "#212121",
-                "accent_color": "#FFFFFF",
-                "success_color": "#28a745",
-                "danger_color": "#dc3545",
-                "dark_color": "#1a1a1a",
-                "light_color": "#f8f9fa",
+            "primary_color": "#FFD65A",
+            "secondary_color": "#212121",
+            "accent_color": "#FFFFFF",
+            "success_color": "#28a745",
+            "danger_color": "#dc3545",
+            "dark_color": "#1a1a1a",
+            "light_color": "#f8f9fa",
         },
     }
 
 
 def site_settings(request):
+    lang = get_language()
     return {
-        "site_config": _get_site_config(),
+        "site_config": _get_site_config(lang),
         "ASSET_VERSION": _compute_asset_version(),
     }
 
 
+@lru_cache(maxsize=1)
 def _static_base_dirs():
     dirs = list(settings.STATICFILES_DIRS)
     static_root = getattr(settings, "STATIC_ROOT", None)
@@ -58,15 +61,17 @@ def _static_base_dirs():
                 dirs.append(os.path.join(os.path.dirname(module.__file__), "static"))
             except (ImportError, AttributeError, TypeError):
                 continue
-    return dirs
+    return tuple(dirs)
 
 
+@lru_cache(maxsize=1)
 def _compute_asset_version():
-    version = settings.ASSET_VERSION or ""
+    version = getattr(settings, "ASSET_VERSION", "") or ""
     if version:
-        return version
+        return str(version)
 
     if settings.DEBUG:
+        # Fixed stable build timestamp during process lifetime in DEBUG mode
         return str(int(time.time()))
 
     latest = 0.0

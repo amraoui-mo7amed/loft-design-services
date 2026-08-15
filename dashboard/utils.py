@@ -50,6 +50,7 @@ def build_packages_context():
             "pkg": pkg,
             "total_price": sum(ps.price or 0 for ps in pkg.package_services.all()),
             "services_json": json.dumps(services),
+            "link": pkg.link or "",
         })
     default_services = []
     default_total = 0
@@ -63,6 +64,7 @@ def build_packages_context():
         "default_pkg": default_pkg,
         "default_total": default_total,
         "default_services_json": json.dumps(default_services),
+        "default_link": default_pkg.link if default_pkg else "",
         "package_data": package_data,
     }
 

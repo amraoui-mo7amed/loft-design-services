@@ -49,7 +49,8 @@
                 data-update-url="{% url 'dash:package_update' pkg.pk %}"
                 data-modal-title="{% trans 'Edit Package' %}"
                 data-submit-text="{% trans 'Save' %}"
-                data-name="{{ pkg.name }}">
+                data-name="{{ pkg.name }}"
+                data-link="{{ pkg.link }}">
             <i class="fas fa-pen me-1"></i>{% trans "Edit Package" %}
         </button>
         <button class="btn btn-outline-danger btn-sm rounded-2 delete_button"
@@ -79,6 +80,18 @@
                 <div class="mb-2 d-flex justify-content-between">
                     <span class="small text-muted">{% trans "Package Price" %}</span>
                     <span class="small fw-semibold"><span id="detailTotalPrice">{{ pkg.total_price|floatformat:"0" }}</span> {% trans "DA" %}</span>
+                </div>
+                <div class="mb-2 d-flex justify-content-between">
+                    <span class="small text-muted">{% trans "Video Link" %}</span>
+                    <span class="small fw-semibold" id="detailVideoLink">
+                        {% if pkg.link %}
+                        <a href="{{ pkg.link }}" target="_blank" rel="noopener" class="text-decoration-none">
+                            <i class="fas fa-video me-1" style="color:var(--brand-primary);"></i>{% trans "Watch" %}
+                        </a>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </span>
                 </div>
             </div>
         </div>
@@ -152,6 +165,14 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold mb-1" style="font-size:0.82rem;">{% trans "Package Name" %}</label>
                         <input type="text" name="name" class="form-control" data-field="name" data-default="" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold mb-1" style="font-size:0.82rem;">
+                            <i class="fas fa-video me-1" style="font-size:0.7rem;color:var(--brand-primary);"></i>
+                            {% trans "Video Link" %}
+                        </label>
+                        <input type="url" name="link" class="form-control" data-field="link" data-default="" placeholder="{% trans 'https://example.com/promo-video.mp4' %}">
+                        <small class="text-muted">{% trans "Optional video shown on the package card (MP4/WebM or YouTube/Vimeo URL)" %}</small>
                     </div>
                 </div>
                 <div class="px-4 py-3 d-flex gap-2 justify-content-end border-top">

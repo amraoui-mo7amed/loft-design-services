@@ -28,6 +28,9 @@ from .models import (
     CartItem,
     Order,
     OrderItem,
+    Video,
+    Contact,
+    Lead,
 )
 
 
@@ -62,8 +65,9 @@ class SpaceAdmin(admin.ModelAdmin):
 
 @admin.register(SpaceImage)
 class SpaceImageAdmin(admin.ModelAdmin):
-    list_display = ["space", "image"]
+    list_display = ["space", "image", "reference", "tags"]
     list_filter = ["space"]
+    search_fields = ["description", "tags", "reference"]
 
 
 @admin.register(ProjectTypeSpace)
@@ -194,3 +198,22 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = ["order", "product", "quantity", "price_at_time"]
+
+
+@admin.register(Video)
+class VideoAdmin(admin.ModelAdmin):
+    list_display = ["title", "link", "url", "created_at"]
+    search_fields = ["title", "description"]
+
+
+@admin.register(Contact)
+class ContactAdmin(admin.ModelAdmin):
+    list_display = ["name", "email", "phone", "is_read", "created_at"]
+    list_filter = ["is_read", "created_at"]
+    search_fields = ["name", "email", "phone", "message"]
+
+
+@admin.register(Lead)
+class LeadAdmin(admin.ModelAdmin):
+    list_display = ["name", "email", "created_at"]
+    search_fields = ["name", "email"]

@@ -9,6 +9,7 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/wizard.css' %}?v={{ ASSET_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/video_player.css' %}?v={{ ASSET_VERSION }}">
 {% endblock css %}
 
 {% block content %}
@@ -134,7 +135,13 @@
     </div>
   </div>
 </div>
+
 {% endblock content %}
+
 {% block js %}
 <script src="{% static 'js/wizard.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock js %}
+
+{% block extra_js %}
+<script src="{% static 'js/video_player.js' %}?v={{ ASSET_VERSION }}"></script>
+{% endblock extra_js %}

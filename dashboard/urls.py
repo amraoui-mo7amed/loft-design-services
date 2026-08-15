@@ -1,5 +1,5 @@
 from django.urls import path
-from dashboard.views import dashboard, users, notifications, design, customer, designer, admin_crm, pricing, portfolio
+from dashboard.views import dashboard, users, notifications, design, customer, designer, admin_crm, pricing, portfolio, videos, content
 
 app_name = "dash"
 
@@ -75,4 +75,16 @@ urlpatterns = [
     path("portfolio/create/", portfolio.portfolio_create, name="portfolio_create"),
     path("portfolio/<int:pk>/update/", portfolio.portfolio_update, name="portfolio_update"),
     path("portfolio/<int:pk>/delete/", portfolio.portfolio_delete, name="portfolio_delete"),
+    # Videos
+    path("videos/", videos.video_list, name="video_list"),
+    path("videos/create/", videos.video_create, name="video_create"),
+    path("videos/<int:pk>/update/", videos.video_update, name="video_update"),
+    path("videos/<int:pk>/delete/", videos.video_delete, name="video_delete"),
+    # Contacts
+    path("contacts/", content.contact_list, name="contact_list"),
+    path("contacts/<int:pk>/", content.contact_detail, name="contact_detail"),
+    path("contacts/<int:pk>/delete/", content.contact_delete, name="contact_delete"),
+    # Leads
+    path("leads/", content.lead_list, name="lead_list"),
+    path("leads/<int:pk>/delete/", content.lead_delete, name="lead_delete"),
 ]

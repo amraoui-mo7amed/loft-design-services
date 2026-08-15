@@ -28,7 +28,7 @@
 </div>
 
 <div class="row g-4" data-catalog-modal="packageModal">
-    {% for pkg in packages %}
+    {% for pkg in page_obj %}
     <div class="col-lg-4 col-md-6">
         <div class="card h-100 border-0 shadow-sm rounded-4 pt-card">
             <div class="pt-card-body">
@@ -44,6 +44,11 @@
                                     {% if pkg.is_default %}
                                     <span class="badge rounded-pill ms-1" style="font-size:0.62rem;background:rgba(255,214,90,0.16);color:#b8860b;">
                                         <i class="fas fa-star me-1" style="font-size:0.55rem;"></i>{% trans "Default" %}
+                                    </span>
+                                    {% endif %}
+                                    {% if pkg.link %}
+                                    <span class="badge rounded-pill ms-1" style="font-size:0.62rem;background:rgba(255,255,255,0.12);color:#f2f5f8;">
+                                        <i class="fas fa-video me-1" style="font-size:0.55rem;"></i>{% trans "Video" %}
                                     </span>
                                     {% endif %}
                                 </h5>

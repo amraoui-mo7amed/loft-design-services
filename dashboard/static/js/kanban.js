@@ -19,9 +19,9 @@
                 var dropdown = this.closest(".crm-status-dropdown");
                 var projectId = dropdown.dataset.projectId;
                 var newStatus = this.dataset.value;
-                var btn = dropdown.querySelector(".crm-status-btn");
+                var btn = dropdown.querySelector(".crm-status-btn, .crm-status-badge");
                 var label = dropdown.querySelector(".crm-status-btn-label");
-                var card = dropdown.closest(".crm-card");
+                var card = dropdown.closest(".crm-glass-card, .crm-card");
                 var projectName = card ? card.dataset.projectName : "";
 
                 var statusLabel = this.textContent.trim();
@@ -58,15 +58,28 @@
                     .then(function (r) { return r.json(); })
                     .then(function (data) {
                         if (data.success) {
-                            card.dataset.status = newStatus;
-                            btn.className = btn.className.replace(/bg-\S+/g, "bg-" + newStatus);
-                            label.textContent = statusLabel;
+                            if (card) {
+                                card.dataset.status = newStatus;
+                                card.className = card.className.replace(/crm-status-\S+/g, "crm-status-" + newStatus);
+                                var avatar = card.querySelector(".crm-project-avatar");
+                                if (avatar) {
+                                    avatar.className = avatar.className.replace(/status-glow-\S+/g, "status-glow-" + newStatus);
+                                }
+                            }
+                            if (btn) {
+                                btn.className = btn.className.replace(/crm-badge-\S+/g, "crm-badge-" + newStatus).replace(/bg-\S+/g, "bg-" + newStatus);
+                            }
+                            if (label) {
+                                label.textContent = statusLabel;
+                            }
                             var menu = dropdown.querySelector(".crm-status-menu");
-                            menu.querySelectorAll(".crm-status-option").forEach(function (o) {
-                                o.classList.remove("active");
-                                var check = o.querySelector(".fa-check");
-                                if (check) check.remove();
-                            });
+                            if (menu) {
+                                menu.querySelectorAll(".crm-status-option").forEach(function (o) {
+                                    o.classList.remove("active");
+                                    var check = o.querySelector(".fa-check");
+                                    if (check) check.remove();
+                                });
+                            }
                             this.classList.add("active");
                             var checkIcon = document.createElement("i");
                             checkIcon.className = "fas fa-check ms-auto";

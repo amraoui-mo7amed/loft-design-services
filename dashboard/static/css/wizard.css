@@ -1801,3 +1801,33 @@ body {
   z-index: 1;
   border-color: rgba(255, 255, 255, 0.12) !important;
 }
+
+/* Watch Video Button styled under the Package Title */
+.pkg-card .pkg-video-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  margin-top: 0.4rem !important;
+  width: auto !important;
+  padding: 4px 10px !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  border-radius: 50px !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease-in-out;
+}
+
+.pkg-card .pkg-video-btn:hover {
+  background: var(--wiz-primary, #FFD65A) !important;
+  color: #1e232a !important;
+  border-color: var(--wiz-primary, #FFD65A) !important;
+  box-shadow: 0 4px 12px rgba(255, 214, 90, 0.35);
+  transform: translateY(-1px);
+}

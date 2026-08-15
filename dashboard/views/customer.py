@@ -9,7 +9,7 @@ from ..models import DesignRequest, DesignDeliverable, DesignMessage, DesignActi
 
 @login_required
 def my_projects(request):
-    projects = DesignRequest.objects.filter(client=request.user).select_related("project_type", "package", "designer")
+    projects = DesignRequest.objects.filter(client=request.user).select_related("project_type", "package", "designer").order_by("-created_at")
     paginator = Paginator(projects, 12)
     page_obj = paginator.get_page(request.GET.get("page"))
     return render(request, "dashboard/customer/project_list.html", {

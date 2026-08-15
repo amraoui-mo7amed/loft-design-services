@@ -39,6 +39,7 @@ class PackageService(models.Model):
 class DesignPackage(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("Name"))
     is_default = models.BooleanField(default=False, verbose_name=_("Default Package"))
+    link = models.URLField(blank=True, verbose_name=_("Video Link"))
     delivery_time_days = models.PositiveIntegerField(default=7, verbose_name=_("Delivery Time (days)"))
     price_multiplier = models.DecimalField(max_digits=5, decimal_places=2, default=1.0, verbose_name=_("Price Multiplier"))
     services_after_payment = models.TextField(blank=True, verbose_name=_("Services After Payment"))

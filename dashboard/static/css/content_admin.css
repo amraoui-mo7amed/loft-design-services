@@ -1,0 +1,699 @@
+/* ============================================
+   Redesigned Contact Cards (Liquid Glass)
+   ============================================ */
+
+.contact-glass-card {
+    background: linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 20px !important;
+    padding: 22px 24px !important;
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+}
+
+.contact-glass-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 214, 90, 0.45) !important;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6), 0 0 24px rgba(255, 214, 90, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+.contact-glass-card.contact-unread {
+    border-color: rgba(255, 214, 90, 0.4) !important;
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 214, 90, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+.contact-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.contact-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.contact-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(145deg, rgba(255, 214, 90, 0.28), rgba(255, 214, 90, 0.08));
+    border: 1.5px solid rgba(255, 214, 90, 0.45);
+    color: var(--brand-primary, #FFD65A);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.15rem;
+    box-shadow: 0 4px 14px rgba(255, 214, 90, 0.15);
+}
+
+.contact-unread-glow {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--brand-primary, #FFD65A);
+    box-shadow: 0 0 10px rgba(255, 214, 90, 0.85);
+    border: 2px solid #0f1318;
+}
+
+[dir="rtl"] .contact-unread-glow {
+    right: auto;
+    left: -3px;
+}
+
+.contact-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.2px;
+}
+
+.contact-status-pill {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.contact-pill-unread {
+    background: rgba(255, 214, 90, 0.15);
+    border: 1px solid rgba(255, 214, 90, 0.4);
+    color: var(--brand-primary, #FFD65A);
+}
+
+.contact-pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--brand-primary, #FFD65A);
+    margin-inline-end: 5px;
+    box-shadow: 0 0 6px rgba(255, 214, 90, 0.8);
+}
+
+.contact-pill-read {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #8b95a1;
+}
+
+.contact-meta-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.contact-meta-pill {
+    font-size: 0.78rem;
+    color: #cbd5e1;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 2px 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+.contact-meta-pill:hover {
+    color: var(--brand-primary, #FFD65A);
+    border-color: rgba(255, 214, 90, 0.3);
+    background: rgba(255, 214, 90, 0.08);
+}
+
+.contact-card-body {
+    margin-bottom: 18px;
+}
+
+.contact-msg-box {
+    position: relative;
+    padding: 12px 14px 12px 32px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+[dir="rtl"] .contact-msg-box {
+    padding: 12px 32px 12px 14px;
+}
+
+.contact-quote-icon {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    color: rgba(255, 214, 90, 0.4);
+    font-size: 0.82rem;
+}
+
+[dir="rtl"] .contact-quote-icon {
+    left: auto;
+    right: 12px;
+}
+
+.contact-msg-text {
+    font-size: 0.85rem;
+    color: #d1d5db;
+    line-height: 1.55;
+    font-style: italic;
+}
+
+.contact-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.contact-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: #8b95a1;
+    font-weight: 500;
+}
+
+.contact-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.contact-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: #e6eaee;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.contact-btn-view:hover {
+    background: rgba(255, 214, 90, 0.2);
+    border-color: var(--brand-primary, #FFD65A);
+    color: var(--brand-primary, #FFD65A);
+    transform: translateY(-2px);
+}
+
+.contact-btn-mail:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: #3b82f6;
+    color: #60a5fa;
+    transform: translateY(-2px);
+}
+
+.contact-btn-delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+    color: #f87171;
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   Redesigned Video Cards (Liquid Glass)
+   ============================================ */
+
+.video-glass-card {
+    background: linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 20px !important;
+    overflow: hidden !important;
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.video-glass-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 214, 90, 0.45) !important;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6), 0 0 24px rgba(255, 214, 90, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+.video-card-media-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: rgba(10, 13, 18, 0.85);
+}
+
+.video-card-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.video-glass-card:hover .video-card-thumb {
+    transform: scale(1.08);
+}
+
+.video-card-fallback-thumb {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    color: rgba(255, 255, 255, 0.2);
+    background: linear-gradient(145deg, rgba(28, 34, 42, 0.9), rgba(16, 20, 26, 0.7));
+}
+
+.video-play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0.85;
+    transition: all 0.25s ease;
+    text-decoration: none;
+}
+
+.video-glass-card:hover .video-play-overlay {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.video-play-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 214, 90, 0.94);
+    color: #1a1c22;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    padding-left: 2px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 0 6px rgba(255, 214, 90, 0.25);
+    transition: transform 0.25s ease;
+}
+
+.video-glass-card:hover .video-play-circle {
+    transform: scale(1.12);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6), 0 0 0 8px rgba(255, 214, 90, 0.35);
+}
+
+.video-media-badges {
+    position: absolute;
+    top: 10px;
+    inset-inline-start: 10px;
+    z-index: 3;
+    display: flex;
+    gap: 6px;
+}
+
+.video-platform-pill {
+    padding: 3px 9px;
+    border-radius: 6px;
+    background: rgba(12, 15, 20, 0.82);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #e6eaee;
+    display: inline-flex;
+    align-items: center;
+}
+
+.video-card-content {
+    padding: 18px 20px 10px;
+    flex-grow: 1;
+}
+
+.video-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.2px;
+}
+
+.video-desc {
+    font-size: 0.84rem;
+    color: #a8b2bd;
+    line-height: 1.55;
+}
+
+.video-dest-row {
+    display: flex;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+.video-dest-link {
+    color: var(--brand-primary, #FFD65A);
+    text-decoration: none;
+    font-weight: 500;
+    transition: underline 0.2s ease;
+}
+
+.video-dest-link:hover {
+    text-decoration: underline;
+}
+
+.video-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.video-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: #8b95a1;
+    font-weight: 500;
+}
+
+.video-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.video-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: #e6eaee;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.video-btn-play:hover {
+    background: rgba(255, 214, 90, 0.2);
+    border-color: var(--brand-primary, #FFD65A);
+    color: var(--brand-primary, #FFD65A);
+    transform: translateY(-2px);
+}
+
+.video-btn-edit:hover {
+    background: rgba(255, 214, 90, 0.2);
+    border-color: var(--brand-primary, #FFD65A);
+    color: var(--brand-primary, #FFD65A);
+    transform: translateY(-2px);
+}
+
+.video-btn-delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+    color: #f87171;
+    transform: translateY(-2px);
+}
+
+.ca-count-badge {
+    font-size: 0.75rem;
+    padding: 0.45rem 0.9rem;
+    background: rgba(255, 214, 90, 0.14) !important;
+    color: var(--brand-primary, #FFD65A) !important;
+    border: 1px solid rgba(255, 214, 90, 0.3);
+    font-weight: 700;
+}
+
+/* ── Contact message preview / detail ── */
+
+.ca-message-preview {
+    margin: 0;
+    font-style: italic;
+    color: #a8b2bd;
+    font-size: 0.85rem;
+    border-inline-start: 3px solid rgba(255, 214, 90, 0.4);
+    padding-inline-start: 12px;
+}
+.ca-message-full {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    color: #e6eaee;
+    font-size: 0.92rem;
+    line-height: 1.7;
+}
+
+.ca-card-foot {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.ca-link {
+    color: var(--brand-primary, #FFD65A);
+    text-decoration: none;
+}
+.ca-link:hover {
+    text-decoration: underline;
+}
+
+/* ── Form page header ── */
+
+.ca-page-head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+/* ============================================
+   Redesigned Lead Cards (Liquid Glass)
+   ============================================ */
+
+.lead-glass-card {
+    background: linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 20px !important;
+    padding: 22px 24px !important;
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.lead-glass-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 214, 90, 0.45) !important;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6), 0 0 24px rgba(255, 214, 90, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+.lead-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.lead-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.lead-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(145deg, rgba(255, 214, 90, 0.3), rgba(255, 214, 90, 0.08));
+    border: 1.5px solid rgba(255, 214, 90, 0.45);
+    color: var(--brand-primary, #FFD65A);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.15rem;
+    box-shadow: 0 4px 14px rgba(255, 214, 90, 0.15);
+}
+
+.lead-status-indicator {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #22c55e;
+    border: 2px solid #0f1318;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+}
+
+[dir="rtl"] .lead-status-indicator {
+    right: auto;
+    left: -2px;
+}
+
+.lead-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.2px;
+}
+
+.lead-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #4ade80;
+}
+
+.lead-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.7);
+}
+
+.lead-card-body {
+    margin-bottom: 18px;
+}
+
+.lead-email-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lead-email-icon {
+    color: var(--brand-primary, #FFD65A);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.lead-email-link {
+    color: #e6eaee;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    flex-grow: 1;
+    transition: color 0.2s ease;
+}
+
+.lead-email-link:hover {
+    color: var(--brand-primary, #FFD65A);
+}
+
+.lead-copy-btn {
+    background: transparent;
+    border: none;
+    color: #8b95a1;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 0.85rem;
+    transition: color 0.2s ease, transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.lead-copy-btn:hover {
+    color: var(--brand-primary, #FFD65A);
+    transform: scale(1.15);
+}
+
+.lead-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lead-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: #8b95a1;
+    font-weight: 500;
+}
+
+.lead-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.lead-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: #e6eaee;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.lead-btn-mail:hover {
+    background: rgba(255, 214, 90, 0.2);
+    border-color: var(--brand-primary, #FFD65A);
+    color: var(--brand-primary, #FFD65A);
+    transform: translateY(-2px);
+}
+
+.lead-btn-delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+    color: #f87171;
+    transform: translateY(-2px);
+}
+
+.ca-empty-card {
+    background: linear-gradient(150deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)) !important;
+    backdrop-filter: blur(18px) saturate(160%) !important;
+    border: 1px dashed rgba(255, 255, 255, 0.15) !important;
+}
