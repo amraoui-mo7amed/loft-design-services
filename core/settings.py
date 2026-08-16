@@ -187,3 +187,5 @@ EVENTSTREAM_REDIS = {
     "port": int(os.getenv("REDIS_PORT", 6379)),
     "db": 0,
 }
+
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="").split(",")
