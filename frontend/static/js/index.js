@@ -37,31 +37,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (data.success) {
+                    form.reset();
                     if (data.message) {
                         const li = document.createElement('li');
-                        li.textContent = data.message;
-                        li.classList.add('alert', 'alert-success', 'mb-2');
+                        li.className = 'alert alert-success d-flex align-items-center mb-2 animate-fadeIn';
+                        li.innerHTML = `<i class="fas fa-check-circle me-2 flex-shrink-0"></i><span>${data.message}</span>`;
                         if (errorList) errorList.appendChild(li);
                     }
                     if (data.redirect_url) {
                         setTimeout(() => {
                             window.location.href = data.redirect_url;
-                        }, 3000);
+                        }, 2000);
                     } else {
-                        // If no redirect, restore button
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = originalBtnContent;
                     }
                 } else {
-                    // Restore button on error
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalBtnContent;
 
                     if (data.errors && errorList) {
-                        const renderMsg = (msg, cls = 'alert-warning') => {
+                        const renderMsg = (msg, cls = 'alert-danger') => {
                             const li = document.createElement('li');
-                            li.textContent = msg;
-                            li.classList.add('alert', 'alert-warning', 'mb-2');
+                            li.className = `alert ${cls} d-flex align-items-center mb-2 animate-fadeIn`;
+                            li.innerHTML = `<i class="fas fa-exclamation-circle me-2 flex-shrink-0"></i><span>${msg}</span>`;
                             errorList.appendChild(li);
                         };
 
@@ -75,14 +74,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } catch (error) {
-                // Restore button on network/unexpected error
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnContent;
 
                 if (errorList) {
                     const li = document.createElement('li');
-                    li.textContent = 'An unexpected error occurred. Please try again.';
-                    li.classList.add('alert', 'alert-danger', 'mb-2');
+                    li.className = 'alert alert-danger d-flex align-items-center mb-2 animate-fadeIn';
+                    li.innerHTML = '<i class="fas fa-times-circle me-2 flex-shrink-0"></i><span>An unexpected error occurred. Please try again.</span>';
                     errorList.appendChild(li);
                 }
                 console.error('Form submission error:', error);

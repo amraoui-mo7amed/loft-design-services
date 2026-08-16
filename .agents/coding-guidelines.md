@@ -98,6 +98,7 @@ URL names are `snake_case` and referenced in templates via `{% url %}`.
 - **Always** use `components/pagination.html` on list views.
 - **Always** add the `.form` class to forms.
 - **Always** render form errors via `partials/errorList.html`.
+- **Always** Let the `partials/errorList.html` only handle the form submission
 - Load static with `{% load static %}`; version every asset `?v={{ ASSET_VERSION }}`.
 - Use Bootstrap form controls for inputs.
 - Keep JS and CSS out of templates — separate files under the app's `static/` dir.

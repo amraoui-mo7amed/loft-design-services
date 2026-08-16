@@ -111,6 +111,25 @@ def submit_contact(request):
         )
         if join_lead:
             Lead.objects.create(name=name, email=email)
+
+        try:
+            from django.contrib.auth.models import User
+            from django.urls import reverse
+            from dashboard.utils import notify_user
+            from django.db.models import Q
+            contact_url = reverse("dash:contact_detail", kwargs={"pk": contact.pk})
+            admins = User.objects.filter(Q(is_superuser=True) | Q(profile__role="admin")).distinct()
+            for admin_user in admins:
+                notify_user(
+                    user=admin_user,
+                    title=_("New Contact Message: %(name)s") % {"name": name},
+                    message=message[:120],
+                    notification_type="info",
+                    link=contact_url,
+                )
+        except Exception:
+            pass
+
         return JsonResponse({
             "success": True,
             "message": _("Thank you! Your message has been sent successfully."),

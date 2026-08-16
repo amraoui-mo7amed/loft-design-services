@@ -32,6 +32,7 @@ from .portfolio import Portfolio, PortfolioGallery
 from .video import Video
 from .contact import Contact
 from .lead import Lead
+from .invitation import Invitation
 
 __all__ = [
     "Inquiry",
@@ -69,4 +70,5 @@ __all__ = [
     "Video",
     "Contact",
     "Lead",
+    "Invitation",
 ]

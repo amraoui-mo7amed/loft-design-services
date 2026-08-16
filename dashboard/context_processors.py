@@ -80,6 +80,12 @@ def _build_menu(is_admin, is_designer, is_customer, lang=None):
                     "url_name": "dash:lead_list",
                     "admin_only": True,
                 },
+                {
+                    "title": _("Invitations"),
+                    "icon": "fas fa-paper-plane",
+                    "url_name": "dash:invitation_list",
+                    "admin_only": True,
+                },
             ],
         )
 

@@ -1,5 +1,5 @@
 from django.urls import path
-from dashboard.views import dashboard, users, notifications, design, customer, designer, admin_crm, pricing, portfolio, videos, content
+from dashboard.views import dashboard, users, notifications, design, customer, designer, admin_crm, pricing, portfolio, videos, content, invitations
 
 app_name = "dash"
 
@@ -32,12 +32,15 @@ urlpatterns = [
     path("design/project-types/<int:pk>/delete/", design.project_type_delete, name="project_type_delete"),
     path("design/project-types/<int:pk>/home/", design.project_type_home_toggle, name="project_type_home_toggle"),
     path("design/project-types/<int:pk>/spaces/", design.space_type_spaces, name="space_type_spaces"),
-    # Design Catalog - Spaces (managed from project type detail)
+    # Design Catalog - Spaces (managed from project type detail & space details page)
     path("design/spaces/create/", design.space_create, name="space_create"),
+    path("design/spaces/<int:pk>/", design.space_detail, name="space_detail"),
     path("design/spaces/<int:pk>/edit/", design.space_update, name="space_update"),
     path("design/spaces/<int:pk>/delete/", design.space_delete, name="space_delete"),
     path("design/spaces/<int:pk>/home-save/", design.space_home_save, name="space_home_save"),
     path("design/spaces/<int:pk>/home-toggle/", design.space_home_toggle, name="space_home_toggle"),
+    path("design/spaces/<int:pk>/images/<int:img_pk>/edit/", design.space_image_update, name="space_image_update"),
+    path("design/spaces/<int:pk>/images/<int:img_pk>/thumbnail/", design.space_image_set_thumbnail, name="space_image_set_thumbnail"),
     path("design/spaces/image/delete/", design.space_image_delete, name="space_image_delete"),
     # Design Catalog - Packages
     path("design/packages/", design.package_list, name="package_list"),
@@ -87,4 +90,9 @@ urlpatterns = [
     # Leads
     path("leads/", content.lead_list, name="lead_list"),
     path("leads/<int:pk>/delete/", content.lead_delete, name="lead_delete"),
+    # Invitations
+    path("invitations/", invitations.invitation_list, name="invitation_list"),
+    path("invitations/create/", invitations.invitation_create, name="invitation_create"),
+    path("invitations/<int:pk>/resend/", invitations.invitation_resend, name="invitation_resend"),
+    path("invitations/<int:pk>/delete/", invitations.invitation_delete, name="invitation_delete"),
 ]

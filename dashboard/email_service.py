@@ -90,3 +90,21 @@ def send_inquiry_status_update_email(inquiry):
         to_email,
         subject,
     )
+
+
+def send_invitation_email(invitation, request=None):
+    to_email = invitation.email
+    if not to_email:
+        return False
+
+    signup_url = invitation.get_signup_url(request)
+    subject = _("Invitation to join LoftDesign / Invitation à rejoindre LoftDesign")
+    return send_email(
+        "dashboard/email/invitation.html",
+        {
+            "invitation": invitation,
+            "signup_url": signup_url,
+        },
+        to_email,
+        subject,
+    )

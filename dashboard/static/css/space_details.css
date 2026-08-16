@@ -1,0 +1,165 @@
+/* ==========================================================================
+   Space Details & Gallery - Dark Liquid Glass Theme
+   ========================================================================== */
+
+.space-details-container {
+    padding-bottom: 2.5rem;
+}
+
+.sd-glass-card {
+    background: rgba(26, 26, 26, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sd-glass-card:hover {
+    border-color: rgba(255, 214, 90, 0.25);
+}
+
+.sd-card-head {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.sd-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+}
+
+.sd-card-body {
+    padding: 1.5rem;
+}
+
+.sd-input {
+    background: rgba(15, 15, 15, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    border-radius: 10px !important;
+    padding: 0.65rem 1rem !important;
+    font-size: 0.9rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.sd-input:focus {
+    background: rgba(20, 20, 20, 0.9) !important;
+    border-color: #ffd65a !important;
+    box-shadow: 0 0 0 3px rgba(255, 214, 90, 0.15) !important;
+    color: #ffffff !important;
+}
+
+/* Bulk Upload Drop Zone */
+.sd-upload-zone {
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.02);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sd-upload-zone:hover,
+.sd-upload-zone.dragover {
+    border-color: #ffd65a;
+    background: rgba(255, 214, 90, 0.05);
+}
+
+/* Gallery Item Card */
+.sd-gallery-item {
+    background: rgba(18, 18, 18, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.sd-gallery-item:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.sd-gallery-item.is-thumbnail {
+    border-color: #ffd65a;
+    box-shadow: 0 0 16px rgba(255, 214, 90, 0.2);
+}
+
+.sd-img-wrapper {
+    position: relative;
+    width: 100%;
+    height: 160px;
+    background: #111;
+    overflow: hidden;
+}
+
+.sd-img-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.sd-gallery-item:hover .sd-img-preview {
+    transform: scale(1.04);
+}
+
+.sd-badge-thumb {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ffd65a;
+    color: #1a1a1a;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+[dir="rtl"] .sd-badge-thumb {
+    right: auto;
+    left: 10px;
+}
+
+.sd-img-info {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
+}
+
+.sd-tags-list {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #ffd65a;
+}
+
+.sd-desc-text {
+    font-size: 0.78rem;
+    color: #adb5bd;
+    line-height: 1.4;
+}
+
+/* Modal Dark Liquid Glass */
+.sd-modal-glass {
+    background: rgba(22, 22, 22, 0.95);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}

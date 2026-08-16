@@ -1,0 +1,122 @@
+/* ==========================================================================
+   Invitations Management - Dark Liquid Glass Theme
+   ========================================================================== */
+
+.invitations-container {
+    padding-bottom: 2rem;
+}
+
+.inv-stat-card {
+    background: rgba(26, 26, 26, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.inv-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255, 214, 90, 0.15);
+    color: #ffd65a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.inv-stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    display: block;
+    line-height: 1.2;
+}
+
+.inv-stat-label {
+    font-size: 0.8rem;
+    color: #adb5bd;
+    font-weight: 600;
+}
+
+/* Glass Card */
+.inv-glass-card {
+    background: rgba(26, 26, 26, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.inv-glass-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 214, 90, 0.25);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+}
+
+.inv-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 214, 90, 0.2), rgba(255, 214, 90, 0.05));
+    border: 1px solid rgba(255, 214, 90, 0.3);
+    color: #ffd65a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.inv-user-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.inv-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.82rem;
+    color: #adb5bd;
+    margin-bottom: 0.35rem;
+}
+
+.inv-meta-row i {
+    width: 14px;
+    text-align: center;
+}
+
+.inv-input {
+    background: rgba(15, 15, 15, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    border-radius: 10px !important;
+    padding: 0.65rem 1rem !important;
+    font-size: 0.9rem !important;
+}
+
+.inv-input:focus {
+    background: rgba(20, 20, 20, 0.9) !important;
+    border-color: #ffd65a !important;
+    box-shadow: 0 0 0 3px rgba(255, 214, 90, 0.15) !important;
+    color: #ffffff !important;
+}
+
+.inv-modal-glass {
+    background: rgba(22, 22, 22, 0.95);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}

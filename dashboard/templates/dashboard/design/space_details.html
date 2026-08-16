@@ -1,0 +1,257 @@
+{% extends "dash/dash_index.html" %}
+{% load i18n %}
+{% load static %}
+{% load l10n %}
+
+{% block dashTitle %}{{ space.name }} - {% trans "Space Details & Gallery" %}{% endblock dashTitle %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/space_details.css' %}?v={{ ASSET_VERSION }}">
+{% endblock extra_css %}
+
+{% block dashContent %}
+<div class="space-details-container">
+    <!-- Header & Navigation Breadcrumb -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            {% if pt %}
+            <a href="{% url 'dash:project_type_detail' pt.pk %}" class="btn btn-outline-light btn-sm rounded-3 d-inline-flex align-items-center justify-content-center"
+               style="width: 38px; height: 38px;"
+               title="{% trans 'Back to project type' %}"
+               aria-label="{% trans 'Back to' %} {{ pt.name }}">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            {% else %}
+            <a href="{% url 'dash:project_type_list' %}" class="btn btn-outline-light btn-sm rounded-3 d-inline-flex align-items-center justify-content-center"
+               style="width: 38px; height: 38px;"
+               title="{% trans 'Back to project types' %}">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            {% endif %}
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <h4 class="fw-bold text-light mb-0">{{ space.name }}</h4>
+                    {% if pt %}
+                    <span class="badge bg-secondary-subtle text-light border border-secondary rounded-pill px-3 py-1 font-monospace" style="font-size: 0.75rem;">
+                        {{ pt.name }}
+                    </span>
+                    {% endif %}
+                </div>
+                <p class="text-muted small mb-0 mt-1">{% trans "Configure space parameters, pricing, and high-resolution gallery images" %}</p>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-danger btn-sm rounded-3 px-3 py-2 delete_button"
+                    data-delete-url="{% url 'dash:space_delete' space.pk %}"
+                    {% if pt %}data-project-type-id="{{ pt.pk }}"{% endif %}
+                    data-csrf-token="{{ csrf_token }}"
+                    data-item-title="{{ space.name }}">
+                <i class="fas fa-trash me-2"></i>{% trans "Delete Space" %}
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column: Space General Settings & Bulk Upload -->
+        <div class="col-xl-4 col-lg-5">
+            <!-- Edit Space Form Card -->
+            <div class="sd-glass-card mb-4">
+                <div class="sd-card-head">
+                    <h5 class="sd-card-title"><i class="fas fa-sliders-h me-2 text-warning"></i>{% trans "Space Settings" %}</h5>
+                </div>
+                <div class="sd-card-body">
+                    <form method="post" action="{% url 'dash:space_detail' space.pk %}" class="form" id="editSpaceForm">
+                        {% csrf_token %}
+                        {% if pt %}
+                        <input type="hidden" name="project_type_id" value="{{ pt.pk }}">
+                        {% endif %}
+                        {% include "partials/errorList.html" with form_id="editSpaceForm" %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small">{% trans "Space Name" %} <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control sd-input" value="{{ space.name }}" required placeholder="{% trans 'e.g. Master Bedroom' %}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small">{% trans "Base Price" %} (DA)</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" name="base_price" class="form-control sd-input" value="{{ space.base_price|unlocalize }}" min="0">
+                                <span class="input-group-text bg-dark text-muted border-secondary">DA</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn dash-btn-primary w-100 rounded-3 py-2 fw-bold">
+                            <i class="fas fa-save me-2"></i>{% trans "Save Space Changes" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bulk Image Upload Card -->
+            <div class="sd-glass-card">
+                <div class="sd-card-head">
+                    <h5 class="sd-card-title"><i class="fas fa-cloud-upload-alt me-2 text-info"></i>{% trans "Bulk Image Upload" %}</h5>
+                </div>
+                <div class="sd-card-body">
+                    <form method="post" action="{% url 'dash:space_detail' space.pk %}" enctype="multipart/form-data" class="form" id="bulkUploadForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="name" value="{{ space.name }}">
+                        <input type="hidden" name="base_price" value="{{ space.base_price|unlocalize }}">
+                        {% include "partials/errorList.html" with form_id="bulkUploadForm" %}
+
+                        <div class="sd-upload-zone mb-3" id="dropZone">
+                            <i class="fas fa-images fa-3x text-muted mb-2"></i>
+                            <h6 class="text-light fw-bold mb-1">{% trans "Choose or drag images here" %}</h6>
+                            <p class="text-muted small mb-3">{% trans "Upload multiple JPG, PNG, WebP images in bulk" %}</p>
+                            <input type="file" name="gallery_images" id="bulkFileInput" multiple accept="image/*" class="d-none" required>
+                            <button type="button" class="btn btn-outline-warning btn-sm rounded-pill px-4" onclick="document.getElementById('bulkFileInput').click()">
+                                <i class="fas fa-folder-open me-2"></i>{% trans "Select Files" %}
+                            </button>
+                        </div>
+                        <div id="fileSelectedCount" class="text-info small mb-3 fw-semibold text-center d-none"></div>
+
+                        <button type="submit" class="btn dash-btn-primary w-100 rounded-3 py-2 fw-bold" id="uploadSubmitBtn">
+                            <i class="fas fa-upload me-2"></i>{% trans "Upload All Images" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Gallery Images Grid -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="sd-glass-card h-100">
+                <div class="sd-card-head d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="sd-card-title"><i class="fas fa-photo-video me-2 text-warning"></i>{% trans "Gallery Images" %}</h5>
+                        <p class="text-muted small mb-0">{% trans "Total images" %}: <span class="badge bg-warning text-dark font-monospace">{{ gallery_images|length }}</span></p>
+                    </div>
+                    <div class="text-muted small d-none d-md-block">
+                        <i class="fas fa-info-circle me-1"></i> {% trans "Click 'Edit' to update tags and description." %}
+                    </div>
+                </div>
+
+                <div class="sd-card-body">
+                    {% if gallery_images %}
+                    <div class="row g-3" id="galleryGrid">
+                        {% for img in gallery_images %}
+                        <div class="col-md-6 col-xxl-4" id="image-card-{{ img.pk }}">
+                            <div class="sd-gallery-item{% if img.is_thumbnail %} is-thumbnail{% endif %}">
+                                <div class="sd-img-wrapper">
+                                    <img src="{{ img.image.url }}" alt="{{ space.name }}" class="sd-img-preview" loading="lazy">
+                                    {% if img.is_thumbnail %}
+                                    <span class="sd-badge-thumb"><i class="fas fa-star me-1"></i>{% trans "Thumbnail" %}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="sd-img-info">
+                                    <div class="sd-img-meta mb-2">
+                                        {% if img.tags %}
+                                        <div class="sd-tags-list text-truncate" id="tags-display-{{ img.pk }}" title="{{ img.tags }}">
+                                            <i class="fas fa-tags me-1 text-warning"></i>{{ img.tags }}
+                                        </div>
+                                        {% else %}
+                                        <div class="sd-tags-list text-muted fst-italic" id="tags-display-{{ img.pk }}">
+                                            <i class="fas fa-tags me-1"></i>{% trans "No tags" %}
+                                        </div>
+                                        {% endif %}
+
+                                        {% if img.description %}
+                                        <p class="sd-desc-text text-truncate mb-0" id="desc-display-{{ img.pk }}" title="{{ img.description }}">
+                                            {{ img.description }}
+                                        </p>
+                                        {% else %}
+                                        <p class="sd-desc-text text-muted fst-italic mb-0" id="desc-display-{{ img.pk }}">
+                                            {% trans "No description" %}
+                                        </p>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="sd-img-actions d-flex align-items-center justify-content-between pt-2 border-top border-secondary border-opacity-25">
+                                        <button type="button" class="btn btn-sm btn-outline-light rounded-2 px-2 py-1 open-img-modal-btn"
+                                                data-img-id="{{ img.pk }}"
+                                                data-tags="{{ img.tags|default:'' }}"
+                                                data-description="{{ img.description|default:'' }}"
+                                                data-update-url="{% url 'dash:space_image_update' space.pk img.pk %}"
+                                                data-img-url="{{ img.image.url }}">
+                                            <i class="fas fa-edit me-1 text-warning"></i>{% trans "Edit" %}
+                                        </button>
+
+                                        {% if not img.is_thumbnail %}
+                                        <button type="button" class="btn btn-sm btn-outline-warning rounded-2 px-2 py-1 set-thumb-btn"
+                                                data-thumb-url="{% url 'dash:space_image_set_thumbnail' space.pk img.pk %}"
+                                                data-csrf="{{ csrf_token }}">
+                                            <i class="far fa-star me-1"></i>{% trans "Set Thumb" %}
+                                        </button>
+                                        {% endif %}
+
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-2 px-2 py-1 delete-img-btn"
+                                                data-delete-url="{% url 'dash:space_image_delete' %}"
+                                                data-image-id="{{ img.pk }}"
+                                                data-csrf="{{ csrf_token }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-images fa-4x text-muted opacity-25 mb-3"></i>
+                        <h5 class="text-muted fw-bold">{% trans "No gallery images yet" %}</h5>
+                        <p class="text-muted small">{% trans "Use the bulk upload form on the left to add high quality renders and photos." %}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Details Edit Modal -->
+<div class="modal fade" id="imageEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content sd-modal-glass border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-image text-warning fa-lg"></i>
+                    <h5 class="modal-title fw-bold text-light mb-0">{% trans "Edit Image Details" %}</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="imageEditForm" class="form" method="post" action="">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    {% include "partials/errorList.html" with form_id="imageEditForm" %}
+                    
+                    <div class="text-center mb-3">
+                        <img id="modalImgPreview" src="" alt="Preview" class="img-fluid rounded-3 shadow" style="max-height: 180px; object-fit: cover;">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light fw-semibold small">{% trans "Tags (Comma separated)" %}</label>
+                        <input type="text" name="tags" id="modalImgTags" class="form-control sd-input" placeholder="{% trans 'e.g. Modern, Minimal, Warm Wood' %}">
+                        <small class="text-muted">{% trans "Optional keyword tags used for filtering inspirations." %}</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light fw-semibold small">{% trans "Description / Caption" %}</label>
+                        <textarea name="description" id="modalImgDesc" rows="3" class="form-control sd-input" placeholder="{% trans 'Detailed notes about materials, style, lighting...' %}"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
+                    <button type="button" class="btn btn-secondary rounded-3 px-3" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn dash-btn-primary rounded-3 px-4 fw-bold" id="saveImageDetailsBtn">
+                        <i class="fas fa-save me-2"></i>{% trans "Save Details" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock dashContent %}
+
+{% block extra_js %}
+<script src="{% static 'js/space_details.js' %}?v={{ ASSET_VERSION }}"></script>
+{% endblock extra_js %}

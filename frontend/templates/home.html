@@ -351,7 +351,6 @@
                     <form class="form contact-form reveal" id="contactForm" method="post" action="{% url 'frontend:contact_submit' %}">
                         {% csrf_token %}
                         {% include "partials/errorList.html" with form_id="contactForm" %}
-                        <div id="contactFormStatus" class="contact-form-status d-none" role="alert"></div>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="contact-label" for="contactName">{% trans "Name" %}</label>

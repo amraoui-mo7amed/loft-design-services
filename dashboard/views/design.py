@@ -197,6 +197,82 @@ def space_update(request, pk):
 
 
 @admin_required
+def space_detail(request, pk):
+    space = get_object_or_404(
+        Space.objects.prefetch_related("gallery_images", "project_types__project_type"),
+        pk=pk,
+    )
+    parent_link = space.project_types.first()
+    pt = parent_link.project_type if parent_link else None
+
+    if request.method == "POST":
+        space.name = request.POST.get("name", space.name).strip()
+        space.base_price = request.POST.get("base_price", space.base_price)
+        gallery_files = request.FILES.getlist("gallery_images")
+
+        if not space.name:
+            return JsonResponse({"success": False, "errors": [_("Space name is required.")]})
+
+        try:
+            with transaction.atomic():
+                space.save()
+                if gallery_files:
+                    _handle_space_gallery(space, gallery_files, [])
+            return JsonResponse({
+                "success": True,
+                "message": _("Space details updated successfully."),
+                "redirect_url": reverse("dash:space_detail", args=[space.pk]),
+            })
+        except Exception as e:
+            return JsonResponse({"success": False, "errors": humanize_error(e)})
+
+    return render(request, "dashboard/design/space_details.html", {
+        "space": space,
+        "pt": pt,
+        "gallery_images": space.gallery_images.all().order_by("-is_thumbnail", "id"),
+    })
+
+
+@admin_required
+def space_image_update(request, pk, img_pk):
+    space = get_object_or_404(Space, pk=pk)
+    img = get_object_or_404(SpaceImage, pk=img_pk, space=space)
+    if request.method == "POST":
+        img.tags = request.POST.get("tags", "").strip()
+        img.description = request.POST.get("description", "").strip()
+        try:
+            img.save(update_fields=["tags", "description"])
+            return JsonResponse({
+                "success": True,
+                "message": _("Image details updated successfully."),
+                "tags": img.tags,
+                "description": img.description,
+            })
+        except Exception as e:
+            return JsonResponse({"success": False, "errors": humanize_error(e)})
+    return JsonResponse({"success": False, "errors": [_("Invalid request method.")]})
+
+
+@admin_required
+def space_image_set_thumbnail(request, pk, img_pk):
+    space = get_object_or_404(Space, pk=pk)
+    img = get_object_or_404(SpaceImage, pk=img_pk, space=space)
+    if request.method == "POST":
+        try:
+            with transaction.atomic():
+                space.gallery_images.update(is_thumbnail=False)
+                img.is_thumbnail = True
+                img.save(update_fields=["is_thumbnail"])
+            return JsonResponse({
+                "success": True,
+                "message": _("Thumbnail updated successfully."),
+            })
+        except Exception as e:
+            return JsonResponse({"success": False, "errors": humanize_error(e)})
+    return JsonResponse({"success": False, "errors": [_("Invalid request method.")]})
+
+
+@admin_required
 def space_delete(request, pk):
     obj = get_object_or_404(Space, pk=pk)
     if request.method == "POST":

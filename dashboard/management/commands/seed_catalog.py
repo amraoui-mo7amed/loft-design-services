@@ -166,8 +166,7 @@ class Command(BaseCommand):
                 _, was = DesignPackage.objects.get_or_create(
                     name=data["name"],
                     defaults={
-                        "description": data["description"],
-                        "delivery_time_days": data["delivery_time_days"],
+                        "delivery_time_days": data.get("delivery_time_days", 7),
                     },
                 )
                 if was:
