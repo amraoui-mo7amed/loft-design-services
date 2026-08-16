@@ -41,14 +41,10 @@ if [ "$APP_ENV" = "development" ] || [ "$APP_ENV" = "dev" ]; then
     echo "4. Compiling translation messages..."
     python manage.py compilemessages --ignore=.venv 2>/dev/null || true
 else
-    echo ">>> Running in ${APP_ENV} mode:"
-    echo "1. Generating migrations..."
-    python manage.py makemigrations user_auth dashboard
-
-    echo "2. Applying database migrations..."
+    echo "1. Applying database migrations..."
     python manage.py migrate --noinput
 
-    echo "3. Collecting static files..."
+    echo "2. Collecting static files..."
     python manage.py collectstatic --noinput
 
     echo "4. Compiling translation messages..."
