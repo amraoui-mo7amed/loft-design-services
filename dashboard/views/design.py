@@ -15,52 +15,33 @@ from ..decorator import admin_required, with_pagination
 from ..models import (
     ProjectType,
     Space,
+    SpaceCategory,
+    SpaceCategoryImages,
     SpaceImage,
     ProjectTypeSpace,
-    DesignPackage,
-    PackageService,
-    DesignOption,
+    Service,
 )
 
 
-def _create_option(name, description=""):
-    base_slug = slugify(name)
-    if not base_slug:
-        base_slug = "option"
-    slug = base_slug
-    counter = 1
-    while DesignOption.objects.filter(slug=slug).exists():
-        slug = f"{base_slug}-{counter}"
-        counter += 1
-    return DesignOption.objects.create(
-        name=name, slug=slug,
-        description=description,
-    )
-
-
-def _handle_space_gallery(space, files, delete_ids, thumbnail_image_id=None):
+def _handle_space_category_images(category, files, is_default=False):
     existing_hashes = set(
-        space.gallery_images.exclude(content_hash="").values_list("content_hash", flat=True)
+        category.images.exclude(content_hash="").values_list("content_hash", flat=True)
     )
     for f in files:
-        digest = SpaceImage.compute_hash(f)
+        digest = SpaceCategoryImages.compute_hash(f)
         if not digest or digest in existing_hashes:
             continue
         try:
-            SpaceImage.objects.create(space=space, image=f, content_hash=digest)
+            has_default = category.images.filter(is_default=True).exists()
+            SpaceCategoryImages.objects.create(
+                category=category,
+                image=f,
+                content_hash=digest,
+                is_default=(not has_default and is_default),
+            )
             existing_hashes.add(digest)
         except IntegrityError:
             continue
-    if delete_ids:
-        SpaceImage.objects.filter(space=space, pk__in=delete_ids).delete()
-    if thumbnail_image_id and SpaceImage.objects.filter(space=space, pk=thumbnail_image_id).exists():
-        space.gallery_images.update(is_thumbnail=False)
-        SpaceImage.objects.filter(space=space, pk=thumbnail_image_id).update(is_thumbnail=True)
-    elif not space.gallery_images.filter(is_thumbnail=True).exists():
-        first = space.gallery_images.first()
-        if first:
-            first.is_thumbnail = True
-            first.save(update_fields=["is_thumbnail"])
 
 
 # ──────────────────────────────────────────────
@@ -71,7 +52,7 @@ def _handle_space_gallery(space, files, delete_ids, thumbnail_image_id=None):
 @with_pagination(per_page=12, template="dashboard/design/project_type_list", queryset_name="project_types")
 def project_type_list(request):
     queryset = ProjectType.objects.annotate(space_count=Count("default_spaces")).order_by("name")
-    return { "project_types": queryset }
+    return {"project_types": queryset}
 
 
 @admin_required
@@ -120,7 +101,7 @@ def project_type_delete(request, pk):
 @admin_required
 def project_type_detail(request, pk):
     pt = get_object_or_404(ProjectType, pk=pk)
-    spaces = Space.objects.prefetch_related("gallery_images").filter(project_types__project_type=pt).order_by("name")
+    spaces = Space.objects.prefetch_related("categories__images").filter(project_types__project_type=pt).order_by("name")
     featured_ids = set(
         ProjectTypeSpace.objects.filter(project_type=pt, show_on_home=True).values_list("space_id", flat=True)
     )
@@ -138,7 +119,7 @@ def project_type_detail(request, pk):
 @admin_required
 def space_create(request):
     if request.method == "POST":
-        name = request.POST.get("name")
+        name = request.POST.get("name", "").strip()
         base_price = request.POST.get("base_price", 0)
         project_type_id = request.POST.get("project_type_id") or None
         gallery_files = request.FILES.getlist("gallery_images")
@@ -152,7 +133,9 @@ def space_create(request):
                 space = Space.objects.create(
                     name=name, base_price=base_price,
                 )
-                _handle_space_gallery(space, gallery_files, [])
+                cat = SpaceCategory.objects.create(space=space, category_name=_("General"))
+                if gallery_files:
+                    _handle_space_category_images(cat, gallery_files, is_default=True)
                 ProjectTypeSpace.objects.create(project_type=pt, space=space)
             redirect_url = reverse("dash:project_type_detail", args=[project_type_id])
             return JsonResponse({"success": True, "message": _("Space created successfully."), "redirect_url": redirect_url})
@@ -167,28 +150,11 @@ def space_create(request):
 def space_update(request, pk):
     obj = get_object_or_404(Space, pk=pk)
     if request.method == "POST":
-        obj.name = request.POST.get("name", obj.name)
+        obj.name = request.POST.get("name", obj.name).strip()
         obj.base_price = request.POST.get("base_price", obj.base_price)
-        gallery_files = request.FILES.getlist("gallery_images")
-        delete_ids = [x for x in request.POST.getlist("delete_gallery_ids") if x.isdigit()]
-        thumbnail_image_id = request.POST.get("thumbnail_image_id") or None
         project_type_id = request.POST.get("project_type_id") or None
         try:
-            with transaction.atomic():
-                obj.save()
-                _handle_space_gallery(obj, gallery_files, delete_ids, thumbnail_image_id=thumbnail_image_id)
-                for img in obj.gallery_images.all():
-                    desc_key = f"description_{img.pk}"
-                    tags_key = f"tags_{img.pk}"
-                    updated = False
-                    if desc_key in request.POST:
-                        img.description = request.POST.get(desc_key, "").strip()
-                        updated = True
-                    if tags_key in request.POST:
-                        img.tags = request.POST.get(tags_key, "").strip()
-                        updated = True
-                    if updated:
-                        img.save()
+            obj.save()
             redirect_url = reverse("dash:project_type_detail", args=[project_type_id]) if project_type_id else reverse("dash:project_type_list")
             return JsonResponse({"success": True, "message": _("Space updated successfully."), "redirect_url": redirect_url})
         except Exception as e:
@@ -199,7 +165,7 @@ def space_update(request, pk):
 @admin_required
 def space_detail(request, pk):
     space = get_object_or_404(
-        Space.objects.prefetch_related("gallery_images", "project_types__project_type"),
+        Space.objects.prefetch_related("categories__images", "project_types__project_type"),
         pk=pk,
     )
     parent_link = space.project_types.first()
@@ -208,16 +174,12 @@ def space_detail(request, pk):
     if request.method == "POST":
         space.name = request.POST.get("name", space.name).strip()
         space.base_price = request.POST.get("base_price", space.base_price)
-        gallery_files = request.FILES.getlist("gallery_images")
 
         if not space.name:
             return JsonResponse({"success": False, "errors": [_("Space name is required.")]})
 
         try:
-            with transaction.atomic():
-                space.save()
-                if gallery_files:
-                    _handle_space_gallery(space, gallery_files, [])
+            space.save()
             return JsonResponse({
                 "success": True,
                 "message": _("Space details updated successfully."),
@@ -226,17 +188,116 @@ def space_detail(request, pk):
         except Exception as e:
             return JsonResponse({"success": False, "errors": humanize_error(e)})
 
+    categories = space.categories.prefetch_related("images").all().order_by("category_name")
     return render(request, "dashboard/design/space_details.html", {
         "space": space,
         "pt": pt,
-        "gallery_images": space.gallery_images.all().order_by("-is_thumbnail", "id"),
+        "categories": categories,
     })
 
 
 @admin_required
-def space_image_update(request, pk, img_pk):
+def space_delete(request, pk):
+    obj = get_object_or_404(Space, pk=pk)
+    if request.method == "POST":
+        project_type_id = request.POST.get("project_type_id") or None
+        try:
+            obj.delete()
+            redirect_url = reverse("dash:project_type_detail", args=[project_type_id]) if project_type_id else reverse("dash:project_type_list")
+            return JsonResponse({"success": True, "message": _("Space deleted successfully."), "redirect_url": redirect_url})
+        except Exception as e:
+            return JsonResponse({"success": False, "errors": humanize_error(e)})
+    return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
+
+
+# ──────────────────────────────────────────────
+# Space Categories & Category Images
+# ──────────────────────────────────────────────
+
+@admin_required
+def space_category_create(request, pk):
     space = get_object_or_404(Space, pk=pk)
-    img = get_object_or_404(SpaceImage, pk=img_pk, space=space)
+    if request.method == "POST":
+        category_name = request.POST.get("category_name", "").strip()
+        if not category_name:
+            return JsonResponse({"success": False, "errors": [_("Category name is required.")]})
+        try:
+            cat = SpaceCategory.objects.create(space=space, category_name=category_name)
+            gallery_files = request.FILES.getlist("category_images")
+            if gallery_files:
+                _handle_space_category_images(cat, gallery_files, is_default=True)
+            return JsonResponse({
+                "success": True,
+                "message": _("Category created successfully."),
+                "redirect_url": reverse("dash:space_detail", args=[space.pk]),
+            })
+        except Exception as e:
+            return JsonResponse({"success": False, "errors": humanize_error(e)})
+    return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
+
+
+@admin_required
+def space_category_update(request, pk, cat_pk):
+    space = get_object_or_404(Space, pk=pk)
+    cat = get_object_or_404(SpaceCategory, pk=cat_pk, space=space)
+    if request.method == "POST":
+        category_name = request.POST.get("category_name", "").strip()
+        if not category_name:
+            return JsonResponse({"success": False, "errors": [_("Category name is required.")]})
+        try:
+            cat.category_name = category_name
+            cat.save(update_fields=["category_name"])
+            return JsonResponse({
+                "success": True,
+                "message": _("Category updated successfully."),
+                "category_name": cat.category_name,
+            })
+        except Exception as e:
+            return JsonResponse({"success": False, "errors": humanize_error(e)})
+    return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
+
+
+@admin_required
+def space_category_delete(request, pk, cat_pk):
+    space = get_object_or_404(Space, pk=pk)
+    cat = get_object_or_404(SpaceCategory, pk=cat_pk, space=space)
+    if request.method == "POST":
+        try:
+            cat.delete()
+            return JsonResponse({
+                "success": True,
+                "message": _("Category deleted successfully."),
+                "redirect_url": reverse("dash:space_detail", args=[space.pk]),
+            })
+        except Exception as e:
+            return JsonResponse({"success": False, "errors": humanize_error(e)})
+    return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
+
+
+@admin_required
+def space_category_image_upload(request, pk, cat_pk):
+    space = get_object_or_404(Space, pk=pk)
+    cat = get_object_or_404(SpaceCategory, pk=cat_pk, space=space)
+    if request.method == "POST":
+        gallery_files = request.FILES.getlist("gallery_images")
+        if not gallery_files:
+            return JsonResponse({"success": False, "errors": [_("Please select at least one image to upload.")]})
+        try:
+            _handle_space_category_images(cat, gallery_files)
+            return JsonResponse({
+                "success": True,
+                "message": _("Images uploaded successfully."),
+                "redirect_url": reverse("dash:space_detail", args=[space.pk]),
+            })
+        except Exception as e:
+            return JsonResponse({"success": False, "errors": humanize_error(e)})
+    return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
+
+
+@admin_required
+def space_category_image_update(request, pk, img_pk):
+    space = get_object_or_404(Space, pk=pk)
+    img = get_object_or_404(SpaceCategoryImages, pk=img_pk, category__space=space)
     if request.method == "POST":
         img.tags = request.POST.get("tags", "").strip()
         img.description = request.POST.get("description", "").strip()
@@ -254,18 +315,18 @@ def space_image_update(request, pk, img_pk):
 
 
 @admin_required
-def space_image_set_thumbnail(request, pk, img_pk):
+def space_category_image_set_default(request, pk, img_pk):
     space = get_object_or_404(Space, pk=pk)
-    img = get_object_or_404(SpaceImage, pk=img_pk, space=space)
+    img = get_object_or_404(SpaceCategoryImages, pk=img_pk, category__space=space)
     if request.method == "POST":
         try:
             with transaction.atomic():
-                space.gallery_images.update(is_thumbnail=False)
-                img.is_thumbnail = True
-                img.save(update_fields=["is_thumbnail"])
+                SpaceCategoryImages.objects.filter(category__space=space).update(is_default=False)
+                img.is_default = True
+                img.save(update_fields=["is_default"])
             return JsonResponse({
                 "success": True,
-                "message": _("Thumbnail updated successfully."),
+                "message": _("Default image updated successfully."),
             })
         except Exception as e:
             return JsonResponse({"success": False, "errors": humanize_error(e)})
@@ -273,31 +334,19 @@ def space_image_set_thumbnail(request, pk, img_pk):
 
 
 @admin_required
-def space_delete(request, pk):
-    obj = get_object_or_404(Space, pk=pk)
+def space_category_image_delete(request):
     if request.method == "POST":
-        project_type_id = request.POST.get("project_type_id") or None
+        img_id = request.POST.get("image_id")
+        img = get_object_or_404(SpaceCategoryImages, pk=img_id)
+        space = img.category.space
         try:
-            obj.delete()
-            redirect_url = reverse("dash:project_type_detail", args=[project_type_id]) if project_type_id else reverse("dash:project_type_list")
-            return JsonResponse({"success": True, "message": _("Space deleted successfully."), "redirect_url": redirect_url})
-        except Exception as e:
-            return JsonResponse({"success": False, "errors": humanize_error(e)})
-    return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
-
-
-@admin_required
-def space_image_delete(request):
-    if request.method == "POST":
-        img = get_object_or_404(SpaceImage, pk=request.POST.get("image_id"))
-        space = img.space
-        try:
+            was_default = img.is_default
             img.delete()
-            if not space.gallery_images.filter(is_thumbnail=True).exists():
-                first = space.gallery_images.first()
-                if first:
-                    first.is_thumbnail = True
-                    first.save(update_fields=["is_thumbnail"])
+            if was_default:
+                fallback = SpaceCategoryImages.objects.filter(category__space=space).first()
+                if fallback:
+                    fallback.is_default = True
+                    fallback.save(update_fields=["is_default"])
             return JsonResponse({
                 "success": True,
                 "message": _("Image deleted successfully."),
@@ -306,6 +355,12 @@ def space_image_delete(request):
         except Exception as e:
             return JsonResponse({"success": False, "errors": humanize_error(e)})
     return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
+
+
+# Compatibility aliases
+space_image_update = space_category_image_update
+space_image_set_thumbnail = space_category_image_set_default
+space_image_delete = space_category_image_delete
 
 
 # ──────────────────────────────────────────────
@@ -344,7 +399,7 @@ def space_type_spaces(request, pk):
     pt = get_object_or_404(ProjectType, pk=pk)
     links = (
         ProjectTypeSpace.objects.select_related("space")
-        .prefetch_related("space__gallery_images")
+        .prefetch_related("space__categories__images")
         .filter(project_type=pt)
         .order_by("space__name")
     )
@@ -408,165 +463,143 @@ def space_home_toggle(request, pk):
 
 
 # ──────────────────────────────────────────────
-# Design Package CRUD
+# Service CRUD (replaces Packages)
 # ──────────────────────────────────────────────
 
 @admin_required
-@with_pagination(per_page=12, template="dashboard/design/package_list", queryset_name="packages")
-def package_list(request):
-    queryset = DesignPackage.objects.prefetch_related("package_services__option__category").order_by("name")
-    return {"packages": queryset}
+@with_pagination(per_page=12, template="dashboard/design/service_list", queryset_name="services")
+def service_list(request):
+    q = request.GET.get("q", "").strip()
+    queryset = Service.objects.all()
+    if q:
+        queryset = queryset.filter(service_name__icontains=q)
+    queryset = queryset.order_by("-is_default", "service_name")
+
+    total_count = Service.objects.count()
+    default_service = Service.objects.filter(is_default=True).first()
+    return {
+        "services": queryset,
+        "total_count": total_count,
+        "default_service": default_service,
+        "search_query": q,
+    }
 
 
 @admin_required
-def package_create(request):
+def service_create(request):
     if request.method == "POST":
-        name = request.POST.get("name")
-        if not name:
-            return JsonResponse({"success": False, "errors": [_("Name is required.")]})
+        service_name = request.POST.get("service_name", "").strip()
+        pricing_type = request.POST.get("pricing_type", Service.PricingType.FIXED)
+        service_price = request.POST.get("service_price", 0)
+        video_link = request.POST.get("video_link", "").strip() or None
+        is_default = request.POST.get("is_default") in ("true", "1", "on", True)
+        gif_file = request.FILES.get("gif_file")
+
+        if not service_name:
+            return JsonResponse({"success": False, "errors": [_("Service name is required.")]})
+
         try:
-            pkg = DesignPackage.objects.create(
-                name=name,
-                link=request.POST.get("link", ""),
+            try:
+                service_price = Decimal(str(service_price or 0))
+            except Exception:
+                service_price = Decimal("0")
+
+            Service.objects.create(
+                service_name=service_name,
+                pricing_type=pricing_type,
+                service_price=service_price,
+                video_link=video_link,
+                gif_file=gif_file,
+                is_default=is_default,
             )
-            return JsonResponse({"success": True, "message": _("Package created successfully."), "redirect_url": reverse("dash:package_detail", args=[pkg.pk])})
+            return JsonResponse({
+                "success": True,
+                "message": _("Service created successfully."),
+                "redirect_url": reverse("dash:service_list"),
+            })
         except Exception as e:
             return JsonResponse({"success": False, "errors": humanize_error(e)})
-    return redirect("dash:package_list")
+    return redirect("dash:service_list")
 
 
 @admin_required
-def package_update(request, pk):
-    obj = get_object_or_404(DesignPackage, pk=pk)
+def service_update(request, pk):
+    obj = get_object_or_404(Service, pk=pk)
     if request.method == "POST":
-        obj.name = request.POST.get("name", obj.name)
-        obj.link = request.POST.get("link", obj.link)
+        service_name = request.POST.get("service_name", obj.service_name).strip()
+        pricing_type = request.POST.get("pricing_type", obj.pricing_type)
+        service_price = request.POST.get("service_price", obj.service_price)
+        video_link = request.POST.get("video_link", "").strip() or None
+        is_default = request.POST.get("is_default") in ("true", "1", "on", True)
+        gif_file = request.FILES.get("gif_file")
+
+        if not service_name:
+            return JsonResponse({"success": False, "errors": [_("Service name is required.")]})
+
         try:
+            try:
+                obj.service_price = Decimal(str(service_price or 0))
+            except Exception:
+                pass
+            obj.service_name = service_name
+            obj.pricing_type = pricing_type
+            obj.video_link = video_link
+            if gif_file:
+                obj.gif_file = gif_file
+            obj.is_default = is_default
             obj.save()
-            return JsonResponse({"success": True, "message": _("Package updated successfully."), "redirect_url": reverse("dash:package_detail", args=[obj.pk])})
-        except Exception as e:
-            return JsonResponse({"success": False, "errors": humanize_error(e)})
-    return redirect("dash:package_list")
-
-
-@admin_required
-def package_detail(request, pk):
-    pkg = get_object_or_404(DesignPackage.objects.prefetch_related("package_services__option__category"), pk=pk)
-    return render(request, "dashboard/design/package_detail.html", {
-        "pkg": pkg,
-    })
-
-
-@admin_required
-def package_option_add(request, pk):
-    pkg = get_object_or_404(DesignPackage, pk=pk)
-    if request.method == "POST":
-        name = request.POST.get("name", "").strip()
-        if not name:
-            return JsonResponse({"success": False, "errors": [_("Option name is required.")]})
-        description = request.POST.get("description", "")
-        try:
-            opt = _create_option(name=name, description=description)
-            opt_price = Decimal(request.POST.get("price", "0") or "0")
-            ps = PackageService.objects.create(package=pkg, option=opt, price=opt_price)
-            opt_count = pkg.package_services.count()
             return JsonResponse({
                 "success": True,
-                "message": _("Option added."),
-                "option": {
-                    "id": opt.pk,
-                    "name": opt.name,
-                    "description": opt.description,
-                },
-                "price": str(ps.price),
-                "option_count": opt_count,
-                "new_package_total": str(pkg.total_price),
+                "message": _("Service updated successfully."),
+                "redirect_url": reverse("dash:service_list"),
             })
         except Exception as e:
             return JsonResponse({"success": False, "errors": humanize_error(e)})
-    return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
+    return redirect("dash:service_list")
 
 
 @admin_required
-def package_option_update(request, pk, opt_pk):
-    pkg = get_object_or_404(DesignPackage, pk=pk)
-    if request.method == "POST":
-        name = request.POST.get("name", "").strip()
-        if not name:
-            return JsonResponse({"success": False, "errors": [_("Option name is required.")]})
-        try:
-            ps = pkg.package_services.get(option_id=opt_pk)
-            ps.option.name = name
-            ps.option.description = request.POST.get("description", "")
-            ps.option.save()
-            ps.price = Decimal(request.POST.get("price", "0") or "0")
-            ps.save()
-            return JsonResponse({
-                "success": True,
-                "message": _("Option updated."),
-                "option": {
-                    "id": ps.option_id,
-                    "name": ps.option.name,
-                    "description": ps.option.description,
-                },
-                "price": str(ps.price),
-                "option_count": pkg.package_services.count(),
-                "new_package_total": str(pkg.total_price),
-            })
-        except PackageService.DoesNotExist:
-            return JsonResponse({"success": False, "errors": [_("This option is not part of the package.")]})
-        except Exception as e:
-            return JsonResponse({"success": False, "errors": humanize_error(e)})
-    return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
-
-
-@admin_required
-def package_option_delete(request, pk, opt_pk):
-    pkg = get_object_or_404(DesignPackage, pk=pk)
-    if request.method == "POST":
-        try:
-            pkg.package_services.filter(option_id=opt_pk).delete()
-            DesignOption.objects.filter(pk=opt_pk, packages=None).delete()
-            opt_count = pkg.package_services.count()
-            return JsonResponse({"success": True, "message": _("Option removed."), "option_count": opt_count, "new_package_total": str(pkg.total_price)})
-        except Exception as e:
-            return JsonResponse({"success": False, "errors": humanize_error(e)})
-    return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
-
-
-@admin_required
-def package_delete(request, pk):
-    obj = get_object_or_404(DesignPackage, pk=pk)
+def service_delete(request, pk):
+    obj = get_object_or_404(Service, pk=pk)
     if request.method == "POST":
         try:
             obj.delete()
-            return JsonResponse({"success": True, "message": _("Package deleted successfully."), "redirect_url": reverse("dash:package_list")})
+            return JsonResponse({
+                "success": True,
+                "message": _("Service deleted successfully."),
+                "redirect_url": reverse("dash:service_list"),
+            })
         except Exception as e:
             return JsonResponse({"success": False, "errors": humanize_error(e)})
     return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
 
 
 @admin_required
-def package_set_default(request, pk):
-    obj = get_object_or_404(DesignPackage, pk=pk)
+def service_toggle_default(request, pk):
+    obj = get_object_or_404(Service, pk=pk)
     if request.method == "POST":
         action = request.POST.get("action")
         try:
-            with transaction.atomic():
-                if action == "set":
-                    obj.is_default = True
-                    obj.save()
-                    message = _("“%(name)s” is now the default package.") % {"name": obj.name}
-                else:
-                    obj.is_default = False
-                    obj.save(update_fields=["is_default"])
-                    message = _("“%(name)s” is no longer the default package.") % {"name": obj.name}
+            if action == "set":
+                obj.is_default = True
+                message = _("“%(name)s” is marked as default.") % {"name": obj.service_name}
+            else:
+                obj.is_default = False
+                message = _("“%(name)s” is no longer default.") % {"name": obj.service_name}
+            obj.save(update_fields=["is_default"])
             return JsonResponse({
                 "success": True,
                 "message": message,
                 "is_default": obj.is_default,
-                "default_pk": obj.pk if obj.is_default else None,
             })
         except Exception as e:
             return JsonResponse({"success": False, "errors": humanize_error(e)})
     return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
+
+
+# Compatibility aliases for legacy package routes
+package_list = service_list
+package_create = service_create
+package_update = service_update
+package_delete = service_delete
+package_set_default = service_toggle_default

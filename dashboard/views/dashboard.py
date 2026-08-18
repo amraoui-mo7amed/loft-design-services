@@ -31,7 +31,7 @@ def dash_home(request):
     total_inquiries = Inquiry.objects.count()
     total_portfolios = Portfolio.objects.count()
 
-    recent_projects = DesignRequest.objects.select_related("project_type", "package").order_by("-created_at")[:5]
+    recent_projects = DesignRequest.objects.select_related("project_type", "service").order_by("-created_at")[:5]
 
     status_labels = json.dumps([
         str(_("Pending")),

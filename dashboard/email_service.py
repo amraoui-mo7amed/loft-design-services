@@ -108,3 +108,24 @@ def send_invitation_email(invitation, request=None):
         to_email,
         subject,
     )
+
+
+def send_gallery_invitation_email(invitation, request=None):
+    to_email = invitation.email
+    if not to_email:
+        return False
+
+    project = invitation.design_request
+    selection_url = invitation.get_selection_url(request)
+    subject = str(_("Select Your Inspiration Gallery - Project %(num)s") % {"num": project.project_number})
+    return send_email(
+        "dashboard/email/gallery_invitation.html",
+        {
+            "invitation": invitation,
+            "project": project,
+            "client_name": project.contact_name,
+            "selection_url": selection_url,
+        },
+        to_email,
+        subject,
+    )

@@ -2,39 +2,354 @@
 {% load i18n %}
 {% load static %}
 
-{% block dashTitle %}{{ project.project_name }}{% endblock dashTitle %}
+{% block dashTitle %}{{ project.project_name }} ({{ project.project_number }}){% endblock dashTitle %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/kanban.css' %}?v={{ ASSET_VERSION }}">
     <link rel="stylesheet" href="{% static 'css/inspiration_lightbox.css' %}?v={{ ASSET_VERSION }}">
+    <style>
+        /* Dark Liquid Glass Theme for Admin Project Details */
+        .admin-detail-hero {
+            background: linear-gradient(135deg, rgba(26, 32, 44, 0.98), rgba(15, 20, 30, 0.95));
+            border: 1.5px solid rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 50;
+            overflow: visible !important;
+        }
+
+        .crm-project-number-badge {
+            background: rgba(255, 214, 90, 0.15) !important;
+            color: #FFD65A !important;
+            border: 1.5px solid rgba(255, 214, 90, 0.5) !important;
+            font-weight: 800 !important;
+            font-size: 0.85rem !important;
+            padding: 4px 12px !important;
+            border-radius: 999px !important;
+            letter-spacing: 0.5px !important;
+            display: inline-block;
+        }
+
+        .crm-status-pill {
+            font-weight: 800 !important;
+            font-size: 0.85rem !important;
+            padding: 4px 14px !important;
+            border-radius: 999px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            display: inline-block;
+        }
+
+        .crm-status-pill.status-pending {
+            background: rgba(56, 189, 248, 0.18) !important;
+            color: #38bdf8 !important;
+            border: 1.5px solid rgba(56, 189, 248, 0.5) !important;
+        }
+
+        .crm-status-pill.status-approved,
+        .crm-status-pill.status-completed,
+        .crm-status-pill.status-delivered {
+            background: rgba(52, 211, 153, 0.18) !important;
+            color: #34d399 !important;
+            border: 1.5px solid rgba(52, 211, 153, 0.5) !important;
+        }
+
+        .crm-status-pill.status-declined,
+        .crm-status-pill.status-cancelled {
+            background: rgba(248, 113, 113, 0.18) !important;
+            color: #f87171 !important;
+            border: 1.5px solid rgba(248, 113, 113, 0.5) !important;
+        }
+
+        .admin-glass-card {
+            background: rgba(22, 27, 34, 0.92);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            transition: border-color 0.25s ease;
+        }
+
+        .admin-glass-card:hover {
+            border-color: rgba(255, 214, 90, 0.35);
+        }
+
+        .stat-badge-chip {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 14px 16px;
+            height: 100%;
+        }
+
+        .stat-badge-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .stat-badge-icon.gold {
+            background: rgba(255, 214, 90, 0.18);
+            color: #FFD65A;
+            border: 1.5px solid rgba(255, 214, 90, 0.4);
+        }
+
+        .stat-badge-icon.blue {
+            background: rgba(56, 189, 248, 0.18);
+            color: #38bdf8;
+            border: 1.5px solid rgba(56, 189, 248, 0.4);
+        }
+
+        .stat-badge-icon.green {
+            background: rgba(52, 211, 153, 0.18);
+            color: #34d399;
+            border: 1.5px solid rgba(52, 211, 153, 0.4);
+        }
+
+        .stat-badge-icon.purple {
+            background: rgba(168, 85, 247, 0.18);
+            color: #c084fc;
+            border: 1.5px solid rgba(168, 85, 247, 0.4);
+        }
+
+        .contact-info-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .contact-info-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.05rem;
+        }
+
+        .table-glass {
+            color: #f1f5f9;
+        }
+
+        .table-glass thead th {
+            background: rgba(255, 255, 255, 0.07);
+            border-bottom: 1.5px solid rgba(255, 255, 255, 0.14);
+            color: #cbd5e1;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 14px 16px;
+        }
+
+        .table-glass tbody td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            padding: 14px 16px;
+            vertical-align: middle;
+        }
+
+        .table-glass tbody tr:hover td {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .floor-pill-tag {
+            background: rgba(255, 214, 90, 0.15);
+            border: 1.5px solid rgba(255, 214, 90, 0.45);
+            color: #FFD65A;
+            font-weight: 800;
+            font-size: 0.85rem;
+            padding: 4px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* Action Buttons */
+        .btn-action-gmail {
+            background: linear-gradient(135deg, #FFD65A 0%, #eab308 100%) !important;
+            color: #000000 !important;
+            font-weight: 900 !important;
+            font-size: 0.95rem !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 12px 18px !important;
+            box-shadow: 0 8px 24px rgba(255, 214, 90, 0.35) !important;
+            transition: all 0.25s ease !important;
+        }
+
+        .btn-action-gmail:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 12px 30px rgba(255, 214, 90, 0.5) !important;
+            color: #000000 !important;
+        }
+
+        .btn-action-gallery {
+            background: rgba(255, 214, 90, 0.12) !important;
+            border: 1.5px solid rgba(255, 214, 90, 0.45) !important;
+            color: #FFD65A !important;
+            font-weight: 800 !important;
+            font-size: 0.92rem !important;
+            border-radius: 12px !important;
+            padding: 12px 18px !important;
+            transition: all 0.25s ease !important;
+        }
+
+        .btn-action-gallery:hover {
+            background: rgba(255, 214, 90, 0.25) !important;
+            border-color: #FFD65A !important;
+            color: #ffffff !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 24px rgba(255, 214, 90, 0.3) !important;
+        }
+
+        .btn-action-pdf {
+            background: rgba(255, 255, 255, 0.07) !important;
+            border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            font-size: 0.92rem !important;
+            border-radius: 12px !important;
+            padding: 12px 18px !important;
+            transition: all 0.25s ease !important;
+        }
+
+        .btn-action-pdf:hover {
+            background: rgba(255, 255, 255, 0.16) !important;
+            border-color: rgba(255, 255, 255, 0.45) !important;
+            color: #ffffff !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .btn-action-approve {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            font-size: 0.92rem !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 12px 18px !important;
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35) !important;
+            transition: all 0.25s ease !important;
+        }
+
+        .btn-action-approve:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 10px 24px rgba(16, 185, 129, 0.5) !important;
+            color: #ffffff !important;
+        }
+
+        .btn-action-pending {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+            color: #000000 !important;
+            font-weight: 800 !important;
+            font-size: 0.92rem !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 12px 18px !important;
+            box-shadow: 0 6px 18px rgba(245, 158, 11, 0.35) !important;
+            transition: all 0.25s ease !important;
+        }
+
+        .btn-action-pending:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 10px 24px rgba(245, 158, 11, 0.5) !important;
+            color: #000000 !important;
+        }
+
+        .btn-action-decline {
+            background: rgba(239, 68, 68, 0.12) !important;
+            border: 1.5px solid rgba(239, 68, 68, 0.45) !important;
+            color: #fca5a5 !important;
+            font-weight: 800 !important;
+            font-size: 0.92rem !important;
+            border-radius: 12px !important;
+            padding: 12px 18px !important;
+            transition: all 0.25s ease !important;
+        }
+
+        .btn-action-decline:hover {
+            background: rgba(239, 68, 68, 0.25) !important;
+            border-color: rgba(239, 68, 68, 0.7) !important;
+            color: #ffffff !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .btn-action-delete {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px dashed rgba(239, 68, 68, 0.35) !important;
+            color: #f87171 !important;
+            font-weight: 700 !important;
+            font-size: 0.85rem !important;
+            border-radius: 12px !important;
+            padding: 10px 16px !important;
+            transition: all 0.25s ease !important;
+        }
+
+        .btn-action-delete:hover {
+            background: rgba(239, 68, 68, 0.15) !important;
+            border-color: #ef4444 !important;
+            color: #ffffff !important;
+        }
+    </style>
 {% endblock extra_css %}
 
 {% block dashContent %}
-<div class="container-fluid">
-    <!-- Hero -->
-    <div class="crm-detail-hero rounded-4 p-4 mb-4" data-status="{{ project.status }}">
+<div class="container-fluid py-3">
+
+    <!-- Hero Header with High Contrast and Fixed Z-Index -->
+    <div class="admin-detail-hero rounded-4 p-4 mb-4" data-status="{{ project.status }}">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
             <div>
-                <a href="{% url 'dash:admin_crm' %}" class="crm-detail-back">
-                    <i class="fas fa-arrow-left me-1"></i>{% trans "Back to Projects" %}
+                <a href="{% url 'dash:admin_crm' %}" class="btn btn-sm btn-outline-light rounded-pill mb-2 px-3">
+                    <i class="fas fa-arrow-left me-1"></i>{% trans "Back to Kanban CRM" %}
                 </a>
-                <h4 class="fw-bold text-white mb-0 mt-1">{{ project.project_name }}</h4>
-                <div class="d-flex align-items-center gap-2 mt-1">
-                    <span class="text-white-50 small">{{ project.project_number }}</span>
-                    <span class="text-white-50">•</span>
-                    <span class="text-white-50 small">{{ project.created_at|date:"d M Y" }}</span>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <h3 class="fw-bold text-white mb-0">{{ project.project_name }}</h3>
+                    <span class="crm-project-number-badge font-monospace">
+                        {{ project.project_number }}
+                    </span>
+                    <span class="crm-status-pill status-{{ project.status }}">
+                        {{ project.get_status_display }}
+                    </span>
+                </div>
+                <div class="text-white-50 small mt-2">
+                    <i class="far fa-calendar-alt me-1 text-warning"></i> {% trans "Submitted on" %} <strong class="text-white">{{ project.created_at|date:"d M Y, H:i" }}</strong>
+                    {% if project.project_type %}
+                    <span class="mx-2">•</span>
+                    <i class="fas fa-home me-1 text-warning"></i> <strong class="text-white">{{ project.project_type.name }}</strong>
+                    {% endif %}
                 </div>
             </div>
+
+            <!-- Quick Status Change Dropdown -->
             <div class="d-flex align-items-center gap-2">
-                <span class="badge crm-detail-badge bg-{{ project.status }}">{{ project.get_status_display }}</span>
                 <div class="dropdown crm-status-dropdown" data-project-id="{{ project.id }}">
-                    <button class="btn btn-sm crm-status-btn d-flex align-items-center gap-1 bg-{{ project.status }}" type="button" data-bs-toggle="dropdown">
+                    <button class="btn btn-sm btn-outline-warning d-flex align-items-center gap-2 rounded-pill px-3 py-2 fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-edit"></i>
+                        <span>{% trans "Change Status" %}</span>
+                        <i class="fas fa-chevron-down ms-1 small"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 crm-status-menu">
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 crm-status-menu bg-dark text-light">
                         {% for val, label in status_choices %}
                         <li>
-                            <button class="dropdown-item crm-status-option {% if project.status == val %}active{% endif %}" type="button" data-value="{{ val }}">
+                            <button class="dropdown-item text-light crm-status-option {% if project.status == val %}active bg-warning text-dark fw-bold{% endif %}" type="button" data-value="{{ val }}" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}">
                                 <span class="crm-option-dot bg-{{ val }}"></span>
                                 {{ label }}
                                 {% if project.status == val %}
@@ -50,360 +365,531 @@
     </div>
 
     <div class="row g-4">
-        <!-- Left Column -->
+        <!-- Left Column: Detailed Specifications, Tables & Gallery Selections -->
         <div class="col-lg-8">
 
-            <!-- Contact / Client Info -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
-                    <i class="fas fa-user text-primary"></i>
-                    <h6 class="fw-bold mb-0 text-light">{% trans "Contact Information" %}</h6>
+            <!-- Restyled Project Details Section -->
+            <div class="admin-glass-card p-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold text-white mb-0">
+                        <i class="fas fa-info-circle text-warning me-2"></i>{% trans "Project Overview & Architecture" %}
+                    </h5>
+                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-30 rounded-pill px-3 py-2 fw-bold">
+                        {{ project.total|floatformat:"0" }} DA {% trans "Total" %}
+                    </span>
                 </div>
-                <div class="card-body px-4 pb-4">
-                    {% if project.client %}
-                    <div class="crm-contact-row">
-                        <div class="crm-contact-icon" style="background:rgba(13,110,253,0.1);color:#0d6efd;"><i class="fas fa-user"></i></div>
-                        <div>
-                            <div class="fw-semibold">{{ project.client.get_full_name|default:project.client.username }}</div>
-                            <small class="text-muted">{% trans "Registered user" %}</small>
+
+                <div class="row g-3">
+                    <div class="col-sm-6 col-md-3">
+                        <div class="stat-badge-chip">
+                            <div class="stat-badge-icon gold">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Total Quoted" %}</small>
+                                <span class="fw-bold text-warning fs-5">{{ project.total|floatformat:"0" }} DA</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="crm-contact-row">
-                        <div class="crm-contact-icon" style="background:rgba(108,117,125,0.1);color:#6c757d;"><i class="fas fa-envelope"></i></div>
-                        <div>
-                            <div class="fw-semibold">{{ project.client.email }}</div>
+
+                    <div class="col-sm-6 col-md-3">
+                        <div class="stat-badge-chip">
+                            <div class="stat-badge-icon blue">
+                                <i class="fas fa-vector-square"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Total Surface" %}</small>
+                                <span class="fw-bold text-white fs-5">{{ project.total_surface|default:"0" }} m²</span>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="col-sm-6 col-md-3">
+                        <div class="stat-badge-chip">
+                            <div class="stat-badge-icon purple">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Floor Levels" %}</small>
+                                <span class="fw-bold text-white fs-5">{{ floors|length }} {% trans "Levels" %}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-md-3">
+                        <div class="stat-badge-chip">
+                            <div class="stat-badge-icon green">
+                                <i class="fas fa-paint-brush"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Designer" %}</small>
+                                <span class="fw-bold text-white fs-6 text-truncate d-inline-block" style="max-width: 110px;">
+                                    {{ project.designer.get_full_name|default:_("Unassigned") }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-secondary border-opacity-25 my-3">
+
+                <div class="row g-3 small">
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted d-block">{% trans "Property Type" %}</span>
+                        <strong class="text-white fs-6">{{ project.project_type.name|default:_("Custom") }}</strong>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted d-block">{% trans "Delivery Date" %}</span>
+                        <strong class="text-white fs-6">{{ project.delivery_date|date:"d M Y"|default:_("Pending") }}</strong>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted d-block">{% trans "Revision Count" %}</span>
+                        <strong class="text-white fs-6">{{ project.revision_count }} {% trans "Revisions" %}</strong>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted d-block">{% trans "Terrace Configured" %}</span>
+                        <strong class="{% if project.has_terrace %}text-warning{% else %}text-white-50{% endif %} fs-6">
+                            {% if project.has_terrace %}{% trans "Yes (Included)" %}{% else %}{% trans "No" %}{% endif %}
+                        </strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SELECTED GALLERY & MOODBOARD INSPIRATIONS CARD -->
+            <div class="admin-glass-card p-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                    <h5 class="fw-bold text-white mb-0">
+                        <i class="fas fa-palette text-warning me-2"></i>{% trans "Selected Gallery & Moodboard (Inspirations)" %}
+                    </h5>
+                    {% if gallery_selections %}
+                    <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-30 rounded-pill px-3 py-2 fw-bold">
+                        <i class="fas fa-check-circle me-1"></i>{{ gallery_selections|length }} {% trans "Inspirations Chosen" %}
+                    </span>
+                    {% elif latest_gallery_invitation %}
+                        {% if latest_gallery_invitation.is_used %}
+                        <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-30 rounded-pill px-3 py-2 fw-bold">
+                            <i class="fas fa-check me-1"></i>{% trans "Submitted by Client" %}
+                        </span>
+                        {% else %}
+                        <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-30 rounded-pill px-3 py-2 fw-bold">
+                            <i class="fas fa-hourglass-half me-1"></i>{% trans "Invitation Sent (Awaiting Client)" %}
+                        </span>
+                        {% endif %}
                     {% else %}
-                    <div class="crm-contact-row">
-                        <div class="crm-contact-icon" style="background:rgba(13,110,253,0.1);color:#0d6efd;"><i class="fas fa-user"></i></div>
-                        <div>
-                            <div class="fw-semibold">{{ project.first_name }} {{ project.last_name }}</div>
-                            <small class="text-muted">{% trans "Anonymous submission" %}</small>
-                        </div>
-                    </div>
-                    {% if project.email %}
-                    <div class="crm-contact-row">
-                        <div class="crm-contact-icon" style="background:rgba(108,117,125,0.1);color:#6c757d;"><i class="fas fa-envelope"></i></div>
-                        <div>
-                            <div class="fw-semibold">{{ project.email }}</div>
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% if project.phone %}
-                    <div class="crm-contact-row">
-                        <div class="crm-contact-icon" style="background:rgba(40,167,69,0.1);color:#28a745;"><i class="fas fa-phone"></i></div>
-                        <div>
-                            <div class="fw-semibold">{{ project.phone }}</div>
-                        </div>
-                    </div>
-                    {% endif %}
+                    <span class="badge bg-secondary bg-opacity-20 text-light border border-secondary border-opacity-30 rounded-pill px-3 py-2">
+                        {% trans "No Invitation Sent" %}
+                    </span>
                     {% endif %}
                 </div>
-            </div>
 
-            <!-- Project Info stats -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
-                    <i class="fas fa-info-circle text-primary"></i>
-                    <h6 class="fw-bold mb-0 text-light">{% trans "Project Details" %}</h6>
-                </div>
-                <div class="card-body px-4 pb-4">
-                    <div class="row g-4">
-                        {% if project.project_type %}
-                        <div class="col-6 col-md-3">
-                            <div class="crm-stat">
-                                <div class="crm-stat-icon" style="background:rgba(23,162,184,0.1);color:#17a2b8;"><i class="fas fa-tag"></i></div>
-                                <div>
-                                    <div class="crm-stat-value">{{ project.project_type.name }}</div>
-                                    <div class="crm-stat-label">{% trans "Project Type" %}</div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                        {% if project.package %}
-                        <div class="col-6 col-md-3">
-                            <div class="crm-stat">
-                                <div class="crm-stat-icon" style="background:rgba(40,167,69,0.1);color:#28a745;"><i class="fas fa-box"></i></div>
-                                <div>
-                                    <div class="crm-stat-value">{{ project.package.name }}</div>
-                                    <div class="crm-stat-label">{% trans "Package" %}</div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                        {% if project.designer %}
-                        <div class="col-6 col-md-3">
-                            <div class="crm-stat">
-                                <div class="crm-stat-icon" style="background:rgba(111,66,193,0.1);color:#6f42c1;"><i class="fas fa-paint-brush"></i></div>
-                                <div>
-                                    <div class="crm-stat-value">{{ project.designer.get_full_name|default:project.designer.username }}</div>
-                                    <div class="crm-stat-label">{% trans "Designer" %}</div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                        <div class="col-6 col-md-3">
-                            <div class="crm-stat">
-                                <div class="crm-stat-icon" style="background:rgba(255,193,7,0.1);color:#ffc107;"><i class="fas fa-coins"></i></div>
-                                <div>
-                                    <div class="crm-stat-value">{{ project.budget|floatformat:"0u"|default:"--" }} DA</div>
-                                    <div class="crm-stat-label">{% trans "Budget" %}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <div class="crm-stat">
-                                <div class="crm-stat-icon" style="background:rgba(42,90,90,0.1);color:var(--brand-primary);"><i class="fas fa-receipt"></i></div>
-                                <div>
-                                    <div class="crm-stat-value crm-stat-total">{{ project.total|floatformat:"0u" }} DA</div>
-                                    <div class="crm-stat-label">{% trans "Total" %}</div>
-                                </div>
-                            </div>
-                        </div>
-                        {% if project.delivery_date %}
-                        <div class="col-6 col-md-3">
-                            <div class="crm-stat">
-                                <div class="crm-stat-icon" style="background:rgba(220,53,69,0.1);color:#dc3545;"><i class="fas fa-calendar-check"></i></div>
-                                <div>
-                                    <div class="crm-stat-value">{{ project.delivery_date|date:"d M Y" }}</div>
-                                    <div class="crm-stat-label">{% trans "Delivery" %}</div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                        <div class="col-6 col-md-3">
-                            <div class="crm-stat">
-                                <div class="crm-stat-icon" style="background:rgba(108,117,125,0.1);color:#6c757d;"><i class="fas fa-sync-alt"></i></div>
-                                <div>
-                                    <div class="crm-stat-value">{{ project.revision_count }}</div>
-                                    <div class="crm-stat-label">{% trans "Revisions" %}</div>
-                                </div>
+                {% if gallery_selections %}
+                <div class="row g-3" data-inspiration-gallery>
+                    {% for item in gallery_selections %}
+                    <div class="col-sm-6 col-md-4">
+                        <div class="rounded-3 overflow-hidden border border-secondary border-opacity-25 bg-dark">
+                            <img src="{{ item.space_image.image.url }}" alt="{{ item.space_image.category.category_name }}" loading="lazy" class="w-100 inspo-thumb" style="aspect-ratio: 16/10; object-fit: cover; cursor: pointer;" data-lightbox>
+                            <div class="p-3">
+                                <span class="badge bg-secondary bg-opacity-25 text-warning font-monospace mb-1" style="font-size: 0.7rem;">
+                                    {{ item.space_image.category.space.name }}
+                                </span>
+                                <h6 class="text-white fw-bold mb-0 fs-6">{{ item.space_image.category.category_name }}</h6>
+                                {% if item.notes %}
+                                <p class="text-white-50 small mt-1 mb-0 fst-italic">"{{ item.notes }}"</p>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
-            </div>
-
-            <!-- Floors & Spaces -->
-            {% if floors %}
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
-                    <i class="fas fa-layer-group text-info"></i>
-                    <h6 class="fw-bold mb-0 text-light">{% trans "Floors & Spaces" %}</h6>
-                    <span class="badge bg-info bg-opacity-10 text-info rounded-pill ms-auto">{{ spaces|length }}</span>
-                </div>
-                <div class="card-body px-0 pb-0">
-                    <div class="table-responsive">
-                        <table class="table crm-table mb-0">
-                            <thead>
-                                <tr>
-                                    <th>{% trans "Floor" %}</th>
-                                    <th>{% trans "Space" %}</th>
-                                    <th class="text-end">{% trans "Price" %}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for s in spaces %}
-                                <tr>
-                                    <td><span class="badge bg-light text-muted rounded-pill">{{ s.floor.name }}</span></td>
-                                    <td class="fw-semibold">{{ s.custom_name|default:s.space.name }}</td>
-                                    <td class="text-end fw-bold">{{ s.price_at_time|floatformat:"0" }} <small class="text-muted fw-normal">DA</small></td>
-                                </tr>
-                                {% empty %}
-                                <tr><td colspan="3" class="text-center text-muted py-3">{% trans "No spaces" %}</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                {% elif latest_gallery_invitation %}
+                <div class="p-3 rounded-3 bg-white bg-opacity-5 border border-secondary border-opacity-25">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div>
+                            <small class="text-muted d-block">{% trans "Active Gallery Selection Link" %}</small>
+                            <span class="text-warning font-monospace small text-break">{{ latest_gallery_invitation.get_selection_url }}</span>
+                        </div>
+                        <a href="{{ latest_gallery_invitation.get_selection_url }}" target="_blank" class="btn btn-sm btn-outline-warning rounded-pill px-3">
+                            <i class="fas fa-external-link-alt me-1"></i>{% trans "Open Link" %}
+                        </a>
                     </div>
+                    <small class="text-muted d-block mt-2">
+                        <i class="far fa-clock me-1"></i>{% trans "Sent on" %} {{ latest_gallery_invitation.created_at|date:"d M Y, H:i" }} &bull; {% if latest_gallery_invitation.is_used %}<span class="text-success fw-bold">{% trans "Used" %}</span>{% else %}<span class="text-warning fw-bold">{% trans "Pending client submission" %}</span>{% endif %}
+                    </small>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-palette fa-2x text-white-50 mb-2 opacity-50"></i>
+                    <p class="text-muted small mb-0">{% trans "No inspiration gallery selected yet. Use the 'Send Gallery Link' button in Actions to invite the client." %}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Floor Levels & Surface Areas Breakdown (Etages) -->
+            <div class="admin-glass-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-white mb-0">
+                        <i class="fas fa-building text-warning me-2"></i>{% trans "Floor Levels & Spatial Dimensions (Étages)" %}
+                    </h5>
+                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-30 rounded-pill px-3 py-2 fw-bold">
+                        {{ project.total_surface }} m² {% trans "Total Surface" %}
+                    </span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-glass mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%;">{% trans "Level" %}</th>
+                                <th>{% trans "Floor Designation" %}</th>
+                                <th class="text-end" style="width: 25%;">{% trans "Surface Area (m²)" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for f in floors %}
+                            <tr>
+                                <td><span class="floor-pill-tag">{{ f.name }}</span></td>
+                                <td class="fw-semibold text-white">{{ f.name }}</td>
+                                <td class="text-end fw-bold font-monospace text-warning fs-6">{{ f.surface|floatformat:"1" }} m²</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-3">{% trans "No floors recorded." %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            {% endif %}
 
-            <!-- Options -->
-            {% if options %}
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
-                    <i class="fas fa-plus-circle text-success"></i>
-                    <h6 class="fw-bold mb-0 text-light">{% trans "Options" %}</h6>
-                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill ms-auto">{{ options|length }}</span>
+            <!-- Selected Services & Options Breakdown -->
+            <div class="admin-glass-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-white mb-0">
+                        <i class="fas fa-drafting-compass text-warning me-2"></i>{% trans "Architectural & Design Services (Options)" %}
+                    </h5>
+                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-30 rounded-pill px-3 py-2 fw-bold">
+                        {{ options|length|default:"1" }} {% trans "Service(s)" %}
+                    </span>
                 </div>
-                <div class="card-body px-0 pb-0">
-                    <div class="table-responsive">
-                        <table class="table crm-table mb-0">
-                            <thead>
-                                <tr>
-                                    <th>{% trans "Option" %}</th>
-                                    <th class="text-end">{% trans "Price" %}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for opt in options %}
-                                <tr>
-                                    <td class="fw-semibold">{{ opt.option.name }}</td>
-                                    <td class="text-end fw-bold">{{ opt.price_at_time|floatformat:"0" }} <small class="text-muted fw-normal">DA</small></td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
 
-            <!-- Inspirations -->
-            {% if inspirations %}
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
-                    <i class="fas fa-images text-warning"></i>
-                    <h6 class="fw-bold mb-0 text-light">{% trans "Inspiration Images" %}</h6>
-                    <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill ms-auto">{{ inspirations|length }}</span>
-                </div>
-                <div class="card-body px-4 pb-4">
-                    {% for drs in inspirations %}
-                    {% with inspos=drs.space_images.all %}
-                    {% if inspos %}
-                    <div class="mb-3">
-                        <small class="fw-semibold d-block mb-2">{{ drs.custom_name|default:drs.space.name }}</small>
-                        <div class="crm-inspo-grid" data-inspiration-gallery>
-                            {% for insp in inspos %}
-                            {% if insp.space_image %}
-                            <img src="{{ insp.space_image.image.url }}" alt="{{ insp.space_image.image.name }}" loading="lazy" class="inspo-thumb" data-lightbox>
+                <div class="table-responsive">
+                    <table class="table table-glass mb-0">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Service" %}</th>
+                                <th class="text-center">{% trans "Pricing Model / Rate" %}</th>
+                                <th class="text-end">{% trans "Calculated Amount (DA)" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for opt in options %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fas fa-check-circle text-warning"></i>
+                                        <span class="fw-bold text-white">{{ opt.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="text-center font-monospace text-white-50">
+                                    {% if opt.service.pricing_type == "area" %}
+                                    {{ opt.service.service_price|floatformat:"0" }} DA / m²
+                                    {% elif opt.service.pricing_type == "hourly" %}
+                                    {{ opt.service.service_price|floatformat:"0" }} DA / hr
+                                    {% else %}
+                                    {% trans "Fixed Rate" %}
+                                    {% endif %}
+                                </td>
+                                <td class="text-end font-monospace text-warning fw-bold fs-6">
+                                    {{ opt.price_at_time|floatformat:"0" }} DA
+                                </td>
+                            </tr>
+                            {% empty %}
+                            {% if project.service %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fas fa-check-circle text-warning"></i>
+                                        <span class="fw-bold text-white">{{ project.service.service_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="text-center font-monospace text-white-50">
+                                    {% if project.service.pricing_type == "area" %}
+                                    {{ project.service.service_price|floatformat:"0" }} DA / m²
+                                    {% else %}
+                                    {% trans "Fixed Rate" %}
+                                    {% endif %}
+                                </td>
+                                <td class="text-end font-monospace text-warning fw-bold fs-6">
+                                    {{ project.total|floatformat:"0" }} DA
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-3">{% trans "Standard Architectural Service" %}</td>
+                            </tr>
                             {% endif %}
                             {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% endwith %}
-                    {% empty %}
-                    <p class="text-muted small mb-0">{% trans "No inspiration images selected." %}</p>
-                    {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr style="border-top: 2px solid rgba(255, 214, 90, 0.4);">
+                                <td colspan="2" class="fw-bold text-uppercase text-white pt-3">
+                                    {% trans "Total Project Quotation" %}
+                                </td>
+                                <td class="text-end fw-bold text-warning fs-5 pt-3 font-monospace">
+                                    {{ project.total|floatformat:"0" }} DA
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Legacy Spaces & Inspirations (if any) -->
+            {% if spaces %}
+            <div class="admin-glass-card p-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold text-white mb-0">
+                        <i class="fas fa-th-large text-info me-2"></i>{% trans "Configured Spaces & Inspirations" %}
+                    </h5>
+                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-20 rounded-pill px-3">
+                        {{ spaces|length }} {% trans "Spaces" %}
+                    </span>
+                </div>
+
+                <div class="table-responsive mb-3">
+                    <table class="table table-glass mb-0">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Floor" %}</th>
+                                <th>{% trans "Space" %}</th>
+                                <th class="text-end">{% trans "Price" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in spaces %}
+                            <tr>
+                                <td><span class="badge bg-light text-dark rounded-pill">{{ s.floor.name }}</span></td>
+                                <td class="fw-semibold text-white">{{ s.custom_name|default:s.space.name }}</td>
+                                <td class="text-end fw-bold text-warning">{{ s.price_at_time|floatformat:"0" }} DA</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
             {% endif %}
 
         </div>
 
-        <!-- Right Column -->
+        <!-- Right Column: Actions, Contact Info, Activity & Notes -->
         <div class="col-lg-4">
 
-            <!-- Status actions -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
-                    <i class="fas fa-tasks text-primary"></i>
-                    <h6 class="fw-bold mb-0 text-light">{% trans "Actions" %}</h6>
+            <!-- ACTIONS CARD (Redesigned with Gallery Invitation Button) -->
+            <div class="admin-glass-card p-4 mb-4">
+                <h5 class="fw-bold text-white mb-3">
+                    <i class="fas fa-tasks text-warning me-2"></i>{% trans "Actions & Management" %}
+                </h5>
+
+                <div class="d-grid gap-3">
+                    <!-- Email Facture (Gmail / WeasyPrint PDF) -->
+                    <button type="button" class="btn btn-action-gmail d-flex align-items-center justify-content-center gap-2"
+                            id="btnAdminEmailFacture"
+                            data-project-id="{{ project.pk }}"
+                            data-client-email="{{ project.contact_email }}">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>{% trans "Email Facture (PDF)" %}</span>
+                    </button>
+
+                    <!-- Send Gallery Link to Client -->
+                    <button type="button" class="btn btn-action-gallery d-flex align-items-center justify-content-center gap-2"
+                            id="btnAdminSendGalleryLink"
+                            data-project-id="{{ project.pk }}"
+                            data-client-email="{{ project.contact_email }}"
+                            data-project-type="{{ project.project_type.name|default:'General' }}">
+                        <i class="fas fa-palette"></i>
+                        <span>{% trans "Send Gallery Link (Email)" %}</span>
+                    </button>
+
+                    <!-- Download Facture PDF -->
+                    <a href="{% url 'dash:admin_download_facture' project.pk %}"
+                       class="btn btn-action-pdf d-flex align-items-center justify-content-center gap-2" target="_blank">
+                        <i class="fas fa-file-pdf text-danger"></i>
+                        <span>{% trans "Download Facture PDF" %}</span>
+                    </a>
+
+                    <hr class="border-secondary border-opacity-25 my-1">
+
+                    <!-- Quick Status Actions -->
+                    {% if project.status == "pending" %}
+                    <button class="btn btn-action-approve d-flex align-items-center justify-content-center gap-2 quick-status-btn" data-status="approved" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
+                        <i class="fas fa-check"></i>
+                        <span>{% trans "Approve Project" %}</span>
+                    </button>
+                    <button class="btn btn-action-decline d-flex align-items-center justify-content-center gap-2 quick-status-btn" data-status="declined" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
+                        <i class="fas fa-times"></i>
+                        <span>{% trans "Decline Project" %}</span>
+                    </button>
+                    {% elif project.status == "approved" %}
+                    <button class="btn btn-action-pending d-flex align-items-center justify-content-center gap-2 quick-status-btn" data-status="pending" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
+                        <i class="fas fa-undo"></i>
+                        <span>{% trans "Move to Pending" %}</span>
+                    </button>
+                    <button class="btn btn-action-decline d-flex align-items-center justify-content-center gap-2 quick-status-btn" data-status="declined" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
+                        <i class="fas fa-times"></i>
+                        <span>{% trans "Decline Project" %}</span>
+                    </button>
+                    {% elif project.status == "declined" %}
+                    <button class="btn btn-action-approve d-flex align-items-center justify-content-center gap-2 quick-status-btn" data-status="approved" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
+                        <i class="fas fa-check"></i>
+                        <span>{% trans "Approve Project" %}</span>
+                    </button>
+                    <button class="btn btn-action-pending d-flex align-items-center justify-content-center gap-2 quick-status-btn" data-status="pending" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
+                        <i class="fas fa-undo"></i>
+                        <span>{% trans "Move to Pending" %}</span>
+                    </button>
+                    {% endif %}
+
+                    <!-- Delete Project Button -->
+                    <form method="post" action="{% url 'dash:crm_delete_project' project.pk %}" class="d-inline mt-2" id="deleteProjectForm">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-action-delete w-100 d-flex align-items-center justify-content-center gap-2" id="btnConfirmDeleteProject">
+                            <i class="fas fa-trash-alt"></i>
+                            <span>{% trans "Delete Project" %}</span>
+                        </button>
+                    </form>
                 </div>
-                <div class="card-body px-4 pb-4">
-                    <div class="d-grid gap-2">
-                        {% if project.status == "pending" %}
-                        <button class="btn btn-success rounded-3 fw-bold quick-status-btn" data-status="approved" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
-                            <i class="fas fa-check me-2"></i>{% trans "Approve Project" %}
-                        </button>
-                        <button class="btn btn-outline-danger rounded-3 fw-bold quick-status-btn" data-status="declined" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
-                            <i class="fas fa-times me-2"></i>{% trans "Decline Project" %}
-                        </button>
-                        {% elif project.status == "approved" %}
-                        <button class="btn btn-outline-warning rounded-3 fw-bold quick-status-btn" data-status="pending" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
-                            <i class="fas fa-undo me-2"></i>{% trans "Move to Pending" %}
-                        </button>
-                        <button class="btn btn-outline-danger rounded-3 fw-bold quick-status-btn" data-status="declined" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
-                            <i class="fas fa-times me-2"></i>{% trans "Decline Project" %}
-                        </button>
-                        {% elif project.status == "declined" %}
-                        <button class="btn btn-outline-success rounded-3 fw-bold quick-status-btn" data-status="approved" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
-                            <i class="fas fa-check me-2"></i>{% trans "Approve Project" %}
-                        </button>
-                        <button class="btn btn-outline-warning rounded-3 fw-bold quick-status-btn" data-status="pending" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
-                            <i class="fas fa-undo me-2"></i>{% trans "Move to Pending" %}
-                        </button>
-                        {% endif %}
+            </div>
+
+            <!-- RESTYLED CONTACT INFORMATION CARD -->
+            <div class="admin-glass-card p-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold text-white mb-0">
+                        <i class="fas fa-id-card text-warning me-2"></i>{% trans "Contact Information" %}
+                    </h5>
+                    {% if project.client %}
+                    <span class="badge bg-primary bg-opacity-20 text-primary border border-primary border-opacity-30 rounded-pill px-3 py-1 fw-bold">
+                        {% trans "Registered" %}
+                    </span>
+                    {% else %}
+                    <span class="badge bg-secondary bg-opacity-20 text-light border border-secondary border-opacity-30 rounded-pill px-3 py-1 fw-bold">
+                        {% trans "Direct Guest" %}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Client Name -->
+                <div class="contact-info-item">
+                    <div class="contact-info-icon" style="background: rgba(255, 214, 90, 0.18); color: #FFD65A; border: 1.5px solid rgba(255, 214, 90, 0.4);">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Client Name" %}</small>
+                        <span class="fw-bold text-white fs-6">{{ project.contact_name }}</span>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="contact-info-item">
+                    <div class="contact-info-icon" style="background: rgba(56, 189, 248, 0.18); color: #38bdf8; border: 1.5px solid rgba(56, 189, 248, 0.4);">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Email Address" %}</small>
+                        <span class="fw-bold text-white font-monospace fs-6">{{ project.contact_email|default:"—" }}</span>
+                    </div>
+                </div>
+
+                <!-- Phone -->
+                <div class="contact-info-item">
+                    <div class="contact-info-icon" style="background: rgba(52, 211, 153, 0.18); color: #34d399; border: 1.5px solid rgba(52, 211, 153, 0.4);">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Phone Number" %}</small>
+                        <span class="fw-bold text-white font-monospace fs-6">{{ project.contact_phone|default:"—" }}</span>
                     </div>
                 </div>
             </div>
 
             <!-- Activity Timeline -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
-                    <i class="fas fa-clock text-secondary"></i>
-                    <h6 class="fw-bold mb-0 text-light">{% trans "Activity" %}</h6>
-                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill ms-auto">{{ activity|length }}</span>
+            <div class="admin-glass-card p-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold text-white mb-0">
+                        <i class="fas fa-clock text-warning me-2"></i>{% trans "Activity History" %}
+                    </h5>
+                    <span class="badge bg-secondary bg-opacity-20 text-light rounded-pill px-2">{{ activity|length }}</span>
                 </div>
-                <div class="card-body px-4 pb-4">
-                    {% if activity %}
-                    <div class="crm-timeline">
-                        {% for log in activity %}
-                        <div class="crm-timeline-item">
-                            <div class="crm-timeline-dot"></div>
-                            <div class="crm-timeline-content">
-                                <div class="fw-semibold small">{{ log.action }}</div>
-                                <div class="text-muted" style="font-size:0.75rem;">{{ log.description }}</div>
-                                <div class="crm-timeline-time text-muted">{{ log.created_at|date:"d M Y H:i" }}</div>
-                            </div>
+
+                {% if activity %}
+                <div class="crm-timeline">
+                    {% for log in activity %}
+                    <div class="crm-timeline-item">
+                        <div class="crm-timeline-dot"></div>
+                        <div class="crm-timeline-content">
+                            <div class="fw-semibold small text-white">{{ log.action }}</div>
+                            <div class="text-white-50" style="font-size:0.75rem;">{{ log.description }}</div>
+                            <div class="crm-timeline-time text-muted">{{ log.created_at|date:"d M Y H:i" }}</div>
                         </div>
-                        {% endfor %}
                     </div>
-                    {% else %}
-                    <div class="text-center py-3">
-                        <i class="fas fa-clock fa-2x text-light mb-2"></i>
-                        <p class="small text-muted mb-0">{% trans "No activity yet." %}</p>
-                    </div>
-                    {% endif %}
+                    {% endfor %}
                 </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-clock fa-2x text-white-50 mb-2"></i>
+                    <p class="small text-muted mb-0">{% trans "No activity recorded yet." %}</p>
+                </div>
+                {% endif %}
             </div>
 
             <!-- Notes -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
-                    <i class="fas fa-sticky-note text-warning"></i>
-                    <h6 class="fw-bold mb-0 text-light">{% trans "Notes" %}</h6>
-                    <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill ms-auto">{{ notes|length }}</span>
+            <div class="admin-glass-card p-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold text-white mb-0">
+                        <i class="fas fa-sticky-note text-warning me-2"></i>{% trans "Admin Notes" %}
+                    </h5>
+                    <span class="badge bg-warning bg-opacity-20 text-warning rounded-pill px-2">{{ notes|length }}</span>
                 </div>
-                <div class="card-body px-4 pb-4">
-                    {% for note in notes %}
-                    <div class="crm-note-item">
-                        <div class="d-flex justify-content-between align-items-start mb-1">
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="crm-note-avatar">{{ note.author.get_full_name|default:note.author.username|first|upper }}</div>
-                                <div>
-                                    <small class="fw-semibold d-block">{{ note.author.get_full_name|default:note.author.username }}</small>
-                                    <small class="text-muted" style="font-size:0.65rem;">{{ note.created_at|date:"d M Y" }}</small>
-                                </div>
+
+                {% for note in notes %}
+                <div class="crm-note-item mb-2 p-3 rounded bg-white bg-opacity-5">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="crm-note-avatar">{{ note.author.get_full_name|default:note.author.username|first|upper }}</div>
+                            <div>
+                                <small class="fw-semibold text-white d-block">{{ note.author.get_full_name|default:note.author.username }}</small>
+                                <small class="text-muted" style="font-size:0.65rem;">{{ note.created_at|date:"d M Y" }}</small>
                             </div>
-                            {% if note.is_internal %}
-                            <span class="badge crm-note-badge-internal">{% trans "Internal" %}</span>
-                            {% endif %}
                         </div>
-                        <p class="crm-note-text">{{ note.note }}</p>
                     </div>
-                    {% empty %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-sticky-note fa-2x text-light mb-2"></i>
-                        <p class="small text-muted mb-0">{% trans "No notes yet." %}</p>
-                    </div>
-                    {% endfor %}
+                    <p class="crm-note-text text-white-50 small mb-0">{{ note.note }}</p>
                 </div>
+                {% empty %}
+                <div class="text-center py-3">
+                    <i class="fas fa-sticky-note fa-2x text-white-50 mb-2"></i>
+                    <p class="small text-muted mb-0">{% trans "No notes yet." %}</p>
+                </div>
+                {% endfor %}
             </div>
 
-            <!-- Files -->
+            <!-- Deliverable Files -->
             {% if files %}
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-transparent border-0 d-flex align-items-center gap-2 pt-4 px-4 text-light">
-                    <i class="fas fa-paperclip text-secondary"></i>
-                    <h6 class="fw-bold mb-0 text-light">{% trans "Files" %}</h6>
-                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill ms-auto">{{ files|length }}</span>
+            <div class="admin-glass-card p-4 mb-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold text-white mb-0">
+                        <i class="fas fa-paperclip text-info me-2"></i>{% trans "Attached Files" %}
+                    </h5>
+                    <span class="badge bg-info bg-opacity-20 text-info rounded-pill px-2">{{ files|length }}</span>
                 </div>
-                <div class="card-body px-4 pb-4">
-                    {% for f in files %}
-                    <a href="{{ f.file.url }}" target="_blank" class="crm-file-item">
-                        <div class="crm-file-icon"><i class="fas fa-file-alt"></i></div>
-                        <div class="crm-file-info">
-                            <span class="crm-file-name">{{ f.file.name|cut:"design-requests/files/" }}</span>
-                            <small class="text-muted">{{ f.uploaded_at|date:"d M Y" }}</small>
-                        </div>
-                        <i class="fas fa-download text-muted"></i>
-                    </a>
-                    {% endfor %}
-                </div>
+
+                {% for f in files %}
+                <a href="{{ f.file.url }}" target="_blank" class="crm-file-item d-flex align-items-center justify-content-between p-2 mb-2 rounded bg-white bg-opacity-5 text-decoration-none text-white">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-file-alt text-info"></i>
+                        <span class="small">{{ f.file.name|cut:"design-requests/files/" }}</span>
+                    </div>
+                    <i class="fas fa-download text-muted small"></i>
+                </a>
+                {% endfor %}
             </div>
             {% endif %}
 
@@ -416,4 +902,192 @@
 {% block extra_js %}
 <script src="{% static 'js/kanban.js' %}?v={{ ASSET_VERSION }}"></script>
 <script src="{% static 'js/inspiration_lightbox.js' %}?v={{ ASSET_VERSION }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Admin Send Facturation (WeasyPrint PDF via Email)
+    const btnAdminEmailFacture = document.getElementById("btnAdminEmailFacture");
+    if (btnAdminEmailFacture) {
+        btnAdminEmailFacture.addEventListener("click", async function () {
+            const pk = this.dataset.projectId;
+            const defaultEmail = this.dataset.clientEmail || "";
+
+            const { value: targetEmail, isConfirmed } = await Swal.fire({
+                title: "{% trans 'Email Proforma Facture (PDF)' %}",
+                text: "{% trans 'Confirm or enter the client email address:' %}",
+                input: "email",
+                inputValue: defaultEmail,
+                showCancelButton: true,
+                confirmButtonText: "{% trans 'Send Facture' %}",
+                cancelButtonText: "{% trans 'Cancel' %}",
+                confirmButtonColor: "#FFD65A",
+                inputValidator: (val) => !val ? "{% trans 'Please enter an email address.' %}" : null,
+            });
+
+            if (!isConfirmed || !targetEmail) return;
+
+            const origHtml = btnAdminEmailFacture.innerHTML;
+            btnAdminEmailFacture.disabled = true;
+            btnAdminEmailFacture.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>{% trans 'Sending...' %}`;
+
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value ||
+                document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+
+            const formData = new FormData();
+            formData.append("email", targetEmail);
+
+            try {
+                const res = await fetch(`/dashboard/crm/${pk}/email-facture/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                    body: formData,
+                });
+                const data = await res.json();
+                if (data.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "{% trans 'Facture Sent!' %}",
+                        text: data.message || `{% trans 'The facture PDF has been emailed to' %} ${targetEmail}.`,
+                        confirmButtonColor: "#FFD65A",
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "{% trans 'Could Not Send' %}",
+                        text: data.errors ? data.errors[0] : "{% trans 'Failed to dispatch facture.' %}",
+                        confirmButtonColor: "#dc3545",
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    icon: "error",
+                    title: "{% trans 'Network Error' %}",
+                    text: "{% trans 'Could not reach server.' %}",
+                    confirmButtonColor: "#dc3545",
+                });
+            } finally {
+                btnAdminEmailFacture.disabled = false;
+                btnAdminEmailFacture.innerHTML = origHtml;
+            }
+        });
+    }
+
+    // Admin Send Gallery Moodboard Link (Email)
+    const btnAdminSendGalleryLink = document.getElementById("btnAdminSendGalleryLink");
+    if (btnAdminSendGalleryLink) {
+        btnAdminSendGalleryLink.addEventListener("click", async function () {
+            const pk = this.dataset.projectId;
+            const defaultEmail = this.dataset.clientEmail || "";
+            const projectType = this.dataset.projectType || "";
+
+            const { value: targetEmail, isConfirmed } = await Swal.fire({
+                title: "{% trans 'Send Gallery Moodboard Link' %}",
+                text: `{% trans 'Send personalized inspiration link (' %}${projectType}{% trans ') to client:' %}`,
+                input: "email",
+                inputValue: defaultEmail,
+                showCancelButton: true,
+                confirmButtonText: "{% trans 'Send Gallery Link' %}",
+                cancelButtonText: "{% trans 'Cancel' %}",
+                confirmButtonColor: "#FFD65A",
+                inputValidator: (val) => !val ? "{% trans 'Please enter a recipient email address.' %}" : null,
+            });
+
+            if (!isConfirmed || !targetEmail) return;
+
+            const origHtml = btnAdminSendGalleryLink.innerHTML;
+            btnAdminSendGalleryLink.disabled = true;
+            btnAdminSendGalleryLink.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>{% trans 'Dispatching...' %}`;
+
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value ||
+                document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+
+            const formData = new FormData();
+            formData.append("email", targetEmail);
+
+            try {
+                const res = await fetch(`/dashboard/crm/${pk}/send-gallery-link/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                    body: formData,
+                });
+                const data = await res.json();
+                if (data.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "{% trans 'Gallery Link Sent!' %}",
+                        html: `<p class="mb-2">${data.message}</p><div class="p-2 rounded bg-dark border border-secondary text-warning small font-monospace text-break">${data.selection_url || ''}</div>`,
+                        confirmButtonColor: "#FFD65A",
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "{% trans 'Could Not Send' %}",
+                        text: data.errors ? data.errors[0] : "{% trans 'Failed to dispatch gallery invitation.' %}",
+                        confirmButtonColor: "#dc3545",
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    icon: "error",
+                    title: "{% trans 'Network Error' %}",
+                    text: "{% trans 'Could not reach server.' %}",
+                    confirmButtonColor: "#dc3545",
+                });
+            } finally {
+                btnAdminSendGalleryLink.disabled = false;
+                btnAdminSendGalleryLink.innerHTML = origHtml;
+            }
+        });
+    }
+
+    // Delete Project Confirmation
+    const btnConfirmDeleteProject = document.getElementById("btnConfirmDeleteProject");
+    const deleteProjectForm = document.getElementById("deleteProjectForm");
+    if (btnConfirmDeleteProject && deleteProjectForm) {
+        btnConfirmDeleteProject.addEventListener("click", async function () {
+            const confirm = await Swal.fire({
+                title: "{% trans 'Delete this project?' %}",
+                text: "{% trans 'This action cannot be undone and will remove all project data.' %}",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#dc3545",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "{% trans 'Yes, delete it' %}",
+                cancelButtonText: "{% trans 'Cancel' %}",
+            });
+            if (confirm.isConfirmed) {
+                const csrfToken = deleteProjectForm.querySelector('[name=csrfmiddlewaretoken]')?.value;
+                const res = await fetch(deleteProjectForm.action, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": csrfToken,
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                });
+                const data = await res.json();
+                if (data.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "{% trans 'Deleted!' %}",
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false,
+                    }).then(() => {
+                        window.location.href = data.redirect_url || "{% url 'dash:admin_crm' %}";
+                    });
+                }
+            }
+        });
+    }
+});
+</script>
 {% endblock extra_js %}

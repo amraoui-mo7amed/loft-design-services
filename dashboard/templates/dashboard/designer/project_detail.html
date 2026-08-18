@@ -24,15 +24,15 @@
                 <div class="row g-3">
                     <div class="col-md-3">
                         <small class="text-muted d-block">{% trans "Client" %}</small>
-                        <span class="fw-bold">{{ project.client.get_full_name|default:project.client.username }}</span>
+                        <span class="fw-bold">{{ project.contact_name }}</span>
                     </div>
                     <div class="col-md-3">
                         <small class="text-muted d-block">{% trans "Email" %}</small>
-                        <span class="fw-bold small">{{ project.client.email }}</span>
+                        <span class="fw-bold small">{{ project.contact_email|default:"—" }}</span>
                     </div>
                     <div class="col-md-3">
                         <small class="text-muted d-block">{% trans "Phone" %}</small>
-                        <span class="fw-bold">{{ project.client.profile.phone_number|default:"—" }}</span>
+                        <span class="fw-bold">{{ project.contact_phone|default:"—" }}</span>
                     </div>
                     <div class="col-md-3">
                         <small class="text-muted d-block">{% trans "Total" %}</small>
@@ -102,10 +102,12 @@
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
                 <h5 class="fw-bold mb-3"><i class="fas fa-info-circle text-primary me-2"></i>{% trans "Client Info" %}</h5>
-                <p class="small mb-1"><strong>{% trans "Name" %}:</strong> {{ project.client.get_full_name|default:project.client.username }}</p>
-                <p class="small mb-1"><strong>{% trans "Email" %}:</strong> {{ project.client.email }}</p>
-                <p class="small mb-1"><strong>{% trans "Phone" %}:</strong> {{ project.client.profile.phone_number|default:"—" }}</p>
+                <p class="small mb-1"><strong>{% trans "Name" %}:</strong> {{ project.contact_name }}</p>
+                <p class="small mb-1"><strong>{% trans "Email" %}:</strong> {{ project.contact_email|default:"—" }}</p>
+                <p class="small mb-1"><strong>{% trans "Phone" %}:</strong> {{ project.contact_phone|default:"—" }}</p>
+                {% if project.client and project.client.profile %}
                 <p class="small mb-0"><strong>{% trans "Address" %}:</strong> {{ project.client.profile.address|default:"—" }}</p>
+                {% endif %}
             </div>
 
             <div class="card border-0 shadow-sm rounded-4 p-4">

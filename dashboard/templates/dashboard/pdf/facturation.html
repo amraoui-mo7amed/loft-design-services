@@ -1,93 +1,347 @@
 {% load i18n %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'en' }}">
-<head><meta charset="utf-8"><title>{% trans "Invoice" %}</title>
-<style>
-    * { box-sizing: border-box; }
-    body { font-family: 'DejaVu Sans', sans-serif; color: #1a1a1a; margin: 0; padding: 0; }
-    .wrap { padding: 40px 45px; }
-    .brandbar {
-        display: flex; justify-content: space-between; align-items: center;
-        padding-bottom: 20px; border-bottom: 3px solid #FFD65A; margin-bottom: 26px;
-    }
-    .brandbar h1 { margin: 0; font-size: 22px; color: #212121; letter-spacing: 0.5px; }
-    .brandbar .tag { font-size: 11px; color: #6b7280; margin-top: 4px; }
-    .invoice-meta { text-align: right; }
-    .invoice-meta .doc { font-size: 20px; font-weight: 700; color: #212121; }
-    .invoice-meta .num { font-size: 13px; color: #6b7280; margin-top: 4px; }
-    .client-box { margin-bottom: 26px; }
-    .client-box h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; margin: 0 0 8px; }
-    .client-box p { margin: 2px 0; font-size: 13px; color: #212121; }
-    table.items { width: 100%; border-collapse: collapse; margin: 16px 0 28px; }
-    table.items th {
-        text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
-        color: #6b7280; border-bottom: 2px solid #e5e7eb; padding: 8px 10px;
-    }
-    table.items td { padding: 10px; font-size: 13px; border-bottom: 1px solid #f3f4f6; }
-    table.items td.right, table.items th.right { text-align: right; }
-    table.items tr.total-row td {
-        border-top: 2px solid #e5e7eb; border-bottom: none; font-weight: 700;
-    }
-    .totals { margin-top: 18px; }
-    .totals .subrow { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
-    .totals .grand { display: flex; justify-content: space-between; padding: 12px 0; font-size: 18px; font-weight: 800; }
-    .totals .grand .val { color: #212121; }
-    .note { margin-top: 34px; font-size: 11px; color: #9ca3af; border-top: 1px solid #f3f4f6; padding-top: 14px; }
-    .foot { text-align: center; font-size: 11px; color: #9ca3af; margin-top: 18px; }
-</style>
+<head>
+    <meta charset="utf-8">
+    <title>{% trans "Proforma Invoice / Facture" %}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm 20mm 15mm;
+            @bottom-center {
+                content: "LoftDesign Studio — {{ studio_name }} | Page " counter(page) " / " counter(pages);
+                font-family: 'DejaVu Sans', sans-serif;
+                font-size: 8pt;
+                color: #888888;
+            }
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'DejaVu Sans', sans-serif;
+            color: #1a1a1a;
+            margin: 0;
+            padding: 0;
+            font-size: 10pt;
+            line-height: 1.5;
+            background: #ffffff;
+        }
+
+        .header-table {
+            width: 100%;
+            border-bottom: 3px solid #FFD65A;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .studio-title {
+            font-size: 22pt;
+            font-weight: bold;
+            color: #111827;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .studio-subtitle {
+            font-size: 9pt;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 3px;
+        }
+
+        .doc-meta {
+            text-align: right;
+        }
+
+        .doc-badge {
+            display: inline-block;
+            background: #111827;
+            color: #FFD65A;
+            font-size: 11pt;
+            font-weight: bold;
+            padding: 5px 12px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .doc-number {
+            font-size: 10pt;
+            font-weight: bold;
+            color: #374151;
+            margin-top: 6px;
+        }
+
+        .doc-date {
+            font-size: 9pt;
+            color: #6b7280;
+        }
+
+        .info-grid {
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .info-col {
+            vertical-align: top;
+            width: 50%;
+        }
+
+        .section-label {
+            font-size: 8pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #9ca3af;
+            margin-bottom: 6px;
+        }
+
+        .info-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 12px 15px;
+            margin-right: 10px;
+        }
+
+        .info-card-right {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 12px 15px;
+            margin-left: 10px;
+        }
+
+        .client-name {
+            font-size: 12pt;
+            font-weight: bold;
+            color: #111827;
+            margin: 0 0 4px;
+        }
+
+        .client-detail {
+            font-size: 9pt;
+            color: #4b5563;
+            margin: 2px 0;
+        }
+
+        /* Items Table */
+        table.items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0 20px;
+        }
+
+        table.items-table th {
+            background: #111827;
+            color: #ffffff;
+            font-size: 8.5pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 10px 12px;
+            border: none;
+        }
+
+        table.items-table th.right,
+        table.items-table td.right {
+            text-align: right;
+        }
+
+        table.items-table th.center,
+        table.items-table td.center {
+            text-align: center;
+        }
+
+        table.items-table td {
+            padding: 10px 12px;
+            font-size: 9.5pt;
+            border-bottom: 1px solid #e5e7eb;
+            color: #1f2937;
+        }
+
+        table.items-table tr:nth-child(even) td {
+            background: #fafafa;
+        }
+
+        .category-header-row td {
+            background: #f3f4f6 !important;
+            font-weight: bold;
+            font-size: 8.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #4b5563;
+            padding: 6px 12px;
+        }
+
+        /* Totals Box */
+        .totals-table {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .totals-col-left {
+            width: 55%;
+            vertical-align: top;
+            padding-right: 20px;
+        }
+
+        .totals-col-right {
+            width: 45%;
+            vertical-align: top;
+        }
+
+        .grand-total-box {
+            background: #111827;
+            border-radius: 8px;
+            padding: 14px 18px;
+            color: #ffffff;
+        }
+
+        .grand-total-label {
+            font-size: 9pt;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #9ca3af;
+        }
+
+        .grand-total-val {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #FFD65A;
+            margin-top: 4px;
+        }
+
+        .notice-box {
+            font-size: 8.5pt;
+            color: #6b7280;
+            line-height: 1.4;
+            background: #fefce8;
+            border: 1px solid #fef08a;
+            border-radius: 6px;
+            padding: 10px 12px;
+        }
+
+        .footer-note {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 8.5pt;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 15px;
+        }
+    </style>
 </head>
 <body>
-<div class="wrap">
-    <div class="header">
-        <div>
-            <h1>{{ studio_name }}</h1>
-            <div class="tag">{{ tagline }}</div>
-        </div>
-        <div class="invoice-meta">
-            <div class="doc-num">{% trans "Invoice" %}</div>
-            <div class="num">{{ doc_number }}</div>
-            <div class="num">{{ date }}</div>
-        </div>
-    </div>
 
-    <div class="client-box">
-        <h3>{% trans "Billed to" %}</h3>
-        <p><strong>{{ client_name }}</strong></p>
-        <p>{{ email }}</p>
-        <p>{{ phone }}</p>
-        <p>{{ project_name }}</p>
-    </div>
+    <!-- Header / Brand -->
+    <table class="header-table">
+        <tr>
+            <td>
+                <div class="studio-title">LOFT<span style="color:#eab308;">DESIGN</span></div>
+                <div class="studio-subtitle">{% trans "Haute Interior Architecture & Design Studio" %}</div>
+            </td>
+            <td class="doc-meta">
+                <div class="doc-badge">{% trans "Proforma Invoice" %}</div>
+                <div class="doc-number">{{ doc_number }}</div>
+                <div class="doc-date">{% trans "Date:" %} {{ date }}</div>
+            </td>
+        </tr>
+    </table>
 
-    <table class="items">
+    <!-- Info Grid: Client & Property -->
+    <table class="info-grid">
+        <tr>
+            <td class="info-col">
+                <div class="section-label">{% trans "Client Information" %}</div>
+                <div class="info-card">
+                    <div class="client-name">{{ client_name }}</div>
+                    {% if email %}<div class="client-detail"><strong>{% trans "Email:" %}</strong> {{ email }}</div>{% endif %}
+                    {% if phone %}<div class="client-detail"><strong>{% trans "Phone:" %}</strong> {{ phone }}</div>{% endif %}
+                </div>
+            </td>
+            <td class="info-col">
+                <div class="section-label">{% trans "Project Architecture" %}</div>
+                <div class="info-card-right">
+                    <div class="client-name">{{ project_type }}</div>
+                    <div class="client-detail"><strong>{% trans "Project:" %}</strong> {{ project_name }}</div>
+                    <div class="client-detail"><strong>{% trans "Total Surface:" %}</strong> {{ total_surface }} m²</div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Items & Services Breakdown Table -->
+    <table class="items-table">
         <thead>
             <tr>
-                <th>{% trans "Description" %}</th>
-                <th class="right">{% trans "Amount (DA)" %}</th>
+                <th>{% trans "Description / Service" %}</th>
+                <th class="center" style="width: 25%;">{% trans "Rate / Unit" %}</th>
+                <th class="right" style="width: 25%;">{% trans "Amount (DA)" %}</th>
             </tr>
         </thead>
         <tbody>
-            {% for item in items %}
-                <tr>
-                    <td>{{ item.description }}</td>
-                    <td class="right">{{ item.amount }}</td>
-                </tr>
-            {% endfor %}
-            {% if package_name %}
-                <tr>
-                    <td>{{ package_name }}</td>
-                    <td class="right">{{ package_amount }}</td>
-                </tr>
-            {% endif %}
-            <tr class="total-row">
-                <td>{% trans "Total" %}</td>
-                <td class="right">{{ total }} DA</td>
+            <!-- Floor Levels Section -->
+            {% if items %}
+            <tr class="category-header-row">
+                <td colspan="3">{% trans "Floor Dimensions & Spatial Levels" %}</td>
             </tr>
+            {% for it in items %}
+            <tr>
+                <td>{{ it.description }}</td>
+                <td class="center">{{ it.amount }}</td>
+                <td class="right" style="color:#6b7280;">—</td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Selected Services Section -->
+            {% if services_list %}
+            <tr class="category-header-row">
+                <td colspan="3">{% trans "Selected Architectural & Design Services" %}</td>
+            </tr>
+            {% for s in services_list %}
+            <tr>
+                <td><strong>{{ s.name }}</strong></td>
+                <td class="center">{{ s.rate }}</td>
+                <td class="right" style="font-weight:bold;">{{ s.amount }}</td>
+            </tr>
+            {% endfor %}
+            {% elif package_name %}
+            <tr class="category-header-row">
+                <td colspan="3">{% trans "Selected Design Package" %}</td>
+            </tr>
+            <tr>
+                <td><strong>{{ package_name }}</strong></td>
+                <td class="center">{{ unit_price }} DA</td>
+                <td class="right" style="font-weight:bold;">{{ total }} DA</td>
+            </tr>
+            {% endif %}
         </tbody>
     </table>
 
-    <div class="foot">
+    <!-- Totals & Notes -->
+    <table class="totals-table">
+        <tr>
+            <td class="totals-col-left">
+                <div class="notice-box">
+                    <strong>{% trans "Proforma Quotation Notice:" %}</strong><br>
+                    {% trans "This document serves as an official preliminary architectural estimate based on the configured floor levels and selected design services. Valid for 30 days." %}
+                </div>
+            </td>
+            <td class="totals-col-right">
+                <div class="grand-total-box">
+                    <div class="grand-total-label">{% trans "Total Estimated Price" %}</div>
+                    <div class="grand-total-val">{{ total }} DA</div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="footer-note">
         <p>{{ thank_you_message }}</p>
     </div>
-</div>
+
 </body>
 </html>

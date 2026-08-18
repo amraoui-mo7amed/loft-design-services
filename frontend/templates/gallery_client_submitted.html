@@ -1,0 +1,115 @@
+{% extends "index.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Moodboard Confirmed" %} — {{ project.project_name }}{% endblock title %}
+
+{% block body_class %}landing-page client-gallery-page{% endblock body_class %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}?v={{ ASSET_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/gallery.css' %}?v={{ ASSET_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/inspiration_lightbox.css' %}?v={{ ASSET_VERSION }}">
+<style>
+    .client-submitted-hero {
+        background: linear-gradient(135deg, rgba(22, 28, 42, 0.98), rgba(11, 15, 25, 0.98));
+        border: 1.5px solid rgba(52, 211, 153, 0.4);
+        border-radius: 20px;
+        padding: 40px 30px;
+        margin-bottom: 35px;
+        box-shadow: 0 16px 45px rgba(0,0,0,0.5);
+        text-align: center;
+    }
+
+    .check-circle-hero {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: rgba(52, 211, 153, 0.15);
+        border: 2px solid #34d399;
+        color: #34d399;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 20px;
+        box-shadow: 0 0 25px rgba(52, 211, 153, 0.3);
+    }
+
+    .gallery-preview-card {
+        border-radius: 16px;
+        overflow: hidden;
+        background: #161c28;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gallery-preview-card img {
+        width: 100%;
+        aspect-ratio: 4/3;
+        object-fit: cover;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Submitted Status Hero -->
+    <div class="client-submitted-hero text-light">
+        <div class="check-circle-hero">
+            <i class="fas fa-check"></i>
+        </div>
+        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-30 rounded-pill px-3 py-1 mb-2 font-monospace">
+            {{ project.project_number }}
+        </span>
+        <h2 class="fw-bold text-white mb-2">{% trans "Moodboard Successfully Submitted!" %}</h2>
+        <p class="text-white-50 mx-auto mb-3" style="max-width: 650px;">
+            {% trans "Thank you! Your chosen architectural and interior inspiration styles have been linked to your project. Our design team is currently reviewing your preferences." %}
+        </p>
+        <div class="d-inline-flex align-items-center gap-2 bg-dark bg-opacity-50 px-4 py-2 rounded-pill border border-secondary border-opacity-25 text-white-50 small">
+            <i class="far fa-clock text-warning"></i>
+            <span>{% trans "Submitted on" %} {{ invitation.used_at|date:"d M Y, H:i"|default:invitation.created_at|date:"d M Y" }}</span>
+        </div>
+    </div>
+
+    <!-- Selected Moodboard Images -->
+    {% if selected_gallery %}
+    <div class="mb-5">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h4 class="fw-bold text-white mb-0">
+                <i class="fas fa-images text-warning me-2"></i>{% trans "Your Selected Inspiration Styles" %}
+            </h4>
+            <span class="badge bg-warning text-dark font-monospace px-3 py-1">
+                {{ selected_gallery|length }} {% trans "Styles Selected" %}
+            </span>
+        </div>
+
+        <div class="row g-4">
+            {% for item in selected_gallery %}
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="gallery-preview-card">
+                    <img src="{{ item.space_image.image.url }}" alt="{{ item.space_image.category.category_name }}" loading="lazy">
+                    <div class="p-3">
+                        <span class="badge bg-secondary bg-opacity-25 text-warning font-monospace mb-1" style="font-size: 0.7rem;">
+                            {{ item.space_image.category.space.name }}
+                        </span>
+                        <h6 class="text-white fw-bold mb-0 fs-6">{{ item.space_image.category.category_name }}</h6>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="text-center mt-5">
+        <a href="{% url 'frontend:home' %}" class="btn btn-outline-light rounded-pill px-4 py-2">
+            <i class="fas fa-home me-2"></i>{% trans "Back to LoftDesign Home" %}
+        </a>
+    </div>
+
+</div>
+{% endblock content %}

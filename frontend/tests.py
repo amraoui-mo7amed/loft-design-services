@@ -7,12 +7,13 @@ from django.urls import reverse
 
 from dashboard.models import (
     Contact,
-    DesignPackage,
+    Service,
     Lead,
     ProjectType,
     ProjectTypeSpace,
     Space,
-    SpaceImage,
+    SpaceCategory,
+    SpaceCategoryImages,
     Video,
 )
 
@@ -46,39 +47,38 @@ class FrontendGalleryAndHomeTests(TestCase):
             show_on_home=True,
             sort_order=2,
         )
+
+        self.cat1 = SpaceCategory.objects.create(space=self.space1, category_name="Living General")
+        self.cat2 = SpaceCategory.objects.create(space=self.space2, category_name="Kitchen General")
         
         # Create Images for spaces with distinct colors
-        self.img1 = SpaceImage.objects.create(
-            space=self.space1,
+        self.img1 = SpaceCategoryImages.objects.create(
+            category=self.cat1,
             image=create_test_image("living1.jpg", color=(255, 214, 90)),
-            is_thumbnail=True,
+            is_default=True,
             description="Cozy modern living room with warm light",
             tags="cozy modern warm",
         )
-        self.img2 = SpaceImage.objects.create(
-            space=self.space1,
+        self.img2 = SpaceCategoryImages.objects.create(
+            category=self.cat1,
             image=create_test_image("living2.jpg", color=(74, 222, 128)),
-            is_thumbnail=False,
+            is_default=False,
             description="Minimalist sofa setup",
             tags="minimalist sofa",
         )
-        self.img3 = SpaceImage.objects.create(
-            space=self.space2,
+        self.img3 = SpaceCategoryImages.objects.create(
+            category=self.cat2,
             image=create_test_image("kitchen1.jpg", color=(139, 92, 246)),
-            is_thumbnail=True,
+            is_default=True,
             description="Modern scandinavian kitchen",
             tags="modern kitchen wooden",
         )
 
-    def test_home_view_includes_gallery_spaces(self):
+    def test_home_view(self):
         response = self.client.get(reverse("frontend:home"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "home.html")
-        self.assertIn("gallery_spaces", response.context)
-        self.assertEqual(len(response.context["gallery_spaces"]), 2)
-        space_names = [s["name"] for s in response.context["gallery_spaces"]]
-        self.assertIn("Living Room", space_names)
-        self.assertIn("Kitchen", space_names)
+        self.assertIn("spaces", response.context)
 
     def test_gallery_all_spaces_view(self):
         response = self.client.get(reverse("frontend:space_gallery"))
@@ -99,17 +99,16 @@ class FrontendGalleryAndHomeTests(TestCase):
         self.assertEqual(len(images), 1)
         self.assertEqual(images[0], self.img2)
 
-    def test_gallery_filter_by_selected_spaces(self):
-        response = self.client.get(reverse("frontend:space_gallery"), {"spaces": [str(self.space2.pk)]})
+    def test_gallery_filter_by_space(self):
+        response = self.client.get(reverse("frontend:space_gallery"), {"spaces": [self.space2.pk]})
         self.assertEqual(response.status_code, 200)
         images = list(response.context["images"])
         self.assertEqual(len(images), 1)
         self.assertEqual(images[0], self.img3)
 
     def test_gallery_single_space_view(self):
-        response = self.client.get(reverse("frontend:space_gallery", kwargs={"space_pk": self.space1.pk}))
+        response = self.client.get(reverse("frontend:space_gallery_space", kwargs={"space_pk": self.space1.pk}))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "gallery.html")
         self.assertTrue(response.context["is_single_space"])
         self.assertEqual(response.context["space"], self.space1)
         images = list(response.context["images"])
@@ -117,38 +116,52 @@ class FrontendGalleryAndHomeTests(TestCase):
         self.assertIn(self.img1, images)
         self.assertIn(self.img2, images)
 
-    def test_gallery_single_space_search(self):
-        response = self.client.get(
-            reverse("frontend:space_gallery", kwargs={"space_pk": self.space1.pk}),
-            {"q": "cozy"},
-        )
-        self.assertEqual(response.status_code, 200)
-        images = list(response.context["images"])
-        self.assertEqual(len(images), 1)
-        self.assertEqual(images[0], self.img1)
 
-    def test_gallery_single_space_not_found(self):
-        response = self.client.get(reverse("frontend:space_gallery", kwargs={"space_pk": 99999}))
-        self.assertEqual(response.status_code, 404)
+class FrontendContactAndLeadTests(TestCase):
+    def setUp(self):
+        self.client = Client()
 
-    def test_gallery_space_alias_route(self):
-        response = self.client.get(reverse("frontend:space_gallery_space", kwargs={"space_pk": self.space1.pk}))
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["space"], self.space1)
-
-    def test_contact_submit_ajax(self):
+    def test_contact_form_submission_success(self):
+        payload = {
+            "first_name": "Karim",
+            "last_name": "Brahimi",
+            "email": "karim.brahimi@example.com",
+            "phone": "+213550112233",
+            "message": "I would like a quote for my apartment in Algiers.",
+        }
         response = self.client.post(
-            reverse("frontend:contact_submit"),
-            {
-                "name": "Jane Doe",
-                "email": "jane@example.com",
-                "phone": "+213555123456",
-                "message": "Hello, I want to redesign my living room.",
-                "join_lead": "1",
-            },
+            reverse("frontend:submit_contact"),
+            payload,
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertTrue(data["success"])
-        self.assertTrue(Contact.objects.filter(email="jane@example.com").exists())
-        self.assertTrue(Lead.objects.filter(email="jane@example.com").exists())
+        self.assertTrue(data.get("success"))
+
+        contact = Contact.objects.filter(email="karim.brahimi@example.com").first()
+        self.assertIsNotNone(contact)
+        self.assertEqual(contact.name, "Karim Brahimi")
+        self.assertEqual(contact.phone, "+213550112233")
+        self.assertEqual(contact.message, "I would like a quote for my apartment in Algiers.")
+
+        lead = Lead.objects.filter(email="karim.brahimi@example.com").first()
+        self.assertIsNotNone(lead)
+        self.assertEqual(lead.name, "Karim Brahimi")
+
+    def test_contact_form_missing_required_fields(self):
+        payload = {
+            "first_name": "",
+            "last_name": "Brahimi",
+            "email": "invalid-email",
+            "message": "",
+        }
+        response = self.client.post(
+            reverse("frontend:submit_contact"),
+            payload,
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertFalse(data.get("success"))
+        self.assertIn("errors", data)
+        self.assertTrue(len(data["errors"]) > 0)

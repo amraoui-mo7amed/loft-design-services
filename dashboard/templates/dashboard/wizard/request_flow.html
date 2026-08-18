@@ -1,0 +1,338 @@
+{% extends "index.html" %}
+{% load i18n %}
+{% load static %}
+{% load l10n %}
+
+{% block title %}{% trans "Studio Request" %} — LoftDesign{% endblock title %}
+
+{% block nav %}{% endblock nav %}
+{% block sidebar %}{% endblock sidebar %}
+{% block footer %}{% endblock footer %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/video_player.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet" href="{% static 'css/request_flow.css' %}?v={{ ASSET_VERSION }}">
+{% endblock extra_css %}
+
+{% block content %}
+<section class="request-flow-page">
+    <div class="request-flow-container">
+        
+        <!-- ── Top Floating Navigation Header ── -->
+        <header class="req-top-nav">
+            <div class="d-flex align-items-center gap-3">
+                <a href="{% url 'frontend:home' %}" class="req-back-home-btn" aria-label="{% trans 'Back to Home' %}" title="{% trans 'Back to Home' %}">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <a href="/" class="req-brand-link">
+                    <div class="req-brand-logo">L</div>
+                    <span>Studio</span>
+                </a>
+            </div>
+
+            <div class="req-progress-pills">
+                <div class="req-progress-pill active" id="trackerNode1" data-target="stepCard1">
+                    <span>01</span> <span>{% trans "Architecture" %}</span>
+                </div>
+                <div class="req-progress-pill" id="trackerNode2" data-target="stepCard2">
+                    <span>02</span> <span>{% trans "Floors" %}</span>
+                </div>
+                <div class="req-progress-pill" id="trackerNode3" data-target="stepCard3">
+                    <span>03</span> <span>{% trans "Surfaces" %}</span>
+                </div>
+                <div class="req-progress-pill" id="trackerNode4" data-target="stepCard4">
+                    <span>04</span> <span>{% trans "Services" %}</span>
+                </div>
+                <div class="req-progress-pill" id="trackerNode5" data-target="stepCard5">
+                    <span>05</span> <span>{% trans "Contact" %}</span>
+                </div>
+            </div>
+        </header>
+
+        <form id="requestFlowForm" method="post" action="{% url 'request_submit' %}" class="form">
+            {% csrf_token %}
+            <input type="hidden" name="project_type_slug" id="selectedProjectType" value="{{ project_types.0.slug }}">
+            <input type="hidden" name="project_type_name" id="selectedProjectTypeName" value="{{ project_types.0.name }}">
+
+            <!-- ── STEP 1: Project Type Selection ── -->
+            <div class="request-step-card" id="stepCard1">
+                <div class="req-step-header">
+                    <div class="req-step-number">01</div>
+                    <h3 class="req-step-title">{% trans "Choose Your Property Architecture" %}</h3>
+                </div>
+
+                <div class="project-type-dropdown-box">
+                    <label class="form-label text-light fw-bold small mb-2">
+                        <i class="fas fa-building text-warning me-1"></i>{% trans "Property Architecture Type" %}
+                    </label>
+                    {% include "components/custom_select.html" with id="projectTypeSelect" name="project_type_slug" choices=project_type_choices value=project_types.0.slug select_title=project_types.0.name wrapper_class="req-custom-select" %}
+                </div>
+
+                <div class="text-end mt-4 pt-3 border-top border-secondary border-opacity-25">
+                    <button type="button" class="btn-step-next" id="btnUnlockStep2">
+                        <span>{% trans "Confirm & Configure Floors" %}</span>
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── STEP 2: Floors & Levels (Full Cards RDC-3 to RDC+5, No Sub-labels, No Video Button) ── -->
+            <div class="request-step-card is-locked" id="stepCard2">
+                <div class="req-step-header">
+                    <div class="req-step-number">02</div>
+                    <h3 class="req-step-title">{% trans "Select Number of Floors & Storeys" %}</h3>
+                </div>
+
+                <!-- Add Floor Buttons -->
+                <div class="floor-add-buttons-bar">
+                    <button type="button" class="btn-add-floor" id="btnAddFloorAbove">
+                        <i class="fas fa-plus-circle text-warning"></i>
+                        <span>{% trans "Add Floor Above RDC (R+)" %}</span>
+                    </button>
+                    <button type="button" class="btn-add-floor" id="btnAddFloorBelow">
+                        <i class="fas fa-plus-circle text-info"></i>
+                        <span>{% trans "Add Basement Level (S-)" %}</span>
+                    </button>
+                </div>
+
+                <!-- Checkboxes List for Floors (Full cards: RDC-3, RDC-2, RDC-1, RDC, RDC+1, RDC+2, RDC+3, RDC+4, RDC+5) -->
+                <div class="floors-checkboxes-container" id="floorsChecklistContainer">
+                    <!-- Populated dynamically via JS without floor-name-heading or floor-sub-label -->
+                </div>
+
+                <div class="text-end mt-4 pt-3 border-top border-secondary border-opacity-25">
+                    <button type="button" class="btn-step-next" id="btnUnlockStep3">
+                        <span>{% trans "Confirm Floors & Enter Surfaces" %}</span>
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── STEP 3: Surface Dimensions (m²) of Each Floor ── -->
+            <div class="request-step-card is-locked" id="stepCard3">
+                <div class="req-step-header">
+                    <div class="req-step-number">03</div>
+                    <h3 class="req-step-title">{% trans "Surface Dimensions of Each Floor (m²)" %}</h3>
+                </div>
+
+                <div class="surfaces-list-container" id="floorSurfacesContainer">
+                    <!-- Populated dynamically via JS with restyled light inputs -->
+                </div>
+
+                <!-- Calculated Total Surface Banner -->
+                <div class="surface-grand-total-banner">
+                    <div class="total-banner-left">
+                        <div class="total-banner-icon-wrap">
+                            <i class="fas fa-vector-square"></i>
+                        </div>
+                        <div>
+                            <div class="text-light fw-bold fs-5">{% trans "Calculated Total Property Surface" %}</div>
+                        </div>
+                    </div>
+                    <div class="total-banner-value">
+                        <span id="step3TotalSurfaceDisplay">220</span>
+                        <small>m²</small>
+                    </div>
+                </div>
+
+                <div class="text-end mt-4 pt-3 border-top border-secondary border-opacity-25">
+                    <button type="button" class="btn-step-next" id="btnUnlockStep4">
+                        <span>{% trans "Confirm Surfaces & Choose Services" %}</span>
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── STEP 4: Choose Your Design Services (Redesigned as Rows with Video Player Modal) ── -->
+            <div class="request-step-card is-locked" id="stepCard4">
+                <div class="req-step-header">
+                    <div class="req-step-number">04</div>
+                    <h3 class="req-step-title">{% trans "Choose Your Design Services" %}</h3>
+                </div>
+
+                <!-- Redesigned Service Rows List: Checkbox, Service Name, Pricing, Video Play Button -->
+                <div class="mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                        <h5 class="text-light fw-bold mb-0">
+                            <i class="fas fa-concierge-bell text-warning me-2"></i>{% trans "Available Design Services" %}
+                        </h5>
+                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill font-monospace fw-bold">
+                            {% trans "Select Desired Services" %}
+                        </span>
+                    </div>
+
+                    <div class="services-selection-rows" id="servicesGrid">
+                        {% for svc in services %}
+                        <div class="service-option-row{% if svc.is_default or svc.id == default_service.id or forloop.first and not default_service %} selected{% endif %}"
+                             data-service-id="{{ svc.id }}"
+                             data-service-name="{{ svc.service_name }}"
+                             data-pricing-type="{{ svc.pricing_type }}"
+                             data-service-price="{{ svc.service_price|unlocalize }}"
+                             data-is-default="{% if svc.is_default or svc.id == default_service.id %}true{% else %}false{% endif %}">
+                            
+                            <div class="service-row-left">
+                                <div class="service-row-check-box">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="service-row-info">
+                                    <h4 class="service-row-title mb-0">{{ svc.service_name }}</h4>
+                                </div>
+                            </div>
+
+                            <div class="service-row-right">
+                                <div class="service-pricing-badge">
+                                    <span class="rate-val">{{ svc.service_price|floatformat:"0" }} DA</span>
+                                </div>
+
+                                {% if svc.video_link %}
+                                <button type="button" class="btn-service-video-play" data-video-url="{{ svc.video_link }}" data-video-title="{{ svc.service_name }}">
+                                    <i class="fas fa-play-circle text-warning"></i>
+                                    <span>{% trans "Watch Video" %}</span>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Video Player Modal Component for Services -->
+                {% include "components/video_player.html" with video_url=default_service.video_link|default:"https://www.youtube.com/embed/dQw4w9WgXcQ" target_btn=".btn-service-video-play" %}
+
+                <!-- Live Facture Quotation Summary -->
+                <div class="live-facture-summary-card mb-2">
+                    <div class="facture-card-header">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="facture-header-icon"><i class="fas fa-file-invoice-dollar text-warning"></i></div>
+                            <div>
+                                <h4 class="text-light fw-bold mb-0">{% trans "Live Facture & Quotation Calculator" %}</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive my-3">
+                        <table class="table table-dark table-borderless facture-table mb-0">
+                            <thead>
+                                <tr class="text-uppercase text-muted small border-bottom border-secondary border-opacity-25">
+                                    <th>{% trans "Selected Service" %}</th>
+                                    <th class="text-center">{% trans "Unit Rate" %}</th>
+                                    <th class="text-end">{% trans "Calculated Amount" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="factureTableBody">
+                                <!-- Populated dynamically via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="facture-totals-footer">
+                        <div class="total-metric">
+                            <span class="total-metric-label">{% trans "Total Project Surface:" %}</span>
+                            <span class="total-metric-val text-light fw-bold"><span id="step4TotalSurfaceDisplay">220</span> m²</span>
+                        </div>
+                        <div class="total-metric grand-total-metric">
+                            <span class="total-metric-label">{% trans "Grand Total Estimated Price:" %}</span>
+                            <span class="total-metric-amount" id="step4GrandTotalPrice">0 DA</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end mt-4 pt-3 border-top border-secondary border-opacity-25">
+                    <button type="button" class="btn-step-next" id="btnUnlockStep5">
+                        <span>{% trans "Confirm Services & Enter Contact Details" %}</span>
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── STEP 5: Client Contact Details & Project Submission ── -->
+            <div class="request-step-card is-locked" id="stepCard5">
+                <div class="req-step-header">
+                    <div class="req-step-number">05</div>
+                    <h3 class="req-step-title">{% trans "Client Contact Details & Final Submission" %}</h3>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="req-form-group">
+                            <label class="req-field-label" for="firstNameInput">
+                                <i class="fas fa-user"></i>
+                                <span>{% trans "First Name" %} <span class="text-danger">*</span></span>
+                            </label>
+                            <input type="text" id="firstNameInput" name="first_name" class="form-control req-field-input" required placeholder="{% trans 'e.g. Karim' %}" value="">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="req-form-group">
+                            <label class="req-field-label" for="lastNameInput">
+                                <i class="fas fa-user"></i>
+                                <span>{% trans "Last Name" %} <span class="text-danger">*</span></span>
+                            </label>
+                            <input type="text" id="lastNameInput" name="last_name" class="form-control req-field-input" required placeholder="{% trans 'e.g. Benali' %}" value="">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="req-form-group">
+                            <label class="req-field-label" for="emailInput">
+                                <i class="fas fa-envelope"></i>
+                                <span>{% trans "Email Address" %} <span class="text-danger">*</span></span>
+                            </label>
+                            <input type="email" id="emailInput" name="email" class="form-control req-field-input" required placeholder="{% trans 'e.g. client@example.com' %}" value="">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="req-form-group">
+                            <label class="req-field-label" for="phoneInput">
+                                <i class="fas fa-phone"></i>
+                                <span>{% trans "Phone Number" %} <span class="text-danger">*</span></span>
+                            </label>
+                            <input type="tel" id="phoneInput" name="phone" class="form-control req-field-input" required placeholder="{% trans 'e.g. 0550 12 34 56' %}" value="">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Final Action Buttons (Email Facture & Submit Request) -->
+                <div class="step4-actions-bar">
+                    <button type="button" class="btn-email-facture" id="btnEmailFacture">
+                        <i class="fas fa-envelope-open-text text-warning"></i>
+                        <span>{% trans "Email Proforma Facture (PDF)" %}</span>
+                    </button>
+
+                    <button type="button" class="btn-final-submit" id="btnSubmitRequest">
+                        <i class="fas fa-check-circle"></i>
+                        <span>{% trans "Submit Architectural Request" %}</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── Floating Sticky Summary Bar ── -->
+            <div class="req-sticky-bar" id="reqStickyBar" style="display: none;">
+                <div class="req-sticky-inner">
+                    <div class="req-sticky-meta">
+                        <div class="req-meta-chip"><span id="chipProjectTypeName">{{ project_types.0.name }}</span></div>
+                        <div class="req-meta-chip"><span id="chipFloorsCount">2 Levels</span></div>
+                        <div class="req-meta-chip"><strong><span id="chipTotalSurface">220 m²</span></strong></div>
+                        <div class="req-meta-chip"><span id="chipServicesCount">1 Service Selected</span></div>
+                        <div class="req-meta-chip"><strong class="text-warning"><span id="chipTotalPrice">0 DA</span></strong></div>
+                    </div>
+                    <div>
+                        <button type="button" class="btn-proceed-step5" id="stickySubmitBtn">
+                            <span>{% trans "Submit Request" %}</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock content %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{% static 'js/video_player.js' %}?v={{ ASSET_VERSION }}"></script>
+<script src="{% static 'js/request_flow.js' %}?v={{ ASSET_VERSION }}"></script>
+{% endblock extra_js %}

@@ -303,11 +303,25 @@
     border-radius: 20px;
     padding: 28px;
     position: relative;
-    overflow: hidden;
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+    z-index: 50;
+    overflow: visible !important;
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
     border: 1px solid rgba(255, 255, 255, 0.14);
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(20px);
+}
+
+.crm-status-dropdown {
+    position: relative;
+    z-index: 100;
+}
+
+.crm-status-dropdown .dropdown-menu {
+    z-index: 1050 !important;
+    background: rgba(18, 24, 38, 0.98) !important;
+    backdrop-filter: blur(24px) !important;
+    border: 1.5px solid rgba(255, 214, 90, 0.4) !important;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.75) !important;
 }
 
 .crm-detail-hero[data-status="pending"] {

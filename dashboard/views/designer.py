@@ -10,7 +10,7 @@ from ..models import DesignRequest, DesignDeliverable, DesignNote, DesignRevisio
 
 @login_required
 def designer_projects(request):
-    projects = DesignRequest.objects.filter(designer=request.user).select_related("client", "project_type", "package").order_by("-created_at")
+    projects = DesignRequest.objects.filter(designer=request.user).select_related("client", "project_type", "service").order_by("-created_at")
     paginator = Paginator(projects, 12)
     page_obj = paginator.get_page(request.GET.get("page"))
     return render(request, "dashboard/designer/project_list.html", {

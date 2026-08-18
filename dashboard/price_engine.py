@@ -12,7 +12,11 @@ def calculate_subtotal(spaces_qs):
 def calculate_package_price(subtotal, package):
     if not package:
         return Decimal("0")
-    return (subtotal * package.price_multiplier).quantize(Decimal("0.01"))
+    if hasattr(package, "service_price"):
+        return Decimal(str(package.service_price))
+    if hasattr(package, "price_multiplier"):
+        return (subtotal * package.price_multiplier).quantize(Decimal("0.01"))
+    return Decimal("0")
 
 
 def calculate_options_total(options_qs):

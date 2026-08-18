@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     forms.forEach(form => {
         form.addEventListener('submit', async (e) => {
+            const method = (form.getAttribute('method') || 'POST').toUpperCase();
+            if (method === 'GET') {
+                return; // Let standard GET search/filter forms submit normally
+            }
             e.preventDefault();
 
             const formData = new FormData(form);
@@ -11,27 +15,40 @@ document.addEventListener('DOMContentLoaded', () => {
             const errorContainer = document.querySelector(`#errorContainer[form_id="${formId}"]`);
             const errorList = errorContainer ? errorContainer.querySelector('#errorList') : document.querySelector('#errorList');
             const submitBtn = form.querySelector('[type="submit"]');
-            const originalBtnContent = submitBtn.innerHTML;
+            const originalBtnContent = submitBtn ? submitBtn.innerHTML : '';
 
             if (errorList) {
                 errorList.innerHTML = '';
             }
 
             // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `
     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
     ${originalBtnContent}
 `;
+            }
+
+            const csrfInput = form.querySelector('[name=csrfmiddlewaretoken]') || document.querySelector('[name=csrfmiddlewaretoken]');
+            let csrfToken = csrfInput ? csrfInput.value : '';
+            if (!csrfToken) {
+                const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+                if (match) csrfToken = match[1];
+            }
+
+            const headers = {
+                'X-Requested-With': 'XMLHttpRequest'
+            };
+            if (csrfToken) {
+                headers['X-CSRFToken'] = csrfToken;
+            }
 
             try {
                 const response = await fetch(form.action, {
-                    method: form.method,
+                    method: form.method || 'POST',
                     body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
-                    }
+                    headers: headers
                 });
 
                 const data = await response.json();
@@ -47,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.redirect_url) {
                         setTimeout(() => {
                             window.location.href = data.redirect_url;
-                        }, 2000);
+                        }, 3000);
                     } else {
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = originalBtnContent;

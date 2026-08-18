@@ -6,12 +6,10 @@ from django.utils.text import slugify
 from dashboard.models import (
     ProjectType,
     Space,
-    SpaceImage,
+    SpaceCategory,
+    SpaceCategoryImages,
     ProjectTypeSpace,
-    DesignPackage,
-    PackageService,
-    ServiceCategory,
-    DesignOption,
+    Service,
 )
 
 
@@ -59,75 +57,43 @@ PROJECT_TYPES = [
     },
 ]
 
-PACKAGES = [
+SERVICES = [
     {
-        "name": "Essential",
-        "description": "Core design package \u2014 floor plans, mood boards, and material selection. Perfect for a single room refresh.",
-        "delivery_time_days": 7,
+        "service_name": "3D Architectural Visualization",
+        "service_price": 15000,
+        "is_default": True,
     },
     {
-        "name": "Premium",
-        "description": "Full design experience with 3D renderings, detailed construction drawings, and personalised consultations.",
-        "delivery_time_days": 14,
+        "service_name": "Full Interior Design & Execution Plans",
+        "service_price": 25000,
+        "is_default": False,
     },
     {
-        "name": "Luxury",
-        "description": "White-glove service covering every detail \u2014 custom furniture design, art curation, project management, and on-site supervision.",
-        "delivery_time_days": 21,
-    },
-]
-
-OPTIONS = [
-    {
-        "name": "3D Walkthrough",
-        "description": "Interactive 3D tour of your designed space so you can experience it before it\u2019s built.",
-        "category_name": "visualisation",
+        "service_name": "Custom Furniture Procurement & Staging",
+        "service_price": 20000,
+        "is_default": False,
     },
     {
-        "name": "Furniture Procurement",
-        "description": "We source and procure all furniture items at trade prices and coordinate delivery.",
-        "category_name": "procurement",
+        "service_name": "Lighting & Electrical Engineering Plan",
+        "service_price": 12000,
+        "is_default": False,
     },
-    {
-        "name": "Lighting Design",
-        "description": "Custom lighting plan with fixture selection, placement diagrams, and dimming schedules.",
-        "category_name": "electrical",
-    },
-    {
-        "name": "Landscape Concept",
-        "description": "Outdoor space concept including planting plans, hardscape materials, and terrace layouts.",
-        "category_name": "outdoor",
-    },
-]
-
-# Package → Services mapping: (package_name, option_name, price)
-PACKAGE_SERVICES = [
-    ("Essential", "3D Walkthrough", 12000),
-    ("Essential", "Furniture Procurement", 20000),
-    ("Essential", "Lighting Design", 10000),
-    ("Premium", "3D Walkthrough", 15000),
-    ("Premium", "Furniture Procurement", 25000),
-    ("Premium", "Lighting Design", 12000),
-    ("Luxury", "3D Walkthrough", 15000),
-    ("Luxury", "Furniture Procurement", 25000),
-    ("Luxury", "Lighting Design", 12000),
-    ("Luxury", "Landscape Concept", 18000),
 ]
 
 
 class Command(BaseCommand):
-    help = "Seeds catalog data: ProjectTypes, Spaces, Packages, Options, ServiceCategories"
+    help = "Seeds catalog data: ProjectTypes, Spaces, Categories, and Services"
 
     def handle(self, *args, **kwargs):
         counts = {
             "project_types": 0,
             "spaces": 0,
-            "packages": 0,
-            "options": 0,
+            "categories": 0,
+            "services": 0,
         }
 
         with transaction.atomic():
-            # ── Spaces ────────────────────────────────────────────
+            # ── Spaces & Categories ──────────────────────────────
             space_map = {}
             for s_name, price in SPACES:
                 space, created = Space.objects.get_or_create(
@@ -140,8 +106,20 @@ class Command(BaseCommand):
                 space_map[s_name] = space
                 if created:
                     counts["spaces"] += 1
+                
+                # Ensure default category
+                cat, cat_created = SpaceCategory.objects.get_or_create(
+                    space=space,
+                    category_name="General",
+                )
+                if cat_created:
+                    counts["categories"] += 1
                     gif_bytes = _make_gif()
-                    SpaceImage.objects.create(space=space, image=ContentFile(gif_bytes, name=f"{space.slug}.gif"))
+                    SpaceCategoryImages.objects.create(
+                        category=cat,
+                        image=ContentFile(gif_bytes, name=f"{space.slug}.gif"),
+                        is_default=True,
+                    )
 
             # ── ProjectTypes + ProjectTypeSpace ───────────────────
             for pt_data in PROJECT_TYPES:
@@ -161,63 +139,25 @@ class Command(BaseCommand):
                             project_type=pt, space=space_obj, sort_order=idx,
                         )
 
-            # ── Packages ──────────────────────────────────────────
-            for data in PACKAGES:
-                _, was = DesignPackage.objects.get_or_create(
-                    name=data["name"],
+            # ── Services ──────────────────────────────────────────
+            for s_data in SERVICES:
+                _, was = Service.objects.get_or_create(
+                    service_name=s_data["service_name"],
                     defaults={
-                        "delivery_time_days": data.get("delivery_time_days", 7),
+                        "service_price": s_data["service_price"],
+                        "is_default": s_data["is_default"],
                     },
                 )
                 if was:
-                    counts["packages"] += 1
-
-            # ── ServiceCategories ──────────────────────────────────
-            cat_names = set()
-            for data in OPTIONS:
-                cat_names.add(data["category_name"])
-            for cn in sorted(cat_names):
-                _, was = ServiceCategory.objects.get_or_create(name=cn)
-                if was:
-                    counts.setdefault("service_categories", 0)
-                    counts["service_categories"] += 1
-
-            # ── Options ───────────────────────────────────────────
-            cat_map = {sc.name: sc for sc in ServiceCategory.objects.all()}
-            for data in OPTIONS:
-                slug = slugify(data["name"])
-                category_fk = cat_map.get(data["category_name"])
-                _, was = DesignOption.objects.get_or_create(
-                    slug=slug,
-                    defaults={
-                        "name": data["name"],
-                        "description": data["description"],
-                        "category": category_fk,
-                    },
-                )
-                if was:
-                    counts["options"] += 1
-
-            # ── PackageService ─────────────────────────────────────
-            for pkg_name, opt_name, price in PACKAGE_SERVICES:
-                try:
-                    pkg = DesignPackage.objects.get(name=pkg_name)
-                    opt = DesignOption.objects.get(name=opt_name)
-                    _, was = PackageService.objects.get_or_create(
-                        package=pkg, option=opt,
-                        defaults={"price": price},
-                    )
-                except (DesignPackage.DoesNotExist, DesignOption.DoesNotExist):
-                    pass
+                    counts["services"] += 1
 
         total = sum(counts.values())
         self.stdout.write(
             self.style.SUCCESS(
                 f"Created {total} items: "
-                f"{counts['project_types']} project types \u00b7 "
-                f"{counts['spaces']} spaces \u00b7 "
-                f"{counts['packages']} packages \u00b7 "
-                f"{counts.get('service_categories', 0)} service categories \u00b7 "
-                f"{counts['options']} options"
+                f"{counts['project_types']} project types · "
+                f"{counts['spaces']} spaces · "
+                f"{counts['categories']} categories · "
+                f"{counts['services']} services"
             )
         )

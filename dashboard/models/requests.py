@@ -4,8 +4,8 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
-from .base import ProjectType, Space, SpaceImage
-from .catalog import DesignPackage, DesignOption
+from .base import ProjectType, Space, SpaceCategoryImages, SpaceImage
+from .catalog import Service
 
 userModel = get_user_model()
 
@@ -43,11 +43,38 @@ class DesignRequest(models.Model):
     )
     delivery_date = models.DateField(null=True, blank=True, verbose_name=_("Delivery Date"))
     revision_count = models.PositiveIntegerField(default=2, verbose_name=_("Revision Count"))
-    package = models.ForeignKey(
-        DesignPackage, on_delete=models.SET_NULL, null=True, blank=True, related_name="requests", verbose_name=_("Package")
+    service = models.ForeignKey(
+        Service, on_delete=models.SET_NULL, null=True, blank=True, related_name="requests", verbose_name=_("Service")
     )
+    total_surface = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name=_("Total Surface (m²)")
+    )
+    has_terrace = models.BooleanField(default=False, verbose_name=_("Has Terrace"))
+    floors_above = models.IntegerField(default=0, verbose_name=_("Floors Above RDC"))
+    floors_below = models.IntegerField(default=0, verbose_name=_("Floors Below RDC"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))
+
+    @property
+    def contact_email(self):
+        return self.email or (self.client.email if self.client else "")
+
+    @property
+    def contact_name(self):
+        full = f"{self.first_name} {self.last_name}".strip()
+        if full:
+            return full
+        if self.client:
+            return self.client.get_full_name() or self.client.username
+        return str(_("Client"))
+
+    @property
+    def contact_phone(self):
+        if self.phone:
+            return self.phone
+        if self.client and hasattr(self.client, "profile"):
+            return getattr(self.client.profile, "phone_number", None) or getattr(self.client.profile, "phone", "") or ""
+        return ""
 
     class Meta:
         verbose_name = _("Design Request")
@@ -61,6 +88,14 @@ class DesignRequest(models.Model):
     def project_number(self):
         return str(self)
 
+    @property
+    def package(self):
+        return self.service
+
+    @package.setter
+    def package(self, val):
+        self.service = val
+
 
 class DesignRequestFloor(models.Model):
     design_request = models.ForeignKey(
@@ -69,6 +104,9 @@ class DesignRequestFloor(models.Model):
     name = models.CharField(max_length=100, verbose_name=_("Name"))
     level = models.IntegerField(default=0, verbose_name=_("Level"))
     order = models.IntegerField(default=0, verbose_name=_("Order"))
+    surface = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name=_("Surface (m²)")
+    )
 
     class Meta:
         verbose_name = _("Floor")
@@ -105,17 +143,21 @@ class DesignRequestOption(models.Model):
     design_request = models.ForeignKey(
         DesignRequest, on_delete=models.CASCADE, related_name="options", verbose_name=_("Design Request")
     )
-    option = models.ForeignKey(
-        DesignOption, on_delete=models.SET_NULL, null=True, related_name="request_options", verbose_name=_("Option")
+    service = models.ForeignKey(
+        Service, on_delete=models.SET_NULL, null=True, related_name="request_options", verbose_name=_("Service")
     )
     price_at_time = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_("Price at Time"))
+
+    @property
+    def name(self):
+        return self.service.service_name if self.service else str(_("Design Service"))
 
     class Meta:
         verbose_name = _("Request Option")
         verbose_name_plural = _("Request Options")
 
     def __str__(self):
-        return f"{self.design_request.project_number} - {self.option.name if self.option else 'N/A'}"
+        return f"{self.design_request.project_number} - {self.name}"
 
 
 class DesignRequestSpaceImage(models.Model):
@@ -123,7 +165,7 @@ class DesignRequestSpaceImage(models.Model):
         DesignRequestSpace, on_delete=models.CASCADE, related_name="space_images", verbose_name=_("Request Space")
     )
     space_image = models.ForeignKey(
-        SpaceImage, on_delete=models.SET_NULL, null=True, related_name="request_space_images", verbose_name=_("Gallery Image")
+        SpaceCategoryImages, on_delete=models.SET_NULL, null=True, related_name="request_space_images", verbose_name=_("Gallery Image")
     )
 
     class Meta:
@@ -151,3 +193,59 @@ class DesignRequestFile(models.Model):
 
     def __str__(self):
         return f"File for {self.design_request.project_number}"
+
+
+class ProjectGalleryInvitation(models.Model):
+    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, verbose_name=_("Token"))
+    design_request = models.ForeignKey(
+        DesignRequest, on_delete=models.CASCADE, related_name="gallery_invitations", verbose_name=_("Design Request")
+    )
+    email = models.EmailField(verbose_name=_("Recipient Email"))
+    is_used = models.BooleanField(default=False, verbose_name=_("Is Used"))
+    used_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Used At"))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
+
+    class Meta:
+        verbose_name = _("Project Gallery Invitation")
+        verbose_name_plural = _("Project Gallery Invitations")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        status = "Used" if self.is_used else "Pending"
+        return f"{self.design_request.project_number} - {self.email} ({status})"
+
+    def get_selection_url(self, request=None):
+        from django.urls import reverse, NoReverseMatch
+        from django.conf import settings
+        try:
+            path = reverse("frontend:gallery_client_selection", kwargs={"token": str(self.token)})
+        except NoReverseMatch:
+            path = reverse("gallery_client_selection", kwargs={"token": str(self.token)})
+        if request:
+            return request.build_absolute_uri(path)
+        site_url = getattr(settings, "SITE_URL", "http://localhost:8000")
+        return f"{site_url.rstrip('/')}{path}"
+
+
+class DesignRequestGalleryImage(models.Model):
+    design_request = models.ForeignKey(
+        DesignRequest, on_delete=models.CASCADE, related_name="gallery_selections", verbose_name=_("Design Request")
+    )
+    space_image = models.ForeignKey(
+        SpaceCategoryImages, on_delete=models.CASCADE, related_name="request_gallery_selections", verbose_name=_("Gallery Image")
+    )
+    notes = models.TextField(blank=True, default="", verbose_name=_("Client Notes"))
+    selected_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Selected At"))
+
+    class Meta:
+        verbose_name = _("Design Request Gallery Selection")
+        verbose_name_plural = _("Design Request Gallery Selections")
+        ordering = ["selected_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["design_request", "space_image"], name="unique_request_gallery_image"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.design_request.project_number} - Image #{self.space_image_id}"

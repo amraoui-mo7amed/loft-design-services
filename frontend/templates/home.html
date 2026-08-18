@@ -11,6 +11,51 @@
     <link rel="stylesheet" href="{% static "css/portfolio_list.css" %}?v={{ ASSET_VERSION }}">
     <link rel="stylesheet" href="{% static "css/video_player.css" %}?v={{ ASSET_VERSION }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <style>
+        body.landing-page .space-card-wrap {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+        body.landing-page .space-card-price {
+            display: inline-flex !important;
+            align-items: baseline !important;
+            justify-content: center !important;
+            gap: 5px !important;
+            margin: 12px auto 0 auto !important;
+            padding: 6px 16px !important;
+            background: rgba(14, 18, 26, 0.92) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.16) !important;
+            border-radius: 999px !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55) !important;
+            transition: all 0.25s ease !important;
+        }
+        body.landing-page .space-card-price-value {
+            font-weight: 800 !important;
+            font-size: 1.15rem !important;
+            color: #ffffff !important;
+            letter-spacing: -0.2px !important;
+        }
+        body.landing-page .space-card-price-currency {
+            font-size: 0.8rem !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 700 !important;
+        }
+        body.landing-page .space-card-wrap:hover .space-card-price {
+            background: rgba(22, 28, 40, 0.98) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65) !important;
+        }
+        body.landing-page .space-card.selected ~ .space-card-price,
+        body.landing-page .space-card-wrap:has(.space-card.selected) .space-card-price {
+            background: rgba(18, 24, 34, 0.98) !important;
+            border-color: #FFD65A !important;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), 0 0 14px rgba(255, 214, 90, 0.25) !important;
+        }
+    </style>
 {% endblock extra_css %}
 
 {% block nav %}
@@ -145,18 +190,22 @@
                 {% endfor %}
             </div>
 
-            <div class="floating-total" id="floatingTotalBadge">
-                <span class="floating-total-value" id="floatingTotalValue">
-                    <span class="floating-total-amount" id="floatingTotal">0</span>
-                    <span class="floating-total-currency">DA</span>
-                </span>
+            <div class="floating-total-box" id="floatingTotalBox">
+                <div class="floating-total" id="floatingTotalBadge">
+                    <span class="floating-total-value" id="floatingTotalValue">
+                        <span class="floating-total-amount" id="floatingTotal">0</span>
+                        <span class="floating-total-currency">DA</span>
+                    </span>
+                </div>
+                <button class="btn btn-primary floating-continue-btn rounded-pill px-4 py-2 fw-bold shadow" id="continueBtn">
+                    {% trans "Continue" %} <i class="fas fa-arrow-right ms-1"></i>
+                </button>
             </div>
 
             <div class="floating-bottom-bar" id="floatingBar">
                 <div class="floating-bottom-inner">
                     <div class="floating-actions">
                         <a href="{% url 'design_service' %}" class="btn btn-outline-primary rounded px-4 fw-bold">{% trans "Create a custom project" %}</a>
-                        <button class="btn btn-primary rounded px-4 fw-bold shadow" id="continueBtn">{% trans "Continue" %}</button>
                     </div>
                 </div>
             </div>
@@ -208,58 +257,6 @@
             <div class="text-center mt-4 pt-2 reveal">
                 <a href="{% url 'frontend:portfolio_list' %}" class="btn btn-outline-primary rounded-pill px-5 py-3 fw-bold shadow-sm">
                     <i class="fas fa-layer-group me-2"></i>{% trans "View All Projects" %}
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Design Inspiration Gallery Slider -->
-    <section class="projects-section gallery-slider-section" id="gallery-section">
-        <div class="container">
-            <div class="projects-section-head text-center mb-4">
-                <h2 class="loft-section-title reveal mb-0">{% trans "Design Inspiration Gallery" %}</h2>
-            </div>
-            <div class="gallery-slider-container position-relative">
-                <button type="button" class="projects-nav-btn gallery-prev" aria-label="{% trans 'Previous gallery spaces' %}">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button type="button" class="projects-nav-btn gallery-next" aria-label="{% trans 'Next gallery spaces' %}">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-                <div class="swiper projects-swiper gallery-swiper" id="gallerySwiper">
-                    <div class="swiper-wrapper">
-                        {% for sp in gallery_spaces %}
-                        <div class="swiper-slide">
-                            <a class="gallery-slide-card" href="{% url 'frontend:space_gallery' space_pk=sp.id %}">
-                                <div class="gallery-slide-img">
-                                    <img src="{{ sp.thumbnail_url }}" alt="{{ sp.name }}" loading="lazy">
-                                    <div class="gallery-slide-overlay">
-                                        <div class="gallery-slide-badge">
-                                            <i class="fas fa-images me-1"></i> {{ sp.images_count }} {% trans "photos" %}
-                                        </div>
-                                        <div class="gallery-slide-bottom">
-                                            <h4 class="gallery-slide-title">{{ sp.name }}</h4>
-                                            <span class="gallery-slide-cta">
-                                                {% trans "Explore Space" %} <i class="fas fa-arrow-right ms-1"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        {% empty %}
-                        <div class="swiper-slide">
-                            <div class="video-card-empty">{% trans "No gallery spaces available yet." %}</div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <!-- Gallery Slider Pagination Indicator -->
-                    <div class="swiper-pagination gallery-pagination"></div>
-                </div>
-            </div>
-            <div class="text-center mt-4 pt-2 reveal">
-                <a href="{% url 'frontend:space_gallery' %}" class="btn btn-outline-primary rounded-pill px-5 py-3 fw-bold shadow-sm">
-                    <i class="fas fa-th-large me-2"></i>{% trans "View Full Gallery" %}
                 </a>
             </div>
         </div>

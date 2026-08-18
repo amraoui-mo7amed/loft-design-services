@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.utils.text import slugify
-from dashboard.models import Space, SpaceImage
+from dashboard.models import Space, SpaceCategory, SpaceCategoryImages
 
 
 SPACE_IMAGES = [
@@ -30,7 +30,7 @@ SPACE_IMAGES = [
 
 
 class Command(BaseCommand):
-    help = "Download real images for all spaces and store them as SpaceImage gallery records"
+    help = "Download real images for all spaces and store them as SpaceCategoryImages gallery records"
 
     def handle(self, *args, **options):
         media_dir = os.path.join(settings.MEDIA_ROOT, "spaces", "gallery")
@@ -47,7 +47,9 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING(f"No URL for {space.name}"))
                 continue
 
-            if space.gallery_images.exists():
+            cat, _ = SpaceCategory.objects.get_or_create(space=space, category_name="General")
+
+            if cat.images.exists():
                 self.stdout.write(f"  {space.name} already has gallery images, skipping")
                 continue
 
@@ -65,9 +67,10 @@ class Command(BaseCommand):
                     continue
 
                 filename = f"{space.slug}.jpg"
-                SpaceImage.objects.create(
-                    space=space,
+                SpaceCategoryImages.objects.create(
+                    category=cat,
                     image=ContentFile(resp.content, name=filename),
+                    is_default=True,
                 )
                 self.stdout.write(self.style.SUCCESS("OK"))
             except requests.exceptions.ConnectionError as e:

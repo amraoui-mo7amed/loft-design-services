@@ -1,165 +1,416 @@
 /* ==========================================================================
-   Space Details & Gallery - Dark Liquid Glass Theme
+   LoftDesign — Space Details & Category Gallery Management
+   Theme: Dark Liquid Glass (Design System Token Compliant)
    ========================================================================== */
 
-.space-details-container {
+.dashContent .space-management-container {
+    animation: spacePageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     padding-bottom: 2.5rem;
 }
 
-.sd-glass-card {
-    background: rgba(26, 26, 26, 0.65);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+@keyframes spacePageFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Base Glass Card ── */
+.dashContent .sd-card {
+    background: linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 18px;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.sd-glass-card:hover {
-    border-color: rgba(255, 214, 90, 0.25);
+.dashContent .sd-card:hover {
+    border-color: rgba(255, 214, 90, 0.3);
 }
 
-.sd-card-head {
+.dashContent .sd-card-head {
     padding: 1.25rem 1.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.02);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-.sd-card-title {
+.dashContent .sd-card-title {
     font-size: 1.05rem;
     font-weight: 700;
-    color: #ffffff;
+    color: #f2f5f8;
     margin-bottom: 0;
     display: flex;
     align-items: center;
+    gap: 0.5rem;
 }
 
-.sd-card-body {
+.dashContent .sd-card-body {
     padding: 1.5rem;
 }
 
-.sd-input {
-    background: rgba(15, 15, 15, 0.7) !important;
+/* ── Form Inputs ── */
+.dashContent .sd-input {
+    background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    color: #ffffff !important;
-    border-radius: 10px !important;
-    padding: 0.65rem 1rem !important;
-    font-size: 0.9rem !important;
+    color: #f2f5f8 !important;
+    border-radius: 12px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.95rem !important;
     transition: all 0.2s ease !important;
 }
 
-.sd-input:focus {
-    background: rgba(20, 20, 20, 0.9) !important;
-    border-color: #ffd65a !important;
-    box-shadow: 0 0 0 3px rgba(255, 214, 90, 0.15) !important;
+.dashContent .sd-input:focus {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: var(--brand-primary, #FFD65A) !important;
+    box-shadow: 0 0 0 4px rgba(255, 214, 90, 0.15) !important;
     color: #ffffff !important;
 }
 
-/* Bulk Upload Drop Zone */
-.sd-upload-zone {
-    border: 2px dashed rgba(255, 255, 255, 0.2);
-    border-radius: 14px;
-    padding: 2rem 1.5rem;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.02);
+/* ── Horizontal Category Tabs Bar (Right Column) ── */
+.dashContent .cat-tabs-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    overflow-x: auto;
+    padding: 0.5rem 0 1rem 0;
+    margin-bottom: 1rem;
+    scrollbar-width: none;
+}
+
+.dashContent .cat-tabs-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.dashContent .cat-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.15rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #a8b2bd;
+    font-size: 0.88rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+    user-select: none;
 }
 
-.sd-upload-zone:hover,
-.sd-upload-zone.dragover {
-    border-color: #ffd65a;
-    background: rgba(255, 214, 90, 0.05);
+.dashContent .cat-tab-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 214, 90, 0.3);
+    color: #ffffff;
 }
 
-/* Gallery Item Card */
-.sd-gallery-item {
-    background: rgba(18, 18, 18, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
+.dashContent .cat-tab-btn.active {
+    background: linear-gradient(150deg, rgba(255, 214, 90, 0.18), rgba(255, 214, 90, 0.06));
+    border-color: var(--brand-primary, #FFD65A);
+    color: var(--brand-primary, #FFD65A);
+    box-shadow: 0 0 16px rgba(255, 214, 90, 0.18);
+}
+
+.dashContent .cat-tab-btn.active .cat-tab-badge {
+    background: var(--brand-primary, #FFD65A) !important;
+    color: var(--brand-secondary, #212121) !important;
+    font-weight: 800;
+}
+
+/* ── Active Category Control Header ── */
+.dashContent .sd-category-banner {
+    background: linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 18px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.dashContent .sd-cat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 214, 90, 0.12);
+    color: var(--brand-primary, #FFD65A);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 214, 90, 0.25);
+}
+
+/* ── Pill Buttons with Background ── */
+.dashContent .btn-pill-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0.45rem 0.95rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 9px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.dashContent .btn-pill-upload {
+    background: rgba(255, 214, 90, 0.15);
+    border-color: rgba(255, 214, 90, 0.35);
+    color: var(--brand-primary, #FFD65A);
+}
+
+.dashContent .btn-pill-upload:hover {
+    background: var(--brand-primary, #FFD65A);
+    border-color: var(--brand-primary, #FFD65A);
+    color: var(--brand-secondary, #212121);
+    box-shadow: 0 0 16px rgba(255, 214, 90, 0.3);
+}
+
+.dashContent .btn-pill-edit {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.25);
+    color: #93c5fd;
+}
+
+.dashContent .btn-pill-edit:hover {
+    background: rgba(59, 130, 246, 0.25);
+    border-color: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+}
+
+.dashContent .btn-pill-delete {
+    background: rgba(220, 53, 69, 0.12);
+    border-color: rgba(220, 53, 69, 0.25);
+    color: #fca5a5;
+}
+
+.dashContent .btn-pill-delete:hover {
+    background: rgba(220, 53, 69, 0.25);
+    border-color: #dc3545;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(220, 53, 69, 0.3);
+}
+
+.dashContent .btn-pill-gold {
+    background: rgba(255, 214, 90, 0.1);
+    border-color: rgba(255, 214, 90, 0.25);
+    color: var(--brand-primary, #FFD65A);
+}
+
+.dashContent .btn-pill-gold:hover {
+    background: rgba(255, 214, 90, 0.25);
+    border-color: var(--brand-primary, #FFD65A);
+    color: var(--brand-primary, #FFD65A);
+    box-shadow: 0 0 12px rgba(255, 214, 90, 0.25);
+}
+
+/* ── Redesigned Drag & Drop Zone ── */
+.dashContent .sd-dropzone {
+    border: 2px dashed rgba(255, 214, 90, 0.3);
+    border-radius: 20px;
+    padding: 2.25rem 2rem;
+    text-align: center;
+    background: linear-gradient(150deg, rgba(255, 214, 90, 0.04), rgba(255, 255, 255, 0.01));
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-bottom: 1.75rem;
+    position: relative;
     overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashContent .sd-dropzone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255, 214, 90, 0.08) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.dashContent .sd-dropzone:hover,
+.dashContent .sd-dropzone.dragover {
+    border-color: var(--brand-primary, #FFD65A);
+    background: linear-gradient(150deg, rgba(255, 214, 90, 0.09), rgba(255, 255, 255, 0.03));
+    box-shadow: 0 0 30px rgba(255, 214, 90, 0.15), inset 0 0 20px rgba(255, 214, 90, 0.05);
+    transform: translateY(-2px);
+}
+
+.dashContent .sd-dropzone:hover::before,
+.dashContent .sd-dropzone.dragover::before {
+    opacity: 1;
+}
+
+.dashContent .sd-dropzone-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    background: rgba(255, 214, 90, 0.12);
+    color: var(--brand-primary, #FFD65A);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 214, 90, 0.25);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dashContent .sd-dropzone:hover .sd-dropzone-icon,
+.dashContent .sd-dropzone.dragover .sd-dropzone-icon {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 214, 90, 0.3);
+}
+
+.dashContent .sd-dropzone-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #f2f5f8;
+    margin-bottom: 0.35rem;
+}
+
+.dashContent .sd-dropzone-desc {
+    font-size: 0.85rem;
+    color: #a8b2bd;
+    margin-bottom: 1rem;
+}
+
+.dashContent .sd-dropzone-pills {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.dashContent .sd-dropzone-pill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #a8b2bd;
+}
+
+/* ── Photo Gallery Card (No Checkbox) ── */
+.dashContent .sd-photo-card {
+    background: linear-gradient(150deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
     height: 100%;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
-.sd-gallery-item:hover {
-    transform: translateY(-3px);
-    border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+.dashContent .sd-photo-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 214, 90, 0.35);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), 0 0 16px rgba(255, 214, 90, 0.08);
 }
 
-.sd-gallery-item.is-thumbnail {
-    border-color: #ffd65a;
-    box-shadow: 0 0 16px rgba(255, 214, 90, 0.2);
+.dashContent .sd-photo-card.is-default-photo {
+    border-color: var(--brand-primary, #FFD65A);
+    background: linear-gradient(150deg, rgba(255, 214, 90, 0.08), rgba(255, 255, 255, 0.03));
+    box-shadow: 0 0 20px rgba(255, 214, 90, 0.15);
 }
 
-.sd-img-wrapper {
+.dashContent .sd-photo-img-wrap {
     position: relative;
     width: 100%;
-    height: 160px;
-    background: #111;
+    height: 185px;
+    background: #0f1217;
     overflow: hidden;
 }
 
-.sd-img-preview {
+.dashContent .sd-photo-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.4s ease;
 }
 
-.sd-gallery-item:hover .sd-img-preview {
-    transform: scale(1.04);
+.dashContent .sd-photo-card:hover .sd-photo-img {
+    transform: scale(1.05);
 }
 
-.sd-badge-thumb {
+.dashContent .sd-photo-badge {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: #ffd65a;
-    color: #1a1a1a;
-    font-size: 0.72rem;
+    background: var(--brand-primary, #FFD65A);
+    color: var(--brand-secondary, #212121);
+    font-size: 0.7rem;
     font-weight: 800;
     padding: 3px 8px;
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
-[dir="rtl"] .sd-badge-thumb {
+[dir="rtl"] .dashContent .sd-photo-badge {
     right: auto;
     left: 10px;
 }
 
-.sd-img-info {
-    padding: 1rem;
+.dashContent .sd-photo-info {
+    padding: 1.15rem;
     display: flex;
     flex-direction: column;
     flex: 1;
     justify-content: space-between;
 }
 
-.sd-tags-list {
+.dashContent .sd-tags-pill {
     font-size: 0.8rem;
     font-weight: 600;
-    color: #ffd65a;
+    color: var(--brand-primary, #FFD65A);
 }
 
-.sd-desc-text {
+.dashContent .sd-desc-snip {
     font-size: 0.78rem;
-    color: #adb5bd;
-    line-height: 1.4;
+    color: #a8b2bd;
+    line-height: 1.45;
 }
 
-/* Modal Dark Liquid Glass */
-.sd-modal-glass {
-    background: rgba(22, 22, 22, 0.95);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+.dashContent .sd-photo-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ── Modal Dark Glass ── */
+.dashContent .sd-glass-modal {
+    background: linear-gradient(145deg, rgba(30, 35, 42, 0.97), rgba(20, 24, 29, 0.95)) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
 }

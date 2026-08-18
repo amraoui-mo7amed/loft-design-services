@@ -1,0 +1,1207 @@
+/* ==========================================================================
+   LoftDesign — Redesigned /request/ Experience (5-Step Flow)
+   Steps: 01 Architecture -> 02 Floors -> 03 Surfaces -> 04 Services -> 05 Contact & Submit
+   Theme: Haute Interior Architecture & Liquid Glass Dark Aesthetic (White Text / Dark Text on Yellow)
+   ========================================================================== */
+
+:root {
+    --gold: #FFD65A;
+    --gold-hover: #f3ca4b;
+    --gold-glow: rgba(255, 214, 90, 0.28);
+    --gold-subtle: rgba(255, 214, 90, 0.14);
+    --bg-dark: #090d14;
+    --bg-card: rgba(18, 24, 38, 0.78);
+    --bg-card-hover: rgba(25, 33, 50, 0.92);
+    --border-glass: rgba(255, 255, 255, 0.12);
+    --border-glass-active: rgba(255, 214, 90, 0.5);
+    --text-main: #ffffff;
+    --text-muted: #f1f5f9;
+    --radius-xl: 24px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background: var(--bg-dark) !important;
+    color: #ffffff !important;
+    font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+}
+
+.request-flow-page {
+    background: radial-gradient(circle at 50% 0%, #151d2f 0%, #090d14 75%);
+    min-height: 100vh;
+    padding: 2rem 0 8rem 0;
+    position: relative;
+    color: #ffffff !important;
+}
+
+/* Ambient Architectural Lighting */
+.request-flow-page::before {
+    content: '';
+    position: fixed;
+    top: -10%;
+    left: 15%;
+    width: 650px;
+    height: 650px;
+    background: radial-gradient(circle, rgba(255, 214, 90, 0.06) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.request-flow-page::after {
+    content: '';
+    position: fixed;
+    bottom: -10%;
+    right: 15%;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.04) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.request-flow-container {
+    position: relative;
+    z-index: 2;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* ── Top Floating Navigation Header ── */
+.req-top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.5rem;
+    background: rgba(15, 21, 34, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: 999px;
+    margin-bottom: 2.25rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.req-back-home-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #ffffff !important;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.req-back-home-btn:hover {
+    background: var(--gold);
+    color: #000000 !important;
+    border-color: var(--gold);
+    transform: scale(1.1);
+}
+
+.req-brand-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: #ffffff !important;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: -0.3px;
+}
+
+.req-brand-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--gold), #d9a71e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000000 !important;
+    font-weight: 900;
+    font-size: 0.95rem;
+}
+
+.req-progress-pills {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.req-progress-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #ffffff !important;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.req-progress-pill.active {
+    background: var(--gold-subtle);
+    border-color: var(--gold);
+    color: var(--gold) !important;
+    box-shadow: 0 0 14px var(--gold-glow);
+}
+
+.req-progress-pill.completed {
+    background: rgba(34, 197, 94, 0.18);
+    border-color: #22c55e;
+    color: #4ade80 !important;
+}
+
+/* ── Main Step Card Container ── */
+.request-step-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-xl);
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+    position: relative;
+    overflow: visible;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: stepSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    color: #ffffff !important;
+}
+
+.request-step-card.is-locked {
+    display: none !important;
+}
+
+.request-step-card:has(.custom-select-wrapper.active),
+.request-step-card:has(.custom-select-list.show) {
+    z-index: 1500;
+}
+
+@keyframes stepSlideIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.request-step-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    border-top-left-radius: var(--radius-xl);
+    border-top-right-radius: var(--radius-xl);
+}
+
+.req-step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 1.85rem;
+    flex-direction: row;
+}
+
+.req-step-number {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--gold-subtle);
+    border: 1px solid rgba(255, 214, 90, 0.35);
+    color: var(--gold) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 900;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(255, 214, 90, 0.15);
+}
+
+.req-step-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff !important;
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+
+/* ── STEP 1: Custom Select Component ── */
+.project-type-dropdown-box {
+    max-width: 620px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 500;
+}
+
+.request-flow-page .custom-select-wrapper {
+    position: relative;
+    width: 100%;
+    z-index: 500;
+}
+
+.request-flow-page .custom-select-wrapper.active {
+    z-index: 2000 !important;
+}
+
+.request-flow-page .custom-select-display {
+    background: rgba(14, 18, 28, 0.95) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 1rem 1.35rem !important;
+    color: #ffffff !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    transition: all 0.25s ease !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
+}
+
+.request-flow-page .custom-select-display:hover,
+.request-flow-page .custom-select-display.active,
+.request-flow-page .custom-select-wrapper.active .custom-select-display {
+    background: rgba(20, 26, 40, 0.98) !important;
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 22px var(--gold-glow) !important;
+    color: #ffffff !important;
+}
+
+.request-flow-page .custom-select-display .arrow {
+    color: var(--gold) !important;
+    font-size: 1.2rem !important;
+    transition: transform 0.25s ease !important;
+}
+
+.request-flow-page .custom-select-wrapper.active .custom-select-display .arrow,
+.request-flow-page .custom-select-display.active .arrow {
+    transform: translateY(-50%) rotate(180deg) !important;
+}
+
+.request-flow-page .custom-select-list {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #0d121c !important;
+    backdrop-filter: blur(28px) !important;
+    -webkit-backdrop-filter: blur(28px) !important;
+    border: 1.5px solid rgba(255, 214, 90, 0.45) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 0.5rem !important;
+    margin: 0 !important;
+    list-style: none !important;
+    max-height: 280px !important;
+    overflow-y: auto !important;
+    z-index: 9999 !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9) !important;
+    display: none;
+}
+
+.request-flow-page .custom-select-list.show,
+.request-flow-page .custom-select-wrapper.active .custom-select-list {
+    display: block !important;
+    animation: fadeInList 0.2s ease forwards !important;
+}
+
+.request-flow-page .custom-select-list li {
+    padding: 0.9rem 1.25rem !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    font-size: 0.98rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+.request-flow-page .custom-select-list li:hover {
+    background: rgba(255, 214, 90, 0.18) !important;
+    color: var(--gold) !important;
+    padding-left: 1.5rem !important;
+}
+
+[dir="rtl"] .request-flow-page .custom-select-list li:hover {
+    padding-left: 1.25rem !important;
+    padding-right: 1.5rem !important;
+}
+
+.request-flow-page .custom-select-list li.selected {
+    background: rgba(255, 214, 90, 0.25) !important;
+    color: var(--gold) !important;
+    font-weight: 800 !important;
+}
+
+/* ── STEP 2: Floors Checkboxes & Video Demo Button ── */
+.btn-watch-demo-step2 {
+    background: rgba(15, 20, 32, 0.9);
+    border: 1.5px solid rgba(255, 214, 90, 0.45);
+    color: #ffffff !important;
+    padding: 0.55rem 1.25rem;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+}
+
+.btn-watch-demo-step2:hover {
+    background: rgba(255, 214, 90, 0.2);
+    border-color: var(--gold);
+    color: var(--gold) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 214, 90, 0.3);
+}
+
+.floor-add-buttons-bar {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+}
+
+.btn-add-floor {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid rgba(255, 255, 255, 0.16);
+    color: #ffffff !important;
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-size: 0.92rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-add-floor#btnAddFloorAbove:hover {
+    background: rgba(255, 214, 90, 0.18);
+    border-color: var(--gold);
+    color: var(--gold) !important;
+}
+
+.btn-add-floor#btnAddFloorBelow:hover {
+    background: rgba(56, 189, 248, 0.18);
+    border-color: #38bdf8;
+    color: #38bdf8 !important;
+}
+
+.floors-checkboxes-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.floor-check-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-lg);
+    padding: 1.15rem 1.35rem;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: all 0.25s ease;
+    color: #ffffff !important;
+}
+
+.floor-check-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+}
+
+.floor-check-card.checked {
+    background: linear-gradient(140deg, rgba(255, 214, 90, 0.14) 0%, rgba(20, 26, 40, 0.96) 100%) !important;
+    border-color: var(--gold) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45), 0 0 16px rgba(255, 214, 90, 0.16) !important;
+}
+
+.floor-check-main {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-width: 0;
+}
+
+.floor-check-icon-wrap {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.floor-check-card.checked .floor-check-icon-wrap {
+    background: var(--gold-subtle);
+    color: var(--gold) !important;
+    border-color: rgba(255, 214, 90, 0.45);
+}
+
+.floor-badge-tag {
+    padding: 0.3rem 0.75rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff !important;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.floor-check-card.checked .floor-badge-tag {
+    background: rgba(255, 214, 90, 0.22);
+    border-color: rgba(255, 214, 90, 0.45);
+    color: var(--gold) !important;
+}
+
+.floor-sub-label {
+    font-size: 0.8rem;
+    color: #f1f5f9 !important;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.floor-check-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.floor-check-indicator {
+    position: relative;
+    width: 24px;
+    height: 24px;
+}
+
+.floor-checkbox-native {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.floor-custom-check-box {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.4);
+    color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 900;
+    transition: all 0.2s ease;
+}
+
+.floor-check-card.checked .floor-custom-check-box {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #000000 !important;
+    box-shadow: 0 0 12px rgba(255, 214, 90, 0.45);
+}
+
+.btn-remove-floor {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #f87171 !important;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-remove-floor:hover {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: #ef4444;
+    color: #ffffff !important;
+    transform: scale(1.08);
+}
+
+/* ── STEP 3: Surface Dimensions (Light Text & Sleek Inputs) ── */
+.surfaces-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.95rem;
+    margin-bottom: 1.75rem;
+}
+
+.surface-entry-card {
+    background: rgba(255, 255, 255, 0.045);
+    border: 1.5px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--radius-md);
+    padding: 1.15rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    transition: all 0.2s ease;
+    color: #ffffff !important;
+}
+
+.surface-entry-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 214, 90, 0.35);
+}
+
+.surface-level-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.surface-badge-pill {
+    padding: 0.35rem 0.85rem;
+    border-radius: 8px;
+    background: var(--gold-subtle);
+    border: 1px solid rgba(255, 214, 90, 0.4);
+    color: var(--gold) !important;
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+.surface-level-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff !important;
+}
+
+.surface-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.surface-input-control {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
+    border-radius: 12px !important;
+    padding: 0.6rem 0.9rem !important;
+    font-size: 1.2rem !important;
+    font-weight: 900 !important;
+    text-align: center !important;
+    width: 125px !important;
+    transition: all 0.25s ease !important;
+}
+
+.surface-input-control:focus {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 4px var(--gold-glow) !important;
+    color: #ffffff !important;
+}
+
+.surface-unit-label {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #ffffff !important;
+}
+
+.surface-grand-total-banner {
+    background: linear-gradient(135deg, rgba(255, 214, 90, 0.12), rgba(20, 26, 40, 0.95));
+    border: 1.5px solid rgba(255, 214, 90, 0.35);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.total-banner-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.total-banner-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--gold-subtle);
+    border: 1px solid rgba(255, 214, 90, 0.35);
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.total-banner-value {
+    font-size: 1.85rem;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: -0.5px;
+}
+
+/* ── STEP 4: Services Redesigned as Horizontal Rows (No Description) ── */
+.services-selection-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-bottom: 1.75rem;
+}
+
+.service-option-row {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    padding: 1.1rem 1.4rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    user-select: none;
+}
+
+.service-option-row:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 214, 90, 0.35);
+    transform: translateY(-2px);
+}
+
+.service-option-row.selected {
+    background: linear-gradient(140deg, rgba(255, 214, 90, 0.16) 0%, rgba(20, 26, 40, 0.96) 100%) !important;
+    border-color: var(--gold) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(255, 214, 90, 0.18) !important;
+}
+
+.service-row-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.service-row-check-box {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.4);
+    color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 900;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.service-option-row.selected .service-row-check-box {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #000000 !important;
+    box-shadow: 0 0 10px rgba(255, 214, 90, 0.5);
+}
+
+.service-row-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff !important;
+    line-height: 1.3;
+}
+
+.service-row-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.service-pricing-badge {
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    background: var(--gold-subtle);
+    border: 1px solid rgba(255, 214, 90, 0.35);
+    color: #ffffff;
+    font-size: 0.92rem;
+    font-weight: 800;
+}
+
+.service-pricing-badge .rate-val {
+    color: var(--gold) !important;
+    font-weight: 900;
+}
+
+.btn-service-video-play {
+    background: rgba(15, 20, 32, 0.9);
+    border: 1.5px solid rgba(255, 214, 90, 0.4);
+    color: #ffffff !important;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-service-video-play:hover {
+    background: rgba(255, 214, 90, 0.2);
+    border-color: var(--gold);
+    color: var(--gold) !important;
+}
+
+/* ── Live Facture Summary ── */
+.live-facture-summary-card {
+    background: linear-gradient(150deg, rgba(255, 214, 90, 0.12), rgba(20, 26, 40, 0.95));
+    border: 1.5px solid rgba(255, 214, 90, 0.4);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.8rem;
+    margin-top: 1.5rem;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5);
+    color: #ffffff !important;
+}
+
+.facture-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.facture-header-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--gold-subtle);
+    border: 1px solid rgba(255, 214, 90, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.facture-table {
+    background: transparent !important;
+}
+
+.facture-table tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.facture-table td {
+    padding: 0.8rem 0.5rem;
+    font-size: 0.92rem;
+    color: #ffffff !important;
+    vertical-align: middle;
+}
+
+.facture-totals-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1.15rem;
+    border-top: 1.5px dashed rgba(255, 214, 90, 0.35);
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.total-metric-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #cbd5e1;
+}
+
+.grand-total-metric {
+    text-align: right;
+}
+
+.total-metric-amount {
+    font-size: 1.9rem;
+    font-weight: 900;
+    color: var(--gold) !important;
+    letter-spacing: -0.5px;
+}
+
+/* ── STEP 5: Form & Action Buttons ── */
+.req-form-group {
+    margin-bottom: 1.25rem;
+}
+
+.req-field-label {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #ffffff !important;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.req-field-label i {
+    color: var(--gold) !important;
+}
+
+.req-field-input {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+    border-radius: var(--radius-md) !important;
+    padding: 0.85rem 1.15rem !important;
+    font-size: 1rem !important;
+    transition: all 0.25s ease !important;
+}
+
+.req-field-input::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.req-field-input:focus {
+    background: rgba(255, 255, 255, 0.09) !important;
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 4px var(--gold-glow) !important;
+    color: #ffffff !important;
+}
+
+.step4-actions-bar {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn-email-facture {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(255, 214, 90, 0.4);
+    color: #ffffff !important;
+    padding: 0.95rem 1.8rem;
+    border-radius: var(--radius-md);
+    font-size: 0.98rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btn-email-facture:hover {
+    background: rgba(255, 214, 90, 0.2);
+    border-color: var(--gold);
+    color: var(--gold) !important;
+}
+
+/* Yellow Action Buttons (Always Dark Text on Yellow) */
+.btn-step-next,
+.btn-final-submit,
+.btn-proceed-step5 {
+    background: linear-gradient(135deg, var(--gold), #eab308) !important;
+    color: #000000 !important;
+    font-weight: 900 !important;
+    border: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    cursor: pointer !important;
+    box-shadow: 0 10px 25px rgba(255, 214, 90, 0.35) !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-step-next {
+    padding: 0.85rem 2.2rem;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+}
+
+.btn-final-submit {
+    padding: 0.95rem 2.4rem;
+    border-radius: var(--radius-md);
+    font-size: 1.05rem;
+}
+
+.btn-proceed-step5 {
+    padding: 0.9rem 2.2rem;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+}
+
+.btn-step-next:hover,
+.btn-final-submit:hover,
+.btn-proceed-step5:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(255, 214, 90, 0.5) !important;
+    color: #000000 !important;
+}
+
+/* ── Sticky Summary Footer ── */
+.req-sticky-bar {
+    position: sticky;
+    bottom: 24px;
+    z-index: 100;
+    margin-top: 3rem;
+}
+
+.req-sticky-inner {
+    background: rgba(15, 21, 34, 0.92);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255, 214, 90, 0.35);
+    border-radius: var(--radius-xl);
+    padding: 1.1rem 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 214, 90, 0.15);
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.req-sticky-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.req-meta-chip {
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #ffffff !important;
+}
+
+.req-meta-chip strong {
+    color: var(--gold) !important;
+}
+
+[dir="rtl"] .btn-step-next i,
+[dir="rtl"] .btn-proceed-step5 i,
+[dir="rtl"] .btn-final-submit i {
+    transform: rotate(180deg);
+}
+
+@media (max-width: 768px) {
+    .request-step-card {
+        padding: 1.4rem;
+    }
+    .req-top-nav {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .floors-checkboxes-container {
+        grid-template-columns: 1fr;
+    }
+    .service-option-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .service-row-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .surface-entry-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .surface-input-wrap {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .step4-actions-bar {
+        flex-direction: column;
+    }
+    .btn-email-facture, .btn-final-submit {
+        width: 100%;
+        justify-content: center;
+    }
+    .req-sticky-inner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* ==========================================================================
+   SweetAlert2 — Dark Liquid-Glass Theme for /request/
+   ========================================================================== */
+
+.swal2-container {
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    background: rgba(4, 6, 10, 0.85) !important;
+    z-index: 10000 !important;
+}
+
+.swal2-popup {
+    background: linear-gradient(155deg, rgba(22, 28, 44, 0.96) 0%, rgba(12, 16, 26, 0.94) 100%) !important;
+    backdrop-filter: blur(28px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+    border: 1.5px solid rgba(255, 214, 90, 0.35) !important;
+    border-radius: 24px !important;
+    color: #ffffff !important;
+    padding: 2.2rem !important;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85), 0 0 35px rgba(255, 214, 90, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+.swal2-title {
+    color: #ffffff !important;
+    font-size: 1.4rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.3px !important;
+    padding: 0 0 0.75rem 0 !important;
+}
+
+.swal2-html-container {
+    color: #f1f5f9 !important;
+    font-size: 0.98rem !important;
+    line-height: 1.6 !important;
+}
+
+.swal2-icon {
+    border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+.swal2-icon.swal2-success {
+    color: #34d399 !important;
+    border-color: rgba(52, 211, 153, 0.6) !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-ring {
+    border-color: rgba(52, 211, 153, 0.3) !important;
+}
+
+.swal2-icon.swal2-success [class^='swal2-success-line'] {
+    background-color: #34d399 !important;
+}
+
+.swal2-icon.swal2-warning {
+    color: var(--gold, #FFD65A) !important;
+    border-color: rgba(255, 214, 90, 0.6) !important;
+}
+
+.swal2-icon.swal2-error {
+    color: #f87171 !important;
+    border-color: rgba(248, 113, 113, 0.6) !important;
+}
+
+.swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
+    background-color: #f87171 !important;
+}
+
+.swal2-icon.swal2-info {
+    color: #38bdf8 !important;
+    border-color: rgba(56, 189, 248, 0.6) !important;
+}
+
+.swal2-icon.swal2-question {
+    color: var(--gold, #FFD65A) !important;
+    border-color: rgba(255, 214, 90, 0.6) !important;
+}
+
+.swal2-actions {
+    margin-top: 1.75rem !important;
+    gap: 12px !important;
+}
+
+.swal2-confirm {
+    background: linear-gradient(135deg, var(--gold, #FFD65A) 0%, #eab308 100%) !important;
+    color: #000000 !important;
+    font-weight: 900 !important;
+    border: none !important;
+    border-radius: 999px !important;
+    padding: 0.75rem 2.2rem !important;
+    font-size: 0.95rem !important;
+    box-shadow: 0 8px 24px rgba(255, 214, 90, 0.35) !important;
+    transition: all 0.25s ease !important;
+}
+
+.swal2-confirm:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 30px rgba(255, 214, 90, 0.5) !important;
+}
+
+.swal2-cancel {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border-radius: 999px !important;
+    padding: 0.75rem 1.8rem !important;
+    font-size: 0.95rem !important;
+    transition: all 0.25s ease !important;
+}
+
+.swal2-cancel:hover {
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+}
+
+.swal2-close {
+    color: #ffffff !important;
+    transition: transform 0.2s ease !important;
+}
+
+.swal2-close:hover {
+    color: #ef4444 !important;
+    transform: rotate(90deg) scale(1.1) !important;
+}

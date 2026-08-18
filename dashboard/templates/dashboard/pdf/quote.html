@@ -24,7 +24,7 @@ th { background: #f8f9fa; }
 <h3>{% trans "Package" %}</h3>
 <p>{{ project.package.name }} ({{ project.package.price_multiplier }}x)</p>
 <h3>{% trans "Options" %}</h3>
-<table>{% for o in project.options.all %}<tr><td>{{ o.option.name }}</td><td>{{ o.price_at_time|floatformat:"0" }} DA</td></tr>{% endfor %}</table>
+<table>{% for o in project.options.all %}<tr><td>{{ o.name }}</td><td>{{ o.price_at_time|floatformat:"0" }} DA</td></tr>{% endfor %}</table>
 <div class="total">{% trans "Total" %}: {{ project.total|floatformat:"0" }} DA</div>
 <div class="footer"><p>{% trans "Thank you for choosing our design service!" %}</p></div>
 </body></html>

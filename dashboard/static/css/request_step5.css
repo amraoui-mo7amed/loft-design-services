@@ -1,0 +1,511 @@
+/* ==========================================================================
+   LoftDesign — Step 5: Services, Facture Calculator & Submission Stylesheet
+   Theme: Luxury Dark Liquid Glass (Progressive Scrollable Numbered Steps)
+   ========================================================================== */
+
+:root {
+    --step5-gold: #FFD65A;
+    --step5-gold-glow: rgba(255, 214, 90, 0.25);
+    --step5-bg-glass: linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+    --step5-border-glass: rgba(255, 255, 255, 0.12);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background: #0d1117 !important;
+}
+
+.step5-page {
+    background: #0d1117;
+    min-height: 100vh;
+    padding: 3.5rem 0 7rem 0;
+    color: #f2f5f8;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Ambient glow */
+.step5-page::before {
+    content: '';
+    position: fixed;
+    top: -15%;
+    left: 20%;
+    width: 650px;
+    height: 650px;
+    background: radial-gradient(circle, rgba(255, 214, 90, 0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.step5-container {
+    max-width: 1050px;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Hero Header ── */
+.step5-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+}
+
+.step5-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.4rem 1.1rem;
+    border-radius: 999px;
+    background: rgba(255, 214, 90, 0.12);
+    border: 1px solid rgba(255, 214, 90, 0.28);
+    color: var(--step5-gold);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+}
+
+.step5-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.75rem;
+}
+
+.step5-subtitle {
+    font-size: 1.05rem;
+    color: #9ca3af;
+    max-width: 620px;
+    margin: 0 auto 2rem auto;
+    line-height: 1.6;
+}
+
+/* ── Numbered Stepper Navigation Bar ── */
+.step5-num-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.step5-nav-node {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.45rem 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: #9ca3af;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.step5-nav-node.active {
+    background: rgba(255, 214, 90, 0.15);
+    border-color: var(--step5-gold);
+    color: var(--step5-gold);
+    box-shadow: 0 0 16px var(--step5-gold-glow);
+}
+
+.step5-nav-node.completed {
+    background: rgba(40, 167, 69, 0.15);
+    border-color: #28a745;
+    color: #4ade80;
+}
+
+.step5-nav-num {
+    font-weight: 900;
+}
+
+/* ── Numbered Section Card Container ── */
+.step5-section-card {
+    background: var(--step5-bg-glass);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    border: 1px solid var(--step5-border-glass);
+    border-radius: 24px;
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    animation: stepFadeSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.step5-section-card.is-locked {
+    display: none !important;
+}
+
+@keyframes stepFadeSlideIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.step5-section-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--step5-gold), transparent);
+}
+
+.step5-section-card:hover {
+    border-color: rgba(255, 214, 90, 0.3);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 214, 90, 0.08);
+}
+
+.step5-section-head {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.step5-section-num {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(255, 214, 90, 0.12);
+    border: 1px solid rgba(255, 214, 90, 0.3);
+    color: var(--step5-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 900;
+    flex-shrink: 0;
+}
+
+.step5-section-title-box h3 {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+
+.step5-section-title-box p {
+    font-size: 0.88rem;
+    color: #9ca3af;
+    margin-bottom: 0;
+}
+
+/* ── Section 01: Project Overview Banner ── */
+.step5-project-banner {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 1.5rem 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.step5-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.step5-meta-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 214, 90, 0.12);
+    color: var(--step5-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    border: 1px solid rgba(255, 214, 90, 0.25);
+}
+
+.step5-meta-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #9ca3af;
+    margin-bottom: 2px;
+}
+
+.step5-meta-val {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 0;
+}
+
+/* ── Section 02: Service Cards Grid ── */
+.services-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+}
+
+.service-select-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    user-select: none;
+}
+
+.service-select-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 214, 90, 0.4);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+}
+
+.service-select-card.selected {
+    border-color: var(--step5-gold);
+    background: linear-gradient(150deg, rgba(255, 214, 90, 0.14), rgba(255, 255, 255, 0.03));
+    box-shadow: 0 0 24px var(--step5-gold-glow);
+    transform: translateY(-4px);
+}
+
+.service-card-check {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 900;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+[dir="rtl"] .service-card-check {
+    right: auto;
+    left: 12px;
+}
+
+.service-select-card.selected .service-card-check {
+    background: var(--step5-gold);
+    border-color: var(--step5-gold);
+    color: #212121;
+}
+
+.service-card-gif-wrap {
+    width: 100%;
+    height: 140px;
+    background: #0f1217;
+    overflow: hidden;
+}
+
+.service-card-gif {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.service-select-card:hover .service-card-gif {
+    transform: scale(1.04);
+}
+
+.service-card-content {
+    padding: 1.25rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.service-card-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 0.35rem;
+}
+
+.service-pricing-model-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    background: rgba(255, 214, 90, 0.12);
+    border: 1px solid rgba(255, 214, 90, 0.25);
+    color: var(--step5-gold);
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-bottom: 0.85rem;
+}
+
+.service-card-price-box {
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.service-card-price-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #9ca3af;
+}
+
+.service-card-price-val {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: var(--step5-gold);
+}
+
+.service-card-price-val small {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+/* ── Section 03: Facture Calculator Box ── */
+.facture-table {
+    width: 100%;
+    margin-bottom: 1rem;
+    border-collapse: collapse;
+}
+
+.facture-table th {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #9ca3af;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: left;
+}
+
+[dir="rtl"] .facture-table th {
+    text-align: right;
+}
+
+.facture-table td {
+    padding: 0.85rem 1rem;
+    font-size: 0.92rem;
+    color: #f2f5f8;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.facture-table tr.total-highlight td {
+    border-top: 2px solid rgba(255, 214, 90, 0.35);
+    border-bottom: none;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--step5-gold);
+    padding-top: 1.25rem;
+}
+
+/* ── Section 04: Actions Row ── */
+.facture-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.btn-step-next {
+    background: linear-gradient(135deg, var(--step5-gold), #ffc107);
+    color: #212121;
+    padding: 0.85rem 2rem;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 800;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(255, 214, 90, 0.35);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-step-next:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(255, 214, 90, 0.5);
+    color: #000000;
+}
+
+.btn-email-facture {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    padding: 0.9rem 1.6rem;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-email-facture:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #3b82f6;
+    color: #93c5fd;
+}
+
+.btn-submit-project {
+    background: linear-gradient(135deg, var(--step5-gold), #ffc107);
+    color: #212121;
+    padding: 0.95rem 2.25rem;
+    border-radius: 14px;
+    font-size: 1.05rem;
+    font-weight: 900;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 12px 30px rgba(255, 214, 90, 0.4);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-submit-project:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 16px 40px rgba(255, 214, 90, 0.55);
+    color: #000000;
+}
+
+@media (max-width: 768px) {
+    .step5-title { font-size: 1.85rem; }
+    .step5-section-card { padding: 1.5rem; }
+    .step5-project-banner { flex-direction: column; align-items: flex-start; }
+    .services-selection-grid { grid-template-columns: 1fr; }
+    .facture-actions-row { flex-direction: column; align-items: stretch; }
+    .btn-email-facture, .btn-submit-project, .btn-step-next { width: 100%; justify-content: center; }
+}

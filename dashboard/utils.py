@@ -7,7 +7,7 @@ from django.utils.translation import gettext as _
 from django.db import IntegrityError
 from django.core.files.base import ContentFile
 from django_eventstream import send_event
-from .models import Notification, DesignPackage
+from .models import Notification, Service
 import os
 import re
 import json
@@ -22,10 +22,10 @@ logger = logging.getLogger(__name__)
 from decouple import config
 
 
-HUMAN_ERROR_MAP = {    "dashboard_projecttype_slug_key": _("A project type with this name already exists."),
+HUMAN_ERROR_MAP = {
+    "dashboard_projecttype_slug_key": _("A project type with this name already exists."),
     "dashboard_space_slug_key": _("A space with this name already exists."),
-    "dashboard_designoption_slug_key": _("A design option with this name already exists."),
-    "dashboard_stylecategory_slug_key": _("A style category with this name already exists."),
+    "dashboard_service_slug_key": _("A service with this name already exists."),
     "dashboard_projecttypespace_project_type_id_space_id_": _("This space is already linked to this project type."),
     "unique_space_project_type": _("This space already belongs to another project type."),
     "dashboard_productcategory_slug_key": _("A product category with this name already exists."),
@@ -35,37 +35,33 @@ HUMAN_ERROR_MAP = {    "dashboard_projecttype_slug_key": _("A project type with 
 }
 
 def build_packages_context():
-    """Shared package payload used by the wizard step 4 and the public pack page."""
-    packages = DesignPackage.objects.prefetch_related("package_services__option__category")
-    default_pkg = packages.filter(is_default=True).first()
+    """Shared service payload used by the wizard and order pages."""
+    services = Service.objects.all().order_by("-is_default", "service_name")
+    default_pkg = services.filter(is_default=True).first()
     package_data = []
-    for pkg in packages:
-        if default_pkg and pkg.pk == default_pkg.pk:
+    for s in services:
+        if default_pkg and s.pk == default_pkg.pk:
             continue
-        services = [
-            {"id": ps.option_id, "name": ps.option.name, "price": str(ps.price or 0)}
-            for ps in pkg.package_services.all()
-        ]
         package_data.append({
-            "pkg": pkg,
-            "total_price": sum(ps.price or 0 for ps in pkg.package_services.all()),
-            "services_json": json.dumps(services),
-            "link": pkg.link or "",
+            "pkg": s,
+            "id": s.id,
+            "name": s.service_name,
+            "total_price": s.service_price,
+            "services_json": json.dumps([{"id": s.id, "name": s.service_name, "price": str(s.service_price)}]),
+            "link": "",
         })
     default_services = []
     default_total = 0
     if default_pkg:
-        default_services = [
-            {"id": ps.option_id, "name": ps.option.name, "price": str(ps.price or 0)}
-            for ps in default_pkg.package_services.all()
-        ]
-        default_total = sum(ps.price or 0 for ps in default_pkg.package_services.all())
+        default_services = [{"id": default_pkg.id, "name": default_pkg.service_name, "price": str(default_pkg.service_price)}]
+        default_total = default_pkg.service_price
     return {
         "default_pkg": default_pkg,
         "default_total": default_total,
         "default_services_json": json.dumps(default_services),
-        "default_link": default_pkg.link if default_pkg else "",
+        "default_link": "",
         "package_data": package_data,
+        "services": services,
     }
 
 

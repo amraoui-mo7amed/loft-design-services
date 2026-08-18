@@ -1,55 +1,42 @@
 # TODOLIST
 
-## Home Page `/` `home.html`
-- [x] Let `errorList` only handle the form Submission
-- [x] in `index.css` and `index.js` restyle the errorList so it matches the design of 
-- [x] Send a notification to admin everytime a contact has been submitted
+## Gallery Page /gallery/
+- [x] Remove the `filter and search` section
+- [x] Show the spaces of buttons in the top and remove the slider
+- [x] Show the Search Bar as always visible in desktop screens
+- [x] Show the search bar in a modal in mobile phones screens
+- [x] The Gallery Image cards are not selectable 
+- [x] Remove the `.gallery-sectioon-bar`, `.viewer-footer`, `.viewer-topbar`
+- [x] The Images inside the viewer must be fullscreen and in phone screens it must be 6/19
+- [x] when a space image has been clicked the user must navigate the images inside the categories of this space 
 
-## Spaces Page /dashboard/design/project-types/<id>/
-- [x] Remove the Gallery/Edit Modal and replace them a dedicate page named `space_details.html`
-- [x] Space Details page must allow the admin to modify the space and upload a bulk images
-- [x] when uploading gallery images for a space all fields are optional except the image 
-- [x] Each gallery Image Must contain a modal so the admin can edit the tags/description
-- [ ] Remove the gallery Images fields from the Create Modal
-
-
-## Space Details Page /dashboard/design/spaces/<id>/
-- [ ] Inlcude a Gallery Preview when in a popup when images uploaded 
-- [ ] Align the buttons of `.sd-gallery-item` to right
-
-## Invitation Model
-**Context**
-Invitation feature will allow the admin to send a custom and unqiue invitation link to a user to signup
-
-- [x] Create an invitation Model in `dashboard.models`, with following fields
-    - `UUID`
-    - `email`
-    - `name` optional 
-    - `phone_number` optional
-- [x] Create the invitation views in `dashboard/views/invitations.py`
-- [x] Use a Modal for Invitation Creation
-- [x] Use Cards for the Invitation List
-- [x] Send an email template to the provided email with a link to set his password
-- [x] When A User Signup using the invitation Link set his Role To `client`
-- [x] The E-mail template must inlcude the FR/EN Text 
-- [x] Use a `atomic` to Create the invvitation and send the email
-
-
-## Dashboard Models
-
-- [x] Create 30 Item for the Models of 
-    - Project Types
-    - Packages
-    - Projects
-    - Contact
-    - Videos
-    - Inquieries
-    - Leads
-    - Portfolio
-    - Spaces
-
-**PS:**
-- if you need images for the object creaton, use areal images from google search/pixbay/unsplash
-- Never Duplicate the Image/Video
-
-- [ ] all dashboard List Views Must Be Ordered by the last created items
+## Request Page /request/
+- [x] Change the text of `.req-brand-link` to 'Studio'
+- [x] add a back button to Home Page icon-only
+- [x] Remove all the taglines 
+- [x] Show the Step Number And Title in the same row 
+- [x] Always Use a light text on dark background 
+- [x] Always use a dark text on a yellow background
+- [x] always be sure that the page elements are totally responsive 
+- [x] In Step 2 you must show the full cards, ex:
+    - RDC - 3
+    - RDC - 2
+    - RDC - 1 
+    - RDC 
+    - RDC + 1
+    - RDC + 2
+    - RDC + 3
+    - RDC + 4
+    - RDC + 5 
+- [x] In Step 2 add a simple clear buttons for a user to add a floor above or below 
+- [x] in step 2 Remove the `.floor-name-heading`, `.floor-sub-label`, 'watch video demo button'
+- [x] In Step 2, use the `dashboard/templates/components/video_player.html` with the 'watch demo video'
+- [x] In Step 3 remove the `.service-card-desc`
+- [x] In Step 3 redesign the `.service-option-card` so it becomes a row not a card whwre you show 
+    - a checkbox
+    - the service name 
+    - pricing 
+    - a play video buttons that shows the `video_player` modal -dont show the video modal unless this button is clicked-
+- [x] In Step 2 dont show the video modal when card clicked
+- [x] In Step 3 remove the service desc
+- [x] When a request is submitted send a notification to the admin

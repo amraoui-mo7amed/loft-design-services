@@ -1,19 +1,20 @@
 document.addEventListener("DOMContentLoaded", function () {
-    var floatingTotal = document.getElementById("floatingTotal");
-    var floatingBadge = document.getElementById("floatingTotalBadge");
-    var spacesSection = document.getElementById("spaces-section");
-    var continueBtn = document.getElementById("continueBtn");
-    var checkboxes = document.querySelectorAll(".space-checkbox");
-    var spaceCards = document.querySelectorAll(".space-card");
-    var currentTotal = 0;
-    var sectionInView = true;
+    const floatingTotal = document.getElementById("floatingTotal");
+    const floatingBadge = document.getElementById("floatingTotalBadge");
+    const floatingBox = document.getElementById("floatingTotalBox");
+    const spacesSection = document.getElementById("spaces-section");
+    const continueBtn = document.getElementById("continueBtn");
+    const checkboxes = document.querySelectorAll(".space-checkbox");
+    const spaceCards = document.querySelectorAll(".space-card");
+    let currentTotal = 0;
+    let sectionInView = true;
 
     function formatNumber(num) {
         return Math.round(num).toString();
     }
 
     function getSelectedSpaces() {
-        var ids = [];
+        const ids = [];
         checkboxes.forEach(function (cb) {
             if (cb.checked) ids.push(cb.value);
         });
@@ -21,25 +22,31 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updateFloatingBadge() {
-        if (!floatingBadge) return;
-        var show = sectionInView && currentTotal > 0;
-        floatingBadge.classList.toggle("is-visible", show);
+        const show = sectionInView && currentTotal > 0;
+        if (floatingBox) {
+            floatingBox.classList.toggle("is-visible", show);
+        } else if (floatingBadge) {
+            floatingBadge.classList.toggle("is-visible", show);
+        }
+        if (continueBtn && !floatingBox) {
+            continueBtn.classList.toggle("is-visible", show);
+        }
     }
 
     function updateTotal() {
-        var total = 0;
+        let total = 0;
         checkboxes.forEach(function (cb) {
             if (cb.checked) {
-                var card = cb.closest(".space-card");
+                const card = cb.closest(".space-card");
                 total += parseFloat(card.dataset.price) || 0;
             }
         });
         currentTotal = total;
-        floatingTotal.textContent = formatNumber(total);
+        if (floatingTotal) floatingTotal.textContent = formatNumber(total);
         updateFloatingBadge();
     }
 
-    if (spacesSection && floatingBadge && "IntersectionObserver" in window) {
+    if (spacesSection && "IntersectionObserver" in window) {
         new IntersectionObserver(function (entries) {
             entries.forEach(function (entry) {
                 sectionInView = entry.isIntersecting;
@@ -296,45 +303,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ── Gallery Swiper (slide effect) ──
-    var gallerySwiperEl = document.getElementById("gallerySwiper");
-    if (gallerySwiperEl && window.Swiper) {
-        var isRTL = document.documentElement.getAttribute("dir") === "rtl";
-        var gallerySlides = gallerySwiperEl.querySelectorAll(".swiper-slide").length;
-        var galleryPaginationEl = gallerySwiperEl.querySelector(".gallery-pagination") || document.querySelector(".gallery-pagination");
-        var gallerySwiper = new Swiper(gallerySwiperEl, {
-            effect: "slide",
-            direction: "horizontal",
-            loop: gallerySlides > 2,
-            grabCursor: true,
-            slidesPerView: 1.1,
-            spaceBetween: 20,
-            watchOverflow: false,
-            autoplay: {
-                delay: 3500,
-                disableOnInteraction: false,
-                pauseOnMouseEnter: true,
-            },
-            pagination: {
-                el: galleryPaginationEl,
-                clickable: true,
-                dynamicBullets: false,
-            },
-            rtl: isRTL,
-            speed: 600,
-            navigation: {
-                prevEl: ".gallery-prev",
-                nextEl: ".gallery-next",
-            },
-            breakpoints: {
-                320: { slidesPerView: 1.1, spaceBetween: 14 },
-                576: { slidesPerView: 2, spaceBetween: 16 },
-                768: { slidesPerView: 2.5, spaceBetween: 18 },
-                992: { slidesPerView: 3.2, spaceBetween: 20 },
-                1200: { slidesPerView: 4, spaceBetween: 24 },
-            },
-        });
-    }
+
 
     // ── Videos Swiper (slide effect) ──
     var videosSwiperEl = document.getElementById("videosSwiper");

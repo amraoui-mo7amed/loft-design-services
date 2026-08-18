@@ -5,10 +5,10 @@ from .models import (
     Notification,
     ProjectType,
     Space,
-    SpaceImage,
+    SpaceCategory,
+    SpaceCategoryImages,
     ProjectTypeSpace,
-    DesignPackage,
-    DesignOption,
+    Service,
     DesignRequest,
     DesignRequestFloor,
     DesignRequestSpace,
@@ -63,10 +63,17 @@ class SpaceAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ["name"]}
 
 
-@admin.register(SpaceImage)
-class SpaceImageAdmin(admin.ModelAdmin):
-    list_display = ["space", "image", "reference", "tags"]
+@admin.register(SpaceCategory)
+class SpaceCategoryAdmin(admin.ModelAdmin):
+    list_display = ["category_name", "space", "created_at"]
     list_filter = ["space"]
+    search_fields = ["category_name", "space__name"]
+
+
+@admin.register(SpaceCategoryImages)
+class SpaceCategoryImagesAdmin(admin.ModelAdmin):
+    list_display = ["category", "image", "is_default", "reference", "tags"]
+    list_filter = ["category__space", "is_default"]
     search_fields = ["description", "tags", "reference"]
 
 
@@ -76,18 +83,11 @@ class ProjectTypeSpaceAdmin(admin.ModelAdmin):
     list_filter = ["project_type"]
 
 
-@admin.register(DesignPackage)
-class DesignPackageAdmin(admin.ModelAdmin):
-    list_display = ["name"]
-    list_filter = []
-
-
-@admin.register(DesignOption)
-class DesignOptionAdmin(admin.ModelAdmin):
-    list_display = ["name", "slug", "category", "active"]
-    list_filter = ["category", "active"]
-    search_fields = ["name"]
-    prepopulated_fields = {"slug": ["name"]}
+@admin.register(Service)
+class ServiceAdmin(admin.ModelAdmin):
+    list_display = ["service_name", "service_price", "is_default", "created_at"]
+    list_filter = ["is_default"]
+    search_fields = ["service_name"]
 
 
 @admin.register(DesignRequest)
@@ -110,7 +110,7 @@ class DesignRequestSpaceAdmin(admin.ModelAdmin):
 
 @admin.register(DesignRequestOption)
 class DesignRequestOptionAdmin(admin.ModelAdmin):
-    list_display = ["design_request", "option", "price_at_time"]
+    list_display = ["design_request", "service", "price_at_time"]
 
 
 @admin.register(DesignRequestSpaceImage)

@@ -119,13 +119,16 @@
 
       if (triggered) return;
 
-      // 2. Fallback to generic data-video-url trigger
-      var trigger = e.target.closest("[data-video-url]");
+      // 2. Fallback to explicit video trigger elements with data-video-url
+      var trigger = e.target.closest("button[data-video-url], a[data-video-url], .btn-service-video-play, .pkg-video-btn, [data-video-trigger]");
       if (!trigger) return;
+
+      var url = trigger.getAttribute("data-video-url") || "";
+      if (!url) return;
+
       e.preventDefault();
       e.stopPropagation();
 
-      var url = trigger.getAttribute("data-video-url") || "";
       var title = trigger.getAttribute("data-video-title") || "Video Preview";
 
       var card = trigger.closest(".pkg-card");

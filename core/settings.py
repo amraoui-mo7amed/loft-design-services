@@ -169,13 +169,13 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 SITE_URL = os.getenv("SITE_URL", "http://localhost:8000")
 
 # EMAIL Settings
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = config("EMAIL_HOST", default=None)
+EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
 EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
-EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False, cast=bool)
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default=None)
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default=None)
-DEFAULT_FROM_EMAIL = config("EMAIL_HOST_USER", default="no-reply@example.com")
+DEFAULT_FROM_EMAIL = config("EMAIL_HOST_USER", default="no-reply@loftdesign.com")
 
 # EventStream Configuration
 EVENTSTREAM_CHANNELMANAGER_CLASS = "dashboard.channelmanager.NotificationChannelManager"
@@ -188,4 +188,5 @@ EVENTSTREAM_REDIS = {
     "db": 0,
 }
 
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="").split(",")
+if APP_ENV == "production":
+    CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="").split(",")

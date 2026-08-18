@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
-from ..models import ProjectType, Space, DesignPackage, DesignOption
+from ..models import ProjectType, Space, Service
 from ..price_engine import calculate_full_price
 
 
@@ -19,7 +19,7 @@ def api_project_types(request):
 
 def api_spaces(request):
     project_type_slug = request.GET.get("project_type")
-    qs = Space.objects.all().prefetch_related("gallery_images")
+    qs = Space.objects.all().prefetch_related("categories__images")
     if project_type_slug:
         pt = get_object_or_404(ProjectType, slug=project_type_slug)
         space_ids = pt.default_spaces.values_list("space_id", flat=True)
@@ -37,20 +37,28 @@ def api_spaces(request):
 
 
 def api_packages(request):
-    qs = DesignPackage.objects.values("id", "name", "price_multiplier")
-    return JsonResponse({"data": list(qs)})
+    qs = Service.objects.values("id", "service_name", "service_price", "is_default")
+    data = [
+        {
+            "id": s["id"],
+            "name": s["service_name"],
+            "price": s["service_price"],
+            "is_default": s["is_default"],
+        }
+        for s in qs
+    ]
+    return JsonResponse({"data": data})
 
 
 def api_options(request):
-    qs = DesignOption.objects.filter(active=True).values("id", "name", "slug", "description", "category")
-    return JsonResponse({"data": list(qs)})
+    return JsonResponse({"data": []})
 
 
 def api_calculate_price(request):
     space_ids = request.GET.getlist("space_ids[]")
     package_id = request.GET.get("package_id")
     option_ids = request.GET.getlist("option_ids[]")
-    package = DesignPackage.objects.filter(id=package_id).first() if package_id else None
+    package = Service.objects.filter(id=package_id).first() if package_id else None
     result = calculate_full_price(
         space_ids=[int(x) for x in space_ids if x],
         package=package,

@@ -5,10 +5,10 @@
 .video-widget-overlay {
   position: fixed;
   inset: 0;
-  z-index: 2100; /* Overlays the navbar/headers */
-  background: rgba(8, 10, 13, 0.72);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  z-index: 9999; /* Overlays all navigation and wizard elements */
+  background: rgba(8, 10, 13, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   align-items: center;
   justify-content: center;

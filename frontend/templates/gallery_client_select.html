@@ -1,0 +1,399 @@
+{% extends "index.html" %}
+{% load i18n %}
+{% load static %}
+
+{% get_current_language_bidi as IS_RTL %}
+
+{% block title %}{% trans "Select Moodboard & Inspirations" %} — {{ project.project_name }}{% endblock title %}
+
+{% block body_class %}landing-page client-gallery-page{% endblock body_class %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}?v={{ ASSET_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/gallery.css' %}?v={{ ASSET_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/inspiration_lightbox.css' %}?v={{ ASSET_VERSION }}">
+<style>
+    .client-select-hero {
+        background: linear-gradient(135deg, rgba(22, 28, 42, 0.95), rgba(11, 15, 25, 0.98));
+        border: 1.5px solid rgba(255, 214, 90, 0.35);
+        border-radius: 20px;
+        padding: 32px 28px;
+        margin-bottom: 30px;
+        box-shadow: 0 16px 45px rgba(0,0,0,0.5);
+    }
+
+    .space-filter-pills {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 12px;
+        scrollbar-width: thin;
+    }
+
+    .space-pill-btn {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #e2e8f0;
+        padding: 8px 18px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+
+    .space-pill-btn:hover,
+    .space-pill-btn.active {
+        background: #FFD65A;
+        border-color: #FFD65A;
+        color: #000000;
+        box-shadow: 0 4px 14px rgba(255, 214, 90, 0.35);
+    }
+
+    .gallery-select-card {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #161c28;
+        border: 2px solid rgba(255, 255, 255, 0.08);
+        transition: all 0.25s ease;
+        cursor: pointer;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gallery-select-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255, 214, 90, 0.5);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .gallery-select-card.selected {
+        border-color: #FFD65A !important;
+        box-shadow: 0 0 0 3px rgba(255, 214, 90, 0.4), 0 12px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .gallery-select-card .card-img-wrap {
+        position: relative;
+        aspect-ratio: 4/3;
+        overflow: hidden;
+        background: #0d111a;
+    }
+
+    .gallery-select-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .gallery-select-card:hover img {
+        transform: scale(1.05);
+    }
+
+    .select-check-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid #ffffff;
+        color: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        z-index: 10;
+    }
+
+    .gallery-select-card.selected .select-check-badge {
+        background: #FFD65A;
+        border-color: #FFD65A;
+        color: #000000;
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(255, 214, 90, 0.5);
+    }
+
+    .btn-preview-lightbox {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        opacity: 0;
+        transition: all 0.2s ease;
+        z-index: 10;
+    }
+
+    .gallery-select-card:hover .btn-preview-lightbox {
+        opacity: 1;
+    }
+
+    .btn-preview-lightbox:hover {
+        background: #ffffff;
+        color: #000000;
+    }
+
+    /* Sticky Bottom Submission Bar */
+    .sticky-submit-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(15, 20, 32, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1.5px solid rgba(255, 214, 90, 0.4);
+        padding: 16px 24px;
+        z-index: 1000;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.7);
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container py-5" style="margin-bottom: 100px;">
+
+    <!-- Client Selection Hero -->
+    <div class="client-select-hero text-light">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+            <div>
+                <span class="badge bg-warning text-dark font-monospace fw-bold px-3 py-1 mb-2">
+                    {{ project.project_number }}
+                </span>
+                <h2 class="fw-bold text-white mb-1">{{ project.project_name }}</h2>
+                <div class="text-white-50 small">
+                    <i class="fas fa-home text-warning me-1"></i> {{ project.project_type.name|default:_("Architectural Project") }}
+                    <span class="mx-2">•</span>
+                    <i class="fas fa-ruler-combined text-warning me-1"></i> {{ project.total_surface }} m²
+                </div>
+            </div>
+            <div>
+                <span class="badge bg-dark border border-warning text-warning px-3 py-2 fs-6">
+                    <i class="fas fa-magic me-2"></i>{% trans "Moodboard Selection" %}
+                </span>
+            </div>
+        </div>
+
+        <p class="text-white-50 mb-0" style="max-width: 800px;">
+            {% trans "Please browse our curated architectural styles and select the designs that best match your aspirations. Your selections will directly guide our design team in creating your 3D concept." %}
+        </p>
+    </div>
+
+    <!-- Space Filter Tabs -->
+    <div class="space-filter-pills mb-4">
+        <button type="button" class="space-pill-btn active" data-space-id="all">
+            <i class="fas fa-th-large me-1"></i> {% trans "All Spaces & Styles" %} ({{ images|length }})
+        </button>
+        {% for sp in spaces %}
+        <button type="button" class="space-pill-btn" data-space-id="{{ sp.pk }}">
+            {{ sp.name }}
+        </button>
+        {% endfor %}
+    </div>
+
+    <!-- Images Grid -->
+    <div class="row g-4" id="gallerySelectGrid">
+        {% for img in images %}
+        <div class="col-sm-6 col-md-4 col-lg-3 gallery-item-col" data-space-id="{{ img.category.space_id }}">
+            <div class="gallery-select-card" data-image-id="{{ img.pk }}">
+                <div class="card-img-wrap">
+                    <img src="{{ img.image.url }}" alt="{{ img.category.category_name }}" loading="lazy">
+                    <div class="select-check-badge">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <button type="button" class="btn-preview-lightbox" data-lightbox-src="{{ img.image.url }}" data-lightbox-title="{{ img.category.space.name }} - {{ img.category.category_name }}" title="{% trans 'Preview' %}">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                </div>
+                <div class="p-3 d-flex flex-column justify-content-between flex-grow-1">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="badge bg-secondary bg-opacity-25 text-warning font-monospace" style="font-size: 0.7rem;">
+                                {{ img.category.space.name }}
+                            </span>
+                            {% if img.is_default %}
+                            <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">{% trans "Featured" %}</span>
+                            {% endif %}
+                        </div>
+                        <h6 class="text-white fw-bold mb-1 fs-6">{{ img.category.category_name }}</h6>
+                        {% if img.description %}
+                        <p class="text-white-50 small mb-0 line-clamp-2" style="font-size: 0.75rem;">{{ img.description }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5 text-muted">
+            <i class="fas fa-images fa-3x mb-3 text-warning opacity-50"></i>
+            <h5>{% trans "No inspiration images found for this project type." %}</h5>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- Sticky Bottom Bar -->
+<div class="sticky-submit-bar">
+    <div class="container d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="badge bg-warning text-dark fs-6 px-3 py-2 fw-bold" id="selectionCountBadge">
+                0 {% trans "Selected" %}
+            </div>
+            <span class="text-white-50 small d-none d-md-inline">
+                {% trans "Select one or more inspirations, then confirm your choice." %}
+            </span>
+        </div>
+        <button type="button" class="btn btn-warning rounded-pill px-4 py-2 fw-bold shadow" id="btnSubmitMoodboard" disabled>
+            <i class="fas fa-paper-plane me-2"></i>{% trans "Submit Moodboard Selection" %}
+        </button>
+    </div>
+</div>
+
+{% include "components/inspiration_lightbox.html" %}
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/inspiration_lightbox.js' %}?v={{ ASSET_VERSION }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const selectedImageIds = new Set();
+    const countBadge = document.getElementById("selectionCountBadge");
+    const btnSubmit = document.getElementById("btnSubmitMoodboard");
+    const cards = document.querySelectorAll(".gallery-select-card");
+    const filterPills = document.querySelectorAll(".space-pill-btn");
+    const cols = document.querySelectorAll(".gallery-item-col");
+
+    // Space filtering
+    filterPills.forEach(pill => {
+        pill.addEventListener("click", function () {
+            filterPills.forEach(p => p.classList.remove("active"));
+            this.classList.add("active");
+            const spaceId = this.dataset.spaceId;
+
+            cols.forEach(col => {
+                if (spaceId === "all" || col.dataset.spaceId === spaceId) {
+                    col.style.display = "";
+                } else {
+                    col.style.display = "none";
+                }
+            });
+        });
+    });
+
+    // Card selection toggle
+    cards.forEach(card => {
+        card.addEventListener("click", function (e) {
+            // Prevent trigger if preview button was clicked
+            if (e.target.closest(".btn-preview-lightbox")) return;
+
+            const imgId = parseInt(this.dataset.imageId, 10);
+            if (selectedImageIds.has(imgId)) {
+                selectedImageIds.delete(imgId);
+                this.classList.remove("selected");
+            } else {
+                selectedImageIds.add(imgId);
+                this.classList.add("selected");
+            }
+
+            updateSelectionBar();
+        });
+    });
+
+    function updateSelectionBar() {
+        const count = selectedImageIds.size;
+        countBadge.textContent = `${count} {% trans "Selected" %}`;
+        if (count > 0) {
+            btnSubmit.disabled = false;
+            btnSubmit.classList.add("btn-warning");
+            btnSubmit.classList.remove("btn-secondary");
+        } else {
+            btnSubmit.disabled = true;
+            btnSubmit.classList.remove("btn-warning");
+            btnSubmit.classList.add("btn-secondary");
+        }
+    }
+
+    // Submit selection
+    btnSubmit.addEventListener("click", async function () {
+        if (selectedImageIds.size === 0) return;
+
+        const confirm = await Swal.fire({
+            title: "{% trans 'Submit your inspiration moodboard?' %}",
+            text: `{% trans 'You have selected' %} ${selectedImageIds.size} {% trans 'style(s) for your project. This will be sent to our architects.' %}`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "{% trans 'Yes, Submit Moodboard' %}",
+            cancelButtonText: "{% trans 'Continue browsing' %}",
+            confirmButtonColor: "#FFD65A",
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        const origHtml = btnSubmit.innerHTML;
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>{% trans 'Submitting...' %}`;
+
+        const csrfToken = document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+
+        try {
+            const res = await fetch("{% url 'frontend:gallery_client_selection_submit' invitation.token %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken,
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                body: JSON.stringify({
+                    image_ids: Array.from(selectedImageIds)
+                }),
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                await Swal.fire({
+                    icon: "success",
+                    title: "{% trans 'Moodboard Submitted!' %}",
+                    text: data.message,
+                    confirmButtonColor: "#FFD65A",
+                });
+                window.location.reload();
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "{% trans 'Error' %}",
+                    text: data.errors ? data.errors[0] : "{% trans 'Failed to submit selection.' %}",
+                    confirmButtonColor: "#dc3545",
+                });
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = origHtml;
+            }
+        } catch (err) {
+            console.error(err);
+            Swal.fire({
+                icon: "error",
+                title: "{% trans 'Network Error' %}",
+                text: "{% trans 'Could not reach server. Please try again.' %}",
+                confirmButtonColor: "#dc3545",
+            });
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = origHtml;
+        }
+    });
+});
+</script>
+{% endblock extra_js %}

@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.core.validators import validate_email, ValidationError
 from django.utils.translation import gettext as _
 from django.utils.html import escape
-from dashboard.models import Portfolio, ProjectType, Space, DesignPackage, Contact, Lead, Video
+from dashboard.models import Portfolio, ProjectType, Space, Service, Contact, Lead, Video
 from dashboard.utils import build_packages_context
 
 
@@ -15,7 +15,7 @@ def home_view(request):
         spaces = (
             Space.objects.filter(project_types__project_type=featured, project_types__show_on_home=True)
             .distinct()
-            .prefetch_related("gallery_images")
+            .prefetch_related("categories__images")
             .order_by("name")
         )
     else:
@@ -29,65 +29,48 @@ def home_view(request):
         "thumbnail": space.thumbnail.url if space.thumbnail else None,
     } for space in spaces]
 
-    packages = DesignPackage.objects.prefetch_related("package_services__option__category")
+    services = Service.objects.all().order_by("-is_default", "service_name")
     package_data = []
-    for p in packages:
-        all_services = list(p.package_services.all())
+    for s in services:
         package_data.append({
-            "id": p.id,
-            "name": p.name,
-            "link": p.link or "",
-            "delivery_days": p.total_delivery_days,
-            "services_count": len(all_services),
-            "total_price": p.total_price,
+            "id": s.id,
+            "name": s.service_name,
+            "link": "",
+            "delivery_days": 7,
+            "services_count": 1,
+            "total_price": s.service_price,
             "services": [
                 {
-                    "id": ps.option_id,
-                    "name": ps.option.name,
-                    "price": str(ps.price),
+                    "id": s.id,
+                    "name": s.service_name,
+                    "price": str(s.service_price),
                 }
-                for ps in all_services[:6]
             ],
-            "services_more": max(0, len(all_services) - 6),
+            "services_more": 0,
         })
-
-    gallery_spaces = (
-        Space.objects.prefetch_related("gallery_images")
-        .order_by("name")
-    )
-    gallery_spaces_data = []
-    for sp in gallery_spaces:
-        thumb = sp.thumbnail
-        if thumb:
-            gallery_spaces_data.append({
-                "id": sp.id,
-                "name": sp.name,
-                "thumbnail_url": thumb.url,
-                "images_count": len(sp.gallery_images.all()),
-            })
 
     return render(request, "home.html", {
         "spaces": spaces_data,
         "packages": package_data,
         "projects": Portfolio.objects.prefetch_related("gallery_images").order_by("-created_at")[:12],
         "videos": Video.objects.all(),
-        "gallery_spaces": gallery_spaces_data,
     })
 
 
 def submit_contact(request):
     """Create a Contact message (and optionally a Lead) from the homepage form."""
     if request.method != "POST":
-        return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
+        return JsonResponse({"success": False, "errors": [_("Method not allowed.")]})
 
-    name = request.POST.get("name", "").strip()
+    first_name = request.POST.get("first_name", "").strip()
+    last_name = request.POST.get("last_name", "").strip()
+    full_name = f"{first_name} {last_name}".strip() or request.POST.get("name", "").strip()
     email = request.POST.get("email", "").strip()
     phone = request.POST.get("phone", "").strip()
     message = request.POST.get("message", "").strip()
-    join_lead = request.POST.get("join_lead") in ("1", "on", "true")
 
     errors = []
-    if not name:
+    if not full_name:
         errors.append(_("Name is required."))
     if not email:
         errors.append(_("Email is required."))
@@ -97,52 +80,37 @@ def submit_contact(request):
         except ValidationError:
             errors.append(_("Please provide a valid email address."))
     if not message:
-        errors.append(_("Message is required."))
+        errors.append(_("Message cannot be empty."))
 
     if errors:
         return JsonResponse({"success": False, "errors": errors})
 
-    try:
-        contact = Contact.objects.create(
-            name=name,
-            email=email,
-            phone=phone,
-            message=message,
-        )
-        if join_lead:
-            Lead.objects.create(name=name, email=email)
+    contact = Contact.objects.create(
+        name=full_name,
+        email=email,
+        phone=phone,
+        message=message,
+    )
 
-        try:
-            from django.contrib.auth.models import User
-            from django.urls import reverse
-            from dashboard.utils import notify_user
-            from django.db.models import Q
-            contact_url = reverse("dash:contact_detail", kwargs={"pk": contact.pk})
-            admins = User.objects.filter(Q(is_superuser=True) | Q(profile__role="admin")).distinct()
-            for admin_user in admins:
-                notify_user(
-                    user=admin_user,
-                    title=_("New Contact Message: %(name)s") % {"name": name},
-                    message=message[:120],
-                    notification_type="info",
-                    link=contact_url,
-                )
-        except Exception:
-            pass
+    lead, lead_created = Lead.objects.get_or_create(
+        email=email,
+        defaults={
+            "name": full_name,
+        },
+    )
 
-        return JsonResponse({
-            "success": True,
-            "message": _("Thank you! Your message has been sent successfully."),
-            "contact_id": contact.pk,
-        })
-    except Exception as e:
-        return JsonResponse({"success": False, "errors": [escape(str(e))]})
+    return JsonResponse({
+        "success": True,
+        "message": _("Thank you for reaching out! We will get back to you shortly."),
+        "contact_id": contact.id,
+    })
 
 
 def order_view(request):
-    space_ids = request.GET.get("spaces", "")
     selected = []
     total = 0
+
+    space_ids = request.GET.get("spaces", "")
     if space_ids:
         ids = [s for s in space_ids.split(",") if s.isdigit()]
         selected = Space.objects.filter(id__in=ids)
@@ -152,13 +120,9 @@ def order_view(request):
     package = None
     pkg_id = request.GET.get("pkg", "")
     if pkg_id.isdigit():
-        package = (
-            DesignPackage.objects.filter(id=int(pkg_id))
-            .prefetch_related("package_services__option__category")
-            .first()
-        )
+        package = Service.objects.filter(id=int(pkg_id)).first()
         if package:
-            total += float(package.total_price)
+            total += float(package.service_price)
 
     total = round(total)
 
@@ -167,6 +131,9 @@ def order_view(request):
         "total": total,
         "package": package,
     })
+
+
+inquiry_view = order_view
 
 
 def pack_select_view(request):
