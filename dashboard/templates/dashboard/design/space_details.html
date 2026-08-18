@@ -204,6 +204,16 @@
                                         </div>
                                         <div class="sd-photo-info">
                                             <div class="sd-photo-meta mb-3">
+                                                {% if img.reference %}
+                                                <div class="sd-ref-pill text-truncate mb-1" id="ref-display-{{ img.pk }}" title="{{ img.reference }}">
+                                                    <i class="fas fa-hashtag me-1 text-info"></i><span class="font-monospace">{{ img.reference }}</span>
+                                                </div>
+                                                {% else %}
+                                                <div class="sd-ref-pill text-muted fst-italic mb-1" id="ref-display-{{ img.pk }}" style="color: #64748b !important; background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08);">
+                                                    <i class="fas fa-hashtag me-1"></i>{% trans "No reference" %}
+                                                </div>
+                                                {% endif %}
+
                                                 {% if img.tags %}
                                                 <div class="sd-tags-pill text-truncate mb-1" id="tags-display-{{ img.pk }}" title="{{ img.tags }}">
                                                     <i class="fas fa-tags me-1 text-warning"></i>{{ img.tags }}
@@ -245,6 +255,7 @@
                                                 <div class="d-flex align-items-center gap-1">
                                                     <button type="button" class="btn-pill-action btn-pill-edit open-img-modal-btn"
                                                             data-img-id="{{ img.pk }}"
+                                                            data-reference="{{ img.reference|default:'' }}"
                                                             data-tags="{{ img.tags|default:'' }}"
                                                             data-description="{{ img.description|default:'' }}"
                                                             data-update-url="{% url 'dash:space_category_image_update' space.pk img.pk %}"
@@ -383,6 +394,12 @@
                     
                     <div class="text-center mb-3">
                         <img id="modalImgPreview" src="" alt="Preview" class="img-fluid rounded-3 shadow" style="max-height: 180px; object-fit: cover;">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light fw-semibold small">{% trans "Reference (Code, Item #, or Source URL)" %}</label>
+                        <input type="text" name="reference" id="modalImgRef" class="form-control sd-input font-monospace" placeholder="{% trans 'e.g. REF-LIV-001, PIN-409, or https://...' %}">
+                        <small class="text-muted">{% trans "Custom identifier or source reference for this inspiration photo." %}</small>
                     </div>
 
                     <div class="mb-3">

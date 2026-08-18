@@ -155,12 +155,6 @@ class SpaceCategoryImages(models.Model):
             except Exception:
                 pass
         super().save(*args, **kwargs)
-        if self.image and not self.reference:
-            try:
-                self.reference = self.image.path
-                super().save(update_fields=["reference"])
-            except Exception:
-                pass
 
     @staticmethod
     def compute_hash(uploaded_file):

@@ -74,7 +74,8 @@ class SpaceCategoryAdmin(admin.ModelAdmin):
 class SpaceCategoryImagesAdmin(admin.ModelAdmin):
     list_display = ["category", "image", "is_default", "reference", "tags"]
     list_filter = ["category__space", "is_default"]
-    search_fields = ["description", "tags", "reference"]
+    list_editable = ["reference"]
+    search_fields = ["description", "tags", "reference", "category__category_name"]
 
 
 @admin.register(ProjectTypeSpace)

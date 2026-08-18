@@ -4,4 +4,3 @@
 *.sqlite3
 *.pyc
 media/*
-*/migrations

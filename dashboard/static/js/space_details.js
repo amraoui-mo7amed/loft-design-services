@@ -466,12 +466,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const editForm = document.getElementById("imageEditForm");
     const modalImgPreview = document.getElementById("modalImgPreview");
+    const modalImgRef = document.getElementById("modalImgRef");
     const modalImgTags = document.getElementById("modalImgTags");
     const modalImgDesc = document.getElementById("modalImgDesc");
 
     document.querySelectorAll(".open-img-modal-btn").forEach(btn => {
         btn.addEventListener("click", function () {
             const imgId = this.dataset.imgId;
+            const ref = this.dataset.reference || "";
             const tags = this.dataset.tags || "";
             const desc = this.dataset.description || "";
             const updateUrl = this.dataset.updateUrl;
@@ -481,6 +483,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 editForm.action = updateUrl;
                 editForm.dataset.imgId = imgId;
                 if (modalImgPreview) modalImgPreview.src = imgUrl;
+                if (modalImgRef) modalImgRef.value = ref;
                 if (modalImgTags) modalImgTags.value = tags;
                 if (modalImgDesc) modalImgDesc.value = desc;
 
@@ -517,9 +520,24 @@ document.addEventListener("DOMContentLoaded", function () {
                 const data = await response.json();
 
                 if (data.success) {
+                    const refEl = document.getElementById(`ref-display-${imgId}`);
                     const tagsEl = document.getElementById(`tags-display-${imgId}`);
                     const descEl = document.getElementById(`desc-display-${imgId}`);
                     const editBtn = document.querySelector(`.open-img-modal-btn[data-img-id="${imgId}"]`);
+
+                    if (refEl) {
+                        if (data.reference) {
+                            refEl.innerHTML = `<i class="fas fa-hashtag me-1 text-info"></i><span class="font-monospace">${data.reference}</span>`;
+                            refEl.className = "sd-ref-pill text-truncate mb-1";
+                            refEl.style.cssText = "";
+                            refEl.title = data.reference;
+                        } else {
+                            refEl.innerHTML = `<i class="fas fa-hashtag me-1"></i>No reference`;
+                            refEl.className = "sd-ref-pill text-muted fst-italic mb-1";
+                            refEl.style.cssText = "color: #64748b !important; background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08);";
+                            refEl.title = "";
+                        }
+                    }
 
                     if (tagsEl) {
                         tagsEl.innerHTML = data.tags ? `<i class="fas fa-tags me-1 text-warning"></i>${data.tags}` : `<i class="fas fa-tags me-1"></i>No tags`;
@@ -534,6 +552,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
 
                     if (editBtn) {
+                        editBtn.dataset.reference = data.reference || "";
                         editBtn.dataset.tags = data.tags || "";
                         editBtn.dataset.description = data.description || "";
                     }

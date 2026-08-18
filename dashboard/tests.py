@@ -89,6 +89,7 @@ class SpaceDetailAndGalleryTests(TestCase):
         response = self.client.post(
             reverse("dash:space_image_update", args=[self.space.pk, self.img2.pk]),
             {
+                "reference": "REF-LIV-990",
                 "tags": "contemporary, bright",
                 "description": "Floor-to-ceiling glass panoramic view",
             },
@@ -97,7 +98,9 @@ class SpaceDetailAndGalleryTests(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertTrue(data["success"])
+        self.assertEqual(data["reference"], "REF-LIV-990")
         self.img2.refresh_from_db()
+        self.assertEqual(self.img2.reference, "REF-LIV-990")
         self.assertEqual(self.img2.tags, "contemporary, bright")
         self.assertEqual(self.img2.description, "Floor-to-ceiling glass panoramic view")
 

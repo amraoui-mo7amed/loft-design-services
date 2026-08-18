@@ -301,13 +301,15 @@ def space_category_image_update(request, pk, img_pk):
     if request.method == "POST":
         img.tags = request.POST.get("tags", "").strip()
         img.description = request.POST.get("description", "").strip()
+        img.reference = request.POST.get("reference", "").strip()
         try:
-            img.save(update_fields=["tags", "description"])
+            img.save(update_fields=["tags", "description", "reference"])
             return JsonResponse({
                 "success": True,
                 "message": _("Image details updated successfully."),
                 "tags": img.tags,
                 "description": img.description,
+                "reference": img.reference,
             })
         except Exception as e:
             return JsonResponse({"success": False, "errors": humanize_error(e)})
