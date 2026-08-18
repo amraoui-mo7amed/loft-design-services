@@ -8,6 +8,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const submitBar = document.getElementById("clientSubmitBar");
     const notesInput = document.getElementById("clientNotesInput");
 
+    // Safe Swal wrapper
+    const hasSwal = typeof Swal !== "undefined";
+
     // ==========================================
     // Selection Management
     // ==========================================
@@ -186,51 +189,59 @@ document.addEventListener("DOMContentLoaded", function () {
             e.preventDefault();
 
             if (selectedImageIds.size === 0) {
-                Swal.fire({
-                    icon: "info",
-                    title: submitBtn.dataset.noSelectionTitle || "Please Select Inspirations",
-                    text: submitBtn.dataset.noSelectionText || "Choose at least one inspiration photo to build your moodboard.",
-                    confirmButtonColor: "#FFD65A",
-                });
+                if (typeof Swal !== "undefined") {
+                    Swal.fire({
+                        icon: "info",
+                        title: submitBtn.dataset.noSelectionTitle || "Please Select Inspirations",
+                        text: submitBtn.dataset.noSelectionText || "Choose at least one inspiration photo to build your moodboard.",
+                        confirmButtonColor: "#FFD65A",
+                    });
+                } else {
+                    alert(submitBtn.dataset.noSelectionText || "Please choose at least one inspiration photo to build your moodboard.");
+                }
                 return;
             }
 
             const submitUrl = submitBtn.dataset.submitUrl;
             const csrfToken = submitBtn.dataset.csrf || "";
             const count = selectedImageIds.size;
+            let swalNotes = "";
 
-            const confirmResult = await Swal.fire({
-                title: submitBtn.dataset.confirmTitle || "Confirm Moodboard Selection",
-                html: `
-                    <div class="text-start">
-                        <p class="mb-3 text-light">${count} ${submitBtn.dataset.confirmDesc || "inspiration photos selected for your project design team."}</p>
-                        <label class="form-label text-warning small fw-bold text-uppercase mb-1">
-                            ${submitBtn.dataset.notesLabel || "Optional Notes / Special Preferences"}
-                        </label>
-                        <textarea id="swalNotesInput" class="form-control" rows="3" placeholder="${submitBtn.dataset.notesPlaceholder || "e.g. We love the natural wood textures and ambient ceiling lights..."}"></textarea>
-                    </div>
-                `,
-                icon: "question",
-                showCancelButton: true,
-                confirmButtonText: `<i class="fas fa-check-circle me-1"></i> ${submitBtn.dataset.btnConfirm || "Submit Moodboard"}`,
-                cancelButtonText: submitBtn.dataset.btnCancel || "Review Selection",
-                confirmButtonColor: "#FFD65A",
-                cancelButtonColor: "#475569",
-                customClass: {
-                    popup: "swal-glass",
-                    confirmButton: "text-dark fw-bold",
-                },
-                didOpen: () => {
-                    const swalInput = document.getElementById("swalNotesInput");
-                    if (swalInput && notesInput && notesInput.value) {
-                        swalInput.value = notesInput.value;
+            if (typeof Swal !== "undefined") {
+                const confirmResult = await Swal.fire({
+                    title: submitBtn.dataset.confirmTitle || "Confirm Moodboard Selection",
+                    html: `
+                        <div class="text-start">
+                            <p class="mb-3 text-light">${count} ${submitBtn.dataset.confirmDesc || "inspiration photos selected for your project design team."}</p>
+                            <label class="form-label text-warning small fw-bold text-uppercase mb-1">
+                                ${submitBtn.dataset.notesLabel || "Optional Notes / Special Preferences"}
+                            </label>
+                            <textarea id="swalNotesInput" class="form-control" rows="3" placeholder="${submitBtn.dataset.notesPlaceholder || "e.g. We love the natural wood textures and ambient ceiling lights..."}"></textarea>
+                        </div>
+                    `,
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonText: `<i class="fas fa-check-circle me-1"></i> ${submitBtn.dataset.btnConfirm || "Submit Moodboard"}`,
+                    cancelButtonText: submitBtn.dataset.btnCancel || "Review Selection",
+                    confirmButtonColor: "#FFD65A",
+                    cancelButtonColor: "#475569",
+                    customClass: {
+                        popup: "swal-glass",
+                        confirmButton: "text-dark fw-bold",
+                    },
+                    didOpen: () => {
+                        const swalInput = document.getElementById("swalNotesInput");
+                        if (swalInput && notesInput && notesInput.value) {
+                            swalInput.value = notesInput.value;
+                        }
                     }
-                }
-            });
+                });
 
-            if (!confirmResult.isConfirmed) return;
-
-            const swalNotes = document.getElementById("swalNotesInput")?.value || "";
+                if (!confirmResult.isConfirmed) return;
+                swalNotes = document.getElementById("swalNotesInput")?.value || "";
+            } else {
+                if (!confirm(`Submit ${count} selected inspiration(s)?`)) return;
+            }
 
             const originalHtml = submitBtn.innerHTML;
             submitBtn.disabled = true;
@@ -253,16 +264,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 const data = await response.json();
 
                 if (data.success) {
-                    await Swal.fire({
-                        icon: "success",
-                        title: data.title || "Moodboard Submitted!",
-                        text: data.message || "Your style preferences have been recorded.",
-                        confirmButtonText: "View Confirmed Moodboard",
-                        confirmButtonColor: "#FFD65A",
-                        customClass: {
-                            confirmButton: "text-dark fw-bold",
-                        }
-                    });
+                    if (typeof Swal !== "undefined") {
+                        await Swal.fire({
+                            icon: "success",
+                            title: data.title || "Moodboard Submitted!",
+                            text: data.message || "Your style preferences have been recorded.",
+                            confirmButtonText: "View Confirmed Moodboard",
+                            confirmButtonColor: "#FFD65A",
+                            customClass: {
+                                confirmButton: "text-dark fw-bold",
+                            }
+                        });
+                    } else {
+                        alert(data.message || "Moodboard Submitted!");
+                    }
 
                     if (data.redirect_url) {
                         window.location.href = data.redirect_url;
@@ -270,23 +285,31 @@ document.addEventListener("DOMContentLoaded", function () {
                         window.location.reload();
                     }
                 } else {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Submission Error",
-                        text: data.errors ? data.errors.join("\n") : "Unable to submit your choices.",
-                        confirmButtonColor: "#FFD65A",
-                    });
+                    if (typeof Swal !== "undefined") {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Submission Error",
+                            text: data.errors ? data.errors.join("\n") : "Unable to submit your choices.",
+                            confirmButtonColor: "#FFD65A",
+                        });
+                    } else {
+                        alert(data.errors ? data.errors.join("\n") : "Unable to submit choices.");
+                    }
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalHtml;
                 }
             } catch (err) {
                 console.error(err);
-                Swal.fire({
-                    icon: "error",
-                    title: "Network Error",
-                    text: "Failed to connect to the server. Please try again.",
-                    confirmButtonColor: "#FFD65A",
-                });
+                if (typeof Swal !== "undefined") {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Network Error",
+                        text: "Failed to connect to the server. Please try again.",
+                        confirmButtonColor: "#FFD65A",
+                    });
+                } else {
+                    alert("Network error. Please try again.");
+                }
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalHtml;
             }
