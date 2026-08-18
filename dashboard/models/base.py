@@ -106,6 +106,10 @@ class SpaceCategory(models.Model):
     def __str__(self):
         return f"{self.space.name} - {self.category_name}"
 
+    @property
+    def name(self):
+        return self.category_name
+
 
 class SpaceCategoryImages(models.Model):
     category = models.ForeignKey(

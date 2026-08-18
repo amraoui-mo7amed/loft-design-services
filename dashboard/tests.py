@@ -409,6 +409,13 @@ class ProjectGalleryInvitationAndSelectionTests(TestCase):
         get_res = anon_client.get(select_url)
         self.assertEqual(get_res.status_code, 200)
         self.assertTemplateUsed(get_res, "gallery_client_select.html")
+        self.assertIn(self.space, get_res.context["spaces"])
+
+        # Test search filter
+        search_res = anon_client.get(f"{select_url}?q=marble")
+        self.assertEqual(search_res.status_code, 200)
+        self.assertEqual(len(search_res.context["images"]), 1)
+        self.assertEqual(search_res.context["images"][0].pk, self.img1.pk)
 
         # 2. Submit moodboard selection
         submit_url = reverse("frontend:gallery_client_selection_submit", kwargs={"token": invitation.token})

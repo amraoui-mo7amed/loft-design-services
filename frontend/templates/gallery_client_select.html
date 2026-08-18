@@ -4,396 +4,267 @@
 
 {% get_current_language_bidi as IS_RTL %}
 
-{% block title %}{% trans "Select Moodboard & Inspirations" %} — {{ project.project_name }}{% endblock title %}
+{% block title %}{% trans "Inspiration Gallery" %} — {{ project.project_name }} — LoftDesign{% endblock title %}
 
 {% block body_class %}landing-page client-gallery-page{% endblock body_class %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}?v={{ ASSET_VERSION }}">
 <link rel="stylesheet" href="{% static 'css/gallery.css' %}?v={{ ASSET_VERSION }}">
-<link rel="stylesheet" href="{% static 'css/inspiration_lightbox.css' %}?v={{ ASSET_VERSION }}">
-<style>
-    .client-select-hero {
-        background: linear-gradient(135deg, rgba(22, 28, 42, 0.95), rgba(11, 15, 25, 0.98));
-        border: 1.5px solid rgba(255, 214, 90, 0.35);
-        border-radius: 20px;
-        padding: 32px 28px;
-        margin-bottom: 30px;
-        box-shadow: 0 16px 45px rgba(0,0,0,0.5);
-    }
-
-    .space-filter-pills {
-        display: flex;
-        gap: 10px;
-        overflow-x: auto;
-        padding-bottom: 12px;
-        scrollbar-width: thin;
-    }
-
-    .space-pill-btn {
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        color: #e2e8f0;
-        padding: 8px 18px;
-        border-radius: 999px;
-        font-weight: 700;
-        font-size: 0.85rem;
-        cursor: pointer;
-        white-space: nowrap;
-        transition: all 0.2s ease;
-    }
-
-    .space-pill-btn:hover,
-    .space-pill-btn.active {
-        background: #FFD65A;
-        border-color: #FFD65A;
-        color: #000000;
-        box-shadow: 0 4px 14px rgba(255, 214, 90, 0.35);
-    }
-
-    .gallery-select-card {
-        position: relative;
-        border-radius: 16px;
-        overflow: hidden;
-        background: #161c28;
-        border: 2px solid rgba(255, 255, 255, 0.08);
-        transition: all 0.25s ease;
-        cursor: pointer;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .gallery-select-card:hover {
-        transform: translateY(-4px);
-        border-color: rgba(255, 214, 90, 0.5);
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
-    }
-
-    .gallery-select-card.selected {
-        border-color: #FFD65A !important;
-        box-shadow: 0 0 0 3px rgba(255, 214, 90, 0.4), 0 12px 30px rgba(0, 0, 0, 0.6);
-    }
-
-    .gallery-select-card .card-img-wrap {
-        position: relative;
-        aspect-ratio: 4/3;
-        overflow: hidden;
-        background: #0d111a;
-    }
-
-    .gallery-select-card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.4s ease;
-    }
-
-    .gallery-select-card:hover img {
-        transform: scale(1.05);
-    }
-
-    .select-check-badge {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        width: 34px;
-        height: 34px;
-        border-radius: 50%;
-        background: rgba(0, 0, 0, 0.6);
-        border: 2px solid #ffffff;
-        color: transparent;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
-        transition: all 0.2s ease;
-        z-index: 10;
-    }
-
-    .gallery-select-card.selected .select-check-badge {
-        background: #FFD65A;
-        border-color: #FFD65A;
-        color: #000000;
-        transform: scale(1.1);
-        box-shadow: 0 4px 12px rgba(255, 214, 90, 0.5);
-    }
-
-    .btn-preview-lightbox {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: rgba(0, 0, 0, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.85rem;
-        opacity: 0;
-        transition: all 0.2s ease;
-        z-index: 10;
-    }
-
-    .gallery-select-card:hover .btn-preview-lightbox {
-        opacity: 1;
-    }
-
-    .btn-preview-lightbox:hover {
-        background: #ffffff;
-        color: #000000;
-    }
-
-    /* Sticky Bottom Submission Bar */
-    .sticky-submit-bar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(15, 20, 32, 0.95);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-top: 1.5px solid rgba(255, 214, 90, 0.4);
-        padding: 16px 24px;
-        z-index: 1000;
-        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.7);
-    }
-</style>
 {% endblock extra_css %}
 
-{% block content %}
-<div class="container py-5" style="margin-bottom: 100px;">
+{% block nav %}
+    <nav class="home-navbar">
+        <div class="container home-navbar-inner">
+            <a class="home-navbar-brand" href="{% url 'frontend:home' %}">
+                {% if site_config.logo %}
+                    <img src="{{ site_config.logo }}" alt="{% trans 'Logo' %}" class="home-navbar-logo me-2">
+                {% else %}
+                    <img src="{% static 'img/icon.jpeg' %}" alt="{% trans 'Logo' %}" class="home-navbar-logo me-2">
+                {% endif %}
+                <span class="home-navbar-brand-name">
+                    {% if IS_RTL %}{{ site_config.ar_name }}{% else %}{{ site_config.name }}{% endif %}
+                </span>
+            </a>
 
-    <!-- Client Selection Hero -->
-    <div class="client-select-hero text-light">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
-            <div>
-                <span class="badge bg-warning text-dark font-monospace fw-bold px-3 py-1 mb-2">
-                    {{ project.project_number }}
+            <div class="d-none d-md-flex align-items-center gap-2">
+                <span class="badge bg-warning text-dark font-monospace px-3 py-2 fw-bold rounded-pill">
+                    <i class="fas fa-folder-open me-1"></i>{{ project.project_number }}
                 </span>
-                <h2 class="fw-bold text-white mb-1">{{ project.project_name }}</h2>
-                <div class="text-white-50 small">
-                    <i class="fas fa-home text-warning me-1"></i> {{ project.project_type.name|default:_("Architectural Project") }}
-                    <span class="mx-2">•</span>
-                    <i class="fas fa-ruler-combined text-warning me-1"></i> {{ project.total_surface }} m²
-                </div>
+                <span class="text-light fw-bold small text-truncate" style="max-width: 260px;">
+                    {{ project.project_name }}
+                </span>
             </div>
-            <div>
-                <span class="badge bg-dark border border-warning text-warning px-3 py-2 fs-6">
-                    <i class="fas fa-magic me-2"></i>{% trans "Moodboard Selection" %}
-                </span>
+
+            <div class="home-navbar-actions d-flex align-items-center gap-2">
+                {% include 'partials/language_switcher.html' %}
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dash:dash_home' %}" class="home-navbar-btn" title="{% trans 'Dashboard' %}">
+                        <span class="home-navbar-btn-label">{% trans "Dashboard" %}</span>
+                    </a>
+                {% endif %}
             </div>
         </div>
+    </nav>
+{% endblock nav %}
 
-        <p class="text-white-50 mb-0" style="max-width: 800px;">
-            {% trans "Please browse our curated architectural styles and select the designs that best match your aspirations. Your selections will directly guide our design team in creating your 3D concept." %}
-        </p>
-    </div>
+{% block sidebar %}{% endblock sidebar %}
 
-    <!-- Space Filter Tabs -->
-    <div class="space-filter-pills mb-4">
-        <button type="button" class="space-pill-btn active" data-space-id="all">
-            <i class="fas fa-th-large me-1"></i> {% trans "All Spaces & Styles" %} ({{ images|length }})
-        </button>
-        {% for sp in spaces %}
-        <button type="button" class="space-pill-btn" data-space-id="{{ sp.pk }}">
-            {{ sp.name }}
-        </button>
-        {% endfor %}
-    </div>
-
-    <!-- Images Grid -->
-    <div class="row g-4" id="gallerySelectGrid">
-        {% for img in images %}
-        <div class="col-sm-6 col-md-4 col-lg-3 gallery-item-col" data-space-id="{{ img.category.space_id }}">
-            <div class="gallery-select-card" data-image-id="{{ img.pk }}">
-                <div class="card-img-wrap">
-                    <img src="{{ img.image.url }}" alt="{{ img.category.category_name }}" loading="lazy">
-                    <div class="select-check-badge">
-                        <i class="fas fa-check"></i>
-                    </div>
-                    <button type="button" class="btn-preview-lightbox" data-lightbox-src="{{ img.image.url }}" data-lightbox-title="{{ img.category.space.name }} - {{ img.category.category_name }}" title="{% trans 'Preview' %}">
-                        <i class="fas fa-search-plus"></i>
-                    </button>
-                </div>
-                <div class="p-3 d-flex flex-column justify-content-between flex-grow-1">
+{% block content %}
+<div class="gallery-page">
+    <!-- Header Section with Title & Search -->
+    <div class="gallery-header-section">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-3">
                     <div>
-                        <div class="d-flex align-items-center justify-content-between mb-1">
-                            <span class="badge bg-secondary bg-opacity-25 text-warning font-monospace" style="font-size: 0.7rem;">
-                                {{ img.category.space.name }}
-                            </span>
-                            {% if img.is_default %}
-                            <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">{% trans "Featured" %}</span>
+                        <h1 class="gallery-title">
+                            {% if active_space %}{{ active_space.name }}{% else %}{% trans "Inspiration Gallery" %}{% endif %}
+                        </h1>
+                        <p class="text-muted small mb-0 mt-1">
+                            {% trans "Select the design inspirations that match your style for" %} <strong class="text-warning">{{ project.project_name }}</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Desktop Search Bar (Always Visible on Desktop) -->
+                <div class="gallery-desktop-search d-none d-md-flex">
+                    <form class="gallery-search-form form" method="GET" action="{% url 'frontend:gallery_client_selection' token=invitation.token %}">
+                        {% if active_space %}
+                            <input type="hidden" name="space" value="{{ active_space.pk }}">
+                        {% endif %}
+                        <div class="gallery-search-input-wrap">
+                            <i class="fas fa-search gallery-search-icon"></i>
+                            <input type="text" class="form-control gallery-search-input" name="q" value="{{ q }}" placeholder="{% trans 'Search inspirations, tags, styles...' %}">
+                            {% if q %}
+                                <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}{% if active_space %}?space={{ active_space.pk }}{% endif %}" class="gallery-search-clear" aria-label="{% trans 'Clear' %}">
+                                    <i class="fas fa-times"></i>
+                                </a>
                             {% endif %}
                         </div>
-                        <h6 class="text-white fw-bold mb-1 fs-6">{{ img.category.category_name }}</h6>
+                    </form>
+                </div>
+
+                <!-- Mobile Search Button (Opens Modal on Mobile Screens) -->
+                <button type="button" class="gallery-mobile-search-btn d-flex d-md-none" data-bs-toggle="modal" data-bs-target="#gallerySearchModal" aria-label="{% trans 'Search Gallery' %}">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <!-- Top Spaces Buttons Bar (Only the spaces chosen during project submission) -->
+            <div class="gallery-spaces-buttons-bar mt-4">
+                <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}{% if q %}?q={{ q }}{% endif %}" class="gallery-space-pill-btn{% if not active_space %} active{% endif %}">
+                    <i class="fas fa-th-large"></i>
+                    <span>{% trans "All Spaces" %}</span>
+                </a>
+                {% for sp in spaces %}
+                <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}?space={{ sp.pk }}{% if q %}&q={{ q }}{% endif %}" class="gallery-space-pill-btn{% if active_space.pk == sp.pk %} active{% endif %}">
+                    <i class="fas fa-door-open"></i>
+                    <span>{{ sp.name }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Search Filter Chip -->
+    {% if q %}
+    <div class="container mt-3">
+        <div class="gallery-chips-bar">
+            <span class="gallery-chip">
+                <i class="fas fa-search"></i> "{{ q }}"
+                <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}{% if active_space %}?space={{ active_space.pk }}{% endif %}" class="gallery-chip-remove" aria-label="{% trans 'Clear search' %}">
+                    <i class="fas fa-times"></i>
+                </a>
+            </span>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Gallery Grid (Interactive Selectable Cards Matching gallery.html) -->
+    <div class="container py-4">
+        {% if images %}
+        <div class="gallery-grid" id="galleryGrid">
+            {% for img in images %}
+            <div class="gallery-card select-gallery-card" data-image-id="{{ img.pk }}" data-image-url="{{ img.image.url }}" data-space-name="{{ img.category.space.name|default:'Space' }}" data-category-name="{{ img.category.category_name|default:img.category.name|default:'' }}" data-title="{{ img.description|default:img.category.space.name|default:'' }}" data-tags="{{ img.tags|default:'' }}">
+                <img src="{{ img.image.url }}" alt="{{ img.category.space.name|default:'Design Inspiration' }}" loading="lazy">
+                
+                <!-- Selection Check Badge -->
+                <div class="gallery-select-badge" title="{% trans 'Click to select / unselect' %}">
+                    <i class="fas fa-check"></i>
+                </div>
+
+                <!-- Lightbox Preview Button -->
+                <button type="button" class="gallery-lightbox-trigger-btn" title="{% trans 'Fullscreen Preview' %}" aria-label="{% trans 'Preview' %}">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </button>
+
+                <div class="gallery-card-overlay">
+                    <div class="gallery-card-top">
+                        <span class="gallery-space-tag">{{ img.category.space.name|default:"Space" }}</span>
+                        {% if img.category.category_name %}
+                        <span class="gallery-category-tag">{{ img.category.category_name }}</span>
+                        {% elif img.category.name %}
+                        <span class="gallery-category-tag">{{ img.category.name }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="gallery-card-bottom">
                         {% if img.description %}
-                        <p class="text-white-50 small mb-0 line-clamp-2" style="font-size: 0.75rem;">{{ img.description }}</p>
+                        <p class="gallery-card-title">{{ img.description }}</p>
+                        {% else %}
+                        <p class="gallery-card-title">{{ img.category.category_name|default:img.category.name|default:img.category.space.name|default:_("Design Inspiration") }}</p>
+                        {% endif %}
+                        {% if img.tags %}
+                        <div class="gallery-card-tags">
+                            {% for tag in img.tags.split %}
+                                {% if tag %}
+                                <span class="gallery-tag-badge">#{{ tag }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div class="col-12 text-center py-5 text-muted">
-            <i class="fas fa-images fa-3x mb-3 text-warning opacity-50"></i>
-            <h5>{% trans "No inspiration images found for this project type." %}</h5>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-images fa-4x text-light mb-3 opacity-50"></i>
+            <h4 class="text-light fw-bold mb-2">{% trans "No Images Found" %}</h4>
+            <p class="text-muted small">{% trans "Try selecting another space or resetting your search." %}</p>
+            <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}" class="btn btn-sm btn-outline-light rounded-pill px-4 mt-2">{% trans "View All Spaces" %}</a>
         </div>
-        {% endfor %}
+        {% endif %}
     </div>
 
-</div>
-
-<!-- Sticky Bottom Bar -->
-<div class="sticky-submit-bar">
-    <div class="container d-flex align-items-center justify-content-between flex-wrap gap-3">
-        <div class="d-flex align-items-center gap-3">
-            <div class="badge bg-warning text-dark fs-6 px-3 py-2 fw-bold" id="selectionCountBadge">
-                0 {% trans "Selected" %}
-            </div>
-            <span class="text-white-50 small d-none d-md-inline">
-                {% trans "Select one or more inspirations, then confirm your choice." %}
+    <!-- Floating Liquid-Glass Bottom Submission Bar -->
+    <div class="client-gallery-submit-bar is-hidden" id="clientSubmitBar">
+        <div class="submit-bar-info">
+            <span class="submit-bar-count-badge">
+                <i class="fas fa-sparkles me-1 text-warning"></i>
+                <span id="selectedCountBadge">0</span>
+            </span>
+            <span class="submit-bar-project-name d-none d-sm-inline" id="selectedCountText" data-singular="{% trans 'Inspiration Selected' %}" data-plural="{% trans 'Inspirations Selected' %}">
+                0 {% trans "Inspirations Selected" %}
             </span>
         </div>
-        <button type="button" class="btn btn-warning rounded-pill px-4 py-2 fw-bold shadow" id="btnSubmitMoodboard" disabled>
-            <i class="fas fa-paper-plane me-2"></i>{% trans "Submit Moodboard Selection" %}
+        <div class="submit-bar-actions">
+            <button type="button"
+                    class="btn-submit-gallery"
+                    id="btnSubmitGallery"
+                    data-submit-url="{% url 'frontend:gallery_client_selection_submit' token=invitation.token %}"
+                    data-csrf="{{ csrf_token }}"
+                    data-confirm-title="{% trans 'Submit Moodboard Selection' %}"
+                    data-confirm-desc="{% trans 'inspiration photos selected for your project design team.' %}"
+                    data-notes-label="{% trans 'Optional Notes / Special Preferences' %}"
+                    data-notes-placeholder="{% trans 'e.g. We love the natural wood textures and ambient ceiling lights...' %}"
+                    data-btn-confirm="{% trans 'Submit Moodboard' %}"
+                    data-btn-cancel="{% trans 'Review Selection' %}"
+                    data-sending-text="{% trans 'Submitting...' %}"
+                    data-no-selection-title="{% trans 'Please Select Inspirations' %}"
+                    data-no-selection-text="{% trans 'Choose at least one inspiration photo to build your moodboard.' %}"
+                    disabled>
+                <i class="fas fa-check-circle"></i>
+                <span>{% trans "Submit Selection" %}</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Search Modal (Phone screens) -->
+<div class="modal fade" id="gallerySearchModal" tabindex="-1" aria-labelledby="gallerySearchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-glass">
+            <div class="modal-header">
+                <h5 class="modal-title text-light" id="gallerySearchModalLabel">
+                    <i class="fas fa-search text-warning me-2"></i>{% trans "Search Gallery" %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form class="form" method="GET" action="{% url 'frontend:gallery_client_selection' token=invitation.token %}">
+                {% if active_space %}
+                    <input type="hidden" name="space" value="{{ active_space.pk }}">
+                {% endif %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="mobileSearchInput" class="form-label text-warning fw-bold small text-uppercase">{% trans "Keywords, styles or tags" %}</label>
+                        <input type="text" class="form-control gallery-search-input" id="mobileSearchInput" name="q" value="{{ q }}" placeholder="{% trans 'e.g. modern, salon, wood, cozy...' %}">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-light rounded-pill" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-gallery-primary">{% trans "Search" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Liquid-Glass Lightbox Viewer -->
+<div class="viewer-container" id="portfolioViewer" role="dialog" aria-modal="true" aria-label="{% trans 'Image Lightbox' %}">
+    <button type="button" class="viewer-floating-close-btn" id="viewerCloseBtn" aria-label="{% trans 'Close Viewer' %}">
+        <i class="fas fa-times"></i>
+    </button>
+
+    <div class="viewer-stage">
+        <button type="button" class="viewer-nav-btn nav-prev" id="viewerPrevBtn" aria-label="{% trans 'Previous image' %}">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <div class="viewer-main-img-wrapper" id="viewerImgWrapper">
+            <img class="viewer-main-img" id="viewerMainImg" src="" alt="{% trans 'Design Preview' %}">
+        </div>
+
+        <button type="button" class="viewer-nav-btn nav-next" id="viewerNextBtn" aria-label="{% trans 'Next image' %}">
+            <i class="fas fa-chevron-right"></i>
         </button>
     </div>
 </div>
-
-{% include "components/inspiration_lightbox.html" %}
 {% endblock content %}
 
+{% block footer %}{% endblock footer %}
+
 {% block extra_js %}
-<script src="{% static 'js/inspiration_lightbox.js' %}?v={{ ASSET_VERSION }}"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const selectedImageIds = new Set();
-    const countBadge = document.getElementById("selectionCountBadge");
-    const btnSubmit = document.getElementById("btnSubmitMoodboard");
-    const cards = document.querySelectorAll(".gallery-select-card");
-    const filterPills = document.querySelectorAll(".space-pill-btn");
-    const cols = document.querySelectorAll(".gallery-item-col");
-
-    // Space filtering
-    filterPills.forEach(pill => {
-        pill.addEventListener("click", function () {
-            filterPills.forEach(p => p.classList.remove("active"));
-            this.classList.add("active");
-            const spaceId = this.dataset.spaceId;
-
-            cols.forEach(col => {
-                if (spaceId === "all" || col.dataset.spaceId === spaceId) {
-                    col.style.display = "";
-                } else {
-                    col.style.display = "none";
-                }
-            });
-        });
-    });
-
-    // Card selection toggle
-    cards.forEach(card => {
-        card.addEventListener("click", function (e) {
-            // Prevent trigger if preview button was clicked
-            if (e.target.closest(".btn-preview-lightbox")) return;
-
-            const imgId = parseInt(this.dataset.imageId, 10);
-            if (selectedImageIds.has(imgId)) {
-                selectedImageIds.delete(imgId);
-                this.classList.remove("selected");
-            } else {
-                selectedImageIds.add(imgId);
-                this.classList.add("selected");
-            }
-
-            updateSelectionBar();
-        });
-    });
-
-    function updateSelectionBar() {
-        const count = selectedImageIds.size;
-        countBadge.textContent = `${count} {% trans "Selected" %}`;
-        if (count > 0) {
-            btnSubmit.disabled = false;
-            btnSubmit.classList.add("btn-warning");
-            btnSubmit.classList.remove("btn-secondary");
-        } else {
-            btnSubmit.disabled = true;
-            btnSubmit.classList.remove("btn-warning");
-            btnSubmit.classList.add("btn-secondary");
-        }
-    }
-
-    // Submit selection
-    btnSubmit.addEventListener("click", async function () {
-        if (selectedImageIds.size === 0) return;
-
-        const confirm = await Swal.fire({
-            title: "{% trans 'Submit your inspiration moodboard?' %}",
-            text: `{% trans 'You have selected' %} ${selectedImageIds.size} {% trans 'style(s) for your project. This will be sent to our architects.' %}`,
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonText: "{% trans 'Yes, Submit Moodboard' %}",
-            cancelButtonText: "{% trans 'Continue browsing' %}",
-            confirmButtonColor: "#FFD65A",
-        });
-
-        if (!confirm.isConfirmed) return;
-
-        const origHtml = btnSubmit.innerHTML;
-        btnSubmit.disabled = true;
-        btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>{% trans 'Submitting...' %}`;
-
-        const csrfToken = document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
-
-        try {
-            const res = await fetch("{% url 'frontend:gallery_client_selection_submit' invitation.token %}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrfToken,
-                    "X-Requested-With": "XMLHttpRequest",
-                },
-                body: JSON.stringify({
-                    image_ids: Array.from(selectedImageIds)
-                }),
-            });
-
-            const data = await res.json();
-            if (data.success) {
-                await Swal.fire({
-                    icon: "success",
-                    title: "{% trans 'Moodboard Submitted!' %}",
-                    text: data.message,
-                    confirmButtonColor: "#FFD65A",
-                });
-                window.location.reload();
-            } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "{% trans 'Error' %}",
-                    text: data.errors ? data.errors[0] : "{% trans 'Failed to submit selection.' %}",
-                    confirmButtonColor: "#dc3545",
-                });
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = origHtml;
-            }
-        } catch (err) {
-            console.error(err);
-            Swal.fire({
-                icon: "error",
-                title: "{% trans 'Network Error' %}",
-                text: "{% trans 'Could not reach server. Please try again.' %}",
-                confirmButtonColor: "#dc3545",
-            });
-            btnSubmit.disabled = false;
-            btnSubmit.innerHTML = origHtml;
-        }
-    });
-});
-</script>
+<script src="{% static 'js/gallery_client_select.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

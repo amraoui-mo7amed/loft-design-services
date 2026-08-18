@@ -120,22 +120,52 @@ def client_gallery_selection(request, token):
             },
         )
 
-    # Fetch spaces linked to the project's project_type
-    project_type = project.project_type
-    if project_type:
-        type_spaces = Space.objects.filter(
-            project_types__project_type=project_type
-        ).prefetch_related("categories__images").distinct()
-        if not type_spaces.exists():
-            type_spaces = Space.objects.prefetch_related("categories__images").all()
-    else:
-        type_spaces = Space.objects.prefetch_related("categories__images").all()
+    # Render only the spaces that the user chose while submitting the project
+    chosen_space_ids = project.spaces.values_list("space_id", flat=True).distinct()
+    spaces = (
+        Space.objects.filter(id__in=chosen_space_ids)
+        .prefetch_related("categories__images")
+        .distinct()
+    )
 
-    # Get all space category images for these spaces
+    # Fallback to project type spaces if no spaces were attached to project
+    if not spaces.exists():
+        if project.project_type:
+            spaces = (
+                Space.objects.filter(project_types__project_type=project.project_type)
+                .prefetch_related("categories__images")
+                .distinct()
+            )
+        if not spaces.exists():
+            spaces = Space.objects.prefetch_related("categories__images").all()
+
+    # Handle active space filter
+    space_pk = request.GET.get("space")
+    active_space = None
+    if space_pk and str(space_pk).isdigit():
+        active_space = spaces.filter(pk=int(space_pk)).first()
+
+    # Search filter
+    q = request.GET.get("q", "").strip()
+
+    if active_space:
+        images_qs = SpaceCategoryImages.objects.filter(category__space=active_space)
+    else:
+        images_qs = SpaceCategoryImages.objects.filter(category__space__in=spaces)
+
+    if q:
+        images_qs = images_qs.filter(
+            Q(category__category_name__icontains=q)
+            | Q(description__icontains=q)
+            | Q(tags__icontains=q)
+            | Q(reference__icontains=q)
+            | Q(category__space__name__icontains=q)
+        )
+
     images = (
-        SpaceCategoryImages.objects.filter(category__space__in=type_spaces)
-        .select_related("category", "category__space")
+        images_qs.select_related("category", "category__space")
         .order_by("category__space__name", "-is_default", "id")
+        .distinct()
     )
 
     return render(
@@ -144,8 +174,10 @@ def client_gallery_selection(request, token):
         {
             "invitation": invitation,
             "project": project,
-            "spaces": type_spaces,
+            "spaces": spaces,
+            "active_space": active_space,
             "images": images,
+            "q": q,
         },
     )
 
