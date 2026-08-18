@@ -46,6 +46,7 @@ def wizard_container(request):
             "floors_above": int(data.get("floors_above", 0) or 0),
             "floors_below": int(data.get("floors_below", 0) or 0),
             "has_terrace": data.get("has_terrace") in ("true", "1", True, "on"),
+            "has_garden": data.get("has_garden") in ("true", "1", True, "on"),
             "floors": data.get("floors", []),
             "total_surface": float(data.get("total_surface", 0) or 0),
             "first_name": data.get("first_name", "").strip(),
@@ -132,6 +133,7 @@ def submit_design_request(request):
             floors_above = int(data.get("floors_above", 0) or 0)
             floors_below = int(data.get("floors_below", 0) or 0)
             has_terrace = data.get("has_terrace") in ("true", "1", True, "on")
+            has_garden = data.get("has_garden") in ("true", "1", True, "on")
             total_surface = Decimal(str(data.get("total_surface", 0) or 0))
             total = Decimal(str(data.get("total", 0) or 0))
 
@@ -150,6 +152,7 @@ def submit_design_request(request):
                 floors_above=floors_above,
                 floors_below=floors_below,
                 has_terrace=has_terrace,
+                has_garden=has_garden,
                 total=total,
             )
 
@@ -179,7 +182,7 @@ def submit_design_request(request):
                 design_request.service = primary_service
                 design_request.save(update_fields=["service"])
 
-            # Create Floors with respective Surfaces
+            # Create Floors with respective Surfaces in chronological/architectural order
             floors_data = data.get("floors", [])
             if isinstance(floors_data, str):
                 try:
@@ -187,10 +190,28 @@ def submit_design_request(request):
                 except Exception:
                     floors_data = []
 
-            for i, f in enumerate(floors_data):
+            # Sort floors strictly in chronological order: Basements -> RDC -> Upper Floors -> Terrace -> Garden
+            def get_floor_sort_key(item):
+                lvl = item.get("level", 0)
+                try:
+                    return int(lvl)
+                except (ValueError, TypeError):
+                    return 0
+
+            sorted_floors = sorted(floors_data, key=get_floor_sort_key)
+
+            for i, f in enumerate(sorted_floors):
                 f_name = f.get("name") or f"Level {i}"
                 f_surface = Decimal(str(f.get("surface", 0) or 0))
-                f_level = int(f.get("level", i) or i)
+                raw_level = f.get("level")
+                if raw_level is not None:
+                    try:
+                        f_level = int(raw_level)
+                    except (ValueError, TypeError):
+                        f_level = i
+                else:
+                    f_level = i
+
                 DesignRequestFloor.objects.create(
                     design_request=design_request,
                     name=f_name,

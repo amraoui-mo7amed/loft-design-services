@@ -50,6 +50,7 @@ class DesignRequest(models.Model):
         max_digits=10, decimal_places=2, default=0, verbose_name=_("Total Surface (m²)")
     )
     has_terrace = models.BooleanField(default=False, verbose_name=_("Has Terrace"))
+    has_garden = models.BooleanField(default=False, verbose_name=_("Has Garden"))
     floors_above = models.IntegerField(default=0, verbose_name=_("Floors Above RDC"))
     floors_below = models.IntegerField(default=0, verbose_name=_("Floors Below RDC"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))

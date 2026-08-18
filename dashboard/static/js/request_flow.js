@@ -20,9 +20,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedProjectTypeNameInput = document.getElementById("selectedProjectTypeName");
     const projectTypeSelect = document.getElementById("projectTypeSelect");
 
-    const floorsChecklistContainer = document.getElementById("floorsChecklistContainer");
+    const buildingLevelsStack = document.getElementById("buildingLevelsStack");
+    const stackAbove = document.getElementById("stackAbove");
+    const stackRdcRow = document.getElementById("stackRdcRow");
+    const stackBelow = document.getElementById("stackBelow");
     const btnAddFloorAbove = document.getElementById("btnAddFloorAbove");
     const btnAddFloorBelow = document.getElementById("btnAddFloorBelow");
+    const floorsAriaAnnouncement = document.getElementById("floorsAriaAnnouncement");
 
     const floorSurfacesContainer = document.getElementById("floorSurfacesContainer");
     const step3TotalSurfaceDisplay = document.getElementById("step3TotalSurfaceDisplay");
@@ -61,23 +65,33 @@ document.addEventListener("DOMContentLoaded", function () {
     const btnUnlockStep4 = document.getElementById("btnUnlockStep4");
     const btnUnlockStep5 = document.getElementById("btnUnlockStep5");
 
-    // ── State: Full cards (RDC - 3 to RDC + 5, and Terrasse) ──
-    let floorListState = [
-        { key: "below_3", name: "Sous-sol S-3", badge: "RDC - 3", icon: "fa-dungeon", level: -3, checked: false, surface: 100 },
-        { key: "below_2", name: "Sous-sol S-2", badge: "RDC - 2", icon: "fa-dungeon", level: -2, checked: false, surface: 100 },
-        { key: "below_1", name: "Sous-sol S-1", badge: "RDC - 1", icon: "fa-dungeon", level: -1, checked: false, surface: 100 },
-        { key: "rdc", name: "Rez-de-Chaussée (RDC)", badge: "RDC", icon: "fa-door-open", level: 0, checked: true, surface: 120 },
-        { key: "above_1", name: "Étage R+1", badge: "RDC + 1", icon: "fa-layer-group", level: 1, checked: true, surface: 100 },
-        { key: "above_2", name: "Étage R+2", badge: "RDC + 2", icon: "fa-layer-group", level: 2, checked: false, surface: 100 },
-        { key: "above_3", name: "Étage R+3", badge: "RDC + 3", icon: "fa-layer-group", level: 3, checked: false, surface: 100 },
-        { key: "above_4", name: "Étage R+4", badge: "RDC + 4", icon: "fa-layer-group", level: 4, checked: false, surface: 100 },
-        { key: "above_5", name: "Étage R+5", badge: "RDC + 5", icon: "fa-layer-group", level: 5, checked: false, surface: 100 },
-        { key: "terrace", name: "Terrasse / Toiture", badge: "Terrasse", icon: "fa-umbrella-beach", level: 99, checked: false, surface: 60 },
-    ];
+    // ── State: Normalized Building Hierarchy ──
+    const floorState = {
+        maxAbove: 5,        // highest rendered upper floor
+        maxBelow: 5,        // deepest rendered basement
+        selectedAbove: 0,   // continuous active count above RDC (0 initially)
+        selectedBelow: 0,   // continuous active basements (0 initially)
+        terrace: false,     // independent toggle
+        garden: false,      // independent toggle
+        surfaces: {
+            "rdc": 120,
+            "terrace": 60,
+            "garden": 80,
+        }
+    };
 
     let selectedServices = [];
-    let calculatedTotalSurface = 220;
+    let calculatedTotalSurface = 120;
     let grandCalculatedTotal = 0;
+
+    // Accessibility screen-reader announcer
+    function announceAria(message) {
+        if (!floorsAriaAnnouncement) return;
+        floorsAriaAnnouncement.textContent = "";
+        setTimeout(() => {
+            floorsAriaAnnouncement.textContent = message;
+        }, 50);
+    }
 
     // Helper CSRF Token
     function getCsrfToken() {
@@ -141,105 +155,308 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ── STEP 2: Floors Checkboxes Management (No .floor-name-heading, No .floor-sub-label) ──
-    function renderFloorsChecklist() {
-        if (!floorsChecklistContainer) return;
-        floorsChecklistContainer.innerHTML = "";
+    // ── STEP 2: Building Hierarchy Vertical Carousel & Cascade Logic ──
 
-        const sorted = [...floorListState].sort((a, b) => a.level - b.level);
+    function toggleAbove(n) {
+        if (n <= floorState.selectedAbove) {
+            floorState.selectedAbove = n - 1;
+            announceAria(floorState.selectedAbove === 0
+                ? "Étages supérieurs désactivés"
+                : `Étages actifs de R+1 à R+${floorState.selectedAbove}`);
+        } else {
+            floorState.selectedAbove = n;
+            announceAria(`R+1 à R+${n} sélectionnés automatiquement`);
+        }
+        renderBuildingStack();
+        updateSummaryChips();
+    }
 
-        sorted.forEach(item => {
+    function toggleBelow(n) {
+        if (n <= floorState.selectedBelow) {
+            floorState.selectedBelow = n - 1;
+            announceAria(floorState.selectedBelow === 0
+                ? "Sous-sols désactivés"
+                : `Sous-sols actifs de R-1 à R-${floorState.selectedBelow}`);
+        } else {
+            floorState.selectedBelow = n;
+            announceAria(`R-1 à R-${n} sélectionnés automatiquement`);
+        }
+        renderBuildingStack();
+        updateSummaryChips();
+    }
+
+    function toggleTerrace() {
+        floorState.terrace = !floorState.terrace;
+        announceAria(floorState.terrace ? "Terrasse sélectionnée" : "Terrasse désélectionnée");
+        renderBuildingStack();
+        updateSummaryChips();
+    }
+
+    function toggleGarden() {
+        floorState.garden = !floorState.garden;
+        announceAria(floorState.garden ? "Jardin sélectionné" : "Jardin désélectionné");
+        renderBuildingStack();
+        updateSummaryChips();
+    }
+
+    function renderBuildingStack() {
+        if (!stackAbove || !stackRdcRow || !stackBelow) return;
+
+        // 1. Upper Floors Stack (R+maxAbove down to R+1)
+        stackAbove.innerHTML = "";
+        for (let n = floorState.maxAbove; n >= 1; n--) {
+            const isActive = n <= floorState.selectedAbove;
             const card = document.createElement("div");
-            card.className = `floor-check-card${item.checked ? ' checked' : ''}`;
-            card.dataset.floorKey = item.key;
+            card.className = `building-level-card${isActive ? " active" : ""}`;
+            card.setAttribute("role", "button");
+            card.setAttribute("tabindex", "0");
+            card.setAttribute("aria-pressed", isActive ? "true" : "false");
+            card.dataset.level = n;
+            card.dataset.key = `above_${n}`;
+            card.title = `Étage R+${n}`;
 
             card.innerHTML = `
-                <div class="floor-check-main">
-                    <div class="floor-check-icon-wrap">
-                        <i class="fas ${item.icon}"></i>
+                <div class="level-card-left">
+                    <div class="level-icon-wrap">
+                        <i class="fas fa-layer-group"></i>
                     </div>
-                    <div class="floor-check-text-content">
-                        <span class="floor-badge-tag">${item.badge}</span>
-                    </div>
+                    <span class="level-badge">R+${n}</span>
+                    <span class="level-name">Étage R+${n}</span>
                 </div>
-
-                <div class="floor-check-actions">
-                    <div class="floor-check-indicator">
-                        <input type="checkbox" class="floor-checkbox-native" ${item.checked ? 'checked' : ''} data-floor-key="${item.key}">
-                        <div class="floor-custom-check-box">
-                            <i class="fas fa-check"></i>
-                        </div>
-                    </div>
+                <div class="level-card-check">
+                    <i class="fas fa-check"></i>
                 </div>
             `;
 
-            // Card click toggles checkbox
-            card.addEventListener("click", function (e) {
-                const chk = card.querySelector(".floor-checkbox-native");
-                if (e.target !== chk) {
-                    chk.checked = !chk.checked;
+            card.addEventListener("click", () => toggleAbove(n));
+            card.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    toggleAbove(n);
                 }
-                const isChecked = chk.checked;
-                item.checked = isChecked;
-                card.classList.toggle("checked", isChecked);
-                updateSummaryChips();
             });
 
-            floorsChecklistContainer.appendChild(card);
+            stackAbove.appendChild(card);
+        }
+
+        // 2. RDC Row: RDC + Terrasse + Jardin
+        stackRdcRow.innerHTML = "";
+
+        // RDC (Always Active)
+        const rdcCard = document.createElement("div");
+        rdcCard.className = "building-level-card rdc-card active";
+        rdcCard.setAttribute("role", "button");
+        rdcCard.setAttribute("tabindex", "0");
+        rdcCard.setAttribute("aria-pressed", "true");
+        rdcCard.dataset.level = "0";
+        rdcCard.dataset.key = "rdc";
+        rdcCard.title = "Rez-de-Chaussée (RDC) - Toujours inclus";
+
+        rdcCard.innerHTML = `
+            <div class="level-card-left">
+                <div class="level-icon-wrap">
+                    <i class="fas fa-door-open"></i>
+                </div>
+                <span class="level-badge">RDC</span>
+                <span class="level-name">Rez-de-Chaussée (RDC)</span>
+            </div>
+            <div class="level-card-check">
+                <i class="fas fa-check"></i>
+            </div>
+        `;
+
+        rdcCard.addEventListener("click", () => {
+            announceAria("Le Rez-de-Chaussée est obligatoire et toujours inclus");
         });
+        rdcCard.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                announceAria("Le Rez-de-Chaussée est obligatoire et toujours inclus");
+            }
+        });
+        stackRdcRow.appendChild(rdcCard);
+
+        // Terrasse Option Card
+        const terraceCard = document.createElement("div");
+        terraceCard.className = `building-option-card terrace-card${floorState.terrace ? " active" : ""}`;
+        terraceCard.setAttribute("role", "button");
+        terraceCard.setAttribute("tabindex", "0");
+        terraceCard.setAttribute("aria-pressed", floorState.terrace ? "true" : "false");
+        terraceCard.id = "cardTerrace";
+        terraceCard.title = "Terrasse / Toiture (Option indépendante)";
+
+        terraceCard.innerHTML = `
+            <div class="level-card-left">
+                <div class="level-icon-wrap">
+                    <i class="fas fa-umbrella-beach"></i>
+                </div>
+                <span class="level-badge">Terrasse</span>
+            </div>
+            <div class="level-card-check">
+                <i class="fas fa-check"></i>
+            </div>
+        `;
+
+        terraceCard.addEventListener("click", toggleTerrace);
+        terraceCard.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggleTerrace();
+            }
+        });
+        stackRdcRow.appendChild(terraceCard);
+
+        // Jardin Option Card
+        const gardenCard = document.createElement("div");
+        gardenCard.className = `building-option-card garden-card${floorState.garden ? " active" : ""}`;
+        gardenCard.setAttribute("role", "button");
+        gardenCard.setAttribute("tabindex", "0");
+        gardenCard.setAttribute("aria-pressed", floorState.garden ? "true" : "false");
+        gardenCard.id = "cardGarden";
+        gardenCard.title = "Jardin / Extérieur (Option indépendante)";
+
+        gardenCard.innerHTML = `
+            <div class="level-card-left">
+                <div class="level-icon-wrap">
+                    <i class="fas fa-tree"></i>
+                </div>
+                <span class="level-badge">Jardin</span>
+            </div>
+            <div class="level-card-check">
+                <i class="fas fa-check"></i>
+            </div>
+        `;
+
+        gardenCard.addEventListener("click", toggleGarden);
+        gardenCard.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggleGarden();
+            }
+        });
+        stackRdcRow.appendChild(gardenCard);
+
+        // 3. Basement Floors Stack (R-1 down to R-maxBelow)
+        stackBelow.innerHTML = "";
+        for (let n = 1; n <= floorState.maxBelow; n++) {
+            const isActive = n <= floorState.selectedBelow;
+            const card = document.createElement("div");
+            card.className = `building-level-card${isActive ? " active" : ""}`;
+            card.setAttribute("role", "button");
+            card.setAttribute("tabindex", "0");
+            card.setAttribute("aria-pressed", isActive ? "true" : "false");
+            card.dataset.level = -n;
+            card.dataset.key = `below_${n}`;
+            card.title = `Sous-sol R-${n}`;
+
+            card.innerHTML = `
+                <div class="level-card-left">
+                    <div class="level-icon-wrap">
+                        <i class="fas fa-dungeon"></i>
+                    </div>
+                    <span class="level-badge">R-${n}</span>
+                    <span class="level-name">Sous-sol R-${n}</span>
+                </div>
+                <div class="level-card-check">
+                    <i class="fas fa-check"></i>
+                </div>
+            `;
+
+            card.addEventListener("click", () => toggleBelow(n));
+            card.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    toggleBelow(n);
+                }
+            });
+
+            stackBelow.appendChild(card);
+        }
 
         updateSummaryChips();
     }
 
-    // Add Upper Floor (RDC +) -> checks next unchecked upper floor
+    // Dynamic Level Addition (Top / Bottom)
     if (btnAddFloorAbove) {
         btnAddFloorAbove.addEventListener("click", function () {
-            const nextUncheckedUpper = floorListState.find(f => f.level > 0 && f.level < 99 && !f.checked);
-            if (nextUncheckedUpper) {
-                nextUncheckedUpper.checked = true;
-                renderFloorsChecklist();
-            } else {
-                safeSwal.fire({
-                    icon: "info",
-                    title: "Max Floors Reached",
-                    text: "All upper storeys up to RDC + 5 are already active.",
-                    confirmButtonColor: "var(--gold, #FFD65A)",
-                });
-            }
+            floorState.maxAbove += 1;
+            announceAria(`Étage R+${floorState.maxAbove} ajouté`);
+            renderBuildingStack();
         });
     }
 
-    // Add Basement Level (RDC -) -> checks next unchecked basement level
     if (btnAddFloorBelow) {
         btnAddFloorBelow.addEventListener("click", function () {
-            const basements = floorListState.filter(f => f.level < 0).sort((a, b) => b.level - a.level);
-            const nextUncheckedBasement = basements.find(f => !f.checked);
-            if (nextUncheckedBasement) {
-                nextUncheckedBasement.checked = true;
-                renderFloorsChecklist();
-            } else {
-                safeSwal.fire({
-                    icon: "info",
-                    title: "Max Basements Reached",
-                    text: "All basement levels down to RDC - 3 are already active.",
-                    confirmButtonColor: "var(--gold, #FFD65A)",
-                });
-            }
+            floorState.maxBelow += 1;
+            announceAria(`Sous-sol R-${floorState.maxBelow} ajouté`);
+            renderBuildingStack();
         });
+    }
+
+    // Helper: Compute ordered list of active configured levels
+    function getActiveFloors() {
+        const list = [];
+
+        // 1. Basements (from deepest selected up to R-1)
+        for (let n = floorState.selectedBelow; n >= 1; n--) {
+            const key = `below_${n}`;
+            list.push({
+                key: key,
+                badge: `R-${n}`,
+                name: `Sous-sol R-${n}`,
+                level: -n,
+                surface: floorState.surfaces[key] !== undefined ? floorState.surfaces[key] : 100,
+            });
+        }
+
+        // 2. Ground floor (RDC)
+        list.push({
+            key: "rdc",
+            badge: "RDC",
+            name: "Rez-de-Chaussée (RDC)",
+            level: 0,
+            surface: floorState.surfaces["rdc"] !== undefined ? floorState.surfaces["rdc"] : 120,
+        });
+
+        // 3. Upper floors (from R+1 to highest selected)
+        for (let n = 1; n <= floorState.selectedAbove; n++) {
+            const key = `above_${n}`;
+            list.push({
+                key: key,
+                badge: `R+${n}`,
+                name: `Étage R+${n}`,
+                level: n,
+                surface: floorState.surfaces[key] !== undefined ? floorState.surfaces[key] : 100,
+            });
+        }
+
+        // 4. Terrace (if selected)
+        if (floorState.terrace) {
+            list.push({
+                key: "terrace",
+                badge: "Terrasse",
+                name: "Terrasse / Toiture",
+                level: 99,
+                surface: floorState.surfaces["terrace"] !== undefined ? floorState.surfaces["terrace"] : 60,
+            });
+        }
+
+        // 5. Garden (if selected)
+        if (floorState.garden) {
+            list.push({
+                key: "garden",
+                badge: "Jardin",
+                name: "Jardin / Extérieur",
+                level: 100,
+                surface: floorState.surfaces["garden"] !== undefined ? floorState.surfaces["garden"] : 80,
+            });
+        }
+
+        return list;
     }
 
     if (btnUnlockStep3) {
         btnUnlockStep3.addEventListener("click", function () {
-            const checkedCount = floorListState.filter(f => f.checked).length;
-            if (checkedCount === 0) {
-                safeSwal.fire({
-                    icon: "warning",
-                    title: "Select at least one floor",
-                    text: "Please check at least one floor level to proceed to surfaces.",
-                    confirmButtonColor: "var(--gold, #FFD65A)",
-                });
-                return;
-            }
             rebuildStep3Surfaces();
             unlockStep(stepCard3, trackerNode3, trackerNode2);
         });
@@ -250,9 +467,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!floorSurfacesContainer) return;
         floorSurfacesContainer.innerHTML = "";
 
-        const checkedFloors = floorListState.filter(f => f.checked).sort((a, b) => a.level - b.level);
+        const activeFloors = getActiveFloors();
 
-        checkedFloors.forEach(item => {
+        activeFloors.forEach(item => {
             const row = document.createElement("div");
             row.className = "surface-entry-card";
             row.innerHTML = `
@@ -274,7 +491,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const input = row.querySelector(".surface-input-control");
             input.addEventListener("input", function () {
-                item.surface = parseFloat(this.value) || 0;
+                const val = parseFloat(this.value) || 0;
+                floorState.surfaces[item.key] = val;
+                item.surface = val;
                 recalculateTotalSurface();
             });
 
@@ -286,8 +505,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function recalculateTotalSurface() {
         let total = 0;
-        const checkedFloors = floorListState.filter(f => f.checked);
-        checkedFloors.forEach(f => {
+        const activeFloors = getActiveFloors();
+        activeFloors.forEach(f => {
             total += (f.surface || 0);
         });
 
@@ -415,9 +634,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updateSummaryChips() {
-        const checkedCount = floorListState.filter(f => f.checked).length;
+        const activeFloors = getActiveFloors();
+        const count = activeFloors.length;
         if (chipFloorsCount) {
-            chipFloorsCount.textContent = `${checkedCount} Level${checkedCount > 1 ? 's' : ''} Selected`;
+            chipFloorsCount.textContent = `${count} ${count > 1 ? "Niveaux" : "Niveau"}`;
         }
     }
 
@@ -440,20 +660,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ── Build Full Request Payload ──
     function buildRequestPayload() {
-        const checkedFloors = floorListState.filter(f => f.checked);
+        const activeFloors = getActiveFloors();
         const floorsData = [];
         let totalSurface = 0;
-        let floorsAboveCount = 0;
-        let floorsBelowCount = 0;
-        let hasTerraceVal = false;
 
-        checkedFloors.forEach((f, idx) => {
+        activeFloors.forEach((f, idx) => {
             const surf = parseFloat(f.surface) || 0;
             totalSurface += surf;
-            if (f.level > 0 && f.level < 99) floorsAboveCount++;
-            if (f.level < 0) floorsBelowCount++;
-            if (f.level === 99) hasTerraceVal = true;
-
             floorsData.push({
                 key: f.key,
                 name: f.name,
@@ -477,9 +690,10 @@ document.addEventListener("DOMContentLoaded", function () {
             service_id: primaryService ? primaryService.id : null,
             service_name: primaryService ? primaryService.name : "",
             service_ids: serviceIds,
-            floors_above: floorsAboveCount,
-            floors_below: floorsBelowCount,
-            has_terrace: hasTerraceVal,
+            floors_above: floorState.selectedAbove,
+            floors_below: floorState.selectedBelow,
+            has_terrace: floorState.terrace,
+            has_garden: floorState.garden,
             floors: floorsData,
             total_surface: totalSurface,
             total: grandCalculatedTotal,
@@ -672,7 +886,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Initial setup
-    renderFloorsChecklist();
+    renderBuildingStack();
     rebuildStep3Surfaces();
     initServicesMultiSelect();
     recalculateStep4Facture();

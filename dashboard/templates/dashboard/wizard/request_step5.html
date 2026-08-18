@@ -73,6 +73,7 @@
                         <div class="step5-meta-val">
                             RDC +{{ session_data.floors_above|default:0 }} / -{{ session_data.floors_below|default:0 }}
                             {% if session_data.has_terrace %}<span class="badge bg-warning text-dark ms-1">{% trans "Terrace" %}</span>{% endif %}
+                            {% if session_data.has_garden %}<span class="badge bg-success text-dark ms-1">{% trans "Garden" %}</span>{% endif %}
                         </div>
                     </div>
                 </div>

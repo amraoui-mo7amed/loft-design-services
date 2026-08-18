@@ -382,172 +382,292 @@ body {
     box-shadow: 0 6px 20px rgba(255, 214, 90, 0.3);
 }
 
-.floor-add-buttons-bar {
+/* ── STEP 2: Building Hierarchy Vertical Selector ── */
+.building-selector-wrapper {
+    width: 100%;
+    max-width: 580px;
+    margin: 0 auto;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 1.25rem;
-    margin-bottom: 1.75rem;
-    flex-wrap: wrap;
+    gap: 0.65rem;
+    position: relative;
 }
 
-.btn-add-floor {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1.5px solid rgba(255, 255, 255, 0.16);
-    color: #ffffff !important;
-    padding: 0.8rem 1.5rem;
+.floor-add-btn-row {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    justify-content: center;
+}
+
+.btn-add-floor-stack {
+    width: 100%;
+    min-height: 48px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px dashed rgba(255, 214, 90, 0.45);
     border-radius: var(--radius-md);
+    color: var(--gold) !important;
     font-size: 0.92rem;
     font-weight: 800;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     cursor: pointer;
-    transition: all 0.25s ease;
-}
-
-.btn-add-floor#btnAddFloorAbove:hover {
-    background: rgba(255, 214, 90, 0.18);
-    border-color: var(--gold);
-    color: var(--gold) !important;
-}
-
-.btn-add-floor#btnAddFloorBelow:hover {
-    background: rgba(56, 189, 248, 0.18);
-    border-color: #38bdf8;
-    color: #38bdf8 !important;
-}
-
-.floors-checkboxes-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1rem;
-}
-
-.floor-check-card {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1.5px solid rgba(255, 255, 255, 0.12);
-    border-radius: var(--radius-lg);
-    padding: 1.15rem 1.35rem;
-    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    padding: 0.7rem 1.25rem;
     user-select: none;
+}
+
+.btn-add-floor-stack:hover,
+.btn-add-floor-stack:focus-visible {
+    background: rgba(255, 214, 90, 0.16);
+    border-color: var(--gold);
+    box-shadow: 0 0 20px var(--gold-glow);
+    transform: translateY(-2px);
+    outline: none;
+}
+
+.btn-add-floor-stack:active {
+    transform: translateY(0);
+}
+
+.building-levels-stack {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.stack-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+/* Individual Building Level Card */
+.building-level-card {
+    width: 100%;
+    max-width: 480px;
+    min-height: 48px;
+    background: rgba(18, 24, 38, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    padding: 0.65rem 1.15rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    transition: all 0.25s ease;
+    gap: 0.85rem;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
     color: #ffffff !important;
+    position: relative;
 }
 
-.floor-check-card:hover {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.25);
+.building-level-card:hover {
+    background: rgba(25, 33, 50, 0.95);
+    border-color: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
-.floor-check-card.checked {
-    background: linear-gradient(140deg, rgba(255, 214, 90, 0.14) 0%, rgba(20, 26, 40, 0.96) 100%) !important;
+.building-level-card:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+    border-color: var(--gold);
+}
+
+.building-level-card.active {
+    background: linear-gradient(135deg, rgba(255, 214, 90, 0.18) 0%, rgba(20, 26, 42, 0.98) 100%) !important;
     border-color: var(--gold) !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45), 0 0 16px rgba(255, 214, 90, 0.16) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 16px var(--gold-glow) !important;
 }
 
-.floor-check-main {
+.building-level-card.rdc-card {
+    border-color: rgba(255, 214, 90, 0.5) !important;
+}
+
+.building-level-card.rdc-card.active {
+    background: linear-gradient(135deg, rgba(255, 214, 90, 0.24) 0%, rgba(20, 26, 42, 0.98) 100%) !important;
+    border-color: var(--gold) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 20px var(--gold-glow) !important;
+}
+
+.level-card-left {
     display: flex;
     align-items: center;
-    gap: 0.9rem;
+    gap: 12px;
     min-width: 0;
 }
 
-.floor-check-icon-wrap {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
+.level-icon-wrap {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
     background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
+    color: #94a3b8;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.building-level-card.active .level-icon-wrap {
+    background: var(--gold);
+    color: #000000;
+    border-color: var(--gold);
+}
+
+.level-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    font-size: 0.84rem;
+    font-weight: 800;
+    font-family: monospace, sans-serif;
+    letter-spacing: 0.5px;
     flex-shrink: 0;
 }
 
-.floor-check-card.checked .floor-check-icon-wrap {
-    background: var(--gold-subtle);
-    color: var(--gold) !important;
-    border-color: rgba(255, 214, 90, 0.45);
+.building-level-card.active .level-badge {
+    background: rgba(255, 214, 90, 0.25);
+    border-color: var(--gold);
+    color: var(--gold);
 }
 
-.floor-badge-tag {
-    padding: 0.3rem 0.75rem;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #ffffff !important;
-    font-size: 0.82rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.floor-check-card.checked .floor-badge-tag {
-    background: rgba(255, 214, 90, 0.22);
-    border-color: rgba(255, 214, 90, 0.45);
-    color: var(--gold) !important;
-}
-
-.floor-sub-label {
-    font-size: 0.8rem;
-    color: #f1f5f9 !important;
-    margin: 0;
+.level-name {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #ffffff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.floor-check-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-}
-
-.floor-check-indicator {
-    position: relative;
-    width: 24px;
-    height: 24px;
-}
-
-.floor-checkbox-native {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-    z-index: 2;
-}
-
-.floor-custom-check-box {
-    width: 24px;
-    height: 24px;
-    border-radius: 7px;
-    border: 2px solid rgba(255, 255, 255, 0.25);
+.level-card-check {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
     background: rgba(0, 0, 0, 0.4);
-    color: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.72rem;
-    font-weight: 900;
+    color: transparent;
+    font-size: 0.78rem;
+    flex-shrink: 0;
     transition: all 0.2s ease;
 }
 
-.floor-check-card.checked .floor-custom-check-box {
+.building-level-card.active .level-card-check {
     background: var(--gold);
     border-color: var(--gold);
-    color: #000000 !important;
-    box-shadow: 0 0 12px rgba(255, 214, 90, 0.45);
+    color: #000000;
+    box-shadow: 0 0 10px rgba(255, 214, 90, 0.5);
+}
+
+/* RDC Row Grid Layout: RDC in center/left, Terrasse and Jardin on right */
+.stack-rdc-row {
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) auto auto;
+    gap: 0.55rem;
+    align-items: stretch;
+    width: 100%;
+    max-width: 580px;
+}
+
+.building-option-card {
+    min-height: 48px;
+    min-width: 110px;
+    background: rgba(18, 24, 38, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    padding: 0.65rem 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    color: #ffffff !important;
+}
+
+.building-option-card:hover {
+    background: rgba(25, 33, 50, 0.95);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.building-option-card:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+    border-color: var(--gold);
+}
+
+.building-option-card.active {
+    background: linear-gradient(135deg, rgba(255, 214, 90, 0.18) 0%, rgba(20, 26, 42, 0.98) 100%) !important;
+    border-color: var(--gold) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 16px var(--gold-glow) !important;
+}
+
+.building-option-card.active .level-icon-wrap {
+    background: var(--gold);
+    color: #000000;
+    border-color: var(--gold);
+}
+
+.building-option-card.active .level-badge {
+    background: rgba(255, 214, 90, 0.25);
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.building-option-card.active .level-card-check {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #000000;
+    box-shadow: 0 0 10px rgba(255, 214, 90, 0.5);
+}
+
+/* Responsive queries */
+@media (max-width: 640px) {
+    .stack-rdc-row {
+        grid-template-columns: 1fr 1fr;
+        max-width: 480px;
+    }
+    .stack-rdc-row .building-level-card.rdc-card {
+        grid-column: 1 / -1;
+    }
+    .building-option-card {
+        min-width: 0;
+        justify-content: space-between;
+    }
+}
+
+/* RTL Support */
+[dir="rtl"] .level-card-left {
+    flex-direction: row-reverse;
+}
+[dir="rtl"] .building-level-card,
+[dir="rtl"] .building-option-card {
+    direction: rtl;
 }
 
 .btn-remove-floor {

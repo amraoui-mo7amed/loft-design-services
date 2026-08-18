@@ -196,14 +196,16 @@ class RequestFlowFeatureTests(TestCase):
             "floors_above": 2,
             "floors_below": 1,
             "has_terrace": True,
+            "has_garden": True,
             "floors": [
-                {"name": "Sous-sol S-1", "surface": 100},
-                {"name": "Rez-de-Chaussée (RDC)", "surface": 150},
-                {"name": "Étage R+1", "surface": 120},
-                {"name": "Étage R+2", "surface": 120},
-                {"name": "Terrasse", "surface": 80},
+                {"name": "Sous-sol R-1", "surface": 100, "level": -1},
+                {"name": "Rez-de-Chaussée (RDC)", "surface": 150, "level": 0},
+                {"name": "Étage R+1", "surface": 120, "level": 1},
+                {"name": "Étage R+2", "surface": 120, "level": 2},
+                {"name": "Terrasse", "surface": 80, "level": 99},
+                {"name": "Jardin", "surface": 100, "level": 100},
             ],
-            "total_surface": 570,
+            "total_surface": 670,
             "first_name": "Samir",
             "last_name": "Dahmani",
             "email": "samir@example.com",
@@ -219,6 +221,9 @@ class RequestFlowFeatureTests(TestCase):
         data = response.json()
         self.assertTrue(data["success"])
         self.assertEqual(data["redirect_url"], reverse("request_step5"))
+        session_data = self.client.session.get("request_flow_data", {})
+        self.assertTrue(session_data.get("has_garden"))
+        self.assertTrue(session_data.get("has_terrace"))
 
     def test_request_step5_standalone_page(self):
         session = self.client.session
@@ -226,6 +231,8 @@ class RequestFlowFeatureTests(TestCase):
             "project_type_slug": "modern-villa",
             "project_type_name": "Modern Villa",
             "total_surface": 350,
+            "has_terrace": True,
+            "has_garden": True,
             "first_name": "Samir",
             "last_name": "Dahmani",
         }
@@ -240,16 +247,21 @@ class RequestFlowFeatureTests(TestCase):
         payload = {
             "project_type_slug": "modern-villa",
             "project_type_name": "Modern Villa",
-            "floors_above": 1,
-            "floors_below": 0,
-            "has_terrace": False,
+            "floors_above": 2,
+            "floors_below": 1,
+            "has_terrace": True,
+            "has_garden": True,
             "floors": [
+                {"name": "Étage R+2", "surface": 100, "level": 2},
+                {"name": "Sous-sol R-1", "surface": 90, "level": -1},
                 {"name": "Rez-de-Chaussée (RDC)", "surface": 150, "level": 0},
                 {"name": "Étage R+1", "surface": 120, "level": 1},
+                {"name": "Terrasse / Toiture", "surface": 60, "level": 99},
+                {"name": "Jardin / Extérieur", "surface": 80, "level": 100},
             ],
-            "total_surface": 270,
+            "total_surface": 600,
             "service_id": self.svc.pk,
-            "total": 540000,
+            "total": 1200000,
             "first_name": "Amine",
             "last_name": "Meziane",
             "email": "amine@example.com",
@@ -267,12 +279,24 @@ class RequestFlowFeatureTests(TestCase):
 
         req = DesignRequest.objects.get(email="amine@example.com")
         self.assertEqual(req.first_name, "Amine")
-        self.assertEqual(req.total_surface, Decimal("270"))
-        self.assertEqual(req.total, Decimal("540000"))
+        self.assertEqual(req.total_surface, Decimal("600"))
+        self.assertEqual(req.total, Decimal("1200000"))
         self.assertEqual(req.service, self.svc)
-        self.assertEqual(req.floors.count(), 2)
-        rdc_floor = req.floors.get(level=0)
-        self.assertEqual(rdc_floor.surface, Decimal("150"))
+        self.assertTrue(req.has_terrace)
+        self.assertTrue(req.has_garden)
+        self.assertEqual(req.floors_above, 2)
+        self.assertEqual(req.floors_below, 1)
+
+        # Verify strict chronological ordering of created floors
+        floors = list(req.floors.all().order_by("order"))
+        self.assertEqual(len(floors), 6)
+        self.assertEqual([f.level for f in floors], [-1, 0, 1, 2, 99, 100])
+        self.assertEqual(floors[0].name, "Sous-sol R-1")
+        self.assertEqual(floors[1].name, "Rez-de-Chaussée (RDC)")
+        self.assertEqual(floors[2].name, "Étage R+1")
+        self.assertEqual(floors[3].name, "Étage R+2")
+        self.assertEqual(floors[4].name, "Terrasse / Toiture")
+        self.assertEqual(floors[5].name, "Jardin / Extérieur")
 
 
 class InvitationFeatureTests(TestCase):

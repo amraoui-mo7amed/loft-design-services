@@ -452,6 +452,12 @@
                             {% if project.has_terrace %}{% trans "Yes (Included)" %}{% else %}{% trans "No" %}{% endif %}
                         </strong>
                     </div>
+                    <div class="col-6 col-md-3">
+                        <span class="text-muted d-block">{% trans "Garden Configured" %}</span>
+                        <strong class="{% if project.has_garden %}text-success{% else %}text-white-50{% endif %} fs-6">
+                            {% if project.has_garden %}{% trans "Yes (Included)" %}{% else %}{% trans "No" %}{% endif %}
+                        </strong>
+                    </div>
                 </div>
             </div>
 

@@ -172,6 +172,7 @@ document.addEventListener("DOMContentLoaded", function () {
             floors_above: projectData.floors_above || 0,
             floors_below: projectData.floors_below || 0,
             has_terrace: projectData.has_terrace || false,
+            has_garden: projectData.has_garden || false,
             floors: floors,
             total_surface: totalSurface,
             service_id: currentSelectedService ? currentSelectedService.id : null,
