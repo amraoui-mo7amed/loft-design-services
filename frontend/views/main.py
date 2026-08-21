@@ -139,9 +139,28 @@ def home_view(request):
             {"id": "v3", "title": "Projet résidentiel · détails & lumière", "youtube_id": "66qSJ4EIIdM", "thumbnail": "https://loftdesign.bilnov.com/media/portfolio/thumbnails/SEJOUR_4.png"},
         ]
 
+    project_types_qs = ProjectType.objects.all().order_by("name")
+    if project_types_qs.exists():
+        project_types_data = [{
+            "id": pt.id,
+            "slug": pt.slug,
+            "name": pt.name,
+        } for pt in project_types_qs]
+    else:
+        project_types_data = [
+            {"id": 1, "slug": "residence", "name": "Résidence"},
+            {"id": 2, "slug": "villa", "name": "Villa"},
+            {"id": 3, "slug": "appartement", "name": "Appartement"},
+            {"id": 4, "slug": "commercial", "name": "Commercial"},
+            {"id": 5, "slug": "bureau", "name": "Bureau"},
+            {"id": 6, "slug": "hotel", "name": "Hôtel"},
+        ]
+
     gallery_data = build_gallery_data(all_spaces)
 
     return render(request, "home.html", {
+        "project_types": project_types_data,
+        "project_types_json": json.dumps(project_types_data),
         "spaces": spaces_data,
         "spaces_json": json.dumps(spaces_data),
         "services": services_data,
@@ -157,7 +176,7 @@ def home_view(request):
 
 
 def submit_contact(request):
-    """Create a Contact message (and optionally a Lead) from the homepage form."""
+    """Create a Contact, Lead, and Inquiry from the homepage form under transaction.atomic with admin notification."""
     if request.method != "POST":
         return JsonResponse({"success": False, "errors": [_("Method not allowed.")]})
 
@@ -184,25 +203,63 @@ def submit_contact(request):
     if errors:
         return JsonResponse({"success": False, "errors": errors})
 
-    contact = Contact.objects.create(
-        name=full_name,
-        email=email,
-        phone=phone,
-        message=message,
-    )
+    try:
+        from django.db import transaction
+        from django.db.models import Q
+        from django.contrib.auth import get_user_model
+        from django.urls import reverse
+        from dashboard.models import Inquiry
+        from dashboard.utils import notify_user
 
-    lead = Lead.objects.filter(email=email).first()
-    if not lead:
-        lead = Lead.objects.create(
-            email=email,
-            name=full_name,
-        )
+        with transaction.atomic():
+            contact = Contact.objects.create(
+                name=full_name,
+                email=email,
+                phone=phone,
+                message=message,
+            )
 
-    return JsonResponse({
-        "success": True,
-        "message": _("Thank you for reaching out! We will get back to you shortly."),
-        "contact_id": contact.id,
-    })
+            lead = Lead.objects.filter(email=email).first()
+            if not lead:
+                lead = Lead.objects.create(
+                    email=email,
+                    name=full_name,
+                )
+
+            f_name = first_name or (full_name.split()[0] if full_name else "Contact")
+            l_name = last_name or (" ".join(full_name.split()[1:]) if len(full_name.split()) > 1 else "")
+
+            Inquiry.objects.create(
+                first_name=f_name,
+                last_name=l_name,
+                email=email,
+                phone=phone,
+                spaces=[],
+                inspirations={"message": message},
+                total=0,
+            )
+
+            UserModel = get_user_model()
+            admin_users = UserModel.objects.filter(
+                Q(is_superuser=True) | Q(profile__role="admin")
+            ).distinct()
+
+            for admin_u in admin_users:
+                notify_user(
+                    user=admin_u,
+                    title=_("New Inquiry: %(name)s") % {"name": full_name},
+                    message=message[:120],
+                    notification_type="inquiry",
+                    link=reverse("dash:inquiry_list"),
+                )
+
+        return JsonResponse({
+            "success": True,
+            "message": _("Thank you for reaching out! We will get back to you shortly."),
+            "contact_id": contact.id,
+        })
+    except Exception as e:
+        return JsonResponse({"success": False, "errors": [str(e)]})
 
 
 def order_view(request):

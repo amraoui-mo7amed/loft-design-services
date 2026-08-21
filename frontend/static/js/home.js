@@ -88,6 +88,7 @@ if (videoRail) {
 const money=v=>new Intl.NumberFormat('fr-DZ').format(Math.round(v))+' DA';
 const spaces = (window.SPACES_DATA && window.SPACES_DATA.length > 0) ? window.SPACES_DATA : [{id:'living',name:'Living room',price:8000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/living-room/16757/image_1.jpg'},{id:'bed',name:'Bedroom',price:6000,img:'https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-02-05-20-45-23_Enscape_scene_8.jpg'},{id:'kitchen',name:'Kitchen',price:12000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/kitchen-interior/11154/image_1.jpg'},{id:'bath',name:'Bathroom',price:7000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/bathroom/15230/image_1_dsgPgFt.jpg'},{id:'kids',name:'Children room',price:6500,img:'https://loftdesign.bilnov.com/media/spaces/gallery/children-room/10567/image_1_qP62mWe.jpg'}];
 const services = (window.SERVICES_DATA && window.SERVICES_DATA.length > 0) ? window.SERVICES_DATA : [{id:'3d',name:'Modélisation 3D',price:750},{id:'360',name:'Visite virtuelle 360°',price:8000},{id:'light',name:'Étude d’éclairage',price:12000}];
+const projectTypes = (window.PROJECT_TYPES_DATA && window.PROJECT_TYPES_DATA.length > 0) ? window.PROJECT_TYPES_DATA : [{id:'residence',name:'Résidence'},{id:'villa',name:'Villa'},{id:'appartement',name:'Appartement'},{id:'commercial',name:'Commercial'},{id:'bureau',name:'Bureau'},{id:'hotel',name:'Hôtel'}];
 const defaultSelectedSpaces = (spaces.length >= 2) ? [spaces[0].id, spaces[1].id] : (spaces[0] ? [spaces[0].id] : ['living', 'bed']);
 const defaultSelectedServices = (services.length >= 2) ? [services[0].id, services[1].id] : (services.length === 1 ? [services[0].id] : ['3d', '360']);
 let upperLevels=['R+3','R+2','R+1'];const middleLevels=['Terrasse / Jardin','RDC'];let lowerLevels=['R-1'];
@@ -188,7 +189,7 @@ function renderProject(){
       <label>TYPE DE PROJET · OBLIGATOIRE</label>
       <select id="projectType">
         <option value="">Sélectionnez un type de projet</option>
-        ${['Résidence','Villa','Appartement','Commercial','Bureau','Hôtel'].map(x=>`<option ${st.projectType===x?'selected':''}>${x}</option>`).join('')}
+        ${projectTypes.map(x=>`<option value="${x.name}" ${st.projectType===x.name?'selected':''}>${x.name}</option>`).join('')}
       </select>
       ${!st.projectType?'<div class="typeHint">Commencez ici avant de sélectionner un niveau.</div>':''}
     </div>
@@ -444,10 +445,33 @@ function renderContactStep(){
       st.success = true;
       renderComposer();
 
-      // Open WhatsApp notification
-      const waText = `Bonjour LOFT DESIGN,\nNouvelle demande ${st.ref}\n${summary(c)}`;
-      window.open(`https://wa.me/213776139475?text=${encodeURIComponent(waText)}`, '_blank');
+      if (window.Swal) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Demande enregistrée !',
+          html: `<p style="margin:0 0 10px;">Votre projet <strong>${st.ref}</strong> a été transmis avec succès.</p><p style="color:#a0aba6;font-size:14px;">Vous pouvez consulter et télécharger votre devis estimatif ci-dessous.</p>`,
+          confirmButtonText: 'Voir mon devis',
+          customClass: {
+            popup: 'swal2-popup',
+            confirmButton: 'btn neonCyan'
+          },
+          buttonsStyling: false
+        });
+      }
     } catch(err) {
+      if (window.Swal) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: err.message || 'Une erreur est survenue lors de l’envoi.',
+          confirmButtonText: 'OK',
+          customClass: {
+            popup: 'swal2-popup',
+            confirmButton: 'btn neonCyan'
+          },
+          buttonsStyling: false
+        });
+      }
       status.textContent = err.message || 'Une erreur est survenue lors de l’envoi.';
       btn.disabled = false;
       btn.textContent = 'Réessayer';

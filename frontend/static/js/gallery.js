@@ -334,6 +334,121 @@ document.getElementById('galleryCopyLink')?.addEventListener('click',async()=>{
   try{await navigator.clipboard.writeText(gallerySelectionUrl());galleryShowToast('Lien de sélection copié')}catch(e){prompt('Copiez ce lien',gallerySelectionUrl())}
 });
 
+document.getElementById('gallerySubmitSelection')?.addEventListener('click', async () => {
+  const items = [...galleryState.cart].map(galleryGetCategory).filter(Boolean);
+  if (!items.length) {
+    if (window.Swal) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Panier vide',
+        text: 'Veuillez sélectionner au moins une inspiration avant d’envoyer.',
+        confirmButtonText: 'OK',
+        customClass: { popup: 'swal2-popup', confirmButton: 'btn neonCyan' },
+        buttonsStyling: false
+      });
+    } else {
+      galleryShowToast('Panier vide');
+    }
+    return;
+  }
+
+  if (window.Swal) {
+    const { value: formValues } = await Swal.fire({
+      title: 'Transmettre ma sélection',
+      html: `
+        <div style="display:flex;flex-direction:column;gap:10px;text-align:left;margin-top:14px;">
+          <label style="font-size:12px;color:#c0c7c4;">Nom complet
+            <input id="swal_name" class="swal2-input" placeholder="Votre nom" style="width:100%;margin:4px 0 0;box-sizing:border-box;background:rgba(4,9,12,.85);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;">
+          </label>
+          <label style="font-size:12px;color:#c0c7c4;">E-mail <span style="color:#55dcff;">*</span>
+            <input id="swal_email" type="email" class="swal2-input" placeholder="vous@exemple.com" required style="width:100%;margin:4px 0 0;box-sizing:border-box;background:rgba(4,9,12,.85);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;">
+          </label>
+          <label style="font-size:12px;color:#c0c7c4;">Téléphone
+            <input id="swal_phone" class="swal2-input" placeholder="+213 ..." style="width:100%;margin:4px 0 0;box-sizing:border-box;background:rgba(4,9,12,.85);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;">
+          </label>
+          <label style="font-size:12px;color:#c0c7c4;">Message / Remarques
+            <textarea id="swal_notes" class="swal2-textarea" placeholder="Vos souhaits particuliers…" style="width:100%;margin:4px 0 0;box-sizing:border-box;background:rgba(4,9,12,.85);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;min-height:60px;resize:vertical;"></textarea>
+          </label>
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Envoyer ma sélection',
+      cancelButtonText: 'Annuler',
+      customClass: {
+        popup: 'swal2-popup',
+        confirmButton: 'btn neonCyan',
+        cancelButton: 'btn btn-outline-light'
+      },
+      buttonsStyling: false,
+      preConfirm: () => {
+        const email = document.getElementById('swal_email')?.value?.trim();
+        if (!email) {
+          Swal.showValidationMessage('Veuillez renseigner votre adresse e-mail.');
+          return false;
+        }
+        return {
+          name: document.getElementById('swal_name')?.value?.trim() || '',
+          email: email,
+          phone: document.getElementById('swal_phone')?.value?.trim() || '',
+          notes: document.getElementById('swal_notes')?.value?.trim() || '',
+          items: items.map(c => `${c.spaceName} - ${c.name}`)
+        };
+      }
+    });
+
+    if (formValues) {
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+        (document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/) || [])[1] || '';
+
+      try {
+        const res = await fetch('/gallery/submit-selection/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify(formValues)
+        });
+        const data = await res.json();
+        if (data.success) {
+          galleryState.cart.clear();
+          galleryRenderCategories();
+          galleryRenderCart();
+          galleryCloseCart();
+          Swal.fire({
+            icon: 'success',
+            title: 'Sélection envoyée !',
+            text: data.message || 'Votre sélection d’inspirations a bien été reçue par nos architectes.',
+            confirmButtonText: 'OK',
+            customClass: { popup: 'swal2-popup', confirmButton: 'btn neonCyan' },
+            buttonsStyling: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: (Array.isArray(data.errors) ? data.errors.join(', ') : data.errors) || 'Impossible d’enregistrer votre sélection.',
+            confirmButtonText: 'OK',
+            customClass: { popup: 'swal2-popup', confirmButton: 'btn neonCyan' },
+            buttonsStyling: false
+          });
+        }
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'Une erreur réseau est survenue. Veuillez réessayer.',
+          confirmButtonText: 'OK',
+          customClass: { popup: 'swal2-popup', confirmButton: 'btn neonCyan' },
+          buttonsStyling: false
+        });
+      }
+    }
+  }
+});
+
 // Restore a shared selection
 const galleryParams=new URLSearchParams(location.search);
 const sharedSelection=(galleryParams.get('selection')||'').split(',').filter(Boolean);

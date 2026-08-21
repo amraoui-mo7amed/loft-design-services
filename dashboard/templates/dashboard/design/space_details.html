@@ -78,9 +78,6 @@
                               class="form"
                               id="editSpaceForm">
                             {% csrf_token %}
-                            {% if pt %}
-                                <input type="hidden" name="project_type_id" value="{{ pt.pk }}">
-                            {% endif %}
                             {% include "partials/errorList.html" with form_id="editSpaceForm" %}
                             <div class="mb-3">
                                 <label class="form-label text-light fw-semibold small">{% trans "Space Name" %} <span class="text-danger">*</span></label>
@@ -90,6 +87,10 @@
                                        value="{{ space.name }}"
                                        required
                                        placeholder="{% trans 'e.g. Master Bedroom' %}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-light fw-semibold small">{% trans "Project Type" %}</label>
+                                {% include "components/custom_select.html" with id="projectTypeSelect" name="project_type_id" choices=project_type_choices value=pt.pk select_title=pt.name|default:_("Select Project Type") %}
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-light fw-semibold small">{% trans "Base Price" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span></label>

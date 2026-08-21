@@ -16,4 +16,5 @@ urlpatterns = [
     path("gallery/space/<int:space_pk>/", gallery.space_gallery, name="space_gallery_space"),
     path("gallery/select/<uuid:token>/", gallery.client_gallery_selection, name="gallery_client_selection"),
     path("gallery/select/<uuid:token>/submit/", gallery.submit_client_gallery_selection, name="gallery_client_selection_submit"),
+    path("gallery/submit-selection/", gallery.submit_public_gallery_selection, name="submit_public_gallery_selection"),
 ]

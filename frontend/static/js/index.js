@@ -55,6 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (data.success) {
                     form.reset();
+                    if (window.Swal && data.message) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Succès !',
+                            text: data.message,
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                popup: 'swal2-popup',
+                                confirmButton: 'btn neonCyan'
+                            },
+                            buttonsStyling: false
+                        });
+                    }
                     if (data.message) {
                         const li = document.createElement('li');
                         li.className = 'alert alert-success d-flex align-items-center mb-2 animate-fadeIn';
@@ -64,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.redirect_url) {
                         setTimeout(() => {
                             window.location.href = data.redirect_url;
-                        }, 3000);
+                        }, 2500);
                     } else {
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = originalBtnContent;
@@ -73,20 +86,38 @@ document.addEventListener('DOMContentLoaded', () => {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalBtnContent;
 
-                    if (data.errors && errorList) {
-                        const renderMsg = (msg, cls = 'alert-danger') => {
-                            const li = document.createElement('li');
-                            li.className = `alert ${cls} d-flex align-items-center mb-2 animate-fadeIn`;
-                            li.innerHTML = `<i class="fas fa-exclamation-circle me-2 flex-shrink-0"></i><span>${msg}</span>`;
-                            errorList.appendChild(li);
-                        };
+                    if (data.errors) {
+                        if (window.Swal) {
+                            const errMsg = Array.isArray(data.errors)
+                                ? data.errors.join('<br>')
+                                : (typeof data.errors === 'object' ? Object.values(data.errors).flat().join('<br>') : String(data.errors));
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erreur',
+                                html: errMsg,
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'swal2-popup',
+                                    confirmButton: 'btn neonCyan'
+                                },
+                                buttonsStyling: false
+                            });
+                        }
+                        if (errorList) {
+                            const renderMsg = (msg, cls = 'alert-danger') => {
+                                const li = document.createElement('li');
+                                li.className = `alert ${cls} d-flex align-items-center mb-2 animate-fadeIn`;
+                                li.innerHTML = `<i class="fas fa-exclamation-circle me-2 flex-shrink-0"></i><span>${msg}</span>`;
+                                errorList.appendChild(li);
+                            };
 
-                        if (Array.isArray(data.errors)) {
-                            data.errors.forEach(renderMsg);
-                        } else if (typeof data.errors === 'object') {
-                            Object.values(data.errors)
-                                .flat()
-                                .forEach(m => renderMsg(m));
+                            if (Array.isArray(data.errors)) {
+                                data.errors.forEach(renderMsg);
+                            } else if (typeof data.errors === 'object') {
+                                Object.values(data.errors)
+                                    .flat()
+                                    .forEach(m => renderMsg(m));
+                            }
                         }
                     }
                 }
@@ -94,13 +125,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnContent;
 
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: 'Une erreur inattendue est survenue. Veuillez réessayer.',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            popup: 'swal2-popup',
+                            confirmButton: 'btn neonCyan'
+                        },
+                        buttonsStyling: false
+                    });
+                }
                 if (errorList) {
                     const li = document.createElement('li');
                     li.className = 'alert alert-danger d-flex align-items-center mb-2 animate-fadeIn';
                     li.innerHTML = '<i class="fas fa-times-circle me-2 flex-shrink-0"></i><span>An unexpected error occurred. Please try again.</span>';
                     errorList.appendChild(li);
                 }
-                console.error('Form submission error:', error);
+            }    console.error('Form submission error:', error);
             }
         });
     });

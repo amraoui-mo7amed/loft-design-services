@@ -74,6 +74,26 @@ class SpaceDetailAndGalleryTests(TestCase):
         self.assertEqual(self.space.name, "Updated Living Room")
         self.assertEqual(self.space.base_price, 30000)
 
+    def test_space_detail_move_to_new_project_type(self):
+        new_pt = ProjectType.objects.create(name="Commercial Complex", slug="commercial-complex")
+        response = self.client.post(
+            reverse("dash:space_detail", args=[self.space.pk]),
+            {
+                "name": self.space.name,
+                "base_price": "25000.00",
+                "project_type_id": new_pt.pk,
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["success"])
+
+        from dashboard.models import ProjectTypeSpace
+        pts = ProjectTypeSpace.objects.filter(space=self.space).first()
+        self.assertIsNotNone(pts)
+        self.assertEqual(pts.project_type, new_pt)
+
     def test_space_category_create(self):
         response = self.client.post(
             reverse("dash:space_category_create", args=[self.space.pk]),

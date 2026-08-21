@@ -262,3 +262,76 @@ def submit_client_gallery_selection(request, token):
 
     except Exception as e:
         return JsonResponse({"success": False, "errors": [humanize_error(e)]})
+
+
+def submit_public_gallery_selection(request):
+    """Process public submission of chosen inspiration images/categories from the gallery."""
+    if request.method != "POST":
+        return JsonResponse({"success": False, "errors": [_("Method not allowed.")]})
+
+    try:
+        data = json.loads(request.body.decode("utf-8")) if request.body else request.POST
+        name = data.get("name", "").strip()
+        email = data.get("email", "").strip()
+        phone = data.get("phone", "").strip()
+        notes = data.get("notes", "").strip()
+        items = data.get("items", [])
+
+        if not email:
+            return JsonResponse({"success": False, "errors": [_("L'adresse e-mail est obligatoire.")]})
+
+        if not items:
+            return JsonResponse({"success": False, "errors": [_("Veuillez sélectionner au moins une inspiration.")]})
+
+        from dashboard.models import Inquiry, Lead, Contact
+
+        with transaction.atomic():
+            lead = Lead.objects.filter(email=email).first()
+            if not lead:
+                lead = Lead.objects.create(
+                    email=email,
+                    name=name or "Client Galerie",
+                )
+
+            items_str = ", ".join(str(x) for x in items)
+            Contact.objects.create(
+                name=name or email,
+                email=email,
+                phone=phone,
+                message=f"Sélection galerie ({len(items)} éléments) : {items_str}. Observations : {notes}",
+            )
+
+            inquiry = Inquiry.objects.create(
+                first_name=name.split()[0] if name else "Client",
+                last_name=" ".join(name.split()[1:]) if len(name.split()) > 1 else "Galerie",
+                email=email,
+                phone=phone,
+                spaces=[],
+                inspirations={"items": items, "notes": notes},
+                total=0,
+            )
+
+            UserModel = get_user_model()
+            admins = UserModel.objects.filter(
+                Q(is_superuser=True) | Q(profile__role="admin")
+            ).distinct()
+
+            for adm in admins:
+                try:
+                    notify_user(
+                        user=adm,
+                        title=str(_("New Gallery Selection: %(name)s") % {"name": name or email}),
+                        message=f"{len(items)} inspirations sélectionnées. Notes: {notes[:80]}",
+                        notification_type="inquiry",
+                        link=reverse("dash:inquiry_detail", args=[inquiry.pk]),
+                    )
+                except Exception:
+                    pass
+
+        return JsonResponse({
+            "success": True,
+            "message": str(_("Votre sélection d'inspirations a bien été envoyée à nos architectes !")),
+        })
+    except Exception as e:
+        return JsonResponse({"success": False, "errors": [humanize_error(e)]})
+

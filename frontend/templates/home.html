@@ -344,6 +344,7 @@
   </div>
   <div class="galleryCartItems" id="galleryCartItems"></div>
   <div class="galleryCartActions">
+    <button id="gallerySubmitSelection" type="button" class="gallerySubmitBtn">{% trans "Envoyer ma sélection" %}</button>
     <button id="galleryShareWa" type="button">WhatsApp</button>
     <button id="galleryShareMail" type="button">E-mail</button>
     <button id="galleryCopyLink" type="button">{% trans "Copier le lien" %}</button>
@@ -394,9 +395,11 @@
 {% endblock content %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
+  window.PROJECT_TYPES_DATA = {{ project_types_json | safe }};
   window.PORTFOLIO_DATA = {{ portfolio_data_json | safe }};
   window.SPACES_DATA = {{ spaces_json | safe }};
   window.SERVICES_DATA = {{ services_json | safe }};

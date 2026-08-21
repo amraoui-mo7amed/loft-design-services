@@ -1,42 +1,27 @@
 # TODOLIST
 
-## Gallery Page /gallery/
-- [x] Remove the `filter and search` section
-- [x] Show the spaces of buttons in the top and remove the slider
-- [x] Show the Search Bar as always visible in desktop screens
-- [x] Show the search bar in a modal in mobile phones screens
-- [x] The Gallery Image cards are not selectable 
-- [x] Remove the `.gallery-sectioon-bar`, `.viewer-footer`, `.viewer-topbar`
-- [x] The Images inside the viewer must be fullscreen and in phone screens it must be 6/19
-- [x] when a space image has been clicked the user must navigate the images inside the categories of this space 
 
-## Request Page /request/
-- [x] Change the text of `.req-brand-link` to 'Studio'
-- [x] add a back button to Home Page icon-only
-- [x] Remove all the taglines 
-- [x] Show the Step Number And Title in the same row 
-- [x] Always Use a light text on dark background 
-- [x] Always use a dark text on a yellow background
-- [x] always be sure that the page elements are totally responsive 
-- [x] In Step 2 you must show the full cards, ex:
-    - RDC - 3
-    - RDC - 2
-    - RDC - 1 
-    - RDC 
-    - RDC + 1
-    - RDC + 2
-    - RDC + 3
-    - RDC + 4
-    - RDC + 5 
-- [x] In Step 2 add a simple clear buttons for a user to add a floor above or below 
-- [x] in step 2 Remove the `.floor-name-heading`, `.floor-sub-label`, 'watch video demo button'
-- [x] In Step 2, use the `dashboard/templates/components/video_player.html` with the 'watch demo video'
-- [x] In Step 3 remove the `.service-card-desc`
-- [x] In Step 3 redesign the `.service-option-card` so it becomes a row not a card whwre you show 
-    - a checkbox
-    - the service name 
-    - pricing 
-    - a play video buttons that shows the `video_player` modal -dont show the video modal unless this button is clicked-
-- [x] In Step 2 dont show the video modal when card clicked
-- [x] In Step 3 remove the service desc
-- [x] When a request is submitted send a notification to the admin
+## Home Page /
+
+### The Compose Section `#composer`
+
+- [x] Make the request submitted in the dashboard instead of whatsapp
+- [x] Get all the data of forms from the dashboard -especially project categories-
+- [x] Submit the two forms to Project and Inquiery Model with a notification for admin
+- [x] Use atomic to submit the notification and Model
+- [x] The Two Forms Must use sweetAlert For Form Submission Handeling
+- [x] The SweetAlertMust Be Styled with the Style of `home.css`
+ 
+### Gallery Page `/#Gallery`
+- [x] Allow User To Select Multiple Images
+- [x] Allow user to view his selected images
+- [x] Allow user to submit the selected Images to admin Dashboard with an atomic 
+- [x] Use atomic to submit the notification and Notifications 
+- [x] Allow the Admin To Send A Custom invitation Link to User So He Fills His Project Details Alongside the Spaces Selected from the images
+- [x] the Invitation Link Must Be Tokenized and Must Be Used Only Once 
+- [x] Save the E-mail template in `dashboard/template/email`
+- [x] After The Project Is Sbmitted send a notification to admin and use atomic 
+
+## Space Details Page /dashboard/design/spaces/<id>
+
+- [x] Allow the admin to Move the Space to another Project Type 

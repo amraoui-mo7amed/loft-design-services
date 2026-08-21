@@ -170,6 +170,7 @@ def space_detail(request, pk):
     )
     parent_link = space.project_types.first()
     pt = parent_link.project_type if parent_link else None
+    all_project_types = ProjectType.objects.all().order_by("name")
 
     if request.method == "POST":
         space.name = request.POST.get("name", space.name).strip()
@@ -178,8 +179,23 @@ def space_detail(request, pk):
         if not space.name:
             return JsonResponse({"success": False, "errors": [_("Space name is required.")]})
 
+        new_pt_id = request.POST.get("project_type_id")
+
         try:
-            space.save()
+            with transaction.atomic():
+                space.save()
+
+                if new_pt_id:
+                    new_pt = ProjectType.objects.filter(pk=new_pt_id).first()
+                    if new_pt:
+                        ProjectTypeSpace.objects.filter(space=space).delete()
+                        ProjectTypeSpace.objects.create(
+                            space=space,
+                            project_type=new_pt,
+                            sort_order=0,
+                            show_on_home=False,
+                        )
+
             return JsonResponse({
                 "success": True,
                 "message": _("Space details updated successfully."),
@@ -189,9 +205,13 @@ def space_detail(request, pk):
             return JsonResponse({"success": False, "errors": humanize_error(e)})
 
     categories = space.categories.prefetch_related("images").all().order_by("category_name")
+    project_type_choices = [(p.pk, p.name) for p in all_project_types]
+
     return render(request, "dashboard/design/space_details.html", {
         "space": space,
         "pt": pt,
+        "all_project_types": all_project_types,
+        "project_type_choices": project_type_choices,
         "categories": categories,
     })
 

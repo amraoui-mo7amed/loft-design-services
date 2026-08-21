@@ -148,6 +148,12 @@ class FrontendContactAndLeadTests(TestCase):
         self.assertIsNotNone(lead)
         self.assertEqual(lead.name, "Karim Brahimi")
 
+        from dashboard.models import Inquiry
+        inquiry = Inquiry.objects.filter(email="karim.brahimi@example.com").first()
+        self.assertIsNotNone(inquiry)
+        self.assertEqual(inquiry.first_name, "Karim")
+        self.assertEqual(inquiry.last_name, "Brahimi")
+
     def test_contact_form_missing_required_fields(self):
         payload = {
             "first_name": "",
@@ -165,3 +171,37 @@ class FrontendContactAndLeadTests(TestCase):
         self.assertFalse(data.get("success"))
         self.assertIn("errors", data)
         self.assertTrue(len(data["errors"]) > 0)
+
+    def test_submit_public_gallery_selection(self):
+        import json
+        payload = {
+            "name": "Nadia Amrani",
+            "email": "nadia.amrani@example.com",
+            "phone": "+213661223344",
+            "notes": "Love the scandinavian warm style",
+            "items": ["Salon - Contemporain", "Cuisine - Moderne"],
+        }
+        response = self.client.post(
+            reverse("frontend:submit_public_gallery_selection"),
+            data=json.dumps(payload),
+            content_type="application/json",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data.get("success"))
+
+        from dashboard.models import Inquiry, Lead, Contact
+        lead = Lead.objects.filter(email="nadia.amrani@example.com").first()
+        self.assertIsNotNone(lead)
+        self.assertEqual(lead.name, "Nadia Amrani")
+
+        contact = Contact.objects.filter(email="nadia.amrani@example.com").first()
+        self.assertIsNotNone(contact)
+        self.assertIn("Salon - Contemporain", contact.message)
+
+        inquiry = Inquiry.objects.filter(email="nadia.amrani@example.com").first()
+        self.assertIsNotNone(inquiry)
+        self.assertEqual(inquiry.email, "nadia.amrani@example.com")
+        self.assertIn("items", inquiry.inspirations)
+
