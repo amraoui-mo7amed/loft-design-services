@@ -18,6 +18,7 @@ from dashboard.models import (
     DesignActivityLog,
 )
 from dashboard.utils import notify_user, humanize_error
+from frontend.utils import build_gallery_data
 
 
 def space_gallery(request, space_pk=None):
@@ -29,11 +30,12 @@ def space_gallery(request, space_pk=None):
         space_pk = int(space_param)
 
     spaces = Space.objects.prefetch_related("categories__images").order_by("name")
+    active_space = None
 
     if space_pk:
-        space = get_object_or_404(Space, pk=space_pk)
+        active_space = get_object_or_404(Space, pk=space_pk)
         images = (
-            SpaceCategoryImages.objects.filter(category__space=space)
+            SpaceCategoryImages.objects.filter(category__space=active_space)
             .select_related("category", "category__space")
             .order_by("-is_default", "id")
         )
@@ -43,18 +45,7 @@ def space_gallery(request, space_pk=None):
                 | Q(description__icontains=q)
                 | Q(category__category_name__icontains=q)
             )
-
-        context = {
-            "space": space,
-            "active_space": space,
-            "spaces": spaces,
-            "images": images,
-            "q": q,
-            "is_single_space": True,
-        }
-        return render(request, "gallery.html", context)
-
-    if q or selected_space_ids:
+    elif q or selected_space_ids:
         images = SpaceCategoryImages.objects.all().select_related("category", "category__space").order_by("-is_default", "id")
         if q:
             images = images.filter(
@@ -86,13 +77,18 @@ def space_gallery(request, space_pk=None):
             .order_by("category__space__name")
         )
 
+    gallery_data = build_gallery_data(spaces)
+
     context = {
+        "space": active_space,
+        "active_space": active_space,
         "spaces": spaces,
-        "active_space": None,
         "images": images,
         "q": q,
         "selected_spaces": [int(x) for x in selected_space_ids if x.isdigit()],
-        "is_single_space": False,
+        "is_single_space": bool(active_space),
+        "gallery_data_json": json.dumps(gallery_data),
+        "initial_space_id": (active_space.slug or str(active_space.id)) if active_space else (spaces[0].slug if spaces.exists() else ""),
     }
     return render(request, "gallery.html", context)
 
@@ -168,6 +164,8 @@ def client_gallery_selection(request, token):
         .distinct()
     )
 
+    gallery_data = build_gallery_data(spaces)
+
     return render(
         request,
         "gallery_client_select.html",
@@ -178,6 +176,8 @@ def client_gallery_selection(request, token):
             "active_space": active_space,
             "images": images,
             "q": q,
+            "gallery_data_json": json.dumps(gallery_data),
+            "initial_space_id": (active_space.slug or str(active_space.id)) if active_space else (spaces[0].slug if spaces.exists() else ""),
         },
     )
 

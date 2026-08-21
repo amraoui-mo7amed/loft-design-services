@@ -2,112 +2,120 @@
 {% load i18n %}
 {% load static %}
 {% load tags %}
-
-{% block dashTitle %}{% trans "Inquiry Details" %}{% endblock dashTitle %}
-
+{% block dashTitle %}
+    {% trans "Inquiry Details" %}
+{% endblock dashTitle %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/inquiry.css' %}?v={{ ASSET_VERSION }}">
-<link rel="stylesheet" href="{% static 'css/inspiration_lightbox.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/inquiry.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/inspiration_lightbox.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
-
 {% block dashContent %}
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-        <div>
-            <a href="{% url 'dash:inquiry_list' %}" class="text-decoration-none text-muted small mb-1 d-inline-block">
-                <i class="fas fa-arrow-left me-1"></i>{% trans "Back to Inquiries" %}
-            </a>
-            <h5 class="fw-bold mb-0">{{ inquiry.first_name }} {{ inquiry.last_name }}</h5>
-            <p class="text-muted small mb-0">{{ inquiry.created_at|date:"d/m/Y H:i" }}</p>
+    <div class="container-fluid">
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+            <div>
+                <a href="{% url 'dash:inquiry_list' %}"
+                   class="text-decoration-none text-muted small mb-1 d-inline-block">
+                    <i class="fas fa-arrow-left me-1"></i>{% trans "Back to Inquiries" %}
+                </a>
+                <h5 class="fw-bold mb-0">{{ inquiry.first_name }} {{ inquiry.last_name }}</h5>
+                <p class="text-muted small mb-0">{{ inquiry.created_at|date:"d/m/Y H:i" }}</p>
+            </div>
+            <form method="post"
+                  class="d-flex gap-2 align-items-center"
+                  id="statusForm"
+                  data-confirm-title="{% trans 'Change Status?' %}"
+                  data-confirm-text="{% trans 'This will send an email notification to the customer.' %}"
+                  data-confirm-btn="{% trans 'Yes, update' %}"
+                  data-cancel-btn="{% trans 'Cancel' %}"
+                  data-success-title="{% trans 'Status Updated' %}"
+                  data-success-text="{% trans 'An email notification has been sent.' %}">
+                {% csrf_token %}
+                <select name="status"
+                        class="form-select form-select-sm rounded-3 inquiry-status-select">
+                    {% for val, label in status_choices %}
+                        <option value="{{ val }}" {% if inquiry.status == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </form>
         </div>
-        <form method="post" class="d-flex gap-2 align-items-center" id="statusForm"
-              data-confirm-title="{% trans 'Change Status?' %}"
-              data-confirm-text="{% trans 'This will send an email notification to the customer.' %}"
-              data-confirm-btn="{% trans 'Yes, update' %}"
-              data-cancel-btn="{% trans 'Cancel' %}"
-              data-success-title="{% trans 'Status Updated' %}"
-              data-success-text="{% trans 'An email notification has been sent.' %}">
-            {% csrf_token %}
-            <select name="status" class="form-select form-select-sm rounded-3 inquiry-status-select">
-                {% for val, label in status_choices %}
-                <option value="{{ val }}" {% if inquiry.status == val %}selected{% endif %}>{{ label }}</option>
-                {% endfor %}
-            </select>
-        </form>
-    </div>
-
-    <div class="row g-4">
-        <div class="col-lg-4 order-lg-2">
-            <div class="card border-0 shadow-sm inquiry-detail-card">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3">{% trans "Contact Information" %}</h6>
-                    <div class="d-flex flex-column gap-3">
-                        <div>
-                            <small class="text-muted d-block">{% trans "Name" %}</small>
-                            <span class="fw-semibold">{{ inquiry.first_name }} {{ inquiry.last_name }}</span>
-                        </div>
-                        <div>
-                            <small class="text-muted d-block">{% trans "Email" %}</small>
-                            <a href="mailto:{{ inquiry.email }}" class="fw-semibold text-decoration-none">{{ inquiry.email }}</a>
-                        </div>
-                        <div>
-                            <small class="text-muted d-block">{% trans "Phone" %}</small>
-                            <a href="tel:{{ inquiry.phone }}" class="fw-semibold text-decoration-none">{{ inquiry.phone }}</a>
+        <div class="row g-4">
+            <div class="col-lg-4 order-lg-2">
+                <div class="card border-0 shadow-sm inquiry-detail-card">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3">{% trans "Contact Information" %}</h6>
+                        <div class="d-flex flex-column gap-3">
+                            <div>
+                                <small class="text-muted d-block">{% trans "Name" %}</small>
+                                <span class="fw-semibold">{{ inquiry.first_name }} {{ inquiry.last_name }}</span>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">{% trans "Email" %}</small>
+                                <a href="mailto:{{ inquiry.email }}"
+                                   class="fw-semibold text-decoration-none">{{ inquiry.email }}</a>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">{% trans "Phone" %}</small>
+                                <a href="tel:{{ inquiry.phone }}"
+                                   class="fw-semibold text-decoration-none">{{ inquiry.phone }}</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="card border-0 shadow-sm mt-4">
-                <div class="card-body p-4 text-center">
-                    <small class="text-muted d-block mb-1">{% trans "Total Estimate" %}</small>
-                    <span class="fw-bold fs-3 inquiry-total">{{ inquiry.total|floatformat:"0u" }} DA</span>
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-body p-4 text-center">
+                        <small class="text-muted d-block mb-1">{% trans "Total Estimate" %}</small>
+                        <span class="fw-bold fs-3 inquiry-total">{{ inquiry.total|floatformat:"0u" }} DA</span>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-8 order-lg-1">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <h6 class="fw-bold mb-3">{% trans "Selected Spaces" %}</h6>
-                    {% if inquiry.spaces %}
-                    <div class="row g-3">
-                        {% for s in inquiry.spaces %}
-                        <div class="col-xl-3 col-lg-4 col-md-3 col-sm-4 col-6">
-                            <div class="inquiry-space-card">
-                                <div class="inquiry-space-name"><i class="fas fa-cube inquiry-space-icon me-1"></i>{{ s.name }}</div>
-                                <div class="inquiry-space-price">{{ s.price|floatformat:"0u" }} DA</div>
+            <div class="col-lg-8 order-lg-1">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3">{% trans "Selected Spaces" %}</h6>
+                        {% if inquiry.spaces %}
+                            <div class="row g-3">
+                                {% for s in inquiry.spaces %}
+                                    <div class="col-xl-3 col-lg-4 col-md-3 col-sm-4 col-6">
+                                        <div class="inquiry-space-card">
+                                            <div class="inquiry-space-name"><i class="fas fa-cube inquiry-space-icon me-1"></i>{{ s.name }}</div>
+                                            <div class="inquiry-space-price">{{ s.price|floatformat:"0u" }} DA</div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
                             </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <p class="text-muted mb-0">{% trans "No spaces selected." %}</p>
-                    {% endif %}
-
-                    {% if inquiry.inspirations %}
-                    <h6 class="fw-bold mb-3 mt-4"><i class="fas fa-images inquiry-space-icon me-1"></i>{% trans "Selected Inspiration Images" %}</h6>
-                    <div class="row g-2" data-inspiration-gallery>
-                        {% for space_id, imgs in inquiry.inspirations.items %}
-                        {% for img in imgs %}
-                        {% if img.url %}
-                        <div class="col-xl-3 col-lg-4 col-md-6 col-6">
-                            <div class="inquiry-inspo-card">
-                                <img src="{{ img.url }}" alt="{% trans 'Inspiration image' %}" class="inquiry-inspo-img inspo-thumb" loading="lazy" data-lightbox>
-                            </div>
-                        </div>
+                        {% else %}
+                            <p class="text-muted mb-0">{% trans "No spaces selected." %}</p>
                         {% endif %}
-                        {% endfor %}
-                        {% endfor %}
+                        {% if inquiry.inspirations %}
+                            <h6 class="fw-bold mb-3 mt-4"><i class="fas fa-images inquiry-space-icon me-1"></i>{% trans "Selected Inspiration Images" %}</h6>
+                            <div class="row g-2" data-inspiration-gallery>
+                                {% for space_id, imgs in inquiry.inspirations.items %}
+                                    {% for img in imgs %}
+                                        {% if img.url %}
+                                            <div class="col-xl-3 col-lg-4 col-md-6 col-6">
+                                                <div class="inquiry-inspo-card">
+                                                    <img src="{{ img.url }}"
+                                                         alt="{% trans 'Inspiration image' %}"
+                                                         class="inquiry-inspo-img inspo-thumb"
+                                                         loading="lazy"
+                                                         data-lightbox>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% include "components/inspiration_lightbox.html" %}
+    {% include "components/inspiration_lightbox.html" %}
 {% endblock dashContent %}
-
 {% block extra_js %}
-<script src="{% static 'js/inquiry.js' %}?v={{ ASSET_VERSION }}"></script>
-<script src="{% static 'js/inspiration_lightbox.js' %}?v={{ ASSET_VERSION }}"></script>
+    <script src="{% static 'js/inquiry.js' %}?v={{ ASSET_VERSION }}"></script>
+    <script src="{% static 'js/inspiration_lightbox.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

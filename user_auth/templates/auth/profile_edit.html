@@ -1,115 +1,152 @@
 {% extends "dash/dash_index.html" %}
 {% load i18n %}
 {% load static %}
-
-{% block dashTitle %}{% trans "Edit Profile" %}{% endblock dashTitle %}
-
+{% block dashTitle %}
+    {% trans "Edit Profile" %}
+{% endblock dashTitle %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/profile_edit.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/profile_edit.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
-
 {% block dashContent %}
-<div class="profile-edit-container">
-    <div class="card border-0 shadow-sm rounded-4 profile-card">
-        <div class="card-header border-0 rounded-top-4 p-4 profile-card-header d-flex align-items-center gap-3">
-            <div class="profile-avatar-area position-relative">
-                <div class="profile-avatar rounded-circle d-flex align-items-center justify-content-center fw-bold"
-                     id="profileAvatar"
-                     style="width: 80px; height: 80px; font-size: 1.75rem;">
-                    {{ request.user.username|slice:":1"|upper }}
+    <div class="profile-edit-container">
+        <div class="card border-0 shadow-sm rounded-4 profile-card">
+            <div class="card-header border-0 rounded-top-4 p-4 profile-card-header d-flex align-items-center gap-3">
+                <div class="profile-avatar-area position-relative">
+                    <div class="profile-avatar rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                         id="profileAvatar"
+                         style="width: 80px;
+                                height: 80px;
+                                font-size: 1.75rem">{{ request.user.username|slice:":1"|upper }}</div>
+                    <label for="profilePicInput"
+                           class="avatar-overlay rounded-circle d-flex align-items-center justify-content-center">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                    <img id="profileAvatarImg"
+                         class="profile-avatar-img rounded-circle d-none"
+                         style="width: 80px;
+                                height: 80px;
+                                object-fit: cover;
+                                position: absolute;
+                                top: 0;
+                                left: 0">
                 </div>
-                <label for="profilePicInput" class="avatar-overlay rounded-circle d-flex align-items-center justify-content-center">
-                    <i class="fas fa-camera"></i>
-                </label>
-                <img id="profileAvatarImg" class="profile-avatar-img rounded-circle d-none"
-                     style="width: 80px; height: 80px; object-fit: cover; position: absolute; top: 0; left: 0;">
+                <div>
+                    <h5 class="fw-bold mb-1 text-white">{{ request.user.get_full_name|default:request.user.username }}</h5>
+                    <p class="small mb-0 text-white opacity-75">{{ request.user.email }}</p>
+                </div>
             </div>
-            <div>
-                <h5 class="fw-bold mb-1 text-white">{{ request.user.get_full_name|default:request.user.username }}</h5>
-                <p class="small mb-0 text-white opacity-75">{{ request.user.email }}</p>
+            <div class="card-body p-4 p-md-5">
+                {% include "partials/errorList.html" with form_id="profileForm" %}
+                <form method="post"
+                      action="{% url 'user_auth:profile_edit' %}"
+                      class="form"
+                      id="profileForm"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="file"
+                           name="profile_picture"
+                           id="profilePicInput"
+                           class="d-none"
+                           accept="image/*">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                <i class="fas fa-user text-primary" style="font-size:0.8rem;"></i>
+                                {% trans "First Name" %}
+                            </label>
+                            <input type="text"
+                                   name="first_name"
+                                   class="form-control"
+                                   value="{{ request.user.first_name }}"
+                                   maxlength="30"
+                                   required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                <i class="fas fa-user text-primary" style="font-size:0.8rem;"></i>
+                                {% trans "Last Name" %}
+                            </label>
+                            <input type="text"
+                                   name="last_name"
+                                   class="form-control"
+                                   value="{{ request.user.last_name }}"
+                                   maxlength="30"
+                                   required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                <i class="fas fa-envelope text-success" style="font-size:0.8rem;"></i>
+                                {% trans "Email" %}
+                            </label>
+                            <input type="email"
+                                   name="email"
+                                   class="form-control"
+                                   value="{{ request.user.email }}"
+                                   required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                <i class="fas fa-phone text-info" style="font-size:0.8rem;"></i>
+                                {% trans "Phone Number" %}
+                            </label>
+                            <input type="text"
+                                   name="phone_number"
+                                   class="form-control"
+                                   value="{{ request.user.profile.phone_number }}"
+                                   maxlength="20">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                <i class="fas fa-calendar text-warning" style="font-size:0.8rem;"></i>
+                                {% trans "Birth Date" %}
+                            </label>
+                            <input type="date"
+                                   name="birth_date"
+                                   class="form-control"
+                                   value="{{ request.user.profile.birth_date|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                <i class="fas fa-venus-mars text-danger" style="font-size:0.8rem;"></i>
+                                {% trans "Sex" %}
+                            </label>
+                            {% include "components/custom_select.html" with id="sexSelect" name="sex" select_title=_("Select sex") choices=sex_choices value=request.user.profile.sex|default:"" %}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                <i class="fas fa-map-marker-alt text-secondary"
+                                   style="font-size:0.8rem"></i>
+                                {% trans "Address" %}
+                            </label>
+                            <input type="text"
+                                   name="address"
+                                   class="form-control"
+                                   value="{{ request.user.profile.address }}"
+                                   maxlength="255">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                <i class="fas fa-align-left text-muted" style="font-size:0.8rem;"></i>
+                                {% trans "Bio" %}
+                            </label>
+                            <textarea name="bio" class="form-control" rows="3" maxlength="500">{{ request.user.profile.bio }}</textarea>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-end pt-4 mt-4 border-top">
+                        <a href="{% url 'dash:dash_home' %}"
+                           class="btn btn-light rounded-3 px-4">
+                            <i class="fas fa-times me-2"></i>{% trans "Cancel" %}
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-3 px-4 shadow-sm">
+                            <i class="fas fa-save me-2"></i>{% trans "Save Changes" %}
+                        </button>
+                    </div>
+                </form>
             </div>
-        </div>
-
-        <div class="card-body p-4 p-md-5">
-            {% include "partials/errorList.html" with form_id="profileForm" %}
-
-            <form method="post" action="{% url 'user_auth:profile_edit' %}" class="form" id="profileForm" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input type="file" name="profile_picture" id="profilePicInput" class="d-none" accept="image/*">
-
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                            <i class="fas fa-user text-primary" style="font-size:0.8rem;"></i>
-                            {% trans "First Name" %}
-                        </label>
-                        <input type="text" name="first_name" class="form-control" value="{{ request.user.first_name }}" maxlength="30" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                            <i class="fas fa-user text-primary" style="font-size:0.8rem;"></i>
-                            {% trans "Last Name" %}
-                        </label>
-                        <input type="text" name="last_name" class="form-control" value="{{ request.user.last_name }}" maxlength="30" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                            <i class="fas fa-envelope text-success" style="font-size:0.8rem;"></i>
-                            {% trans "Email" %}
-                        </label>
-                        <input type="email" name="email" class="form-control" value="{{ request.user.email }}" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                            <i class="fas fa-phone text-info" style="font-size:0.8rem;"></i>
-                            {% trans "Phone Number" %}
-                        </label>
-                        <input type="text" name="phone_number" class="form-control" value="{{ request.user.profile.phone_number }}" maxlength="20">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                            <i class="fas fa-calendar text-warning" style="font-size:0.8rem;"></i>
-                            {% trans "Birth Date" %}
-                        </label>
-                        <input type="date" name="birth_date" class="form-control" value="{{ request.user.profile.birth_date|date:'Y-m-d' }}">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                            <i class="fas fa-venus-mars text-danger" style="font-size:0.8rem;"></i>
-                            {% trans "Sex" %}
-                        </label>
-                        {% include "components/custom_select.html" with id="sexSelect" name="sex" select_title=_("Select sex") choices=sex_choices value=request.user.profile.sex|default:"" %}
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                            <i class="fas fa-map-marker-alt text-secondary" style="font-size:0.8rem;"></i>
-                            {% trans "Address" %}
-                        </label>
-                        <input type="text" name="address" class="form-control" value="{{ request.user.profile.address }}" maxlength="255">
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                            <i class="fas fa-align-left text-muted" style="font-size:0.8rem;"></i>
-                            {% trans "Bio" %}
-                        </label>
-                        <textarea name="bio" class="form-control" rows="3" maxlength="500">{{ request.user.profile.bio }}</textarea>
-                    </div>
-                </div>
-
-                <div class="d-flex gap-2 justify-content-end pt-4 mt-4 border-top">
-                    <a href="{% url 'dash:dash_home' %}" class="btn btn-light rounded-3 px-4">
-                        <i class="fas fa-times me-2"></i>{% trans "Cancel" %}
-                    </a>
-                    <button type="submit" class="btn btn-primary rounded-3 px-4 shadow-sm">
-                        <i class="fas fa-save me-2"></i>{% trans "Save Changes" %}
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
-</div>
 {% endblock dashContent %}
-
 {% block extra_js %}
-<script src="{% static 'js/profile_edit.js' %}?v={{ ASSET_VERSION }}"></script>
+    <script src="{% static 'js/profile_edit.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

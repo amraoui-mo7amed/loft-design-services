@@ -1,7 +1,6 @@
 {% load i18n %}
 {% get_current_language as current_lang %}
 {% get_available_languages as languages %}
-
 <div class="dropdown">
     <button class="lang-switcher-btn dropdown-toggle"
             type="button"
@@ -21,22 +20,21 @@
                     {% csrf_token %}
                     <input type="hidden" name="language" value="{{ lang_code }}">
                     <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                    <button type="submit" class="dropdown-item lang-switcher-item {% if current_lang == lang_code %}active-lang{% endif %}">
+                    <button type="submit"
+                            class="dropdown-item lang-switcher-item {% if current_lang == lang_code %}active-lang{% endif %}">
                         <span class="lang-flag">
                             {% if lang_code == 'ar' %}🇩🇿
                             {% elif lang_code == 'en' %}🇬🇧
                             {% elif lang_code == 'fr' %}🇫🇷
-                            {% else %}🌐{% endif %}
-                        </span>
-                        <span class="lang-name">{{ lang_name }}</span>
-                        {% if current_lang == lang_code %}
-                            <i class="fas fa-check lang-check"></i>
-                        {% endif %}
-                    </button>
-                </form>
+        {% else %}🌐{% endif %}
+            </span>
+            <span class="lang-name">{{ lang_name }}</span>
+            {% if current_lang == lang_code %}
+                <i class="fas fa-check lang-check"></i>
+            {% endif %}
+            </button>
+            </form>
             </li>
         {% endfor %}
     </ul>
 </div>
-
-

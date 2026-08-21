@@ -1,19 +1,59 @@
 {% load i18n %}
-<div class="video-widget-overlay video-player-widget" style="display: none;" video-url="{{ video_url }}" target-btn="{{ target_btn }}">
+<div class="video-widget-overlay video-player-widget"
+     style="display: none"
+     video-url="{{ video_url }}"
+     target-btn="{{ target_btn }}">
     <div class="video-widget-container">
         <div class="video-widget-header">
             <h5 class="video-widget-title">
-                <i class="fas fa-play-circle me-2 video-player-title-icon"></i>
+                <svg viewBox="0 0 24 24"
+                     width="20"
+                     height="20"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     class="video-player-title-icon me-2"
+                     aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" fill="rgba(85,220,255,0.15)"></circle>
+                    <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"></polygon>
+                </svg>
                 <span id="videoPlayerWidgetTitle">{% trans "Video Preview" %}</span>
             </h5>
-            <button type="button" class="video-widget-close" id="closeVideoWidget" aria-label="{% trans 'Close' %}">
-                <i class="fas fa-times"></i>
+            <button type="button"
+                    class="video-widget-close"
+                    id="closeVideoWidget"
+                    aria-label="{% trans 'Close' %}">
+                <svg viewBox="0 0 24 24"
+                     width="18"
+                     height="18"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2.2"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
             </button>
         </div>
         <div class="video-widget-body">
             <div class="video-widget-stage" id="videoPlayerWidgetStage">
                 <div class="video-widget-empty">
-                    <i class="fas fa-video"></i>
+                    <svg viewBox="0 0 24 24"
+                         width="48"
+                         height="48"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.5"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         aria-hidden="true">
+                        <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                    </svg>
                     <p>{% trans "No video available." %}</p>
                 </div>
             </div>

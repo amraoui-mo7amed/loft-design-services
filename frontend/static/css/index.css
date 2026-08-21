@@ -544,13 +544,13 @@ fieldset:disabled .btn {
 }
 
 /* Footer Styles */
-footer {
+body:not(.landing-page) footer {
   background-color: var(--brand-primary) !important;
   color: var(--white-accent) !important;
   border-top: none !important;
 }
 
-footer p {
+body:not(.landing-page) footer p {
   color: rgba(255, 255, 255, 0.8) !important;
 }
 

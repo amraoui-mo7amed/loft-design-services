@@ -1,45 +1,45 @@
 {% extends "index.html" %}
 {% load i18n %}
 {% load static %}
-
 {% get_current_language_bidi as IS_RTL %}
-
 {% block title %}{% trans "Inspiration Gallery" %} — {{ project.project_name }} — LoftDesign{% endblock title %}
-
 {% block body_class %}landing-page client-gallery-page{% endblock body_class %}
-
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/home.css' %}?v={{ ASSET_VERSION }}">
-<link rel="stylesheet" href="{% static 'css/gallery.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/home.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/gallery.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
-
 {% block nav %}
     <nav class="home-navbar">
         <div class="container home-navbar-inner">
             <a class="home-navbar-brand" href="{% url 'frontend:home' %}">
                 {% if site_config.logo %}
-                    <img src="{{ site_config.logo }}" alt="{% trans 'Logo' %}" class="home-navbar-logo me-2">
+                    <img src="{{ site_config.logo }}"
+                         alt="{% trans 'Logo' %}"
+                         class="home-navbar-logo me-2">
                 {% else %}
-                    <img src="{% static 'img/icon.jpeg' %}" alt="{% trans 'Logo' %}" class="home-navbar-logo me-2">
+                    <img src="{% static 'img/icon.jpeg' %}"
+                         alt="{% trans 'Logo' %}"
+                         class="home-navbar-logo me-2">
                 {% endif %}
                 <span class="home-navbar-brand-name">
                     {% if IS_RTL %}{{ site_config.ar_name }}{% else %}{{ site_config.name }}{% endif %}
                 </span>
             </a>
-
             <div class="d-none d-md-flex align-items-center gap-2">
                 <span class="badge bg-warning text-dark font-monospace px-3 py-2 fw-bold rounded-pill">
                     <i class="fas fa-folder-open me-1"></i>{{ project.project_number }}
                 </span>
-                <span class="text-light fw-bold small text-truncate" style="max-width: 260px;">
-                    {{ project.project_name }}
-                </span>
+                <span class="text-light fw-bold small text-truncate"
+                      style="max-width: 260px">{{ project.project_name }}</span>
             </div>
-
             <div class="home-navbar-actions d-flex align-items-center gap-2">
                 {% include 'partials/language_switcher.html' %}
                 {% if user.is_authenticated %}
-                    <a href="{% url 'dash:dash_home' %}" class="home-navbar-btn" title="{% trans 'Dashboard' %}">
+                    <a href="{% url 'dash:dash_home' %}"
+                       class="home-navbar-btn"
+                       title="{% trans 'Dashboard' %}">
                         <span class="home-navbar-btn-label">{% trans "Dashboard" %}</span>
                     </a>
                 {% endif %}
@@ -47,225 +47,272 @@
         </div>
     </nav>
 {% endblock nav %}
-
-{% block sidebar %}{% endblock sidebar %}
-
+{% block sidebar %}
+{% endblock sidebar %}
 {% block content %}
-<div class="gallery-page">
-    <!-- Header Section with Title & Search -->
-    <div class="gallery-header-section">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div class="d-flex align-items-center gap-3">
-                    <div>
-                        <h1 class="gallery-title">
-                            {% if active_space %}{{ active_space.name }}{% else %}{% trans "Inspiration Gallery" %}{% endif %}
-                        </h1>
-                        <p class="text-muted small mb-0 mt-1">
-                            {% trans "Select the design inspirations that match your style for" %} <strong class="text-warning">{{ project.project_name }}</strong>
-                        </p>
+    <div class="gallery-page">
+        <!-- Header Section with Title & Search -->
+        <div class="gallery-header-section">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div>
+                            <h1 class="gallery-title">
+                                {% if active_space %}{{ active_space.name }}{% else %}{% trans "Inspiration Gallery" %}{% endif %}
+                            </h1>
+                            <p class="text-muted small mb-0 mt-1">
+                                {% trans "Select the design inspirations that match your style for" %} <strong class="text-warning">{{ project.project_name }}</strong>
+                            </p>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Desktop Search Bar (Always Visible on Desktop) -->
-                <div class="gallery-desktop-search d-none d-md-flex">
-                    <form class="gallery-search-form form" method="GET" action="{% url 'frontend:gallery_client_selection' token=invitation.token %}">
-                        {% if active_space %}
-                            <input type="hidden" name="space" value="{{ active_space.pk }}">
-                        {% endif %}
-                        <div class="gallery-search-input-wrap">
-                            <i class="fas fa-search gallery-search-icon"></i>
-                            <input type="text" class="form-control gallery-search-input" name="q" value="{{ q }}" placeholder="{% trans 'Search inspirations, tags, styles...' %}">
-                            {% if q %}
-                                <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}{% if active_space %}?space={{ active_space.pk }}{% endif %}" class="gallery-search-clear" aria-label="{% trans 'Clear' %}">
-                                    <i class="fas fa-times"></i>
-                                </a>
+                    <!-- Desktop Search Bar (Always Visible on Desktop) -->
+                    <div class="gallery-desktop-search d-none d-md-flex">
+                        <form class="gallery-search-form form"
+                              method="GET"
+                              action="{% url 'frontend:gallery_client_selection' token=invitation.token %}">
+                            {% if active_space %}
+                                <input type="hidden" name="space" value="{{ active_space.pk }}">
                             {% endif %}
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Mobile Search Button (Opens Modal on Mobile Screens) -->
-                <button type="button" class="gallery-mobile-search-btn d-flex d-md-none" data-bs-toggle="modal" data-bs-target="#gallerySearchModal" aria-label="{% trans 'Search Gallery' %}">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-
-            <!-- Top Spaces Buttons Bar (Only the spaces chosen during project submission) -->
-            <div class="gallery-spaces-buttons-bar mt-4">
-                <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}{% if q %}?q={{ q }}{% endif %}" class="gallery-space-pill-btn{% if not active_space %} active{% endif %}">
-                    <i class="fas fa-th-large"></i>
-                    <span>{% trans "All Spaces" %}</span>
-                </a>
-                {% for sp in spaces %}
-                <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}?space={{ sp.pk }}{% if q %}&q={{ q }}{% endif %}" class="gallery-space-pill-btn{% if active_space.pk == sp.pk %} active{% endif %}">
-                    <i class="fas fa-door-open"></i>
-                    <span>{{ sp.name }}</span>
-                </a>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Active Search Filter Chip -->
-    {% if q %}
-    <div class="container mt-3">
-        <div class="gallery-chips-bar">
-            <span class="gallery-chip">
-                <i class="fas fa-search"></i> "{{ q }}"
-                <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}{% if active_space %}?space={{ active_space.pk }}{% endif %}" class="gallery-chip-remove" aria-label="{% trans 'Clear search' %}">
-                    <i class="fas fa-times"></i>
-                </a>
-            </span>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Gallery Grid (Interactive Selectable Cards Matching gallery.html) -->
-    <div class="container py-4">
-        {% if images %}
-        <div class="gallery-grid" id="galleryGrid">
-            {% for img in images %}
-            <div class="gallery-card select-gallery-card" data-image-id="{{ img.pk }}" data-image-url="{{ img.image.url }}" data-space-name="{{ img.category.space.name|default:'Space' }}" data-category-name="{{ img.category.category_name|default:img.category.name|default:'' }}" data-title="{{ img.description|default:img.category.space.name|default:'' }}" data-tags="{{ img.tags|default:'' }}">
-                <img src="{{ img.image.url }}" alt="{{ img.category.space.name|default:'Design Inspiration' }}" loading="lazy">
-                
-                <!-- Selection Check Badge -->
-                <div class="gallery-select-badge" title="{% trans 'Click to select / unselect' %}">
-                    <i class="fas fa-check"></i>
-                </div>
-
-                <!-- Lightbox Preview Button -->
-                <button type="button" class="gallery-lightbox-trigger-btn" title="{% trans 'Fullscreen Preview' %}" aria-label="{% trans 'Preview' %}">
-                    <i class="fas fa-expand-arrows-alt"></i>
-                </button>
-
-                <div class="gallery-card-overlay">
-                    <div class="gallery-card-top">
-                        <span class="gallery-space-tag">{{ img.category.space.name|default:"Space" }}</span>
-                        {% if img.category.category_name %}
-                        <span class="gallery-category-tag">{{ img.category.category_name }}</span>
-                        {% elif img.category.name %}
-                        <span class="gallery-category-tag">{{ img.category.name }}</span>
-                        {% endif %}
-                    </div>
-                    <div class="gallery-card-bottom">
-                        {% if img.description %}
-                        <p class="gallery-card-title">{{ img.description }}</p>
-                        {% else %}
-                        <p class="gallery-card-title">{{ img.category.category_name|default:img.category.name|default:img.category.space.name|default:_("Design Inspiration") }}</p>
-                        {% endif %}
-                        {% if img.tags %}
-                        <div class="gallery-card-tags">
-                            {% for tag in img.tags.split %}
-                                {% if tag %}
-                                <span class="gallery-tag-badge">#{{ tag }}</span>
+                            <div class="gallery-search-input-wrap">
+                                <i class="fas fa-search gallery-search-icon"></i>
+                                <input type="text"
+                                       class="form-control gallery-search-input"
+                                       name="q"
+                                       value="{{ q }}"
+                                       placeholder="{% trans 'Search inspirations, tags, styles...' %}">
+                                {% if q %}
+                                    <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}{% if active_space %}?space={{ active_space.pk }}{% endif %}"
+                                       class="gallery-search-clear"
+                                       aria-label="{% trans 'Clear' %}">
+                                        <i class="fas fa-times"></i>
+                                    </a>
                                 {% endif %}
-                            {% endfor %}
-                        </div>
-                        {% endif %}
+                            </div>
+                        </form>
                     </div>
+                    <!-- Mobile Search Button (Opens Modal on Mobile Screens) -->
+                    <button type="button"
+                            class="gallery-mobile-search-btn d-flex d-md-none"
+                            data-bs-toggle="modal"
+                            data-bs-target="#gallerySearchModal"
+                            aria-label="{% trans 'Search Gallery' %}">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <!-- Top Spaces Buttons Bar (Only the spaces chosen during project submission) -->
+                <div class="gallery-spaces-buttons-bar mt-4">
+                    <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}{% if q %}?q={{ q }}{% endif %}"
+                       class="gallery-space-pill-btn{% if not active_space %} active{% endif %}">
+                        <i class="fas fa-th-large"></i>
+                        <span>{% trans "All Spaces" %}</span>
+                    </a>
+                    {% for sp in spaces %}
+                        <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}?space={{ sp.pk }}{% if q %}&q={{ q }}{% endif %}"
+                           class="gallery-space-pill-btn{% if active_space.pk == sp.pk %} active{% endif %}">
+                            <i class="fas fa-door-open"></i>
+                            <span>{{ sp.name }}</span>
+                        </a>
+                    {% endfor %}
                 </div>
             </div>
-            {% endfor %}
         </div>
-        {% else %}
-        <div class="text-center py-5">
-            <i class="fas fa-images fa-4x text-light mb-3 opacity-50"></i>
-            <h4 class="text-light fw-bold mb-2">{% trans "No Images Found" %}</h4>
-            <p class="text-muted small">{% trans "Try selecting another space or resetting your search." %}</p>
-            <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}" class="btn btn-sm btn-outline-light rounded-pill px-4 mt-2">{% trans "View All Spaces" %}</a>
-        </div>
+        <!-- Active Search Filter Chip -->
+        {% if q %}
+            <div class="container mt-3">
+                <div class="gallery-chips-bar">
+                    <span class="gallery-chip">
+                        <i class="fas fa-search"></i> "{{ q }}"
+                        <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}{% if active_space %}?space={{ active_space.pk }}{% endif %}"
+                           class="gallery-chip-remove"
+                           aria-label="{% trans 'Clear search' %}">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </span>
+                </div>
+            </div>
         {% endif %}
-    </div>
-
-    <!-- Floating Liquid-Glass Bottom Submission Bar -->
-    <div class="client-gallery-submit-bar is-hidden" id="clientSubmitBar">
-        <div class="submit-bar-info">
-            <span class="submit-bar-count-badge">
-                <i class="fas fa-sparkles me-1 text-warning"></i>
-                <span id="selectedCountBadge">0</span>
-            </span>
-            <span class="submit-bar-project-name d-none d-sm-inline" id="selectedCountText" data-singular="{% trans 'Inspiration Selected' %}" data-plural="{% trans 'Inspirations Selected' %}">
-                0 {% trans "Inspirations Selected" %}
-            </span>
+        <!-- Gallery Grid (Interactive Selectable Cards Matching gallery.html) -->
+        <div class="container py-4">
+            {% if images %}
+                <div class="gallery-grid" id="galleryGrid">
+                    {% for img in images %}
+                        <div class="gallery-card select-gallery-card"
+                             data-image-id="{{ img.pk }}"
+                             data-image-url="{{ img.image.url }}"
+                             data-space-name="{{ img.category.space.name|default:'Space' }}"
+                             data-category-name="{{ img.category.category_name|default:img.category.name|default:'' }}"
+                             data-title="{{ img.description|default:img.category.space.name|default:'' }}"
+                             data-tags="{{ img.tags|default:'' }}">
+                            <img src="{{ img.image.url }}"
+                                 alt="{{ img.category.space.name|default:'Design Inspiration' }}"
+                                 loading="lazy">
+                            <!-- Selection Check Badge -->
+                            <div class="gallery-select-badge"
+                                 title="{% trans 'Click to select / unselect' %}">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <!-- Lightbox Preview Button -->
+                            <button type="button"
+                                    class="gallery-lightbox-trigger-btn"
+                                    title="{% trans 'Fullscreen Preview' %}"
+                                    aria-label="{% trans 'Preview' %}">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                            </button>
+                            <div class="gallery-card-overlay">
+                                <div class="gallery-card-top">
+                                    <span class="gallery-space-tag">{{ img.category.space.name|default:"Space" }}</span>
+                                    {% if img.category.category_name %}
+                                        <span class="gallery-category-tag">{{ img.category.category_name }}</span>
+                                    {% elif img.category.name %}
+                                        <span class="gallery-category-tag">{{ img.category.name }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="gallery-card-bottom">
+                                    {% if img.description %}
+                                        <p class="gallery-card-title">{{ img.description }}</p>
+                                    {% else %}
+                                        <p class="gallery-card-title">{{ img.category.category_name|default:img.category.name|default:img.category.space.name|default:_("Design Inspiration") }}</p>
+                                    {% endif %}
+                                    {% if img.tags %}
+                                        <div class="gallery-card-tags">
+                                            {% for tag in img.tags.split %}
+                                                {% if tag %}
+                                                    <span class="gallery-tag-badge">#{{ tag }}</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-images fa-4x text-light mb-3 opacity-50"></i>
+                    <h4 class="text-light fw-bold mb-2">{% trans "No Images Found" %}</h4>
+                    <p class="text-muted small">{% trans "Try selecting another space or resetting your search." %}</p>
+                    <a href="{% url 'frontend:gallery_client_selection' token=invitation.token %}"
+                       class="btn btn-sm btn-outline-light rounded-pill px-4 mt-2">{% trans "View All Spaces" %}</a>
+                </div>
+            {% endif %}
         </div>
-        <div class="submit-bar-actions">
+        <!-- Floating Liquid-Glass Bottom Submission Bar -->
+        <div class="client-gallery-submit-bar is-hidden" id="clientSubmitBar">
+            <div class="submit-bar-info">
+                <span class="submit-bar-count-badge">
+                    <i class="fas fa-sparkles me-1 text-warning"></i>
+                    <span id="selectedCountBadge">0</span>
+                </span>
+                <span class="submit-bar-project-name d-none d-sm-inline"
+                      id="selectedCountText"
+                      data-singular="{% trans 'Inspiration Selected' %}"
+                      data-plural="{% trans 'Inspirations Selected' %}">0 {% trans "Inspirations Selected" %}</span>
+            </div>
+            <div class="submit-bar-actions">
+                <button type="button"
+                        class="btn-submit-gallery"
+                        id="btnSubmitGallery"
+                        data-submit-url="{% url 'frontend:gallery_client_selection_submit' token=invitation.token %}"
+                        data-csrf="{{ csrf_token }}"
+                        data-confirm-title="{% trans 'Submit Moodboard Selection' %}"
+                        data-confirm-desc="{% trans 'inspiration photos selected for your project design team.' %}"
+                        data-notes-label="{% trans 'Optional Notes / Special Preferences' %}"
+                        data-notes-placeholder="{% trans 'e.g. We love the natural wood textures and ambient ceiling lights...' %}"
+                        data-btn-confirm="{% trans 'Submit Moodboard' %}"
+                        data-btn-cancel="{% trans 'Review Selection' %}"
+                        data-sending-text="{% trans 'Submitting...' %}"
+                        data-no-selection-title="{% trans 'Please Select Inspirations' %}"
+                        data-no-selection-text="{% trans 'Choose at least one inspiration photo to build your moodboard.' %}"
+                        disabled>
+                    <i class="fas fa-check-circle"></i>
+                    <span>{% trans "Submit Selection" %}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Mobile Search Modal (Phone screens) -->
+    <div class="modal fade"
+         id="gallerySearchModal"
+         tabindex="-1"
+         aria-labelledby="gallerySearchModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-content-glass">
+                <div class="modal-header">
+                    <h5 class="modal-title text-light" id="gallerySearchModalLabel">
+                        <i class="fas fa-search text-warning me-2"></i>{% trans "Search Gallery" %}
+                    </h5>
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <form class="form"
+                      method="GET"
+                      action="{% url 'frontend:gallery_client_selection' token=invitation.token %}">
+                    {% if active_space %}
+                        <input type="hidden" name="space" value="{{ active_space.pk }}">
+                    {% endif %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="mobileSearchInput"
+                                   class="form-label text-warning fw-bold small text-uppercase">{% trans "Keywords, styles or tags" %}</label>
+                            <input type="text"
+                                   class="form-control gallery-search-input"
+                                   id="mobileSearchInput"
+                                   name="q"
+                                   value="{{ q }}"
+                                   placeholder="{% trans 'e.g. modern, salon, wood, cozy...' %}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button"
+                                class="btn btn-outline-light rounded-pill"
+                                data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                        <button type="submit" class="btn btn-gallery-primary">{% trans "Search" %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Fullscreen Liquid-Glass Lightbox Viewer -->
+    <div class="viewer-container"
+         id="portfolioViewer"
+         role="dialog"
+         aria-modal="true"
+         aria-label="{% trans 'Image Lightbox' %}">
+        <button type="button"
+                class="viewer-floating-close-btn"
+                id="viewerCloseBtn"
+                aria-label="{% trans 'Close Viewer' %}">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="viewer-stage">
             <button type="button"
-                    class="btn-submit-gallery"
-                    id="btnSubmitGallery"
-                    data-submit-url="{% url 'frontend:gallery_client_selection_submit' token=invitation.token %}"
-                    data-csrf="{{ csrf_token }}"
-                    data-confirm-title="{% trans 'Submit Moodboard Selection' %}"
-                    data-confirm-desc="{% trans 'inspiration photos selected for your project design team.' %}"
-                    data-notes-label="{% trans 'Optional Notes / Special Preferences' %}"
-                    data-notes-placeholder="{% trans 'e.g. We love the natural wood textures and ambient ceiling lights...' %}"
-                    data-btn-confirm="{% trans 'Submit Moodboard' %}"
-                    data-btn-cancel="{% trans 'Review Selection' %}"
-                    data-sending-text="{% trans 'Submitting...' %}"
-                    data-no-selection-title="{% trans 'Please Select Inspirations' %}"
-                    data-no-selection-text="{% trans 'Choose at least one inspiration photo to build your moodboard.' %}"
-                    disabled>
-                <i class="fas fa-check-circle"></i>
-                <span>{% trans "Submit Selection" %}</span>
+                    class="viewer-nav-btn nav-prev"
+                    id="viewerPrevBtn"
+                    aria-label="{% trans 'Previous image' %}">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="viewer-main-img-wrapper" id="viewerImgWrapper">
+                <img class="viewer-main-img"
+                     id="viewerMainImg"
+                     src=""
+                     alt="{% trans 'Design Preview' %}">
+            </div>
+            <button type="button"
+                    class="viewer-nav-btn nav-next"
+                    id="viewerNextBtn"
+                    aria-label="{% trans 'Next image' %}">
+                <i class="fas fa-chevron-right"></i>
             </button>
         </div>
     </div>
-</div>
-
-<!-- Mobile Search Modal (Phone screens) -->
-<div class="modal fade" id="gallerySearchModal" tabindex="-1" aria-labelledby="gallerySearchModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content modal-content-glass">
-            <div class="modal-header">
-                <h5 class="modal-title text-light" id="gallerySearchModalLabel">
-                    <i class="fas fa-search text-warning me-2"></i>{% trans "Search Gallery" %}
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form class="form" method="GET" action="{% url 'frontend:gallery_client_selection' token=invitation.token %}">
-                {% if active_space %}
-                    <input type="hidden" name="space" value="{{ active_space.pk }}">
-                {% endif %}
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="mobileSearchInput" class="form-label text-warning fw-bold small text-uppercase">{% trans "Keywords, styles or tags" %}</label>
-                        <input type="text" class="form-control gallery-search-input" id="mobileSearchInput" name="q" value="{{ q }}" placeholder="{% trans 'e.g. modern, salon, wood, cozy...' %}">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-light rounded-pill" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
-                    <button type="submit" class="btn btn-gallery-primary">{% trans "Search" %}</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Fullscreen Liquid-Glass Lightbox Viewer -->
-<div class="viewer-container" id="portfolioViewer" role="dialog" aria-modal="true" aria-label="{% trans 'Image Lightbox' %}">
-    <button type="button" class="viewer-floating-close-btn" id="viewerCloseBtn" aria-label="{% trans 'Close Viewer' %}">
-        <i class="fas fa-times"></i>
-    </button>
-
-    <div class="viewer-stage">
-        <button type="button" class="viewer-nav-btn nav-prev" id="viewerPrevBtn" aria-label="{% trans 'Previous image' %}">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-
-        <div class="viewer-main-img-wrapper" id="viewerImgWrapper">
-            <img class="viewer-main-img" id="viewerMainImg" src="" alt="{% trans 'Design Preview' %}">
-        </div>
-
-        <button type="button" class="viewer-nav-btn nav-next" id="viewerNextBtn" aria-label="{% trans 'Next image' %}">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-    </div>
-</div>
 {% endblock content %}
-
-{% block footer %}{% endblock footer %}
-
+{% block footer %}
+{% endblock footer %}
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{% static 'js/gallery_client_select.js' %}?v={{ ASSET_VERSION }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{% static 'js/gallery_client_select.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

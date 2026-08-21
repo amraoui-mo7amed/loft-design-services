@@ -52,22 +52,25 @@
   margin: 0;
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
 .video-player-title-icon {
-  color: var(--brand-primary, #FFD65A);
+  color: var(--cyan, #55dcff);
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .video-widget-close {
   background: transparent;
   border: none;
-  color: #fff;
-  opacity: 0.6;
-  font-size: 1.2rem;
+  color: #cdd5df;
+  opacity: 0.75;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s, background-color 0.2s;
-  width: 32px;
-  height: 32px;
+  transition: opacity 0.2s, transform 0.2s, background-color 0.2s, color 0.2s;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,8 +79,15 @@
 
 .video-widget-close:hover {
   opacity: 1;
+  color: #fff;
   transform: scale(1.08);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.video-widget-close svg {
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
 .video-widget-body {

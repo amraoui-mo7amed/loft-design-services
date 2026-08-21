@@ -1,39 +1,50 @@
 {% extends "dash/dash_index.html" %}
 {% load i18n %}
 {% load static %}
-
 {% block dashTitle %}{{ form_title }}{% endblock dashTitle %}
-
 {% block dashContent %}
-<div class="container">
-    <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body p-4">
-            <form method="post" class="form">
-                {% csrf_token %}
-                {% include "partials/errorList.html" with form_id="packageForm" %}
-                <div class="mb-3">
-                    <label class="form-label fw-bold">{% trans "Name" %}</label>
-                    <input type="text" name="name" class="form-control" value="{{ object.name|default:'' }}" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold">{% trans "Description" %}</label>
-                    <textarea name="description" class="form-control" rows="3">{{ object.description|default:'' }}</textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold">{% trans "Price Multiplier" %}</label>
-                    <input type="number" step="0.01" name="price_multiplier" class="form-control" value="{{ object.price_multiplier|default:'1.0' }}">
-                    <small class="text-muted">{% trans "Multiplied by the subtotal of selected spaces" %}</small>
-                </div>
-                <div class="mb-4 form-check">
-                    <input type="checkbox" name="active" class="form-check-input" id="activeCheck" {% if object.active or not object %}checked{% endif %}>
-                    <label class="form-check-label fw-bold" for="activeCheck">{% trans "Active" %}</label>
-                </div>
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary rounded-3 px-4 fw-bold"><i class="fas fa-save me-2"></i>{% trans "Save" %}</button>
-                    <a href="{% url 'dash:package_list' %}" class="btn btn-light rounded-3 px-4 fw-bold">{% trans "Cancel" %}</a>
-                </div>
-            </form>
+    <div class="container">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4">
+                <form method="post" class="form">
+                    {% csrf_token %}
+                    {% include "partials/errorList.html" with form_id="packageForm" %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "Name" %}</label>
+                        <input type="text"
+                               name="name"
+                               class="form-control"
+                               value="{{ object.name|default:'' }}"
+                               required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "Description" %}</label>
+                        <textarea name="description" class="form-control" rows="3">{{ object.description|default:'' }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">{% trans "Price Multiplier" %}</label>
+                        <input type="number"
+                               step="0.01"
+                               name="price_multiplier"
+                               class="form-control"
+                               value="{{ object.price_multiplier|default:'1.0' }}">
+                        <small class="text-muted">{% trans "Multiplied by the subtotal of selected spaces" %}</small>
+                    </div>
+                    <div class="mb-4 form-check">
+                        <input type="checkbox"
+                               name="active"
+                               class="form-check-input"
+                               id="activeCheck"
+                               {% if object.active or not object %}checked{% endif %}>
+                        <label class="form-check-label fw-bold" for="activeCheck">{% trans "Active" %}</label>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary rounded-3 px-4 fw-bold"><i class="fas fa-save me-2"></i>{% trans "Save" %}</button>
+                        <a href="{% url 'dash:package_list' %}"
+                           class="btn btn-light rounded-3 px-4 fw-bold">{% trans "Cancel" %}</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 {% endblock dashContent %}

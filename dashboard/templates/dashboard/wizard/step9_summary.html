@@ -1,70 +1,69 @@
 {% load i18n %}
 <div class="wizard-step" data-step="3">
-  <div class="text-center mb-4">
-    <h2 class="wiz-step-title">{% trans "Review & Submit" %}</h2>
-    <p class="wiz-step-sub">{% trans "Review your selections before submitting" %}</p>
-  </div>
-
-  <div class="wiz-summary-card mb-3" id="facturationCard">
-    <div class="wiz-summary-title mb-2"><i class="fas fa-file-invoice me-2 wiz-fact-title-icon"></i>{% trans "Facturation" %}</div>
-    <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
-      <div>
-        <div class="wiz-text-sm text-muted">{% trans "Billed to" %}</div>
-        <div class="wiz-summary-value" id="facturationClient">-</div>
-        <div class="wiz-text-sm text-muted" id="facturationContact"></div>
-      </div>
-      <div class="text-end">
-        <div class="wiz-text-sm text-muted">{% trans "Invoice" %}</div>
-        <div class="wiz-summary-value" id="facturationDocNo">LOFT-FAC-…</div>
-        <div class="wiz-text-sm text-muted" id="facturationDate"></div>
-      </div>
+    <div class="text-center mb-4">
+        <h2 class="wiz-step-title">{% trans "Review & Submit" %}</h2>
+        <p class="wiz-step-sub">{% trans "Review your selections before submitting" %}</p>
     </div>
-
-    <div class="wiz-fact-scroll">
-      <table class="wiz-fact-table">
-        <thead>
-          <tr>
-            <th class="wiz-fact-th-description">{% trans "Description" %}</th>
-            <th class="text-end wiz-fact-th-amount">{% trans "Amount (DA)" %}</th>
-          </tr>
-        </thead>
-        <tbody id="facturationTableBody"></tbody>
-      </table>
+    <div class="wiz-summary-card mb-3" id="facturationCard">
+        <div class="wiz-summary-title mb-2"><i class="fas fa-file-invoice me-2 wiz-fact-title-icon"></i>{% trans "Facturation" %}</div>
+        <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+            <div>
+                <div class="wiz-text-sm text-muted">{% trans "Billed to" %}</div>
+                <div class="wiz-summary-value" id="facturationClient">-</div>
+                <div class="wiz-text-sm text-muted" id="facturationContact"></div>
+            </div>
+            <div class="text-end">
+                <div class="wiz-text-sm text-muted">{% trans "Invoice" %}</div>
+                <div class="wiz-summary-value" id="facturationDocNo">LOFT-FAC-…</div>
+                <div class="wiz-text-sm text-muted" id="facturationDate"></div>
+            </div>
+        </div>
+        <div class="wiz-fact-scroll">
+            <table class="wiz-fact-table">
+                <thead>
+                    <tr>
+                        <th class="wiz-fact-th-description">{% trans "Description" %}</th>
+                        <th class="text-end wiz-fact-th-amount">{% trans "Amount (DA)" %}</th>
+                    </tr>
+                </thead>
+                <tbody id="facturationTableBody">
+                </tbody>
+            </table>
+        </div>
+        <div class="wiz-fact-total mt-2">
+            <div class="subrow">
+                <span>{% trans "Spaces" %}</span>
+                <span id="factSubtotal">0</span>
+            </div>
+            <div class="subrow">
+                <span>{% trans "Package" %}</span>
+                <span id="factPackage">0</span>
+            </div>
+            <div class="grand">
+                <span>{% trans "Total" %}</span>
+                <span id="factGrandTotal">0 DA</span>
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mt-3 pt-3 border-top wiz-fact-actions">
+            <button type="button"
+                    class="wiz-fact-btn wiz-fact-btn-download"
+                    id="facturationDownloadBtn">
+                <i class="fas fa-download me-2"></i>{% trans "Download PDF" %}
+            </button>
+            <button type="button"
+                    class="wiz-fact-btn wiz-fact-btn-email"
+                    id="facturationEmailBtn">
+                <i class="fas fa-paper-plane me-2"></i>{% trans "Email me the PDF" %}
+            </button>
+            <span class="wiz-fact-status" id="facturationStatus"></span>
+        </div>
     </div>
-
-    <div class="wiz-fact-total mt-2">
-      <div class="subrow">
-        <span>{% trans "Spaces" %}</span>
-        <span id="factSubtotal">0</span>
-      </div>
-      <div class="subrow">
-        <span>{% trans "Package" %}</span>
-        <span id="factPackage">0</span>
-      </div>
-      <div class="grand">
-        <span>{% trans "Total" %}</span>
-        <span id="factGrandTotal">0 DA</span>
-      </div>
+    <label class="wiz-check-label mb-3">
+        <input type="checkbox" id="acceptTerms">
+        <span class="wiz-check-label-text">{% trans "I accept the terms and conditions" %}</span>
+    </label>
+    <div class="alert wiz-alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        {% trans "After submitting, you will receive a confirmation email with your project number and a link to track your project." %}
     </div>
-
-    <div class="d-flex flex-wrap gap-2 mt-3 pt-3 border-top wiz-fact-actions">
-      <button type="button" class="wiz-fact-btn wiz-fact-btn-download" id="facturationDownloadBtn">
-        <i class="fas fa-download me-2"></i>{% trans "Download PDF" %}
-      </button>
-      <button type="button" class="wiz-fact-btn wiz-fact-btn-email" id="facturationEmailBtn">
-        <i class="fas fa-paper-plane me-2"></i>{% trans "Email me the PDF" %}
-      </button>
-      <span class="wiz-fact-status" id="facturationStatus"></span>
-    </div>
-  </div>
-
-  <label class="wiz-check-label mb-3">
-    <input type="checkbox" id="acceptTerms">
-    <span class="wiz-check-label-text">{% trans "I accept the terms and conditions" %}</span>
-  </label>
-
-  <div class="alert wiz-alert-info">
-    <i class="fas fa-info-circle me-2"></i>
-    {% trans "After submitting, you will receive a confirmation email with your project number and a link to track your project." %}
-  </div>
 </div>

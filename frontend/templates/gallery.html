@@ -1,237 +1,122 @@
-{% extends "index.html" %}
-{% load i18n %}
 {% load static %}
-
+{% load i18n %}
+{% get_current_language as current_lang %}
 {% get_current_language_bidi as IS_RTL %}
-
-{% block title %}{% trans "Inspiration Gallery" %} — LoftDesign{% endblock title %}
-
-{% block body_class %}landing-page{% endblock body_class %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/home.css' %}?v={{ ASSET_VERSION }}">
-<link rel="stylesheet" href="{% static 'css/gallery.css' %}?v={{ ASSET_VERSION }}">
-{% endblock extra_css %}
-
-{% block nav %}
-    <nav class="home-navbar">
-        <div class="container home-navbar-inner">
-            <a class="home-navbar-brand" href="{% url 'frontend:home' %}">
-                {% if site_config.logo %}
-                    <img src="{{ site_config.logo }}" alt="{% trans 'Logo' %}" class="home-navbar-logo me-2">
-                {% else %}
-                    <img src="{% static 'img/icon.jpeg' %}" alt="{% trans 'Logo' %}" class="home-navbar-logo me-2">
-                {% endif %}
-                <span class="home-navbar-brand-name">
-                    {% if IS_RTL %}{{ site_config.ar_name }}{% else %}{{ site_config.name }}{% endif %}
-                </span>
-            </a>
-
-            <ul class="home-navbar-links list-unstyled mb-0">
-                <li>
-                    <a href="{% url 'frontend:home' %}" class="home-nav-link">
-                        {% trans "Home" %}
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'frontend:space_gallery' %}" class="home-nav-link active">
-                        {% trans "Gallery" %}
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'frontend:portfolio_list' %}" class="home-nav-link">
-                        {% trans "Portfolio" %}
-                    </a>
-                </li>
-            </ul>
-
-            <div class="home-navbar-actions d-flex align-items-center gap-2">
-                {% include 'partials/language_switcher.html' %}
-                {% if user.is_authenticated %}
-                    <a href="{% url 'dash:dash_home' %}" class="home-navbar-btn" title="{% trans 'Dashboard' %}">
-                        <span class="home-navbar-btn-label">{% trans "Dashboard" %}</span>
-                    </a>
-                {% else %}
-                    <a href="{% url 'user_auth:login' %}" class="home-navbar-btn" title="{% trans 'Login' %}">
-                        <span class="home-navbar-btn-label">{% trans "Login" %}</span>
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-    </nav>
-{% endblock nav %}
-
-{% block sidebar %}{% endblock sidebar %}
-
-{% block content %}
-<div class="gallery-page">
-    <!-- Header Section with Title & Search -->
-    <div class="gallery-header-section">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div class="d-flex align-items-center gap-3">
-                    <a href="{% url 'frontend:home' %}" class="gallery-back-btn" aria-label="{% trans 'Back to Home' %}" title="{% trans 'Back to Home' %}">
-                        <i class="fas fa-arrow-left"></i>
-                    </a>
-                    <div>
-                        <h1 class="gallery-title">
-                            {% if active_space %}{{ active_space.name }}{% else %}{% trans "Inspiration Gallery" %}{% endif %}
-                        </h1>
-                    </div>
+<!DOCTYPE html>
+<html lang="{{ current_lang|default:'fr' }}"
+      dir="{% if IS_RTL %}rtl{% else %}ltr{% endif %}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport"
+              content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+        <meta name="theme-color" content="#070b0d">
+        <title>{% trans "Galerie d’inspirations" %} — {% if IS_RTL %}{{ site_config.ar_name|default:'LOFT DESIGN' }}{% else %}{{ site_config.name|default:'LOFT DESIGN' }}{% endif %}</title>
+        <link rel="icon"
+              type="image/jpeg"
+              href="{% if site_config.favicon %}{{ site_config.favicon }}{% else %}{% static 'img/icon.jpeg' %}{% endif %}">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+              rel="stylesheet">
+        <link rel="stylesheet"
+              href="{% static 'css/home.css' %}?v={{ ASSET_VERSION }}">
+        <link rel="stylesheet"
+              href="{% static 'css/gallery.css' %}?v={{ ASSET_VERSION }}">
+        <style>
+  .galleryApp {
+    position: relative !important;
+    inset: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--nav);
+  }
+  .galleryCloseTop {
+    display: none !important;
+  }
+        </style>
+    </head>
+    <body class="gallery-standalone">
+        <div class="bgLayer" id="bgA"></div>
+        <div class="bgLayer next" id="bgB"></div>
+        <div class="bgVeil"></div>
+        <header class="nav"><div class="wrap navin"><a class="logo" href="{% url 'frontend:home' %}"><img src="{% static 'img/icon.jpeg' %}" alt="LOFT DESIGN"><span>LOFT DESIGN</span></a><nav class="menu"><a href="{% url 'frontend:home' %}#portfolio">{% trans 'Portfolio' %}</a><a href="{% url 'frontend:space_gallery' %}" class="active">{% trans 'Galerie' %}</a><a href="{% url 'frontend:home' %}#apropos">{% trans 'À propos' %}</a><a href="https://store.bilnov.com" target="_blank" rel="noopener">{% trans 'Store Bilnov' %}</a><a href="{% url 'frontend:home' %}#composer">{% trans 'Compositeur' %}</a><a href="{% url 'frontend:home' %}#videos">{% trans 'Vidéos' %}</a><a href="{% url 'frontend:home' %}#contact">{% trans 'Contact' %}</a></nav><div class="navActions"><a class="btn storeTop"
+   href="https://store.bilnov.com"
+   target="_blank"
+   rel="noopener"><span class="storeIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 4h2l2.1 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H7" /><circle cx="10" cy="19" r="1.4" /><circle cx="18" cy="19" r="1.4" /></svg></span>Store Bilnov</a><a class="btn neonCyan" href="{% url 'frontend:home' %}#composer">{% trans 'Composer mon projet' %}</a>{% if user.is_authenticated %}<a class="btn neonViolet" href="{% url 'dash:dash_home' %}">{% trans 'Dashboard' %}</a>{% endif %}</div></div></header>
+        <section class="galleryApp open" id="galleryApp" aria-hidden="false">
+            <div class="galleryAppBg"></div>
+            <header class="galleryAppHeader">
+                <div class="galleryBrand">
+                    <img src="{% static 'img/icon.jpeg' %}" alt="LOFT DESIGN">
+                    <div><b>LOFT DESIGN</b><small>{% trans "Galerie d’inspirations" %}</small></div>
                 </div>
-
-                <!-- Desktop Search Bar (Always Visible on Desktop) -->
-                <div class="gallery-desktop-search d-none d-md-flex">
-                    <form class="gallery-search-form form" method="GET" action="{% url 'frontend:space_gallery' %}">
-                        {% if active_space %}
-                            <input type="hidden" name="space" value="{{ active_space.pk }}">
-                        {% endif %}
-                        <div class="gallery-search-input-wrap">
-                            <i class="fas fa-search gallery-search-icon"></i>
-                            <input type="text" class="form-control gallery-search-input" name="q" value="{{ q }}" placeholder="{% trans 'Search inspirations, tags, styles...' %}">
-                            {% if q %}
-                                <a href="{% if active_space %}{% url 'frontend:space_gallery_space' space_pk=active_space.pk %}{% else %}{% url 'frontend:space_gallery' %}{% endif %}" class="gallery-search-clear" aria-label="{% trans 'Clear' %}">
-                                    <i class="fas fa-times"></i>
-                                </a>
-                            {% endif %}
-                        </div>
-                    </form>
+                <div class="galleryHeaderActions">
+                    <button class="galleryCartTop" id="galleryCartTop" type="button">
+                        {% trans "Panier" %} <span id="galleryCartCount">0</span>
+                    </button>
+                    <a class="galleryCloseTop"
+                       href="{% url 'frontend:home' %}"
+                       style="text-decoration:none">✕</a>
                 </div>
-
-                <!-- Mobile Search Button (Opens Modal on Mobile Screens) -->
-                <button type="button" class="gallery-mobile-search-btn d-flex d-md-none" data-bs-toggle="modal" data-bs-target="#gallerySearchModal" aria-label="{% trans 'Search Gallery' %}">
-                    <i class="fas fa-search"></i>
-                </button>
+            </header>
+            <div class="galleryAppBody">
+                <div class="gallerySpacesNav">
+                    <button class="gallerySpaceArrow prev"
+                            id="gallerySpacePrev"
+                            type="button"
+                            aria-label="{% trans 'Espace précédent' %}">‹</button>
+                    <div class="gallerySpaces" id="gallerySpaces"></div>
+                    <button class="gallerySpaceArrow next"
+                            id="gallerySpaceNext"
+                            type="button"
+                            aria-label="{% trans 'Espace suivant' %}">›</button>
+                </div>
+                <div class="galleryCategoryGrid" id="galleryCategoryGrid"></div>
             </div>
-
-            <!-- Top Spaces Buttons Bar (Wrapped buttons, slider removed) -->
-            <div class="gallery-spaces-buttons-bar mt-4">
-                <a href="{% url 'frontend:space_gallery' %}{% if q %}?q={{ q }}{% endif %}" class="gallery-space-pill-btn{% if not active_space %} active{% endif %}">
-                    <i class="fas fa-th-large"></i>
-                    <span>{% trans "All Spaces" %}</span>
-                </a>
-                {% for sp in spaces %}
-                <a href="{% url 'frontend:space_gallery_space' space_pk=sp.pk %}{% if q %}?q={{ q }}{% endif %}" class="gallery-space-pill-btn{% if active_space.pk == sp.pk %} active{% endif %}">
-                    <i class="fas fa-door-open"></i>
-                    <span>{{ sp.name }}</span>
-                </a>
-                {% endfor %}
+            <button class="galleryMobileCart" id="galleryMobileCart" type="button">
+                <span>{% trans "Panier" %} <b id="galleryMobileCount">0</b></span>
+                <strong>{% trans "Voir & envoyer" %}</strong>
+            </button>
+        </section>
+        <aside class="galleryCartDrawer" id="galleryCartDrawer" aria-hidden="true">
+            <div class="galleryCartHead"><div><small>{% trans "VOTRE SÉLECTION" %}</small><h3>{% trans "Panier inspirations" %}</h3></div><button id="galleryCartClose" type="button">✕</button></div>
+            <div class="galleryCartItems" id="galleryCartItems"></div>
+            <div class="galleryCartActions">
+                <button id="galleryShareWa" type="button">{% trans "WhatsApp" %}</button>
+                <button id="galleryShareMail" type="button">{% trans "E-mail" %}</button>
+                <button id="galleryCopyLink" type="button">{% trans "Copier le lien" %}</button>
             </div>
-        </div>
-    </div>
-
-    <!-- Active Search Filter Chip -->
-    {% if q %}
-    <div class="container mt-3">
-        <div class="gallery-chips-bar">
-            <span class="gallery-chip">
-                <i class="fas fa-search"></i> "{{ q }}"
-                <a href="{% if active_space %}{% url 'frontend:space_gallery_space' space_pk=active_space.pk %}{% else %}{% url 'frontend:space_gallery' %}{% endif %}" class="gallery-chip-remove" aria-label="{% trans 'Clear search' %}">
-                    <i class="fas fa-times"></i>
-                </a>
-            </span>
-        </div>
-    </div>
+        </aside>
+        <section class="galleryDetail" id="galleryDetail" aria-hidden="true">
+            <button class="galleryDetailClose" id="galleryDetailClose" type="button">✕</button>
+            <div class="galleryDetailPanel" id="galleryDetailPanel"></div>
+        </section>
+        <section class="galleryLightbox" id="galleryLightbox" aria-hidden="true">
+            <button class="galleryLightboxClose" id="galleryLightboxClose" type="button">✕</button>
+            <button class="galleryLightboxNav prev"
+                    id="galleryLightboxPrev"
+                    type="button"
+                    aria-label="{% trans 'Image précédente' %}">‹</button>
+            <div class="galleryLightboxStage">
+                <img id="galleryLightboxImg" src="" alt="">
+            </div>
+            <button class="galleryLightboxNav next"
+                    id="galleryLightboxNext"
+                    type="button"
+                    aria-label="{% trans 'Image suivante' %}">›</button>
+            <div class="galleryLightboxThumbs" id="galleryLightboxThumbs"></div>
+        </section>
+        <div class="galleryToast" id="galleryToast">{% trans "Lien copié" %}</div>
+        <script>
+    window.GALLERY_DATA = {{ gallery_data_json|safe }};
+    {% if initial_space_id %}
+    window.INITIAL_SPACE_ID = "{{ initial_space_id }}";
     {% endif %}
-
-    <!-- Gallery Grid (Non-Selectable Cards) -->
-    <div class="container py-4">
-        {% if images %}
-        <div class="gallery-grid" id="galleryGrid">
-            {% for img in images %}
-            <div class="gallery-card" data-image-id="{{ img.pk }}" data-image-url="{{ img.image.url }}" data-space-name="{{ img.category.space.name|default:'Space' }}" data-category-name="{{ img.category.name|default:'' }}" data-title="{{ img.description|default:img.category.space.name|default:'' }}" data-tags="{{ img.tags|default:'' }}">
-                <img src="{{ img.image.url }}" alt="{{ img.category.space.name|default:'Design Inspiration' }}" loading="lazy">
-                <div class="gallery-card-overlay">
-                    <div class="gallery-card-top">
-                        <span class="gallery-space-tag">{{ img.category.space.name|default:"Space" }}</span>
-                        {% if img.category.name %}
-                        <span class="gallery-category-tag">{{ img.category.name }}</span>
-                        {% endif %}
-                    </div>
-                    <div class="gallery-card-bottom">
-                        {% if img.description %}
-                        <p class="gallery-card-title">{{ img.description }}</p>
-                        {% else %}
-                        <p class="gallery-card-title">{{ img.category.name|default:img.category.space.name|default:_("Design Inspiration") }}</p>
-                        {% endif %}
-                        {% if img.tags %}
-                        <div class="gallery-card-tags">
-                            {% for tag in img.tags.split %}
-                                {% if tag %}
-                                <span class="gallery-tag-badge">#{{ tag }}</span>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="text-center py-5">
-            <i class="fas fa-images fa-4x text-light mb-3 opacity-50"></i>
-            <h4 class="text-light fw-bold mb-2">{% trans "No Images Found" %}</h4>
-            <p class="text-muted small">{% trans "Try selecting another space or resetting your search." %}</p>
-            <a href="{% url 'frontend:space_gallery' %}" class="btn btn-sm btn-outline-light rounded-pill px-4 mt-2">{% trans "View All Spaces" %}</a>
-        </div>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Mobile Search Modal (Phone screens) -->
-<div class="modal fade" id="gallerySearchModal" tabindex="-1" aria-labelledby="gallerySearchModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content modal-content-glass">
-            <div class="modal-header">
-                <h5 class="modal-title text-light" id="gallerySearchModalLabel">
-                    <i class="fas fa-search text-warning me-2"></i>{% trans "Search Gallery" %}
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form class="form" method="GET" action="{% url 'frontend:space_gallery' %}">
-                {% if active_space %}
-                    <input type="hidden" name="space" value="{{ active_space.pk }}">
-                {% endif %}
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="mobileSearchInput" class="form-label text-warning fw-bold small text-uppercase">{% trans "Keywords, styles or tags" %}</label>
-                        <input type="text" class="form-control gallery-search-input" id="mobileSearchInput" name="q" value="{{ q }}" placeholder="{% trans 'e.g. modern, salon, wood, cozy...' %}">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-light rounded-pill" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
-                    <button type="submit" class="btn btn-gallery-primary">{% trans "Search" %}</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Fullscreen Liquid-Glass Lightbox Viewer (No topbar, no footer, 6/19 on mobile) -->
-<div class="viewer-container" id="portfolioViewer" role="dialog" aria-modal="true" aria-label="{% trans 'Image Lightbox' %}">
-    <button type="button" class="viewer-floating-close-btn" id="viewerCloseBtn" aria-label="{% trans 'Close Viewer' %}">
-        <i class="fas fa-times"></i>
-    </button>
-
-    <div class="viewer-stage">
-        <button type="button" class="viewer-nav-btn nav-prev" id="viewerPrevBtn" aria-label="{% trans 'Previous image' %}">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-
-        <div class="viewer-main-img-wrapper" id="viewerImgWrapper">
-            <img class="viewer-main-img" id="viewerMainImg" src="" alt="{% trans 'Design Preview' %}">
-        </div>
-
-        <button type="button" class="viewer-nav-btn nav-next" id="viewerNextBtn" aria-label="{% trans 'Next image' %}">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-    </div>
-</div>
-{% endblock content %}
-
-{% block footer %}{% endblock footer %}
-
-{% block extra_js %}
-<script src="{% static 'js/gallery.js' %}?v={{ ASSET_VERSION }}"></script>
-{% endblock extra_js %}
+        </script>
+        <script src="{% static 'js/gallery.js' %}?v={{ ASSET_VERSION }}"></script>
+    </body>
+</html>

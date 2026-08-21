@@ -3,89 +3,102 @@
 {% load static %}
 {% load l10n %}
 {% load tags %}
-
-{% block dashTitle %}{% trans "Portfolios" %}{% endblock dashTitle %}
-
+{% block dashTitle %}
+    {% trans "Portfolios" %}
+{% endblock dashTitle %}
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/portfolio.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/portfolio.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
-
 {% block dashContent %}
-<div class="editorial-header">
-  <div class="editorial-header-left">
-    <h5 class="fw-bold mb-0">{% trans "Portfolios" %}</h5>
-    <p class="text-muted small mb-0">{% trans "Manage your design portfolio projects" %}</p>
-  </div>
-  <div class="d-flex gap-2 align-items-center">
-    <div class="editorial-search">
-      <i class="fas fa-search"></i>
-      <input type="text" class="form-control" id="searchInput" data-portfolio-search="true" placeholder="{% trans "Search portfolios..." %}" value="{{ query }}" autocomplete="off">
-      {% if query %}
-      <button class="search-clear" id="searchClear" data-search-clear="true">×</button>
-      {% endif %}
+    <div class="editorial-header">
+        <div class="editorial-header-left">
+            <h5 class="fw-bold mb-0">{% trans "Portfolios" %}</h5>
+            <p class="text-muted small mb-0">{% trans "Manage your design portfolio projects" %}</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <div class="editorial-search">
+                <i class="fas fa-search"></i>
+                <input type="text"
+                       class="form-control"
+                       id="searchInput"
+                       data-portfolio-search="true"
+                       placeholder="{% trans "Search portfolios..." %}"
+                       value="{{ query }}"
+                       autocomplete="off">
+                {% if query %}
+                    <button class="search-clear" id="searchClear" data-search-clear="true">×</button>
+                {% endif %}
+            </div>
+            <a href="{% url 'dash:portfolio_create' %}"
+               class="dash-btn dash-btn-primary rounded-3 px-4 fw-bold shadow-sm">
+                <i class="fas fa-plus me-2"></i>{% trans "New Masterpiece" %}
+            </a>
+        </div>
     </div>
-    <a href="{% url 'dash:portfolio_create' %}" class="dash-btn dash-btn-primary rounded-3 px-4 fw-bold shadow-sm">
-      <i class="fas fa-plus me-2"></i>{% trans "New Masterpiece" %}
-    </a>
-  </div>
-</div>
-
-{% if page_obj.object_list %}
-<div class="editorial-grid portfolio-card-grid">
-  {% for portfolio in page_obj %}
-  <div class="portfolio-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|stringformat:'i'|slice:':1' }}0">
-    <div class="portfolio-card-img">
-      {% if portfolio.thumbnail %}
-      <img src="{{ portfolio.thumbnail.url }}" alt="{{ portfolio.title }}" loading="lazy">
-      {% else %}
-      <div class="portfolio-card-fallback"><i class="fas fa-image"></i></div>
-      {% endif %}
-    </div>
-    {% if portfolio.is_featured %}
-    <span class="portfolio-card-featured">{% trans "Featured" %}</span>
+    {% if page_obj.object_list %}
+        <div class="editorial-grid portfolio-card-grid">
+            {% for portfolio in page_obj %}
+                <div class="portfolio-card"
+                     data-aos="fade-up"
+                     data-aos-delay="{{ forloop.counter0|stringformat:'i'|slice:':1' }}0">
+                    <div class="portfolio-card-img">
+                        {% if portfolio.thumbnail %}
+                            <img src="{{ portfolio.thumbnail.url }}"
+                                 alt="{{ portfolio.title }}"
+                                 loading="lazy">
+                        {% else %}
+                            <div class="portfolio-card-fallback">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if portfolio.is_featured %}
+                        <span class="portfolio-card-featured">{% trans "Featured" %}</span>
+                    {% endif %}
+                    <div class="portfolio-card-meta">
+                        {% if portfolio.model_3d %}
+                            <span class="portfolio-card-meta-3d" title="{% trans '3D Model' %}"><i class="fas fa-cube"></i> 3D</span>
+                        {% endif %}
+                        <span title="{% trans 'Gallery images' %}"><i class="far fa-images"></i> {{ portfolio.gallery_images.all|length }}</span>
+                        <span title="{% trans 'Created' %}"><i class="far fa-calendar-alt"></i> {{ portfolio.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="portfolio-card-body">
+                        <h5>{{ portfolio.title }}</h5>
+                    </div>
+                    <div class="portfolio-card-actions">
+                        <a href="{% url 'dash:portfolio_update' portfolio.pk %}"
+                           class="portfolio-card-action"
+                           title="{% trans 'Edit' %}">
+                            <i class="fas fa-pen"></i>
+                        </a>
+                        <button class="portfolio-card-action portfolio-card-action--delete delete_button"
+                                title="{% trans 'Delete' %}"
+                                data-delete-url="{% url 'dash:portfolio_delete' portfolio.pk %}"
+                                data-csrf-token="{{ csrf_token }}"
+                                data-swal-title="{% trans 'Delete Portfolio?' %}"
+                                data-swal-text="{% trans 'This will permanently delete this portfolio and all its images.' %}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="editorial-empty">
+            <i class="fas fa-briefcase"></i>
+            <h5>{% trans "No portfolios yet" %}</h5>
+            <p class="text-muted small mb-3">{% trans "Create your first masterpiece to showcase your work." %}</p>
+            <a href="{% url 'dash:portfolio_create' %}"
+               class="dash-btn dash-btn-primary rounded-3 px-4 fw-bold">
+                <i class="fas fa-plus me-2"></i>{% trans "New Masterpiece" %}
+            </a>
+        </div>
     {% endif %}
-    <div class="portfolio-card-meta">
-      {% if portfolio.model_3d %}
-      <span class="portfolio-card-meta-3d" title="{% trans '3D Model' %}"><i class="fas fa-cube"></i> 3D</span>
-      {% endif %}
-      <span title="{% trans 'Gallery images' %}"><i class="far fa-images"></i> {{ portfolio.gallery_images.all|length }}</span>
-      <span title="{% trans 'Created' %}"><i class="far fa-calendar-alt"></i> {{ portfolio.created_at|date:"M d, Y" }}</span>
-    </div>
-    <div class="portfolio-card-body">
-      <h5>{{ portfolio.title }}</h5>
-    </div>
-    <div class="portfolio-card-actions">
-      <a href="{% url 'dash:portfolio_update' portfolio.pk %}" class="portfolio-card-action" title="{% trans 'Edit' %}">
-        <i class="fas fa-pen"></i>
-      </a>
-      <button class="portfolio-card-action portfolio-card-action--delete delete_button"
-        title="{% trans 'Delete' %}"
-        data-delete-url="{% url 'dash:portfolio_delete' portfolio.pk %}"
-        data-csrf-token="{{ csrf_token }}"
-        data-swal-title="{% trans 'Delete Portfolio?' %}"
-        data-swal-text="{% trans 'This will permanently delete this portfolio and all its images.' %}">
-        <i class="fas fa-trash"></i>
-      </button>
-    </div>
-  </div>
-  {% endfor %}
-</div>
-{% else %}
-<div class="editorial-empty">
-  <i class="fas fa-briefcase"></i>
-  <h5>{% trans "No portfolios yet" %}</h5>
-  <p class="text-muted small mb-3">{% trans "Create your first masterpiece to showcase your work." %}</p>
-  <a href="{% url 'dash:portfolio_create' %}" class="dash-btn dash-btn-primary rounded-3 px-4 fw-bold">
-    <i class="fas fa-plus me-2"></i>{% trans "New Masterpiece" %}
-  </a>
-</div>
-{% endif %}
-
-{% if page_obj.paginator.num_pages > 1 %}
-<div class="mt-5">{% render_pagination page_obj %}</div>
-{% endif %}
+    {% if page_obj.paginator.num_pages > 1 %}
+        <div class="mt-5">{% render_pagination page_obj %}</div>
+    {% endif %}
 {% endblock dashContent %}
-
 {% block extra_js %}
-<script src="{% static 'js/portfolio.js' %}?v={{ ASSET_VERSION }}"></script>
+    <script src="{% static 'js/portfolio.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

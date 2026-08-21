@@ -1,10 +1,10 @@
 {% load i18n %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'en' }}">
-<head>
-    <meta charset="utf-8">
-    <title>{% trans "Proforma Invoice / Facture" %}</title>
-    <style>
+    <head>
+        <meta charset="utf-8">
+        <title>{% trans "Proforma Invoice / Facture" %}</title>
+        <style>
         @page {
             size: A4;
             margin: 20mm 15mm 20mm 15mm;
@@ -231,117 +231,111 @@
             border-top: 1px solid #e5e7eb;
             padding-top: 15px;
         }
-    </style>
-</head>
-<body>
-
-    <!-- Header / Brand -->
-    <table class="header-table">
-        <tr>
-            <td>
-                <div class="studio-title">LOFT<span style="color:#eab308;">DESIGN</span></div>
-                <div class="studio-subtitle">{% trans "Haute Interior Architecture & Design Studio" %}</div>
-            </td>
-            <td class="doc-meta">
-                <div class="doc-badge">{% trans "Proforma Invoice" %}</div>
-                <div class="doc-number">{{ doc_number }}</div>
-                <div class="doc-date">{% trans "Date:" %} {{ date }}</div>
-            </td>
-        </tr>
-    </table>
-
-    <!-- Info Grid: Client & Property -->
-    <table class="info-grid">
-        <tr>
-            <td class="info-col">
-                <div class="section-label">{% trans "Client Information" %}</div>
-                <div class="info-card">
-                    <div class="client-name">{{ client_name }}</div>
-                    {% if email %}<div class="client-detail"><strong>{% trans "Email:" %}</strong> {{ email }}</div>{% endif %}
-                    {% if phone %}<div class="client-detail"><strong>{% trans "Phone:" %}</strong> {{ phone }}</div>{% endif %}
-                </div>
-            </td>
-            <td class="info-col">
-                <div class="section-label">{% trans "Project Architecture" %}</div>
-                <div class="info-card-right">
-                    <div class="client-name">{{ project_type }}</div>
-                    <div class="client-detail"><strong>{% trans "Project:" %}</strong> {{ project_name }}</div>
-                    <div class="client-detail"><strong>{% trans "Total Surface:" %}</strong> {{ total_surface }} m²</div>
-                </div>
-            </td>
-        </tr>
-    </table>
-
-    <!-- Items & Services Breakdown Table -->
-    <table class="items-table">
-        <thead>
+        </style>
+    </head>
+    <body>
+        <!-- Header / Brand -->
+        <table class="header-table">
             <tr>
-                <th>{% trans "Description / Service" %}</th>
-                <th class="center" style="width: 25%;">{% trans "Rate / Unit" %}</th>
-                <th class="right" style="width: 25%;">{% trans "Amount (DA)" %}</th>
+                <td>
+                    <div class="studio-title">LOFT<span style="color:#eab308;">DESIGN</span></div>
+                    <div class="studio-subtitle">{% trans "Haute Interior Architecture & Design Studio" %}</div>
+                </td>
+                <td class="doc-meta">
+                    <div class="doc-badge">{% trans "Proforma Invoice" %}</div>
+                    <div class="doc-number">{{ doc_number }}</div>
+                    <div class="doc-date">{% trans "Date:" %} {{ date }}</div>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            <!-- Floor Levels Section -->
-            {% if items %}
-            <tr class="category-header-row">
-                <td colspan="3">{% trans "Floor Dimensions & Spatial Levels" %}</td>
-            </tr>
-            {% for it in items %}
+        </table>
+        <!-- Info Grid: Client & Property -->
+        <table class="info-grid">
             <tr>
-                <td>{{ it.description }}</td>
-                <td class="center">{{ it.amount }}</td>
-                <td class="right" style="color:#6b7280;">—</td>
+                <td class="info-col">
+                    <div class="section-label">{% trans "Client Information" %}</div>
+                    <div class="info-card">
+                        <div class="client-name">{{ client_name }}</div>
+                        {% if email %}<div class="client-detail"><strong>{% trans "Email:" %}</strong> {{ email }}</div>{% endif %}
+                        {% if phone %}<div class="client-detail"><strong>{% trans "Phone:" %}</strong> {{ phone }}</div>{% endif %}
+                    </div>
+                </td>
+                <td class="info-col">
+                    <div class="section-label">{% trans "Project Architecture" %}</div>
+                    <div class="info-card-right">
+                        <div class="client-name">{{ project_type }}</div>
+                        <div class="client-detail"><strong>{% trans "Project:" %}</strong> {{ project_name }}</div>
+                        <div class="client-detail"><strong>{% trans "Total Surface:" %}</strong> {{ total_surface }} m²</div>
+                    </div>
+                </td>
             </tr>
-            {% endfor %}
-            {% endif %}
-
-            <!-- Selected Services Section -->
-            {% if services_list %}
-            <tr class="category-header-row">
-                <td colspan="3">{% trans "Selected Architectural & Design Services" %}</td>
-            </tr>
-            {% for s in services_list %}
+        </table>
+        <!-- Items & Services Breakdown Table -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Description / Service" %}</th>
+                    <th class="center" style="width: 25%;">{% trans "Rate / Unit" %}</th>
+                    <th class="right" style="width: 25%;">{% trans "Amount (DA)" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Floor Levels Section -->
+                {% if items %}
+                    <tr class="category-header-row">
+                        <td colspan="3">{% trans "Floor Dimensions & Spatial Levels" %}</td>
+                    </tr>
+                    {% for it in items %}
+                        <tr>
+                            <td>{{ it.description }}</td>
+                            <td class="center">{{ it.amount }}</td>
+                            <td class="right" style="color:#6b7280;">—</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                <!-- Selected Services Section -->
+                {% if services_list %}
+                    <tr class="category-header-row">
+                        <td colspan="3">{% trans "Selected Architectural & Design Services" %}</td>
+                    </tr>
+                    {% for s in services_list %}
+                        <tr>
+                            <td><strong>{{ s.name }}</strong></td>
+                            <td class="center">{{ s.rate }}</td>
+                            <td class="right" style="font-weight:bold;">{{ s.amount }}</td>
+                        </tr>
+                    {% endfor %}
+                {% elif package_name %}
+                    <tr class="category-header-row">
+                        <td colspan="3">{% trans "Selected Design Package" %}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>{{ package_name }}</strong></td>
+                        <td class="center">{{ unit_price }} DA</td>
+                        <td class="right" style="font-weight:bold;">{{ total }} DA</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        <!-- Totals & Notes -->
+        <table class="totals-table">
             <tr>
-                <td><strong>{{ s.name }}</strong></td>
-                <td class="center">{{ s.rate }}</td>
-                <td class="right" style="font-weight:bold;">{{ s.amount }}</td>
+                <td class="totals-col-left">
+                    <div class="notice-box">
+                        <strong>{% trans "Proforma Quotation Notice:" %}</strong>
+                        <br>
+                        {% trans "This document serves as an official preliminary architectural estimate based on the configured floor levels and selected design services. Valid for 30 days." %}
+                    </div>
+                </td>
+                <td class="totals-col-right">
+                    <div class="grand-total-box">
+                        <div class="grand-total-label">{% trans "Total Estimated Price" %}</div>
+                        <div class="grand-total-val">{{ total }} DA</div>
+                    </div>
+                </td>
             </tr>
-            {% endfor %}
-            {% elif package_name %}
-            <tr class="category-header-row">
-                <td colspan="3">{% trans "Selected Design Package" %}</td>
-            </tr>
-            <tr>
-                <td><strong>{{ package_name }}</strong></td>
-                <td class="center">{{ unit_price }} DA</td>
-                <td class="right" style="font-weight:bold;">{{ total }} DA</td>
-            </tr>
-            {% endif %}
-        </tbody>
-    </table>
-
-    <!-- Totals & Notes -->
-    <table class="totals-table">
-        <tr>
-            <td class="totals-col-left">
-                <div class="notice-box">
-                    <strong>{% trans "Proforma Quotation Notice:" %}</strong><br>
-                    {% trans "This document serves as an official preliminary architectural estimate based on the configured floor levels and selected design services. Valid for 30 days." %}
-                </div>
-            </td>
-            <td class="totals-col-right">
-                <div class="grand-total-box">
-                    <div class="grand-total-label">{% trans "Total Estimated Price" %}</div>
-                    <div class="grand-total-val">{{ total }} DA</div>
-                </div>
-            </td>
-        </tr>
-    </table>
-
-    <div class="footer-note">
-        <p>{{ thank_you_message }}</p>
-    </div>
-
-</body>
+        </table>
+        <div class="footer-note">
+            <p>{{ thank_you_message }}</p>
+        </div>
+    </body>
 </html>

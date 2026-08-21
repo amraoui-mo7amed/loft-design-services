@@ -1,39 +1,57 @@
 {% load i18n %}
 <div class="wizard-step" data-step="2">
-  <div class="text-center mb-4">
-    <h2 class="wiz-step-title">{% trans "Your Contact Information" %}</h2>
-    <p class="wiz-step-sub">{% trans "We'll send your design proposal to this email" %}</p>
-  </div>
-
-  <div class="row justify-content-center">
-    <div class="col-lg-8 col-xl-7">
-      <form id="questionnaireForm" class="form">
-        <div class="wiz-question-card">
-          <div class="row g-3">
-            <div class="col-sm-6">
-              <label class="wiz-form-label" for="qFirstName">{% trans "First Name" %} <span class="text-danger">*</span></label>
-              <input type="text" id="qFirstName" name="first_name" class="wiz-form-control" placeholder="{% trans "John" %}" required>
-            </div>
-            <div class="col-sm-6">
-              <label class="wiz-form-label" for="qLastName">{% trans "Last Name" %} <span class="text-danger">*</span></label>
-              <input type="text" id="qLastName" name="last_name" class="wiz-form-control" placeholder="{% trans "Doe" %}" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="wiz-question-card">
-          <div class="row g-3">
-            <div class="col-sm-6">
-              <label class="wiz-form-label" for="qEmail">{% trans "Email Address" %} <span class="text-danger">*</span></label>
-              <input type="email" id="qEmail" name="email" class="wiz-form-control" placeholder="{% trans "john@example.com" %}" required>
-            </div>
-            <div class="col-sm-6">
-              <label class="wiz-form-label" for="qPhone">{% trans "Phone Number" %} <span class="text-danger">*</span></label>
-              <input type="tel" id="qPhone" name="phone" class="wiz-form-control" placeholder="{% trans "+213 555 123 456" %}" required>
-            </div>
-          </div>
-        </div>
-      </form>
+    <div class="text-center mb-4">
+        <h2 class="wiz-step-title">{% trans "Your Contact Information" %}</h2>
+        <p class="wiz-step-sub">{% trans "We'll send your design proposal to this email" %}</p>
     </div>
-  </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            <form id="questionnaireForm" class="form">
+                <div class="wiz-question-card">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="wiz-form-label" for="qFirstName">{% trans "First Name" %} <span class="text-danger">*</span></label>
+                            <input type="text"
+                                   id="qFirstName"
+                                   name="first_name"
+                                   class="wiz-form-control"
+                                   placeholder="{% trans "John" %}"
+                                   required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="wiz-form-label" for="qLastName">{% trans "Last Name" %} <span class="text-danger">*</span></label>
+                            <input type="text"
+                                   id="qLastName"
+                                   name="last_name"
+                                   class="wiz-form-control"
+                                   placeholder="{% trans "Doe" %}"
+                                   required>
+                        </div>
+                    </div>
+                </div>
+                <div class="wiz-question-card">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="wiz-form-label" for="qEmail">{% trans "Email Address" %} <span class="text-danger">*</span></label>
+                            <input type="email"
+                                   id="qEmail"
+                                   name="email"
+                                   class="wiz-form-control"
+                                   placeholder="{% trans "john@example.com" %}"
+                                   required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="wiz-form-label" for="qPhone">{% trans "Phone Number" %} <span class="text-danger">*</span></label>
+                            <input type="tel"
+                                   id="qPhone"
+                                   name="phone"
+                                   class="wiz-form-control"
+                                   placeholder="{% trans "+213 555 123 456" %}"
+                                   required>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>

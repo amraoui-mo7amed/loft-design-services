@@ -1,4 +1,5 @@
 import json
+import re
 
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -7,53 +8,151 @@ from django.utils.translation import gettext as _
 from django.utils.html import escape
 from dashboard.models import Portfolio, ProjectType, Space, Service, Contact, Lead, Video
 from dashboard.utils import build_packages_context
+from frontend.utils import build_gallery_data
 
 
 def home_view(request):
-    featured = ProjectType.objects.filter(featured_on_home=True).first()
-    if featured:
-        spaces = (
-            Space.objects.filter(project_types__project_type=featured, project_types__show_on_home=True)
-            .distinct()
-            .prefetch_related("categories__images")
-            .order_by("name")
-        )
-    else:
-        spaces = Space.objects.none()
+    all_spaces = Space.objects.prefetch_related("categories__images").order_by("name")
+    
+    PRIMARY_SPACES_MAP = [
+        {"slug": "living-room", "alt_slugs": ["living", "salon"], "name": "Living room", "price": 8000.0, "img": "https://loftdesign.bilnov.com/media/spaces/gallery/living-room/16757/image_1.jpg"},
+        {"slug": "bedroom", "alt_slugs": ["bed", "chambre"], "name": "Bedroom", "price": 6000.0, "img": "https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-02-05-20-45-23_Enscape_scene_8.jpg"},
+        {"slug": "kitchen", "alt_slugs": ["cuisine"], "name": "Kitchen", "price": 12000.0, "img": "https://loftdesign.bilnov.com/media/spaces/gallery/kitchen-interior/11154/image_1.jpg"},
+        {"slug": "bathroom", "alt_slugs": ["bath", "sdb"], "name": "Bathroom", "price": 7000.0, "img": "https://loftdesign.bilnov.com/media/spaces/gallery/bathroom/15230/image_1_dsgPgFt.jpg"},
+        {"slug": "kids-room", "alt_slugs": ["kids", "children-room", "enfant"], "name": "Children room", "price": 6500.0, "img": "https://loftdesign.bilnov.com/media/spaces/gallery/children-room/10567/image_1_qP62mWe.jpg"},
+    ]
+    
+    spaces_by_slug = {sp.slug or str(sp.id): sp for sp in all_spaces}
+    spaces_data = []
+    for default_sp in PRIMARY_SPACES_MAP:
+        matched = None
+        for s_candidate in [default_sp["slug"]] + default_sp["alt_slugs"]:
+            if s_candidate in spaces_by_slug:
+                matched = spaces_by_slug[s_candidate]
+                break
+        if not matched:
+            for sp in all_spaces:
+                if sp.name.lower() == default_sp["name"].lower():
+                    matched = sp
+                    break
 
-    spaces_data = [{
-        "id": space.id,
-        "name": space.name,
-        "slug": space.slug,
-        "base_price": space.base_price,
-        "thumbnail": space.thumbnail.url if space.thumbnail else None,
-    } for space in spaces]
+        if matched:
+            thumb = matched.thumbnail.url if (matched.thumbnail and not str(matched.thumbnail).endswith('.gif')) else ""
+            if not thumb:
+                for cat in matched.categories.all():
+                    first_img = cat.images.first()
+                    if first_img:
+                        thumb = first_img.image.url
+                        break
+            spaces_data.append({
+                "id": matched.slug or str(matched.id),
+                "slug": matched.slug or str(matched.id),
+                "name": matched.name,
+                "price": float(matched.base_price) if matched.base_price > 0 else default_sp["price"],
+                "base_price": float(matched.base_price) if matched.base_price > 0 else default_sp["price"],
+                "img": thumb or default_sp["img"],
+                "thumbnail": thumb or default_sp["img"],
+            })
+        else:
+            spaces_data.append({
+                "id": default_sp["slug"],
+                "slug": default_sp["slug"],
+                "name": default_sp["name"],
+                "price": default_sp["price"],
+                "base_price": default_sp["price"],
+                "img": default_sp["img"],
+                "thumbnail": default_sp["img"],
+            })
 
-    services = Service.objects.all().order_by("-is_default", "service_name")
-    package_data = []
-    for s in services:
-        package_data.append({
+    services_qs = Service.objects.all().order_by("-is_default", "service_name")
+    if services_qs.exists():
+        services_data = [{
             "id": s.id,
             "name": s.service_name,
-            "link": "",
-            "delivery_days": 7,
-            "services_count": 1,
-            "total_price": s.service_price,
-            "services": [
-                {
-                    "id": s.id,
-                    "name": s.service_name,
-                    "price": str(s.service_price),
-                }
-            ],
-            "services_more": 0,
+            "price": float(s.service_price),
+            "pricing_type": s.pricing_type,
+            "is_default": s.is_default,
+        } for s in services_qs]
+    else:
+        services_data = [
+            {"id": "3d", "name": "Modélisation 3D", "price": 750.0, "pricing_type": "per_sqm", "is_default": True},
+            {"id": "360", "name": "Visite virtuelle 360°", "price": 8000.0, "pricing_type": "fixed", "is_default": True},
+            {"id": "light", "name": "Étude d’éclairage", "price": 12000.0, "pricing_type": "fixed", "is_default": False},
+        ]
+
+    PORTFOLIO_DEFAULT_IMAGES = [
+        "https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-02-05-20-45-23_Enscape_scene_8.jpg",
+        "https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2025-11-02-20-03-26_Enscape_scene_1.png",
+        "https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2024-10-27-23-48-12.png",
+        "https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-07-07-23-27-11.png",
+        "https://loftdesign.bilnov.com/media/portfolio/thumbnails/SEJOUR_4.png",
+        "https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-01-02-19-38-33_Enscape_scene_14.png",
+    ]
+    portfolios_qs = Portfolio.objects.prefetch_related("gallery_images").order_by("-created_at")[:15]
+    portfolio_data = []
+    for i, p in enumerate(portfolios_qs):
+        g_imgs = [g.image.url for g in p.gallery_images.all()]
+        def_img = PORTFOLIO_DEFAULT_IMAGES[i % len(PORTFOLIO_DEFAULT_IMAGES)]
+        t_url = p.thumbnail.url if p.thumbnail else (g_imgs[0] if g_imgs else def_img)
+        if not g_imgs:
+            g_imgs = [t_url, PORTFOLIO_DEFAULT_IMAGES[(i+1) % len(PORTFOLIO_DEFAULT_IMAGES)], PORTFOLIO_DEFAULT_IMAGES[(i+2) % len(PORTFOLIO_DEFAULT_IMAGES)]]
+        portfolio_data.append({
+            "id": p.id,
+            "name": p.title,
+            "img": t_url,
+            "vr": p.external_link or "/gallery/",
+            "gallery": g_imgs,
         })
+    if not portfolio_data:
+        default_names = [
+            'Appartement Chéraga', 'Suite contemporaine', 'Épure urbaine',
+            'Maison Sidi Aïch', 'Séjour Béjaïa', 'Triplex Béjaïa'
+        ]
+        for i, name in enumerate(default_names):
+            img = PORTFOLIO_DEFAULT_IMAGES[i % len(PORTFOLIO_DEFAULT_IMAGES)]
+            portfolio_data.append({
+                "id": f"demo-{i+1}",
+                "name": name,
+                "img": img,
+                "vr": "/gallery/",
+                "gallery": [img, PORTFOLIO_DEFAULT_IMAGES[(i+1) % len(PORTFOLIO_DEFAULT_IMAGES)], PORTFOLIO_DEFAULT_IMAGES[(i+2) % len(PORTFOLIO_DEFAULT_IMAGES)]],
+            })
+
+    videos_qs = Video.objects.all().order_by("-created_at")
+    video_data = []
+    for v in videos_qs:
+        yt_id = "66qSJ4EIIdM"
+        if v.play_link:
+            match = re.search(r"(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})", v.play_link)
+            if match:
+                yt_id = match.group(1)
+        video_data.append({
+            "id": v.id,
+            "title": v.title,
+            "youtube_id": yt_id,
+            "thumbnail": v.thumbnail_url or f"https://img.youtube.com/vi/{yt_id}/hqdefault.jpg",
+        })
+    if not video_data:
+        video_data = [
+            {"id": "v1", "title": "LOFT DESIGN · immersion & projet", "youtube_id": "66qSJ4EIIdM", "thumbnail": "https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg"},
+            {"id": "v2", "title": "Conception · matières · expérience", "youtube_id": "66qSJ4EIIdM", "thumbnail": "https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-07-07-23-27-11.png"},
+            {"id": "v3", "title": "Projet résidentiel · détails & lumière", "youtube_id": "66qSJ4EIIdM", "thumbnail": "https://loftdesign.bilnov.com/media/portfolio/thumbnails/SEJOUR_4.png"},
+        ]
+
+    gallery_data = build_gallery_data(all_spaces)
 
     return render(request, "home.html", {
         "spaces": spaces_data,
-        "packages": package_data,
-        "projects": Portfolio.objects.prefetch_related("gallery_images").order_by("-created_at")[:12],
-        "videos": Video.objects.all(),
+        "spaces_json": json.dumps(spaces_data),
+        "services": services_data,
+        "services_json": json.dumps(services_data),
+        "projects": portfolios_qs,
+        "portfolio_list": portfolio_data,
+        "portfolio_data_json": json.dumps(portfolio_data),
+        "videos": videos_qs,
+        "video_list": video_data,
+        "video_data_json": json.dumps(video_data),
+        "gallery_data_json": json.dumps(gallery_data),
     })
 
 
@@ -92,12 +191,12 @@ def submit_contact(request):
         message=message,
     )
 
-    lead, lead_created = Lead.objects.get_or_create(
-        email=email,
-        defaults={
-            "name": full_name,
-        },
-    )
+    lead = Lead.objects.filter(email=email).first()
+    if not lead:
+        lead = Lead.objects.create(
+            email=email,
+            name=full_name,
+        )
 
     return JsonResponse({
         "success": True,

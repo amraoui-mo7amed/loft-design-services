@@ -1,17 +1,15 @@
 {% extends "index.html" %}
 {% load i18n %}
 {% load static %}
-
 {% get_current_language_bidi as IS_RTL %}
-
 {% block title %}{% trans "Moodboard Confirmed" %} — {{ project.project_name }} — LoftDesign{% endblock title %}
-
 {% block body_class %}landing-page client-gallery-page{% endblock body_class %}
-
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/home.css' %}?v={{ ASSET_VERSION }}">
-<link rel="stylesheet" href="{% static 'css/gallery.css' %}?v={{ ASSET_VERSION }}">
-<style>
+    <link rel="stylesheet"
+          href="{% static 'css/home.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/gallery.css' %}?v={{ ASSET_VERSION }}">
+    <style>
     .client-submitted-hero {
         background: linear-gradient(135deg, rgba(16, 22, 34, 0.95), rgba(9, 13, 22, 0.98));
         border: 1.5px solid rgba(52, 211, 153, 0.4);
@@ -38,36 +36,38 @@
         margin: 0 auto 20px;
         box-shadow: 0 0 30px rgba(52, 211, 153, 0.35);
     }
-</style>
+    </style>
 {% endblock extra_css %}
-
 {% block nav %}
     <nav class="home-navbar">
         <div class="container home-navbar-inner">
             <a class="home-navbar-brand" href="{% url 'frontend:home' %}">
                 {% if site_config.logo %}
-                    <img src="{{ site_config.logo }}" alt="{% trans 'Logo' %}" class="home-navbar-logo me-2">
+                    <img src="{{ site_config.logo }}"
+                         alt="{% trans 'Logo' %}"
+                         class="home-navbar-logo me-2">
                 {% else %}
-                    <img src="{% static 'img/icon.jpeg' %}" alt="{% trans 'Logo' %}" class="home-navbar-logo me-2">
+                    <img src="{% static 'img/icon.jpeg' %}"
+                         alt="{% trans 'Logo' %}"
+                         class="home-navbar-logo me-2">
                 {% endif %}
                 <span class="home-navbar-brand-name">
                     {% if IS_RTL %}{{ site_config.ar_name }}{% else %}{{ site_config.name }}{% endif %}
                 </span>
             </a>
-
             <div class="d-none d-md-flex align-items-center gap-2">
                 <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-30 font-monospace px-3 py-2 fw-bold rounded-pill">
                     <i class="fas fa-check-circle me-1"></i>{{ project.project_number }}
                 </span>
-                <span class="text-light fw-bold small text-truncate" style="max-width: 260px;">
-                    {{ project.project_name }}
-                </span>
+                <span class="text-light fw-bold small text-truncate"
+                      style="max-width: 260px">{{ project.project_name }}</span>
             </div>
-
             <div class="home-navbar-actions d-flex align-items-center gap-2">
                 {% include 'partials/language_switcher.html' %}
                 {% if user.is_authenticated %}
-                    <a href="{% url 'dash:dash_home' %}" class="home-navbar-btn" title="{% trans 'Dashboard' %}">
+                    <a href="{% url 'dash:dash_home' %}"
+                       class="home-navbar-btn"
+                       title="{% trans 'Dashboard' %}">
                         <span class="home-navbar-btn-label">{% trans "Dashboard" %}</span>
                     </a>
                 {% endif %}
@@ -75,110 +75,124 @@
         </div>
     </nav>
 {% endblock nav %}
-
-{% block sidebar %}{% endblock sidebar %}
-
+{% block sidebar %}
+{% endblock sidebar %}
 {% block content %}
-<div class="gallery-page">
-    <div class="container py-5">
-
-        <!-- Submitted Status Hero -->
-        <div class="client-submitted-hero text-light">
-            <div class="check-circle-hero">
-                <i class="fas fa-check"></i>
-            </div>
-            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-30 rounded-pill px-3 py-1 mb-2 font-monospace">
-                {{ project.project_number }}
-            </span>
-            <h2 class="fw-bold text-white mb-2">{% trans "Moodboard Successfully Submitted!" %}</h2>
-            <p class="text-white-50 mx-auto mb-3" style="max-width: 650px;">
-                {% trans "Thank you! Your chosen architectural and interior inspiration styles have been linked to your project. Our design team is currently reviewing your preferences." %}
-            </p>
-            <div class="d-inline-flex align-items-center gap-2 bg-dark bg-opacity-50 px-4 py-2 rounded-pill border border-secondary border-opacity-25 text-white-50 small">
-                <i class="far fa-clock text-warning"></i>
-                <span>{% trans "Submitted on" %} {{ invitation.used_at|date:"d M Y, H:i"|default:invitation.created_at|date:"d M Y" }}</span>
-            </div>
-        </div>
-
-        <!-- Selected Moodboard Images Grid using Gallery styling -->
-        {% if selected_gallery %}
-        <div class="mb-5">
-            <div class="d-flex align-items-center justify-content-between mb-4">
-                <h4 class="fw-bold text-white mb-0">
-                    <i class="fas fa-images text-warning me-2"></i>{% trans "Your Selected Inspiration Styles" %}
-                </h4>
-                <span class="badge bg-warning text-dark font-monospace px-3 py-2 rounded-pill fw-bold">
-                    {{ selected_gallery|length }} {% trans "Styles Selected" %}
+    <div class="gallery-page">
+        <div class="container py-5">
+            <!-- Submitted Status Hero -->
+            <div class="client-submitted-hero text-light">
+                <div class="check-circle-hero">
+                    <i class="fas fa-check"></i>
+                </div>
+                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-30 rounded-pill px-3 py-1 mb-2 font-monospace">
+                    {{ project.project_number }}
                 </span>
+                <h2 class="fw-bold text-white mb-2">{% trans "Moodboard Successfully Submitted!" %}</h2>
+                <p class="text-white-50 mx-auto mb-3" style="max-width: 650px;">
+                    {% trans "Thank you! Your chosen architectural and interior inspiration styles have been linked to your project. Our design team is currently reviewing your preferences." %}
+                </p>
+                <div class="d-inline-flex align-items-center gap-2 bg-dark bg-opacity-50 px-4 py-2 rounded-pill border border-secondary border-opacity-25 text-white-50 small">
+                    <i class="far fa-clock text-warning"></i>
+                    <span>{% trans "Submitted on" %} {{ invitation.used_at|date:"d M Y, H:i"|default:invitation.created_at|date:"d M Y" }}</span>
+                </div>
             </div>
-
-            <div class="gallery-grid" id="galleryGrid">
-                {% for item in selected_gallery %}
-                <div class="gallery-card" data-image-id="{{ item.space_image.pk }}" data-image-url="{{ item.space_image.image.url }}" data-space-name="{{ item.space_image.category.space.name|default:'Space' }}" data-category-name="{{ item.space_image.category.category_name|default:'' }}" data-title="{{ item.space_image.description|default:item.space_image.category.space.name|default:'' }}" data-tags="{{ item.space_image.tags|default:'' }}">
-                    <img src="{{ item.space_image.image.url }}" alt="{{ item.space_image.category.category_name }}" loading="lazy">
-                    <div class="gallery-card-overlay">
-                        <div class="gallery-card-top">
-                            <span class="gallery-space-tag">{{ item.space_image.category.space.name|default:"Space" }}</span>
-                            {% if item.space_image.category.category_name %}
-                            <span class="gallery-category-tag">{{ item.space_image.category.category_name }}</span>
-                            {% endif %}
-                        </div>
-                        <div class="gallery-card-bottom">
-                            {% if item.space_image.description %}
-                            <p class="gallery-card-title">{{ item.space_image.description }}</p>
-                            {% else %}
-                            <p class="gallery-card-title">{{ item.space_image.category.category_name|default:item.space_image.category.space.name|default:_("Design Inspiration") }}</p>
-                            {% endif %}
-                            {% if item.space_image.tags %}
-                            <div class="gallery-card-tags">
-                                {% for tag in item.space_image.tags.split %}
-                                    {% if tag %}
-                                    <span class="gallery-tag-badge">#{{ tag }}</span>
-                                    {% endif %}
-                                {% endfor %}
+            <!-- Selected Moodboard Images Grid using Gallery styling -->
+            {% if selected_gallery %}
+                <div class="mb-5">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h4 class="fw-bold text-white mb-0">
+                            <i class="fas fa-images text-warning me-2"></i>{% trans "Your Selected Inspiration Styles" %}
+                        </h4>
+                        <span class="badge bg-warning text-dark font-monospace px-3 py-2 rounded-pill fw-bold">
+                            {{ selected_gallery|length }} {% trans "Styles Selected" %}
+                        </span>
+                    </div>
+                    <div class="gallery-grid" id="galleryGrid">
+                        {% for item in selected_gallery %}
+                            <div class="gallery-card"
+                                 data-image-id="{{ item.space_image.pk }}"
+                                 data-image-url="{{ item.space_image.image.url }}"
+                                 data-space-name="{{ item.space_image.category.space.name|default:'Space' }}"
+                                 data-category-name="{{ item.space_image.category.category_name|default:'' }}"
+                                 data-title="{{ item.space_image.description|default:item.space_image.category.space.name|default:'' }}"
+                                 data-tags="{{ item.space_image.tags|default:'' }}">
+                                <img src="{{ item.space_image.image.url }}"
+                                     alt="{{ item.space_image.category.category_name }}"
+                                     loading="lazy">
+                                <div class="gallery-card-overlay">
+                                    <div class="gallery-card-top">
+                                        <span class="gallery-space-tag">{{ item.space_image.category.space.name|default:"Space" }}</span>
+                                        {% if item.space_image.category.category_name %}
+                                            <span class="gallery-category-tag">{{ item.space_image.category.category_name }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="gallery-card-bottom">
+                                        {% if item.space_image.description %}
+                                            <p class="gallery-card-title">{{ item.space_image.description }}</p>
+                                        {% else %}
+                                            <p class="gallery-card-title">{{ item.space_image.category.category_name|default:item.space_image.category.space.name|default:_("Design Inspiration") }}</p>
+                                        {% endif %}
+                                        {% if item.space_image.tags %}
+                                            <div class="gallery-card-tags">
+                                                {% for tag in item.space_image.tags.split %}
+                                                    {% if tag %}
+                                                        <span class="gallery-tag-badge">#{{ tag }}</span>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
-                            {% endif %}
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
-                {% endfor %}
+            {% endif %}
+            <div class="text-center mt-5">
+                <a href="{% url 'frontend:home' %}"
+                   class="btn btn-outline-light rounded-pill px-4 py-2">
+                    <i class="fas fa-home me-2"></i>{% trans "Back to LoftDesign Home" %}
+                </a>
             </div>
         </div>
-        {% endif %}
-
-        <div class="text-center mt-5">
-            <a href="{% url 'frontend:home' %}" class="btn btn-outline-light rounded-pill px-4 py-2">
-                <i class="fas fa-home me-2"></i>{% trans "Back to LoftDesign Home" %}
-            </a>
-        </div>
-
     </div>
-</div>
-
-<!-- Fullscreen Liquid-Glass Lightbox Viewer -->
-<div class="viewer-container" id="portfolioViewer" role="dialog" aria-modal="true" aria-label="{% trans 'Image Lightbox' %}">
-    <button type="button" class="viewer-floating-close-btn" id="viewerCloseBtn" aria-label="{% trans 'Close Viewer' %}">
-        <i class="fas fa-times"></i>
-    </button>
-
-    <div class="viewer-stage">
-        <button type="button" class="viewer-nav-btn nav-prev" id="viewerPrevBtn" aria-label="{% trans 'Previous image' %}">
-            <i class="fas fa-chevron-left"></i>
+    <!-- Fullscreen Liquid-Glass Lightbox Viewer -->
+    <div class="viewer-container"
+         id="portfolioViewer"
+         role="dialog"
+         aria-modal="true"
+         aria-label="{% trans 'Image Lightbox' %}">
+        <button type="button"
+                class="viewer-floating-close-btn"
+                id="viewerCloseBtn"
+                aria-label="{% trans 'Close Viewer' %}">
+            <i class="fas fa-times"></i>
         </button>
-
-        <div class="viewer-main-img-wrapper" id="viewerImgWrapper">
-            <img class="viewer-main-img" id="viewerMainImg" src="" alt="{% trans 'Design Preview' %}">
+        <div class="viewer-stage">
+            <button type="button"
+                    class="viewer-nav-btn nav-prev"
+                    id="viewerPrevBtn"
+                    aria-label="{% trans 'Previous image' %}">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="viewer-main-img-wrapper" id="viewerImgWrapper">
+                <img class="viewer-main-img"
+                     id="viewerMainImg"
+                     src=""
+                     alt="{% trans 'Design Preview' %}">
+            </div>
+            <button type="button"
+                    class="viewer-nav-btn nav-next"
+                    id="viewerNextBtn"
+                    aria-label="{% trans 'Next image' %}">
+                <i class="fas fa-chevron-right"></i>
+            </button>
         </div>
-
-        <button type="button" class="viewer-nav-btn nav-next" id="viewerNextBtn" aria-label="{% trans 'Next image' %}">
-            <i class="fas fa-chevron-right"></i>
-        </button>
     </div>
-</div>
 {% endblock content %}
-
-{% block footer %}{% endblock footer %}
-
+{% block footer %}
+{% endblock footer %}
 {% block extra_js %}
-<script src="{% static 'js/gallery.js' %}?v={{ ASSET_VERSION }}"></script>
+    <script src="{% static 'js/gallery.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

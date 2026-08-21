@@ -1,80 +1,107 @@
 {% extends "dash/dash_index.html" %}
 {% load i18n %}
 {% load static %}
-
-{% block dashTitle %}{% if video %}{% trans "Edit Video" %}{% else %}{% trans "New Video" %}{% endif %}{% endblock dashTitle %}
-
+{% block dashTitle %}
+    {% if video %}
+        {% trans "Edit Video" %}
+    {% else %}
+        {% trans "New Video" %}
+    {% endif %}
+{% endblock dashTitle %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/content_admin.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/content_admin.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
-
 {% block dashContent %}
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-3">
-            <a href="{% url 'dash:video_list' %}" class="btn btn-outline-light rounded-3" title="{% trans 'Back to Videos' %}" aria-label="{% trans 'Back to Videos' %}">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            <div>
-                <h5 class="fw-bold mb-0">
-                    {% if video %}{% trans "Edit Video" %}{% else %}{% trans "New Video" %}{% endif %}
-                </h5>
-                <p class="text-muted small mb-0">{% trans "Add a video to the homepage slider" %}</p>
+    <div class="container-fluid">
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+                <a href="{% url 'dash:video_list' %}"
+                   class="btn btn-outline-light rounded-3"
+                   title="{% trans 'Back to Videos' %}"
+                   aria-label="{% trans 'Back to Videos' %}">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h5 class="fw-bold mb-0">
+                        {% if video %}
+                            {% trans "Edit Video" %}
+                        {% else %}
+                            {% trans "New Video" %}
+                        {% endif %}
+                    </h5>
+                    <p class="text-muted small mb-0">{% trans "Add a video to the homepage slider" %}</p>
+                </div>
             </div>
         </div>
+        <form method="post"
+              class="form"
+              action="{% if video %}{% url 'dash:video_update' video.pk %}{% else %}{% url 'dash:video_create' %}{% endif %}">
+            {% csrf_token %}
+            {% include "partials/errorList.html" with form_id="videoForm" %}
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold mb-4"><i class="fas fa-video me-2" style="color:var(--brand-primary);"></i>{% trans "Video Details" %}</h6>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">{% trans "Title" %}</label>
+                                <input type="text"
+                                       name="title"
+                                       class="form-control"
+                                       required
+                                       value="{{ video.title|default_if_none:'' }}"
+                                       placeholder="{% trans 'e.g. Living Room Transformation' %}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-link me-1" style="font-size:0.75rem;"></i>{% trans "Video Link" %}
+                                </label>
+                                <input type="url"
+                                       name="link"
+                                       class="form-control"
+                                       value="{{ video.link|default_if_none:'' }}"
+                                       placeholder="{% trans 'https://www.youtube.com/watch?v=...' %}">
+                                <small class="text-muted">{% trans "Playable video URL (YouTube / Vimeo / MP4)" %}</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-globe me-1" style="font-size:0.75rem;"></i>{% trans "External URL" %}
+                                </label>
+                                <input type="url"
+                                       name="url"
+                                       class="form-control"
+                                       value="{{ video.url|default_if_none:'' }}"
+                                       placeholder="{% trans 'https://example.com/project' %}">
+                                <small class="text-muted">{% trans "Optional destination link (e.g. portfolio project)" %}</small>
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label fw-semibold">{% trans "Description" %}</label>
+                                <textarea name="description"
+                                          class="form-control"
+                                          rows="5"
+                                          placeholder="{% trans 'Describe the video...' %}">{{ video.description|default_if_none:'' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold mb-3"><i class="fas fa-cog me-2" style="color:var(--brand-primary);"></i>{% trans "Actions" %}</h6>
+                            <p class="small text-muted mb-4">{% trans "The thumbnail is generated automatically from the video link when available." %}</p>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'dash:video_list' %}"
+                                   class="btn btn-outline-light rounded-3 px-4 fw-bold flex-grow-1">{% trans "Cancel" %}</a>
+                                <button type="submit"
+                                        class="btn dash-btn-primary rounded-3 px-4 fw-bold shadow-sm">
+                                    <i class="fas fa-save me-2"></i>{% trans "Save" %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
-
-    <form method="post" class="form"
-          action="{% if video %}{% url 'dash:video_update' video.pk %}{% else %}{% url 'dash:video_create' %}{% endif %}">
-        {% csrf_token %}
-        {% include "partials/errorList.html" with form_id="videoForm" %}
-
-        <div class="row g-4">
-            <div class="col-lg-7">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-body p-4">
-                        <h6 class="fw-bold mb-4"><i class="fas fa-video me-2" style="color:var(--brand-primary);"></i>{% trans "Video Details" %}</h6>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">{% trans "Title" %}</label>
-                            <input type="text" name="title" class="form-control" required value="{{ video.title|default_if_none:'' }}" placeholder="{% trans 'e.g. Living Room Transformation' %}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">
-                                <i class="fas fa-link me-1" style="font-size:0.75rem;"></i>{% trans "Video Link" %}
-                            </label>
-                            <input type="url" name="link" class="form-control" value="{{ video.link|default_if_none:'' }}" placeholder="{% trans 'https://www.youtube.com/watch?v=...' %}">
-                            <small class="text-muted">{% trans "Playable video URL (YouTube / Vimeo / MP4)" %}</small>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">
-                                <i class="fas fa-globe me-1" style="font-size:0.75rem;"></i>{% trans "External URL" %}
-                            </label>
-                            <input type="url" name="url" class="form-control" value="{{ video.url|default_if_none:'' }}" placeholder="{% trans 'https://example.com/project' %}">
-                            <small class="text-muted">{% trans "Optional destination link (e.g. portfolio project)" %}</small>
-                        </div>
-                        <div class="mb-0">
-                            <label class="form-label fw-semibold">{% trans "Description" %}</label>
-                            <textarea name="description" class="form-control" rows="5" placeholder="{% trans 'Describe the video...' %}">{{ video.description|default_if_none:'' }}</textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-5">
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-body p-4">
-                        <h6 class="fw-bold mb-3"><i class="fas fa-cog me-2" style="color:var(--brand-primary);"></i>{% trans "Actions" %}</h6>
-                        <p class="small text-muted mb-4">{% trans "The thumbnail is generated automatically from the video link when available." %}</p>
-                        <div class="d-flex gap-2">
-                            <a href="{% url 'dash:video_list' %}" class="btn btn-outline-light rounded-3 px-4 fw-bold flex-grow-1">{% trans "Cancel" %}</a>
-                            <button type="submit" class="btn dash-btn-primary rounded-3 px-4 fw-bold shadow-sm">
-                                <i class="fas fa-save me-2"></i>{% trans "Save" %}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
 {% endblock dashContent %}

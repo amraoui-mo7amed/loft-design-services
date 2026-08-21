@@ -1,92 +1,113 @@
 {% extends 'index.html' %}
 {% load i18n %}
 {% load static %}
-
-{% block body_class %}{% endblock body_class %}
-
+{% block body_class %}
+{% endblock body_class %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static "css/home.css" %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static "css/home.css" %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
-
-{% block nav %}{% endblock nav %}
-{% block sidebar %}{% endblock sidebar %}
-
+{% block nav %}
+{% endblock nav %}
+{% block sidebar %}
+{% endblock sidebar %}
 {% block content %}
-<div class="order-page">
-    <div class="order-page-inner">
-        <div class="order-side">
-            <div class="order-side-content">
-                {% if selected_spaces %}
-                <div class="order-summary">
-                    <div class="order-summary-header">{% trans "Shopping List" %}</div>
-                    {% for space in selected_spaces %}
-                    <div class="order-summary-row" data-space-id="{{ space.id }}" data-space-name="{{ space.name }}" data-space-price="{{ space.base_price }}">
-                        <span>{{ space.name }}</span>
-                        <span class="order-summary-price">{{ space.base_price|floatformat:"0u" }} DA</span>
-                    </div>
-                    {% endfor %}
-                    {% if package %}
-                    <div class="order-summary-row order-summary-pkg" data-package-id="{{ package.id }}" data-package-name="{{ package.name }}" data-package-price="{{ package.total_price }}">
-                        <span>{{ package.name }}</span>
-                        <span class="order-summary-price">{{ package.total_price|floatformat:"0u" }} DA</span>
-                    </div>
+    <div class="order-page">
+        <div class="order-page-inner">
+            <div class="order-side">
+                <div class="order-side-content">
+                    {% if selected_spaces %}
+                        <div class="order-summary">
+                            <div class="order-summary-header">{% trans "Shopping List" %}</div>
+                            {% for space in selected_spaces %}
+                                <div class="order-summary-row"
+                                     data-space-id="{{ space.id }}"
+                                     data-space-name="{{ space.name }}"
+                                     data-space-price="{{ space.base_price }}">
+                                    <span>{{ space.name }}</span>
+                                    <span class="order-summary-price">{{ space.base_price|floatformat:"0u" }} DA</span>
+                                </div>
+                            {% endfor %}
+                            {% if package %}
+                                <div class="order-summary-row order-summary-pkg"
+                                     data-package-id="{{ package.id }}"
+                                     data-package-name="{{ package.name }}"
+                                     data-package-price="{{ package.total_price }}">
+                                    <span>{{ package.name }}</span>
+                                    <span class="order-summary-price">{{ package.total_price|floatformat:"0u" }} DA</span>
+                                </div>
+                            {% endif %}
+                        </div>
                     {% endif %}
                 </div>
-                {% endif %}
             </div>
-        </div>
-        <div class="order-main">
-            <div class="order-main-content">
-                <a href="{% url 'frontend:home' %}" class="order-back">&larr; {% trans "Back" %}</a>
-                <h2 class="order-heading">{% trans "Order Details" %}</h2>
-                <p class="order-sub">{% trans "Fill in your details and we'll get back to you" %}</p>
-                <form id="orderForm"
-                      novalidate
-                      data-csrf="{{ csrf_token }}"
-                      data-total="{{ total }}"
-                      data-home-url="{% url 'frontend:home' %}"
-                      data-submit-text="{% trans "Submit Inquiry" %}"
-                      data-sending-text="{% trans "Sending..." %}"
-                      data-missing-title="{% trans "Missing Fields" %}"
-                      data-missing-text="{% trans "Please fill in all your details." %}"
-                      data-success-title="{% trans "Inquiry Sent!" %}"
-                      data-success-text="{% trans "We'll get back to you shortly with a personalized quote." %}"
-                      data-success-btn="{% trans "Great!" %}"
-                      data-error-title="{% trans "Oops!" %}"
-                      data-error-text="{% trans "Something went wrong." %}"
-                      data-network-title="{% trans "Network Error" %}"
-                      data-network-text="{% trans "Please check your connection." %}">
-                    <div class="order-field">
-                        <label class="order-label">{% trans "First Name" %}</label>
-                        <input type="text" class="order-input" name="first_name" required placeholder="{% trans 'John' %}">
-                    </div>
-                    <div class="order-field">
-                        <label class="order-label">{% trans "Last Name" %}</label>
-                        <input type="text" class="order-input" name="last_name" required placeholder="{% trans 'Doe' %}">
-                    </div>
-                    <div class="order-field">
-                        <label class="order-label">{% trans "Email" %}</label>
-                        <input type="email" class="order-input" name="email" required placeholder="{% trans 'john@example.com' %}">
-                    </div>
-                    <div class="order-field">
-                        <label class="order-label">{% trans "Phone Number" %}</label>
-                        <input type="tel" class="order-input" name="phone" required placeholder="{% trans '+213 XXX XX XX XX' %}">
-                    </div>
-                    <div class="order-summary-total">
-                        <span>{% trans "Total" %}</span>
-                        <span class="order-summary-total-price">{{ total|floatformat:"0u" }} DA</span>
-                    </div>
-                    <button type="submit" class="order-submit" id="submitOrderBtn">{% trans "Submit Inquiry" %}</button>
-                </form>
+            <div class="order-main">
+                <div class="order-main-content">
+                    <a href="{% url 'frontend:home' %}" class="order-back">&larr; {% trans "Back" %}</a>
+                    <h2 class="order-heading">{% trans "Order Details" %}</h2>
+                    <p class="order-sub">{% trans "Fill in your details and we'll get back to you" %}</p>
+                    <form id="orderForm"
+                          novalidate
+                          data-csrf="{{ csrf_token }}"
+                          data-total="{{ total }}"
+                          data-home-url="{% url 'frontend:home' %}"
+                          data-submit-text="{% trans "Submit Inquiry" %}"
+                          data-sending-text="{% trans "Sending..." %}"
+                          data-missing-title="{% trans "Missing Fields" %}"
+                          data-missing-text="{% trans "Please fill in all your details." %}"
+                          data-success-title="{% trans "Inquiry Sent!" %}"
+                          data-success-text="{% trans "We'll get back to you shortly with a personalized quote." %}"
+                          data-success-btn="{% trans "Great!" %}"
+                          data-error-title="{% trans "Oops!" %}"
+                          data-error-text="{% trans "Something went wrong." %}"
+                          data-network-title="{% trans "Network Error" %}"
+                          data-network-text="{% trans "Please check your connection." %}">
+                        <div class="order-field">
+                            <label class="order-label">{% trans "First Name" %}</label>
+                            <input type="text"
+                                   class="order-input"
+                                   name="first_name"
+                                   required
+                                   placeholder="{% trans 'John' %}">
+                        </div>
+                        <div class="order-field">
+                            <label class="order-label">{% trans "Last Name" %}</label>
+                            <input type="text"
+                                   class="order-input"
+                                   name="last_name"
+                                   required
+                                   placeholder="{% trans 'Doe' %}">
+                        </div>
+                        <div class="order-field">
+                            <label class="order-label">{% trans "Email" %}</label>
+                            <input type="email"
+                                   class="order-input"
+                                   name="email"
+                                   required
+                                   placeholder="{% trans 'john@example.com' %}">
+                        </div>
+                        <div class="order-field">
+                            <label class="order-label">{% trans "Phone Number" %}</label>
+                            <input type="tel"
+                                   class="order-input"
+                                   name="phone"
+                                   required
+                                   placeholder="{% trans '+213 XXX XX XX XX' %}">
+                        </div>
+                        <div class="order-summary-total">
+                            <span>{% trans "Total" %}</span>
+                            <span class="order-summary-total-price">{{ total|floatformat:"0u" }} DA</span>
+                        </div>
+                        <button type="submit" class="order-submit" id="submitOrderBtn">{% trans "Submit Inquiry" %}</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock content %}
-
-{% block footer %}{% endblock footer %}
-
+{% block footer %}
+{% endblock footer %}
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{% static "js/order.js" %}?v={{ ASSET_VERSION }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{% static "js/order.js" %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

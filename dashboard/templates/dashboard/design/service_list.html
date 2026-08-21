@@ -3,304 +3,368 @@
 {% load static %}
 {% load l10n %}
 {% load tags %}
-
-{% block dashTitle %}{% trans "Services & Options Management" %}{% endblock dashTitle %}
-
+{% block dashTitle %}
+    {% trans "Services & Options Management" %}
+{% endblock dashTitle %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/service_list.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/service_list.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
-
 {% block dashContent %}
-<div class="svc-management-container container-fluid px-0">
-    <!-- Header Section -->
-    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-        <div>
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <h4 class="fw-bold text-light mb-0">{% trans "Services & Catalog Options" %}</h4>
-                <span class="badge bg-secondary-subtle text-light border border-secondary rounded-pill px-3 py-1 font-monospace" style="font-size: 0.75rem;">
-                    {{ total_count }} {% trans "Items" %}
-                </span>
+    <div class="svc-management-container container-fluid px-0">
+        <!-- Header Section -->
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h4 class="fw-bold text-light mb-0">{% trans "Services & Catalog Options" %}</h4>
+                    <span class="badge bg-secondary-subtle text-light border border-secondary rounded-pill px-3 py-1 font-monospace"
+                          style="font-size: 0.75rem">{{ total_count }} {% trans "Items" %}</span>
+                </div>
+                <p class="text-muted small mb-0">{% trans "Configure design packages, standalone services, area/hourly pricing, video demos, and default selections." %}</p>
             </div>
-            <p class="text-muted small mb-0">{% trans "Configure design packages, standalone services, area/hourly pricing, video demos, and default selections." %}</p>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn dash-btn-primary rounded-3 px-3 py-2 fw-bold shadow-sm d-flex align-items-center gap-2"
-                    data-bs-toggle="modal" data-bs-target="#serviceModal"
-                    id="openNewServiceModalBtn">
-                <i class="fas fa-plus"></i>
-                <span>{% trans "New Service" %}</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- KPI Metrics Row -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="svc-kpi-card">
-                <div class="svc-kpi-icon svc-kpi-icon--primary">
-                    <i class="fas fa-cubes"></i>
-                </div>
-                <div class="svc-kpi-info">
-                    <div class="svc-kpi-label">{% trans "Total Services" %}</div>
-                    <div class="svc-kpi-val">{{ total_count }}</div>
-                </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button"
+                        class="btn dash-btn-primary rounded-3 px-3 py-2 fw-bold shadow-sm d-flex align-items-center gap-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#serviceModal"
+                        id="openNewServiceModalBtn">
+                    <i class="fas fa-plus"></i>
+                    <span>{% trans "New Service" %}</span>
+                </button>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="svc-kpi-card">
-                <div class="svc-kpi-icon svc-kpi-icon--success">
-                    <i class="fas fa-star"></i>
+        <!-- KPI Metrics Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="svc-kpi-card">
+                    <div class="svc-kpi-icon svc-kpi-icon--primary">
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    <div class="svc-kpi-info">
+                        <div class="svc-kpi-label">{% trans "Total Services" %}</div>
+                        <div class="svc-kpi-val">{{ total_count }}</div>
+                    </div>
                 </div>
-                <div class="svc-kpi-info">
-                    <div class="svc-kpi-label">{% trans "Default Choice" %}</div>
-                    <div class="svc-kpi-val text-truncate fs-6 pt-1" title="{{ default_service.service_name|default:'None' }}">
-                        {{ default_service.service_name|default:_("None configured") }}
+            </div>
+            <div class="col-md-4">
+                <div class="svc-kpi-card">
+                    <div class="svc-kpi-icon svc-kpi-icon--success">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="svc-kpi-info">
+                        <div class="svc-kpi-label">{% trans "Default Choice" %}</div>
+                        <div class="svc-kpi-val text-truncate fs-6 pt-1"
+                             title="{{ default_service.service_name|default:'None' }}">
+                            {{ default_service.service_name|default:_("None configured") }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="svc-kpi-card">
+                    <div class="svc-kpi-icon svc-kpi-icon--info">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="svc-kpi-info">
+                        <div class="svc-kpi-label">{% trans "Default Pricing Model" %}</div>
+                        <div class="svc-kpi-val fs-6 pt-1">
+                            {% if default_service %}
+                                {{ default_service.get_pricing_type_display }} ({{ default_service.service_price|unlocalize }} DA)
+                            {% else %}
+                                {% trans "N/A" %}
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="svc-kpi-card">
-                <div class="svc-kpi-icon svc-kpi-icon--info">
-                    <i class="fas fa-coins"></i>
+        <!-- Search & Filter Toolbar -->
+        <div class="svc-toolbar">
+            <form method="get"
+                  action="{% url 'dash:service_list' %}"
+                  class="d-flex align-items-center gap-2 flex-wrap">
+                <div class="input-group flex-grow-1" style="max-width: 420px;">
+                    <span class="input-group-text bg-transparent border-secondary text-muted border-opacity-25"><i class="fas fa-search"></i></span>
+                    <input type="text"
+                           name="q"
+                           value="{{ search_query }}"
+                           class="form-control svc-input"
+                           placeholder="{% trans 'Search services by name...' %}">
                 </div>
-                <div class="svc-kpi-info">
-                    <div class="svc-kpi-label">{% trans "Default Pricing Model" %}</div>
-                    <div class="svc-kpi-val fs-6 pt-1">
-                        {% if default_service %}
-                            {{ default_service.get_pricing_type_display }} ({{ default_service.service_price|unlocalize }} DA)
-                        {% else %}
-                            {% trans "N/A" %}
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Search & Filter Toolbar -->
-    <div class="svc-toolbar">
-        <form method="get" action="{% url 'dash:service_list' %}" class="d-flex align-items-center gap-2 flex-wrap">
-            <div class="input-group flex-grow-1" style="max-width: 420px;">
-                <span class="input-group-text bg-transparent border-secondary text-muted border-opacity-25"><i class="fas fa-search"></i></span>
-                <input type="text" name="q" value="{{ search_query }}" class="form-control svc-input" placeholder="{% trans 'Search services by name...' %}">
-            </div>
-            <button type="submit" class="btn dash-btn-primary btn-sm rounded-3 px-3 py-2 fw-semibold">{% trans "Search" %}</button>
-            {% if search_query %}
-            <a href="{% url 'dash:service_list' %}" class="btn btn-outline-light btn-sm rounded-3 px-3 py-2">{% trans "Reset" %}</a>
-            {% endif %}
-        </form>
-    </div>
-
-    <!-- Services Cards Grid -->
-    <div class="row g-4" id="servicesGrid">
-        {% for s in page_obj %}
-        <div class="col-lg-4 col-md-6" id="service-card-{{ s.pk }}">
-            <div class="svc-card{% if s.is_default %} svc-card--default{% endif %}">
-                <!-- Media Preview (If GIF attached) -->
-                {% if s.gif_file %}
-                <div class="svc-card-media" style="height: 140px; overflow: hidden; background: #0f1217; border-bottom: 1px solid rgba(255,255,255,0.08);">
-                    <img src="{{ s.gif_file.url }}" alt="{{ s.service_name }}" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
+                <button type="submit"
+                        class="btn dash-btn-primary btn-sm rounded-3 px-3 py-2 fw-semibold">{% trans "Search" %}</button>
+                {% if search_query %}
+                    <a href="{% url 'dash:service_list' %}"
+                       class="btn btn-outline-light btn-sm rounded-3 px-3 py-2">{% trans "Reset" %}</a>
                 {% endif %}
-
-                <!-- Top Section -->
-                <div>
-                    <div class="svc-card-head">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="svc-card-icon">
-                                <i class="fas fa-layer-group"></i>
+            </form>
+        </div>
+        <!-- Services Cards Grid -->
+        <div class="row g-4" id="servicesGrid">
+            {% for s in page_obj %}
+                <div class="col-lg-4 col-md-6" id="service-card-{{ s.pk }}">
+                    <div class="svc-card{% if s.is_default %} svc-card--default{% endif %}">
+                        <!-- Media Preview (If GIF attached) -->
+                        {% if s.gif_file %}
+                            <div class="svc-card-media"
+                                 style="height: 140px;
+                                        overflow: hidden;
+                                        background: #0f1217;
+                                        border-bottom: 1px solid rgba(255,255,255,0.08)">
+                                <img src="{{ s.gif_file.url }}"
+                                     alt="{{ s.service_name }}"
+                                     style="width: 100%;
+                                            height: 100%;
+                                            object-fit: cover">
                             </div>
-                            <div>
-                                <h5 class="svc-card-title">{{ s.service_name }}</h5>
-                                <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    <span class="badge {% if s.is_default %}bg-warning text-dark{% else %}bg-secondary text-light opacity-75{% endif %} rounded-pill font-monospace" style="font-size: 0.7rem;">
-                                        {% if s.is_default %}<i class="fas fa-star me-1"></i>{% trans "Default" %}{% else %}{% trans "Optional" %}{% endif %}
+                        {% endif %}
+                        <!-- Top Section -->
+                        <div>
+                            <div class="svc-card-head">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="svc-card-icon">
+                                        <i class="fas fa-layer-group"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="svc-card-title">{{ s.service_name }}</h5>
+                                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                                            <span class="badge {% if s.is_default %}bg-warning text-dark{% else %}bg-secondary text-light opacity-75{% endif %} rounded-pill font-monospace"
+                                                  style="font-size: 0.7rem">
+                                                {% if s.is_default %}
+                                                    <i class="fas fa-star me-1"></i>{% trans "Default" %}
+                                                {% else %}
+                                                    {% trans "Optional" %}
+                                                {% endif %}
+                                            </span>
+                                            <span class="badge bg-dark border border-secondary text-warning rounded-pill font-monospace"
+                                                  style="font-size: 0.7rem">{{ s.get_pricing_type_display }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Body & Price -->
+                            <div class="svc-card-body">
+                                {% if s.video_link %}
+                                    <div class="mb-2">
+                                        <a href="{{ s.video_link }}"
+                                           target="_blank"
+                                           rel="noopener noreferrer"
+                                           class="text-info small text-decoration-none d-inline-flex align-items-center gap-1">
+                                            <i class="fas fa-play-circle"></i> <span>{% trans "Watch Video Demo" %}</span>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                                <div class="svc-price-box">
+                                    <span class="svc-price-label">
+                                        {% if s.pricing_type == "area" %}
+                                            {% trans "Price / m²" %}
+                                        {% elif s.pricing_type == "hourly" %}
+                                            {% trans "Price / Hour" %}
+                                        {% else %}
+                                            {% trans "Fixed Price" %}
+                                        {% endif %}
                                     </span>
-                                    <span class="badge bg-dark border border-secondary text-warning rounded-pill font-monospace" style="font-size: 0.7rem;">
-                                        {{ s.get_pricing_type_display }}
-                                    </span>
+                                    <div class="svc-price-value">
+                                        <span>{{ s.service_price|unlocalize }}</span>
+                                        <small>
+                                            {% if s.pricing_type == "area" %}
+                                                DA/m²
+                                            {% elif s.pricing_type == "hourly" %}
+                                                DA/hr
+                                            {% else %}
+                                                DA
+                                            {% endif %}
+                                        </small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Body & Price -->
-                    <div class="svc-card-body">
-                        {% if s.video_link %}
-                        <div class="mb-2">
-                            <a href="{{ s.video_link }}" target="_blank" rel="noopener noreferrer" class="text-info small text-decoration-none d-inline-flex align-items-center gap-1">
-                                <i class="fas fa-play-circle"></i> <span>{% trans "Watch Video Demo" %}</span>
-                            </a>
-                        </div>
-                        {% endif %}
-
-                        <div class="svc-price-box">
-                            <span class="svc-price-label">
-                                {% if s.pricing_type == "area" %}
-                                    {% trans "Price / m²" %}
-                                {% elif s.pricing_type == "hourly" %}
-                                    {% trans "Price / Hour" %}
+                        <!-- Footer Actions: Text-only buttons with background -->
+                        <div class="svc-card-foot">
+                            <div>
+                                {% if s.is_default %}
+                                    <span class="text-warning small fw-bold"><i class="fas fa-check-circle me-1"></i>{% trans "Default" %}</span>
                                 {% else %}
-                                    {% trans "Fixed Price" %}
+                                    <span class="text-muted small">{% trans "Active" %}</span>
                                 {% endif %}
-                            </span>
-                            <div class="svc-price-value">
-                                <span>{{ s.service_price|unlocalize }}</span>
-                                <small>
-                                    {% if s.pricing_type == "area" %}
-                                        DA/m²
-                                    {% elif s.pricing_type == "hourly" %}
-                                        DA/hr
-                                    {% else %}
-                                        DA
-                                    {% endif %}
-                                </small>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button"
+                                        class="btn-text-pill btn-text-edit edit-service-btn"
+                                        data-id="{{ s.pk }}"
+                                        data-name="{{ s.service_name }}"
+                                        data-pricing-type="{{ s.pricing_type }}"
+                                        data-price="{{ s.service_price }}"
+                                        data-video-link="{{ s.video_link|default:'' }}"
+                                        data-is-default="{{ s.is_default|yesno:'true,false' }}"
+                                        data-update-url="{% url 'dash:service_update' s.pk %}">
+                                    {% trans "Edit" %}
+                                </button>
+                                <button type="button"
+                                        class="btn-text-pill btn-text-delete delete_button"
+                                        data-delete-url="{% url 'dash:service_delete' s.pk %}"
+                                        data-csrf-token="{{ csrf_token }}"
+                                        data-item-title="{{ s.service_name }}"
+                                        data-swal-title="{% trans 'Delete Service?' %}"
+                                        data-swal-text="{% trans 'Are you sure you want to delete this service? This action cannot be undone.' %}">
+                                    {% trans "Delete" %}
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Footer Actions: Text-only buttons with background -->
-                <div class="svc-card-foot">
-                    <div>
-                        {% if s.is_default %}
-                        <span class="text-warning small fw-bold"><i class="fas fa-check-circle me-1"></i>{% trans "Default" %}</span>
-                        {% else %}
-                        <span class="text-muted small">{% trans "Active" %}</span>
-                        {% endif %}
-                    </div>
-
-                    <div class="d-flex align-items-center gap-2">
-                        <button type="button" class="btn-text-pill btn-text-edit edit-service-btn"
-                                data-id="{{ s.pk }}"
-                                data-name="{{ s.service_name }}"
-                                data-pricing-type="{{ s.pricing_type }}"
-                                data-price="{{ s.service_price }}"
-                                data-video-link="{{ s.video_link|default:'' }}"
-                                data-is-default="{{ s.is_default|yesno:'true,false' }}"
-                                data-update-url="{% url 'dash:service_update' s.pk %}">
-                            {% trans "Edit" %}
-                        </button>
-                        <button type="button" class="btn-text-pill btn-text-delete delete_button"
-                                data-delete-url="{% url 'dash:service_delete' s.pk %}"
-                                data-csrf-token="{{ csrf_token }}"
-                                data-item-title="{{ s.service_name }}"
-                                data-swal-title="{% trans 'Delete Service?' %}"
-                                data-swal-text="{% trans 'Are you sure you want to delete this service? This action cannot be undone.' %}">
-                            {% trans "Delete" %}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="card border-0 shadow-sm p-5 text-center rounded-4" style="background: rgba(22, 27, 34, 0.6); border: 1px dashed rgba(255,255,255,0.12) !important;">
-                <div class="mb-3"><i class="fas fa-layer-group fa-3x text-light opacity-25"></i></div>
-                <h5 class="text-light fw-bold mb-1">{% trans "No services found" %}</h5>
-                <p class="text-muted small mb-4">{% trans "Create catalog services to configure fixed, area-based (per m²), or hourly pricing models." %}</p>
-                <div>
-                    <button type="button" class="btn dash-btn-primary rounded-3 px-4 py-2 fw-bold"
-                            data-bs-toggle="modal" data-bs-target="#serviceModal">
-                        <i class="fas fa-plus me-2"></i>{% trans "Add First Service" %}
-                    </button>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-
-    {% if page_obj.paginator.num_pages > 1 %}
-    <div class="mt-5">{% render_pagination page_obj %}</div>
-    {% endif %}
-</div>
-
-<!-- Service Modal Form -->
-<div class="modal fade" id="serviceModal" tabindex="-1" aria-labelledby="serviceModalTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content svc-glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
-            <form method="post" action="{% url 'dash:service_create' %}" enctype="multipart/form-data" class="form" id="serviceForm">
-                {% csrf_token %}
-                <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom border-secondary border-opacity-25">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="svc-card-icon" style="width:34px;height:34px;font-size:0.95rem;">
-                            <i class="fas fa-cube"></i>
+            {% empty %}
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm p-5 text-center rounded-4"
+                         style="background: rgba(22, 27, 34, 0.6);
+                                border: 1px dashed rgba(255,255,255,0.12) !important">
+                        <div class="mb-3">
+                            <i class="fas fa-layer-group fa-3x text-light opacity-25"></i>
                         </div>
-                        <h5 class="modal-title fw-bold text-light mb-0" id="serviceModalTitle">{% trans "New Service" %}</h5>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                
-                <div class="p-4">
-                    {% include "partials/errorList.html" with form_id="serviceForm" %}
-
-                    <div class="mb-3">
-                        <label class="form-label text-light fw-semibold small" for="serviceNameInput">
-                            <i class="fas fa-tag me-1 text-warning"></i>
-                            {% trans "Service Name" %} <span class="text-danger">*</span>
-                        </label>
-                        <input type="text" name="service_name" id="serviceNameInput" class="form-control svc-input" required placeholder="{% trans 'e.g. 3D Architectural Visualization' %}" maxlength="150">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-light fw-semibold small" for="servicePricingTypeInput">
-                            <i class="fas fa-calculator me-1 text-warning"></i>
-                            {% trans "Pricing Model" %} <span class="text-danger">*</span>
-                        </label>
-                        <select name="pricing_type" id="servicePricingTypeInput" class="form-select svc-input">
-                            <option value="fixed">{% trans "Fixed Price" %}</option>
-                            <option value="area">{% trans "Price per Square Metre (m²)" %}</option>
-                            <option value="hourly">{% trans "Price per Hour" %}</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-light fw-semibold small" id="servicePriceLabel" for="servicePriceInput">
-                            <i class="fas fa-money-bill-wave me-1 text-warning"></i>
-                            <span id="priceLabelText">{% trans "Price (DA)" %}</span>
-                        </label>
-                        <input type="number" name="service_price" id="servicePriceInput" class="form-control svc-input" min="0" step="0.01" placeholder="0">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-light fw-semibold small" for="serviceVideoInput">
-                            <i class="fab fa-youtube me-1 text-warning"></i>
-                            {% trans "Video Link" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span>
-                        </label>
-                        <input type="url" name="video_link" id="serviceVideoInput" class="form-control svc-input" placeholder="https://youtube.com/watch?v=...">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-light fw-semibold small" for="serviceGifInput">
-                            <i class="fas fa-image me-1 text-warning"></i>
-                            {% trans "GIF / Animation Preview File" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span>
-                        </label>
-                        <input type="file" name="gif_file" id="serviceGifInput" accept="image/*,video/mp4" class="form-control svc-input">
-                    </div>
-
-                    <div class="pt-3 border-top border-secondary border-opacity-25">
-                        <label class="form-check d-flex align-items-center gap-2 m-0 cursor-pointer" for="serviceDefaultInput">
-                            <input type="checkbox" name="is_default" id="serviceDefaultInput" value="1" class="form-check-input">
-                            <span class="text-light small fw-semibold">{% trans "Set as default selected service in catalog" %}</span>
-                        </label>
+                        <h5 class="text-light fw-bold mb-1">{% trans "No services found" %}</h5>
+                        <p class="text-muted small mb-4">{% trans "Create catalog services to configure fixed, area-based (per m²), or hourly pricing models." %}</p>
+                        <div>
+                            <button type="button"
+                                    class="btn dash-btn-primary rounded-3 px-4 py-2 fw-bold"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#serviceModal">
+                                <i class="fas fa-plus me-2"></i>{% trans "Add First Service" %}
+                            </button>
+                        </div>
                     </div>
                 </div>
-
-                <div class="px-4 py-3 d-flex gap-2 justify-content-end border-top border-secondary border-opacity-25">
-                    <button type="button" class="btn btn-outline-light btn-sm px-3 rounded-3" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
-                    <button type="submit" class="btn dash-btn-primary btn-sm px-4 rounded-3 fw-bold" id="serviceSubmitBtn">
-                        <i class="fas fa-save me-1"></i> <span id="serviceSubmitBtnText">{% trans "Create Service" %}</span>
-                    </button>
-                </div>
-            </form>
+            {% endfor %}
+        </div>
+        {% if page_obj.paginator.num_pages > 1 %}
+            <div class="mt-5">{% render_pagination page_obj %}</div>
+        {% endif %}
+    </div>
+    <!-- Service Modal Form -->
+    <div class="modal fade"
+         id="serviceModal"
+         tabindex="-1"
+         aria-labelledby="serviceModalTitle"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content svc-glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
+                <form method="post"
+                      action="{% url 'dash:service_create' %}"
+                      enctype="multipart/form-data"
+                      class="form"
+                      id="serviceForm">
+                    {% csrf_token %}
+                    <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom border-secondary border-opacity-25">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="svc-card-icon"
+                                 style="width:34px;
+                                        height:34px;
+                                        font-size:0.95rem">
+                                <i class="fas fa-cube"></i>
+                            </div>
+                            <h5 class="modal-title fw-bold text-light mb-0" id="serviceModalTitle">{% trans "New Service" %}</h5>
+                        </div>
+                        <button type="button"
+                                class="btn-close btn-close-white"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="p-4">
+                        {% include "partials/errorList.html" with form_id="serviceForm" %}
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small"
+                                   for="serviceNameInput">
+                                <i class="fas fa-tag me-1 text-warning"></i>
+                                {% trans "Service Name" %} <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   name="service_name"
+                                   id="serviceNameInput"
+                                   class="form-control svc-input"
+                                   required
+                                   placeholder="{% trans 'e.g. 3D Architectural Visualization' %}"
+                                   maxlength="150">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small"
+                                   for="servicePricingTypeInput">
+                                <i class="fas fa-calculator me-1 text-warning"></i>
+                                {% trans "Pricing Model" %} <span class="text-danger">*</span>
+                            </label>
+                            <select name="pricing_type"
+                                    id="servicePricingTypeInput"
+                                    class="form-select svc-input">
+                                <option value="fixed">{% trans "Fixed Price" %}</option>
+                                <option value="area">{% trans "Price per Square Metre (m²)" %}</option>
+                                <option value="hourly">{% trans "Price per Hour" %}</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small"
+                                   id="servicePriceLabel"
+                                   for="servicePriceInput">
+                                <i class="fas fa-money-bill-wave me-1 text-warning"></i>
+                                <span id="priceLabelText">{% trans "Price (DA)" %}</span>
+                            </label>
+                            <input type="number"
+                                   name="service_price"
+                                   id="servicePriceInput"
+                                   class="form-control svc-input"
+                                   min="0"
+                                   step="0.01"
+                                   placeholder="0">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small"
+                                   for="serviceVideoInput">
+                                <i class="fab fa-youtube me-1 text-warning"></i>
+                                {% trans "Video Link" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span>
+                            </label>
+                            <input type="url"
+                                   name="video_link"
+                                   id="serviceVideoInput"
+                                   class="form-control svc-input"
+                                   placeholder="https://youtube.com/watch?v=...">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small" for="serviceGifInput">
+                                <i class="fas fa-image me-1 text-warning"></i>
+                                {% trans "GIF / Animation Preview File" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span>
+                            </label>
+                            <input type="file"
+                                   name="gif_file"
+                                   id="serviceGifInput"
+                                   accept="image/*,video/mp4"
+                                   class="form-control svc-input">
+                        </div>
+                        <div class="pt-3 border-top border-secondary border-opacity-25">
+                            <label class="form-check d-flex align-items-center gap-2 m-0 cursor-pointer"
+                                   for="serviceDefaultInput">
+                                <input type="checkbox"
+                                       name="is_default"
+                                       id="serviceDefaultInput"
+                                       value="1"
+                                       class="form-check-input">
+                                <span class="text-light small fw-semibold">{% trans "Set as default selected service in catalog" %}</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="px-4 py-3 d-flex gap-2 justify-content-end border-top border-secondary border-opacity-25">
+                        <button type="button"
+                                class="btn btn-outline-light btn-sm px-3 rounded-3"
+                                data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                        <button type="submit"
+                                class="btn dash-btn-primary btn-sm px-4 rounded-3 fw-bold"
+                                id="serviceSubmitBtn">
+                            <i class="fas fa-save me-1"></i> <span id="serviceSubmitBtnText">{% trans "Create Service" %}</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 {% endblock dashContent %}
-
 {% block extra_js %}
-<script>
+    <script>
 document.addEventListener("DOMContentLoaded", function () {
     const serviceModalEl = document.getElementById("serviceModal");
     let serviceModal = null;
@@ -378,5 +442,5 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
-</script>
+    </script>
 {% endblock extra_js %}

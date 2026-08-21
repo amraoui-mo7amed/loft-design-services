@@ -8,7 +8,11 @@ from dashboard.views import wizard, wizard_api, chat, file_manager, marketplace
 from frontend.views import inquiry
 
 
+from django.views.generic.base import RedirectView
+from django.templatetags.static import static as get_static_url
+
 urlpatterns = [
+    path("favicon.ico", RedirectView.as_view(url=get_static_url("img/icon.jpeg"), permanent=True)),
     path("auth/", include("user_auth.urls", namespace="user_auth")),
     path("dashboard/", include("dashboard.urls", namespace="dash")),
     path("", include("frontend.urls")),
@@ -43,3 +47,4 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

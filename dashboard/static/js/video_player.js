@@ -3,11 +3,18 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     function isEmbeddable(url) {
-      return /youtube\.com|youtu\.be|vimeo\.com/.test(url || "");
+      if (!url || typeof url !== "string") return false;
+      return /youtube\.com|youtu\.be|vimeo\.com|^[\w-]{11}$/.test(url.trim());
     }
 
     function buildEmbedUrl(url) {
       if (!url) return "";
+      url = url.trim();
+
+      // Raw 11-char YouTube ID
+      if (/^[\w-]{11}$/.test(url)) {
+        return "https://www.youtube-nocookie.com/embed/" + url + "?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1";
+      }
 
       // YouTube URL parser
       var ytMatch = url.match(
@@ -15,28 +22,20 @@
       );
       if (ytMatch) {
         var videoId = ytMatch[1];
-        var queryParams = "";
-        var qIdx = url.indexOf("?");
-        if (qIdx !== -1) {
-          try {
-            var searchParams = new URLSearchParams(url.substring(qIdx));
-            searchParams.delete("v"); // Remove video ID parameter if it was in query string
-            searchParams.set("autoplay", "1");
-            queryParams = searchParams.toString();
-          } catch (e) {
-            queryParams = "autoplay=1";
-          }
-        } else {
-          queryParams = "autoplay=1";
-        }
-        return "https://www.youtube.com/embed/" + videoId + "?" + queryParams;
+        var params = new URLSearchParams();
+        params.set("autoplay", "1");
+        params.set("rel", "0");
+        params.set("modestbranding", "1");
+        params.set("playsinline", "1");
+        params.set("enablejsapi", "1");
+        return "https://www.youtube-nocookie.com/embed/" + videoId + "?" + params.toString();
       }
 
       // Vimeo URL parser
       var vimeoMatch = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
       if (vimeoMatch) {
         var vimeoId = vimeoMatch[1];
-        return "https://player.vimeo.com/video/" + vimeoId + "?autoplay=1";
+        return "https://player.vimeo.com/video/" + vimeoId + "?autoplay=1&dnt=1";
       }
 
       return url;
@@ -45,7 +44,7 @@
     function renderEmpty(stage) {
       if (!stage) return;
       stage.innerHTML =
-        '<div class="video-widget-empty" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #8b95a1;"><i class="fas fa-video" style="font-size: 2.4rem; opacity: 0.35;"></i><p style="margin: 0; font-size: 0.85rem;">No video available.</p></div>';
+        '<div class="video-widget-empty" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #8b95a1;"><i class="fas fa-video" style="font-size: 2.4rem; opacity: 0.35;"></i><p style="margin: 0; font-size: 0.85rem;">Aucune vidéo disponible.</p></div>';
     }
 
     function renderVideo(stage, url) {
@@ -56,9 +55,9 @@
       }
       var frame = document.createElement("iframe");
       frame.src = buildEmbedUrl(url);
-      frame.setAttribute("title", "YouTube video player");
+      frame.setAttribute("title", "Vidéo LOFT DESIGN");
       frame.setAttribute("frameborder", "0");
-      frame.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share");
+      frame.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen");
       frame.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
       frame.setAttribute("allowfullscreen", "");
 
@@ -71,104 +70,51 @@
       stage.appendChild(frame);
     }
 
+    window.openVideoPlayer = function (url, title) {
+      var widget = document.querySelector(".video-widget-overlay");
+      if (!widget) return;
+      if (widget.parentNode !== document.body) {
+        document.body.appendChild(widget);
+      }
+      var stage = widget.querySelector(".video-widget-stage");
+      var titleEl = widget.querySelector(".video-widget-title span") || widget.querySelector("#videoPlayerWidgetTitle");
+      if (titleEl) {
+        titleEl.textContent = title || "LOFT DESIGN";
+      }
+      renderVideo(stage, url);
+      widget.style.display = "flex";
+    };
+
     // Delegate click handler on document to handle triggers dynamically loaded via AJAX
     document.addEventListener("click", function (e) {
-      // 1. Check widgets with target-btn attribute first
-      var widgets = document.querySelectorAll(".video-widget-overlay[target-btn]");
-      var triggered = false;
+      var selector = "button[data-video-url], a[data-video-url], .btn-service-video-play, .pkg-video-btn, [data-video-trigger], .videoCard, .videoInsideBtn, [data-explain-video]";
+      var trigger = e.target.closest ? e.target.closest(selector) : null;
 
-      widgets.forEach(function (widget) {
-        var targetSelector = widget.getAttribute("target-btn");
-        if (!targetSelector) return;
-
-        var trigger = e.target.closest(targetSelector);
-        if (!trigger) return;
-
-        // If nested inside a card, make sure this widget belongs to the same card as the trigger
-        var triggerCard = trigger.closest(".pkg-card");
-        var widgetCard = widget.originalCard || widget.closest(".pkg-card");
-        if (triggerCard && widgetCard && triggerCard !== widgetCard) {
-          return;
+      // Fallback if pointer capture or inner wrapper set event target to a parent container
+      if (!trigger && e.clientX && e.clientY) {
+        var elAtPoint = document.elementFromPoint(e.clientX, e.clientY);
+        if (elAtPoint && elAtPoint.closest) {
+          trigger = elAtPoint.closest(selector);
         }
+      }
 
-        e.preventDefault();
-        e.stopPropagation();
-        triggered = true;
-
-        var url = widget.getAttribute("video-url") || trigger.getAttribute("data-video-url") || "";
-        var title = trigger.getAttribute("data-video-title") || widget.getAttribute("data-video-title") || "Video Preview";
-
-        // Move to body to prevent transform/container clipping and ensure centering
-        if (widget.parentNode !== document.body) {
-          if (triggerCard) {
-            widget.originalCard = triggerCard;
-          }
-          document.body.appendChild(widget);
-        }
-
-        var stage = widget.querySelector(".video-widget-stage");
-        var titleEl = widget.querySelector(".video-widget-title span") || widget.querySelector("#videoPlayerWidgetTitle");
-
-        if (titleEl) {
-          titleEl.textContent = title;
-        }
-
-        renderVideo(stage, url);
-        widget.style.display = "flex";
-      });
-
-      if (triggered) return;
-
-      // 2. Fallback to explicit video trigger elements with data-video-url
-      var trigger = e.target.closest("button[data-video-url], a[data-video-url], .btn-service-video-play, .pkg-video-btn, [data-video-trigger]");
       if (!trigger) return;
 
-      var url = trigger.getAttribute("data-video-url") || "";
+      var url = trigger.getAttribute("data-video-url") ||
+                trigger.getAttribute("data-youtube-id") ||
+                trigger.getAttribute("data-explain-video") ||
+                "";
       if (!url) return;
 
       e.preventDefault();
       e.stopPropagation();
 
-      var title = trigger.getAttribute("data-video-title") || "Video Preview";
+      var title = trigger.getAttribute("data-video-title") ||
+                  trigger.getAttribute("data-explain-title") ||
+                  trigger.innerText.trim() ||
+                  "LOFT DESIGN";
 
-      var card = trigger.closest(".pkg-card");
-      var widget = null;
-      if (card) {
-        widget = card.querySelector(".video-widget-overlay");
-        if (!widget) {
-          // If the widget was already moved to body, find it by checking originalCard reference
-          var allWidgets = document.querySelectorAll(".video-widget-overlay");
-          for (var i = 0; i < allWidgets.length; i++) {
-            if (allWidgets[i].originalCard === card) {
-              widget = allWidgets[i];
-              break;
-            }
-          }
-        }
-      }
-
-      if (!widget) {
-        widget = document.querySelector(".video-widget-overlay");
-      }
-      if (!widget) return;
-
-      // Move to body to prevent transform/container clipping and ensure centering, storing card reference
-      if (widget.parentNode !== document.body) {
-        if (card) {
-          widget.originalCard = card;
-        }
-        document.body.appendChild(widget);
-      }
-
-      var stage = widget.querySelector(".video-widget-stage");
-      var titleEl = widget.querySelector(".video-widget-title span") || widget.querySelector("#videoPlayerWidgetTitle");
-
-      if (titleEl) {
-        titleEl.textContent = title;
-      }
-
-      renderVideo(stage, url);
-      widget.style.display = "flex";
+      window.openVideoPlayer(url, title);
     });
 
     // Handle close button click via delegation on document

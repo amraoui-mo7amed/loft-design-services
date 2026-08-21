@@ -2,138 +2,146 @@
 {% load i18n %}
 {% load static %}
 {% load tags %}
-
-{% block dashTitle %}{% trans "Project Types" %}{% endblock dashTitle %}
-
+{% block dashTitle %}
+    {% trans "Project Types" %}
+{% endblock dashTitle %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/project_type_list.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/project_type_list.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
-
 {% block dashContent %}
-<div class="container-fluid">
-    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-        <div>
-            <h5 class="fw-bold mb-0">{% trans "Project Types" %}</h5>
-            <p class="text-muted small mb-0 pt-section-title">{% trans "Manage project types and their spaces" %}</p>
+    <div class="container-fluid">
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+            <div>
+                <h5 class="fw-bold mb-0">{% trans "Project Types" %}</h5>
+                <p class="text-muted small mb-0 pt-section-title">{% trans "Manage project types and their spaces" %}</p>
+            </div>
+            <button class="btn dash-btn-primary rounded-3 px-4 fw-bold shadow-sm catalog-create-btn"
+                    data-bs-target="#projectTypeModal"
+                    data-create-url="{% url 'dash:project_type_create' %}"
+                    data-modal-title="{% trans 'New Project Type' %}"
+                    data-submit-text="{% trans 'Create' %}">
+                <i class="fas fa-plus me-2"></i>{% trans "New Project Type" %}
+            </button>
         </div>
-        <button class="btn dash-btn-primary rounded-3 px-4 fw-bold shadow-sm catalog-create-btn"
-                data-bs-target="#projectTypeModal"
-                data-create-url="{% url 'dash:project_type_create' %}"
-                data-modal-title="{% trans 'New Project Type' %}"
-                data-submit-text="{% trans 'Create' %}">
-            <i class="fas fa-plus me-2"></i>{% trans "New Project Type" %}
-        </button>
-    </div>
-
-    <div class="row g-4" data-catalog-modal="projectTypeModal">
-        {% for pt in page_obj %}
-        <div class="col-lg-4 col-md-6">
-            <div class="card h-100 border-0 shadow-sm rounded-4 pt-card">
-                <div class="pt-card-body">
-                    <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="pt-card-icon-wrap">
-                                <i class="fas fa-building"></i>
-                            </div>
-                            <div>
-                                <h5>{{ pt.name }}</h5>
-                                <span class="badge pt-badge rounded-pill">{{ pt.space_count }} {% trans "spaces" %}</span>
+        <div class="row g-4" data-catalog-modal="projectTypeModal">
+            {% for pt in page_obj %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 pt-card">
+                        <div class="pt-card-body">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="pt-card-icon-wrap">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    <div>
+                                        <h5>{{ pt.name }}</h5>
+                                        <span class="badge pt-badge rounded-pill">{{ pt.space_count }} {% trans "spaces" %}</span>
+                                    </div>
+                                </div>
+                                <div class="pt-actions">
+                                    <button class="btn btn-outline-dark rounded-3 pt-feature-btn{% if pt.featured_on_home %} is-featured{% endif %}"
+                                            title="{% trans 'Feature on home' %}"
+                                            data-feature-url="{% url 'dash:project_type_home_toggle' pt.pk %}"
+                                            data-csrf="{{ csrf_token }}"
+                                            data-action="{% if pt.featured_on_home %}unfeature{% else %}feature{% endif %}"
+                                            data-name="{{ pt.name }}"
+                                            data-featured="{% if pt.featured_on_home %}true{% else %}false{% endif %}"
+                                            data-confirm-title="{% trans 'Remove featured project type?' %}"
+                                            data-confirm-text="{% trans 'This project type will no longer be featured on the homepage.' %}"
+                                            data-confirm-ok="{% trans 'Yes, unfeature' %}"
+                                            data-confirm-cancel="{% trans 'Cancel' %}">
+                                        <i class="{% if pt.featured_on_home %}fas fa-star{% else %}far fa-star{% endif %}"></i>
+                                    </button>
+                                    <a class="btn btn-outline-light rounded-3"
+                                       title="{% trans 'Manage Spaces' %}"
+                                       href="{% url 'dash:project_type_detail' pt.pk %}">
+                                        <i class="fas fa-door-open"></i>
+                                    </a>
+                                    <button class="btn btn-outline-primary rounded-3 catalog-edit-btn"
+                                            title="{% trans 'Edit' %}"
+                                            data-bs-target="#projectTypeModal"
+                                            data-update-url="{% url 'dash:project_type_update' pt.pk %}"
+                                            data-modal-title="{% trans 'Edit Project Type' %}"
+                                            data-submit-text="{% trans 'Save' %}"
+                                            data-name="{{ pt.name }}">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger rounded-3 delete_button"
+                                            title="{% trans 'Delete' %}"
+                                            data-delete-url="{% url 'dash:project_type_delete' pt.pk %}"
+                                            data-csrf-token="{{ csrf_token }}"
+                                            data-swal-title="{% trans 'Delete Project Type?' %}"
+                                            data-swal-text="{% trans 'This action cannot be undone.' %}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="pt-actions">
-                            <button class="btn btn-outline-dark rounded-3 pt-feature-btn{% if pt.featured_on_home %} is-featured{% endif %}"
-                                    title="{% trans 'Feature on home' %}"
-                                    data-feature-url="{% url 'dash:project_type_home_toggle' pt.pk %}"
-                                    data-csrf="{{ csrf_token }}"
-                                    data-action="{% if pt.featured_on_home %}unfeature{% else %}feature{% endif %}"
-                                    data-name="{{ pt.name }}"
-                                    data-featured="{% if pt.featured_on_home %}true{% else %}false{% endif %}"
-                                    data-confirm-title="{% trans 'Remove featured project type?' %}"
-                                    data-confirm-text="{% trans 'This project type will no longer be featured on the homepage.' %}"
-                                    data-confirm-ok="{% trans 'Yes, unfeature' %}"
-                                    data-confirm-cancel="{% trans 'Cancel' %}">
-                                <i class="{% if pt.featured_on_home %}fas fa-star{% else %}far fa-star{% endif %}"></i>
-                            </button>
-                            <a class="btn btn-outline-light rounded-3" title="{% trans 'Manage Spaces' %}"
-                               href="{% url 'dash:project_type_detail' pt.pk %}">
-                                <i class="fas fa-door-open"></i>
-                            </a>
-                            <button class="btn btn-outline-primary rounded-3 catalog-edit-btn"
-                                    title="{% trans 'Edit' %}"
-                                    data-bs-target="#projectTypeModal"
-                                    data-update-url="{% url 'dash:project_type_update' pt.pk %}"
-                                    data-modal-title="{% trans 'Edit Project Type' %}"
-                                    data-submit-text="{% trans 'Save' %}"
-                                    data-name="{{ pt.name }}">
-                                <i class="fas fa-pen"></i>
-                            </button>
-                            <button class="btn btn-outline-danger rounded-3 delete_button"
-                                    title="{% trans 'Delete' %}"
-                                    data-delete-url="{% url 'dash:project_type_delete' pt.pk %}"
-                                    data-csrf-token="{{ csrf_token }}"
-                                    data-swal-title="{% trans 'Delete Project Type?' %}"
-                                    data-swal-text="{% trans 'This action cannot be undone.' %}">
-                                <i class="fas fa-trash"></i>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm p-5 text-center rounded-4">
+                        <div class="mb-4">
+                            <i class="fas fa-building fa-4x text-light"></i>
+                        </div>
+                        <h4 class="text-muted fw-bold mb-2">{% trans "No project types yet" %}</h4>
+                        <p class="text-muted small mb-4">{% trans "Create your first project type to get started." %}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% if page_obj.paginator.num_pages > 1 %}
+            <div class="mt-5">{% render_pagination page_obj %}</div>
+        {% endif %}
+    </div>
+    <!-- Project Type Modal -->
+    <div class="modal fade"
+         id="projectTypeModal"
+         tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+                <div class="pt-modal-header d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-1"></h5>
+                        <p class="pt-modal-subtitle">{% trans "Configure project type details" %}</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="p-4">
+                    <form method="post" action="" class="form" id="projectTypeForm">
+                        {% csrf_token %}
+                        {% include "partials/errorList.html" with form_id="projectTypeForm" %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                <i class="fas fa-tag text-primary" style="font-size:0.8rem;"></i>
+                                {% trans "Name" %}
+                            </label>
+                            <input type="text"
+                                   name="name"
+                                   class="form-control"
+                                   data-field="name"
+                                   data-default=""
+                                   required
+                                   placeholder="{% trans 'e.g. Residential' %}">
+                        </div>
+                        <div class="d-flex gap-2 justify-content-end pt-3 mt-3 border-top">
+                            <button type="button"
+                                    class="btn btn-outline-light rounded-3 px-4"
+                                    data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                            <button type="submit" class="btn dash-btn-primary rounded-3 px-4">
+                                <i class="fas fa-save me-2"></i><span class="catalog-submit-text"></span>
                             </button>
                         </div>
-                    </div>
+                    </form>
                 </div>
-            </div>
-        </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="card border-0 shadow-sm p-5 text-center rounded-4">
-                <div class="mb-4">
-                    <i class="fas fa-building fa-4x text-light"></i>
-                </div>
-                <h4 class="text-muted fw-bold mb-2">{% trans "No project types yet" %}</h4>
-                <p class="text-muted small mb-4">{% trans "Create your first project type to get started." %}</p>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-
-    {% if page_obj.paginator.num_pages > 1 %}
-    <div class="mt-5">{% render_pagination page_obj %}</div>
-    {% endif %}
-</div>
-
-<!-- Project Type Modal -->
-<div class="modal fade" id="projectTypeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
-            <div class="pt-modal-header d-flex align-items-center justify-content-between">
-                <div>
-                    <h5 class="modal-title fw-bold mb-1"></h5>
-                    <p class="pt-modal-subtitle">{% trans "Configure project type details" %}</p>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="p-4">
-                <form method="post" action="" class="form" id="projectTypeForm">
-                    {% csrf_token %}
-                    {% include "partials/errorList.html" with form_id="projectTypeForm" %}
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                            <i class="fas fa-tag text-primary" style="font-size:0.8rem;"></i>
-                            {% trans "Name" %}
-                        </label>
-                        <input type="text" name="name" class="form-control" data-field="name" data-default="" required placeholder="{% trans 'e.g. Residential' %}">
-                    </div>
-                    <div class="d-flex gap-2 justify-content-end pt-3 mt-3 border-top">
-                        <button type="button" class="btn btn-outline-light rounded-3 px-4" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
-                        <button type="submit" class="btn dash-btn-primary rounded-3 px-4">
-                            <i class="fas fa-save me-2"></i><span class="catalog-submit-text"></span>
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
-</div>
 {% endblock dashContent %}
-
 {% block extra_js %}
-<script src="{% static 'js/catalog_modal.js' %}?v={{ ASSET_VERSION }}"></script>
-<script src="{% static 'js/project_type_list.js' %}?v={{ ASSET_VERSION }}"></script>
+    <script src="{% static 'js/catalog_modal.js' %}?v={{ ASSET_VERSION }}"></script>
+    <script src="{% static 'js/project_type_list.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

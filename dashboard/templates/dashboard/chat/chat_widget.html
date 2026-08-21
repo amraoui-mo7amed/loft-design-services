@@ -1,19 +1,26 @@
 {% load i18n %}
-<div class="chat-widget card border-0 shadow-sm rounded-4" id="chatWidget{{ project.uuid }}">
+<div class="chat-widget card border-0 shadow-sm rounded-4"
+     id="chatWidget{{ project.uuid }}">
     <div class="card-header bg-transparent border-0 fw-bold p-3">
         <i class="fas fa-comments text-primary me-2"></i>{% trans "Project Chat" %}
     </div>
     <div class="card-body p-3">
-        <div class="chat-messages-list" style="max-height:300px;overflow-y:auto;scroll-behavior:smooth;"></div>
+        <div class="chat-messages-list"
+             style="max-height:300px;
+                    overflow-y:auto;
+                    scroll-behavior:smooth"></div>
         <form class="form chat-send-form mt-3 d-flex gap-2">
             {% csrf_token %}
             {% include "partials/errorList.html" with form_id="chatForm" %}
-            <input type="text" class="form-control chat-input" placeholder="{% trans 'Type a message...' %}">
-            <button type="submit" class="btn btn-primary rounded-3"><i class="fas fa-paper-plane"></i></button>
+            <input type="text"
+                   class="form-control chat-input"
+                   placeholder="{% trans 'Type a message...' %}">
+            <button type="submit" class="btn btn-primary rounded-3">
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </form>
     </div>
 </div>
-
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     if (typeof ChatWidget !== "undefined") {

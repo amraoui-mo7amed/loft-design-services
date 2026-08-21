@@ -1,420 +1,409 @@
-{% extends 'index.html' %}
-{% load i18n %}
+{% extends "index.html" %}
 {% load static %}
+{% load i18n %}
 
-{% get_current_language_bidi as IS_RTL %}
+{% block title %} — {% trans "Design d’espace · 360° · VR · Bilnov Store & AR" %}{% endblock title %}
 
 {% block body_class %}landing-page{% endblock body_class %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static "css/home.css" %}?v={{ ASSET_VERSION }}">
-    <link rel="stylesheet" href="{% static "css/portfolio_list.css" %}?v={{ ASSET_VERSION }}">
-    <link rel="stylesheet" href="{% static "css/video_player.css" %}?v={{ ASSET_VERSION }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-    <style>
-        body.landing-page .space-card-wrap {
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-        }
-        body.landing-page .space-card-price {
-            display: inline-flex !important;
-            align-items: baseline !important;
-            justify-content: center !important;
-            gap: 5px !important;
-            margin: 12px auto 0 auto !important;
-            padding: 6px 16px !important;
-            background: rgba(14, 18, 26, 0.92) !important;
-            backdrop-filter: blur(16px) !important;
-            -webkit-backdrop-filter: blur(16px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.16) !important;
-            border-radius: 999px !important;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55) !important;
-            transition: all 0.25s ease !important;
-        }
-        body.landing-page .space-card-price-value {
-            font-weight: 800 !important;
-            font-size: 1.15rem !important;
-            color: #ffffff !important;
-            letter-spacing: -0.2px !important;
-        }
-        body.landing-page .space-card-price-currency {
-            font-size: 0.8rem !important;
-            color: rgba(255, 255, 255, 0.9) !important;
-            font-weight: 700 !important;
-        }
-        body.landing-page .space-card-wrap:hover .space-card-price {
-            background: rgba(22, 28, 40, 0.98) !important;
-            border-color: rgba(255, 255, 255, 0.3) !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65) !important;
-        }
-        body.landing-page .space-card.selected ~ .space-card-price,
-        body.landing-page .space-card-wrap:has(.space-card.selected) .space-card-price {
-            background: rgba(18, 24, 34, 0.98) !important;
-            border-color: #FFD65A !important;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), 0 0 14px rgba(255, 214, 90, 0.25) !important;
-        }
-    </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/home.css' %}?v={{ ASSET_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/gallery.css' %}?v={{ ASSET_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/video_player.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
 
 {% block nav %}
-    <nav class="home-navbar">
-        <div class="container home-navbar-inner">
-            <a class="home-navbar-brand" href="{% url 'frontend:home' %}">
-                {% if site_config.logo %}
-                    <img src="{{ site_config.logo }}" alt="{% trans 'Logo' %}" class="home-navbar-logo me-2">
-                {% else %}
-                    <img src="{% static 'img/icon.jpeg' %}" alt="{% trans 'Logo' %}" class="home-navbar-logo me-2">
-                {% endif %}
-                <span class="home-navbar-brand-name">
-                    {% if IS_RTL %}{{ site_config.ar_name }}{% else %}{{ site_config.name }}{% endif %}
-                </span>
-            </a>
-
-            <ul class="home-navbar-links list-unstyled mb-0">
-                <li>
-                    <a href="{% url 'frontend:home' %}" class="home-nav-link active">
-                        {% trans "Home" %}
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'frontend:space_gallery' %}" class="home-nav-link">
-                        {% trans "Gallery" %}
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'frontend:portfolio_list' %}" class="home-nav-link">
-                        {% trans "Portfolio" %}
-                    </a>
-                </li>
-            </ul>
-
-            <div class="home-navbar-actions d-flex align-items-center gap-2">
-                {% include 'partials/language_switcher.html' %}
-                {% if user.is_authenticated %}
-                    <a href="{% url 'dash:dash_home' %}" class="home-navbar-btn" title="{% trans 'Dashboard' %}">
-                        <span class="home-navbar-btn-label">{% trans "Dashboard" %}</span>
-                    </a>
-                {% else %}
-                    <a href="{% url 'user_auth:login' %}" class="home-navbar-btn" title="{% trans 'Login' %}">
-                        <span class="home-navbar-btn-label">{% trans "Login" %}</span>
-                    </a>
-                {% endif %}
-            </div>
-        </div>
+<header class="nav">
+  <div class="wrap navin">
+    <a class="logo" href="#accueil">
+      <img src="{% static 'img/icon.jpeg' %}" alt="LOFT DESIGN">
+      <span>LOFT DESIGN</span>
+    </a>
+    <nav class="menu">
+      <a href="#portfolio">{% trans "Portfolio" %}</a>
+      <button class="desktopGalleryBtn" id="desktopGalleryBtn" type="button">{% trans "Galerie" %}</button>
+      <a href="#apropos">{% trans "À propos" %}</a>
+      <a href="https://store.bilnov.com" target="_blank" rel="noopener">{% trans "Store Bilnov" %}</a>
+      <a href="#composer">{% trans "Compositeur" %}</a>
+      <a href="#videos">{% trans "Vidéos" %}</a>
+      <a href="#contact">{% trans "Contact" %}</a>
     </nav>
+    <div class="navActions">
+      <a class="btn storeTop" href="https://store.bilnov.com" target="_blank" rel="noopener">
+        <span class="storeIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M3.5 4h2l2.1 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H7" />
+            <circle cx="10" cy="19" r="1.4" />
+            <circle cx="18" cy="19" r="1.4" />
+          </svg>
+        </span>
+        {% trans "Store Bilnov" %}
+      </a>
+      <a class="btn neonCyan" href="#composer">{% trans "Composer mon projet" %}</a>
+    </div>
+  </div>
+</header>
+
+<nav class="mobileAppNav" aria-label="{% trans 'Navigation mobile' %}">
+  <button class="appNavBtn active" data-app-page="portfolio">{% trans "Portfolio" %}</button>
+  <button class="appNavBtn galleryPill" id="mobileGalleryBtn" type="button">{% trans "Galerie" %}</button>
+  <a class="appNavBtn store" href="https://store.bilnov.com" target="_blank" rel="noopener">
+    <span class="miniCart" aria-hidden="true">⌑</span> {% trans "Store" %}
+  </a>
+  <button class="appNavBtn compose" data-app-page="composer">{% trans "Composer" %}</button>
+  <button class="appNavBtn" data-app-page="apropos">{% trans "À propos" %}</button>
+  <button class="appNavBtn" data-app-page="videos">{% trans "Vidéos" %}</button>
+  <button class="appNavBtn" data-app-page="contact">{% trans "Contact" %}</button>
+</nav>
 {% endblock nav %}
 
 {% block sidebar %}{% endblock sidebar %}
-
-{% block content %}
-    <!-- Full-page Background Slider -->
-    <div class="page-bg-slider" id="heroSwiper">
-        <div class="swiper-wrapper">
-            <div class="swiper-slide">
-                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_1.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
-            </div>
-            <div class="swiper-slide">
-                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_2.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
-            </div>
-            <div class="swiper-slide">
-                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_3.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
-            </div>
-            <div class="swiper-slide">
-                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_4.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
-            </div>
-            <div class="swiper-slide">
-                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_5.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
-            </div>
-            <div class="swiper-slide">
-                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_6.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
-            </div>
-            <div class="swiper-slide">
-                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_7.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
-            </div>
-            <div class="swiper-slide">
-                <div class="page-bg-slide" style="background-image:url('{% static 'imgs/header_bg_8.jpeg' %}?v={{ ASSET_VERSION }}');"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Hero Intro (scrolls over the fixed background) -->
-    <section class="home-hero" id="homeHero">
-        <div class="home-hero-content">
-            <span class="home-hero-eyebrow reveal">{% trans "Interior Design Studio" %}</span>
-            <h1 class="home-hero-title reveal">
-                {% if IS_RTL %}{{ site_config.ar_name }}{% else %}{{ site_config.name }}{% endif %}
-            </h1>
-            <p class="home-hero-sub reveal">
-                {% trans "We turn spaces into experiences — from concept to key handover." %}
-            </p>
-            <a href="#spaces-section" class="btn home-hero-cta reveal">
-                <i class="fas fa-arrow-down me-2"></i>{% trans "Start Your Project" %}
-            </a>
-        </div>
-    </section>
-
-    <!-- Spaces Section -->
-    <section class="loft-section pt-0" id="spaces-section">
-        <div class="container">
-            <div class="mb-5 pt-5">
-                <h2 class="loft-section-title reveal">{% trans "Choose Your Spaces" %}</h2>
-                <p class="loft-section-sub reveal">{% trans "Select the rooms you want to design and get an instant price" %}</p>
-            </div>
-
-            <div class="row g-4 justify-content-center" id="spacesGrid">
-                {% for space in spaces %}
-                <div class="col-6 col-md-4 col-lg-3">
-                    <div class="space-card-wrap reveal">
-                        <div class="space-card" data-space-id="{{ space.id }}" data-price="{{ space.base_price }}">
-                            <input type="checkbox" class="space-checkbox" id="space_{{ space.id }}" value="{{ space.id }}" aria-label="{{ space.name }}">
-                            <div class="space-card-img">
-                                {% if space.thumbnail %}
-                                <img src="{{ space.thumbnail }}" alt="{{ space.name }}" loading="lazy" data-img-error="hide-parent">
-                                {% endif %}
-                            </div>
-                            <div class="space-card-check">
-                                <i class="fas fa-check"></i>
-                            </div>
-                            <div class="space-card-body">
-                                <h3 class="space-card-title">{{ space.name }}</h3>
-                            </div>
-                        </div>
-                        <div class="space-card-price">
-                            <span class="space-card-price-value">{{ space.base_price|floatformat:"0u" }}</span>
-                            <span class="space-card-price-currency">DA</span>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-
-            <div class="floating-total-box" id="floatingTotalBox">
-                <div class="floating-total" id="floatingTotalBadge">
-                    <span class="floating-total-value" id="floatingTotalValue">
-                        <span class="floating-total-amount" id="floatingTotal">0</span>
-                        <span class="floating-total-currency">DA</span>
-                    </span>
-                </div>
-                <button class="btn btn-primary floating-continue-btn rounded-pill px-4 py-2 fw-bold shadow" id="continueBtn">
-                    {% trans "Continue" %} <i class="fas fa-arrow-right ms-1"></i>
-                </button>
-            </div>
-
-            <div class="floating-bottom-bar" id="floatingBar">
-                <div class="floating-bottom-inner">
-                    <div class="floating-actions">
-                        <a href="{% url 'design_service' %}" class="btn btn-outline-primary rounded px-4 fw-bold">{% trans "Create a custom project" %}</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Recent Projects Coverflow -->
-    <section class="projects-section" id="projects-section">
-        <div class="container">
-            <div class="projects-section-head text-center mb-4">
-                <h2 class="loft-section-title reveal mb-0">{% trans "Recent Projects" %}</h2>
-            </div>
-            <div class="projects-slider-container position-relative">
-                <button type="button" class="projects-nav-btn projects-prev" aria-label="{% trans 'Previous projects' %}">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button type="button" class="projects-nav-btn projects-next" aria-label="{% trans 'Next projects' %}">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-                <div class="swiper projects-swiper" id="projectsSwiper">
-                    <div class="swiper-wrapper">
-                        {% for project in projects %}
-                        <div class="swiper-slide">
-                            <a class="project-rect-card" href="{% url 'frontend:portfolio_detail' project.pk %}">
-                                <div class="project-rect-img">
-                                    {% if project.thumbnail %}
-                                    <img src="{{ project.thumbnail.url }}" alt="{{ project.title }}" loading="lazy">
-                                    {% else %}
-                                    <div class="project-rect-fallback"><i class="fas fa-image"></i></div>
-                                    {% endif %}
-                                    {% if project.is_featured %}
-                                    <span class="project-rect-featured">{% trans "Featured" %}</span>
-                                    {% endif %}
-                                    <div class="project-rect-overlay">
-                                        <h4 class="project-rect-title">{{ project.title }}</h4>
-                                        <span class="project-rect-cta">
-                                            {% trans "View Project" %} <i class="fas fa-arrow-right ms-1"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <!-- Projects Slider Pagination Indicator -->
-                    <div class="swiper-pagination projects-pagination"></div>
-                </div>
-            </div>
-            <div class="text-center mt-4 pt-2 reveal">
-                <a href="{% url 'frontend:portfolio_list' %}" class="btn btn-outline-primary rounded-pill px-5 py-3 fw-bold shadow-sm">
-                    <i class="fas fa-layer-group me-2"></i>{% trans "View All Projects" %}
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Videos Slider -->
-    <section class="projects-section videos-section" id="videos-section">
-        <div class="container">
-            <div class="projects-section-head text-center mb-4">
-                <h2 class="loft-section-title reveal mb-0">{% trans "Our Videos" %}</h2>
-            </div>
-            <div class="videos-slider-container position-relative">
-                <button type="button" class="projects-nav-btn videos-prev" aria-label="{% trans 'Previous videos' %}">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button type="button" class="projects-nav-btn videos-next" aria-label="{% trans 'Next videos' %}">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-                <div class="swiper projects-swiper videos-swiper" id="videosSwiper">
-                    <div class="swiper-wrapper">
-                        {% for video in videos %}
-                        <div class="swiper-slide">
-                            <button type="button" class="video-card video-player-trigger"
-                                    data-video-url="{{ video.play_link }}"
-                                    data-video-title="{{ video.title }}">
-                                <span class="video-card-media">
-                                    {% if video.thumbnail_url %}
-                                    <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" loading="lazy">
-                                    {% else %}
-                                    <span class="video-card-fallback"><i class="fas fa-video"></i></span>
-                                    {% endif %}
-                                    <span class="video-card-play"><i class="fas fa-play"></i></span>
-                                </span>
-                                <span class="video-card-body">
-                                    <span class="video-card-title">{{ video.title }}</span>
-                                    {% if video.description %}
-                                    <span class="video-card-desc">{{ video.description|truncatechars:90 }}</span>
-                                    {% endif %}
-                                </span>
-                            </button>
-                        </div>
-                        {% empty %}
-                        <div class="swiper-slide">
-                            <div class="video-card-empty">{% trans "No videos available yet." %}</div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <!-- Videos Slider Pagination Indicator -->
-                    <div class="swiper-pagination videos-pagination"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section class="contact-section" id="contact-section">
-        <div class="container">
-            <div class="contact-section-head">
-                <h2 class="loft-section-title reveal">{% trans "Get in Touch" %}</h2>
-                <p class="loft-section-sub reveal text-center">{% trans "Tell us about your project, we will get back to you shortly" %}</p>
-            </div>
-            <div class="row g-4 align-items-stretch">
-                <div class="col-lg-5">
-                    <div class="contact-info-card reveal">
-                        <h5 class="contact-info-title">{% trans "Let's talk about your space" %}</h5>
-                        <p class="contact-info-text">{% trans "Follow us on social media or drop us a message. We love hearing from you." %}</p>
-                        <div class="contact-socials">
-                            {% for key, value in site_config.social.items %}
-                            {% if value %}
-                            <a href="{{ value }}" target="_blank" rel="noopener" class="contact-social-link" aria-label="{{ key }}">
-                                <i class="fab fa-{{ key }}"></i>
-                            </a>
-                            {% endif %}
-                            {% endfor %}
-                        </div>
-                        <div class="contact-info-line">
-                            <i class="fas fa-envelope"></i>
-                            <span>{{ site_config.contact_email }}</span>
-                        </div>
-                        {% if site_config.phone %}
-                        <div class="contact-info-line">
-                            <i class="fas fa-phone-alt"></i>
-                            <span>{{ site_config.phone }}</span>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-lg-7">
-                    <form class="form contact-form reveal" id="contactForm" method="post" action="{% url 'frontend:contact_submit' %}">
-                        {% csrf_token %}
-                        {% include "partials/errorList.html" with form_id="contactForm" %}
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="contact-label" for="contactName">{% trans "Name" %}</label>
-                                <input type="text" id="contactName" name="name" class="form-control contact-input" required placeholder="{% trans 'Your full name' %}">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="contact-label" for="contactPhone">{% trans "Phone (optional)" %}</label>
-                                <input type="tel" id="contactPhone" name="phone" class="form-control contact-input" placeholder="{% trans '+213 ...' %}">
-                            </div>
-                            <div class="col-12">
-                                <label class="contact-label" for="contactEmail">{% trans "Email" %}</label>
-                                <input type="email" id="contactEmail" name="email" class="form-control contact-input" required placeholder="{% trans 'you@example.com' %}">
-                            </div>
-                            <div class="col-12">
-                                <label class="contact-label" for="contactMessage">{% trans "Message" %}</label>
-                                <textarea id="contactMessage" name="message" class="form-control contact-input" rows="4" required placeholder="{% trans 'Tell us about your project...' %}"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-check contact-lead-check">
-                                    <input class="form-check-input" type="checkbox" name="join_lead" value="1" id="contactJoinLead">
-                                    <label class="form-check-label" for="contactJoinLead">
-                                        {% trans "Also keep me updated with your latest projects" %}
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <button type="submit" class="btn contact-submit-btn rounded-3 px-4 fw-bold" id="contactSubmitBtn">
-                                    <i class="fas fa-paper-plane me-2"></i>{% trans "Send Message" %}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    {% include "components/video_player.html" %}
-
-    <!-- Inspiration Gallery Modal -->
-    <div class="modal fade" id="inspirationGalleryModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold" id="inspirationModalTitle"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="inspirationModalBody">
-                    <p class="text-muted mb-3 inspo-hint">{% trans "Click images you like to select them." %}</p>
-                    <div class="row g-3" id="inspirationModalGrid"></div>
-                </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-sm btn-dark rounded-3 px-4" id="inspirationSubmitBtn">{% trans "Continue" %}</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-{% endblock content %}
-
 {% block footer %}{% endblock footer %}
 
+{% block content %}
+<div class="bgLayer" id="bgA"></div>
+<div class="bgLayer next" id="bgB"></div>
+<div class="bgVeil"></div>
+
+<main>
+  <!-- ACCUEIL / HERO -->
+  <section id="accueil" class="viewport hero">
+    <div class="wrap heroGrid">
+      <div>
+        <div class="kicker">{% trans "STUDIO DE DESIGN D’ESPACE · ALGÉRIE" %}</div>
+        <h1>{% trans "Votre espace," %}<br><span>{% trans "avant qu’il existe." %}</span></h1>
+        <p>{% trans "Depuis 2010, nous concevons des espaces résidentiels pensés pour la vraie vie. Notre valeur ajoutée : vous entrez dans votre projet en 360° et en VR, puis vous le consultez, le partagez et le suivez sur Bilnov. Avec Store Bilnov, la conception se connecte ensuite au marché réel : produits disponibles, budget, fichiers 3D et visualisation AR dans votre propre espace." %}</p>
+        <div class="actions">
+          <a class="btn neonCyan" href="#portfolio">{% trans "Explorer nos réalisations" %}</a>
+          <button class="btn galleryHeroBtn" id="galleryHeroBtn" type="button">{% trans "Galerie inspirations" %}</button>
+          <a class="btn neonViolet" href="#composer">{% trans "Composer mon projet" %}</a>
+          <a class="btn storeTop" href="https://store.bilnov.com" target="_blank" rel="noopener">
+            <span class="storeIcon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M3.5 4h2l2.1 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H7" />
+                <circle cx="10" cy="19" r="1.4" />
+                <circle cx="18" cy="19" r="1.4" />
+              </svg>
+            </span>
+            {% trans "Explorer Store Bilnov" %}
+          </a>
+        </div>
+      </div>
+      <aside class="heroPanel">
+        <small>{% trans "Approchez le curseur pour découvrir chaque service" %}</small>
+        <div class="serviceGrid">
+          <div class="serviceInfo amber">
+            <b>{% trans "Design" %}</b>
+            <span>{% trans "Usage & optimisation" %}</span>
+            <div class="pop">
+              <img src="https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg" alt="{% trans 'Vidéo Design' %}">
+              <a href="#" class="videoInsideBtn" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="▶ {% trans 'Voir la vidéo explicative' %}">▶ {% trans "Voir la vidéo explicative" %}</a>
+            </div>
+          </div>
+          <div class="serviceInfo cyan">
+            <b>{% trans "360°" %}</b>
+            <span>{% trans "Visite immersive" %}</span>
+            <div class="pop">
+              <img src="https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg" alt="{% trans 'Démo 360°' %}">
+              <a href="#" class="videoInsideBtn" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="▶ {% trans 'Voir la démo 360°' %}">▶ {% trans "Voir la démo 360°" %}</a>
+            </div>
+          </div>
+          <div class="serviceInfo violet">
+            <b>{% trans "VR" %}</b>
+            <span>{% trans "Immersion à l’échelle" %}</span>
+            <div class="pop">
+              <img src="https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg" alt="{% trans 'Comprendre la VR' %}">
+              <a href="#" class="videoInsideBtn" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="▶ {% trans 'Comprendre la VR' %}">▶ {% trans "Comprendre la VR" %}</a>
+            </div>
+          </div>
+          <div class="serviceInfo green">
+            <b>{% trans "Bilnov" %}</b>
+            <span>{% trans "Projet collaboratif" %}</span>
+            <div class="pop">
+              <img src="https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg" alt="{% trans 'Bilnov en action' %}">
+              <a href="#" class="videoInsideBtn" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="▶ {% trans 'Voir Bilnov en action' %}">▶ {% trans "Voir Bilnov en action" %}</a>
+            </div>
+          </div>
+          <div class="serviceInfo green">
+            <b>{% trans "Store Bilnov" %}</b>
+            <span>{% trans "Produits · 3D · AR · budget" %}</span>
+          </div>
+        </div>
+        <div class="cloud">{% trans "Mobile · PC · VR Box · cloud 24/7 · marché réel & disponibilité" %}</div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- PORTFOLIO -->
+  <section id="portfolio" class="viewport">
+    <div class="portfolioWrap">
+      <div class="sectionHead">
+        <div class="ey">{% trans "PORTFOLIO IMMERSIF" %}</div>
+        <h2>{% trans "Explorez nos réalisations." %}<br><em>{% trans "Entrez-y en 360°." %}</em></h2>
+      </div>
+      <div class="portfolioBody">
+        <div id="slider" class="slider"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- A PROPOS -->
+  <section id="apropos" class="viewport">
+    <div class="narrow">
+      <div class="sectionHead">
+        <div class="ey">{% trans "À PROPOS" %}</div>
+        <h2>{% trans "15+ ans à comprendre" %}<br><em>{% trans "comment on vit vraiment un espace." %}</em></h2>
+        <p>{% trans "Le design doit survivre au quotidien : circulation, rangement, confort, lumière, technologie et évolution des usages." %}</p>
+      </div>
+      <div class="aboutGrid">
+        <div class="aboutPhoto">
+          <div>
+            <strong>15+</strong>
+            <p>{% trans "années de conception résidentielle, de retours d’usage et d’amélioration continue." %}</p>
+          </div>
+        </div>
+        <div class="aboutInfo">
+          <article class="infoCard" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="{% trans 'Usage réel' %}" data-explain-video="66qSJ4EIIdM" data-explain-title="{% trans 'Usage réel' %}">
+            <h3>{% trans "Usage réel" %}</h3>
+            <p>{% trans "Des espaces dessinés autour des gestes et habitudes quotidiennes." %}</p>
+          </article>
+          <article class="infoCard" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="{% trans 'Optimisation' %}" data-explain-video="66qSJ4EIIdM" data-explain-title="{% trans 'Optimisation' %}">
+            <h3>{% trans "Optimisation" %}</h3>
+            <p>{% trans "Circulation, rangement et fonction : chaque mètre carré doit servir." %}</p>
+          </article>
+          <article class="infoCard" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="{% trans 'Smart living' %}" data-explain-video="66qSJ4EIIdM" data-explain-title="{% trans 'Smart living' %}">
+            <h3>{% trans "Smart living" %}</h3>
+            <p>{% trans "Éclairage et automatismes intégrés sans compliquer la vie." %}</p>
+          </article>
+          <article class="infoCard" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="{% trans 'Immersion' %}" data-explain-video="66qSJ4EIIdM" data-explain-title="{% trans 'Immersion' %}">
+            <h3>{% trans "Immersion" %}</h3>
+            <p>{% trans "Vous ne validez plus un projet abstrait : vous entrez dedans." %}</p>
+          </article>
+        </div>
+      </div>
+      <div class="bilnow">
+        <div class="serviceInfo violet"><b>Bilnov Cloud</b><span>{% trans "Projet accessible partout" %}</span></div>
+        <div class="serviceInfo cyan"><b>Viewer DWG/PDF</b><span>{% trans "Zoom, distances, surfaces" %}</span></div>
+        <div class="serviceInfo amber"><b>Réserves</b><span>{% trans "Sur un point précis" %}</span></div>
+        <div class="serviceInfo green"><b>Notifications</b><span>{% trans "Intervenant ciblé" %}</span></div>
+        <div class="serviceInfo cyan"><b>360° / VR</b><span>{% trans "Mobile · PC · casque" %}</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPOSITEUR -->
+  <section id="composer" class="viewport">
+    <div class="composerShell">
+      <div class="sectionHead">
+        <div class="ey">{% trans "COMPOSITEUR DE PROJET" %}</div>
+        <h2>{% trans "Composez votre projet." %}<br><em>{% trans "Voyez l’estimation évoluer." %}</em></h2>
+      </div>
+      <div class="progress">
+        <button data-step="project" class="active"><i>01</i><span>{% trans "Projet" %}</span></button>
+        <span></span>
+        <button data-step="services"><i>02</i><span>{% trans "Prestations" %}</span></button>
+        <span></span>
+        <button data-step="contact"><i>03</i><span>{% trans "Coordonnées" %}</span></button>
+      </div>
+      <div class="composerViewport" id="composerBody"></div>
+    </div>
+  </section>
+
+  <!-- VIDEOS -->
+  <section id="videos" class="viewport">
+    <div style="width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+      <div class="sectionHead">
+        <div class="ey">{% trans "VIDÉOS" %}</div>
+        <h2>{% trans "Voir le design" %}<br><em>{% trans "prendre vie." %}</em></h2>
+      </div>
+      <div class="videoRail" id="videoRail">
+        {% if video_list %}
+          {% for v in video_list %}
+            <article class="videoCard" data-video-url="https://www.youtube.com/watch?v={{ v.youtube_id|default:'66qSJ4EIIdM' }}" data-video-title="{{ v.title }}" data-youtube-id="{{ v.youtube_id|default:'66qSJ4EIIdM' }}">
+              <img src="{{ v.thumbnail }}" alt="{{ v.title }}">
+              <span class="play">▶</span>
+              <span class="videoLabel">{{ v.title }}</span>
+            </article>
+          {% endfor %}
+        {% else %}
+          <article class="videoCard" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="LOFT DESIGN · immersion & projet" data-youtube-id="66qSJ4EIIdM">
+            <img src="https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg" alt="Vidéo LOFT DESIGN">
+            <span class="play">▶</span>
+            <span class="videoLabel">LOFT DESIGN · immersion & projet</span>
+          </article>
+          <article class="videoCard" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="Conception · matières · expérience" data-youtube-id="66qSJ4EIIdM">
+            <img src="https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-07-07-23-27-11.png" alt="Conception LOFT DESIGN">
+            <span class="play">▶</span>
+            <span class="videoLabel">Conception · matières · expérience</span>
+          </article>
+          <article class="videoCard" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="Projet résidentiel · détails & lumière" data-youtube-id="66qSJ4EIIdM">
+            <img src="https://loftdesign.bilnov.com/media/portfolio/thumbnails/SEJOUR_4.png" alt="Projet résidentiel LOFT DESIGN">
+            <span class="play">▶</span>
+            <span class="videoLabel">Projet résidentiel · détails & lumière</span>
+          </article>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="viewport">
+    <div class="narrow">
+      <div class="sectionHead">
+        <div class="ey">{% trans "CONTACT" %}</div>
+        <h2>{% trans "Votre projet mérite" %}<br><em>{% trans "une conversation." %}</em></h2>
+      </div>
+      <div class="contactGrid">
+        <div class="contactIntro">
+          <div class="kicker">LOFT DESIGN</div>
+          <h3>{% trans "Un message suffit pour commencer." %}</h3>
+          <p>{% trans "Envoyez votre demande par e-mail ou poursuivez immédiatement sur WhatsApp." %}</p>
+          <div class="details">
+            <a href="mailto:loftdesign@live.fr">✉ loftdesign@live.fr</a>
+            <a href="tel:+213776139475">☎ +213 776 139 475</a>
+            <a href="tel:+213541960603">☎ +213 541 960 603</a>
+          </div>
+          <div class="socials">
+            <a class="wa" href="https://wa.me/213776139475" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M20.5 11.8a8.4 8.4 0 0 1-12.4 7.4L4 20.5l1.3-4a8.4 8.4 0 1 1 15.2-4.7Zm-5 2.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.3-.7.8-.8 1-.2.2-.3.2-.6.1-2.4-1.2-3.9-3.6-4-3.8-.1-.2 0-.4.1-.5l.4-.5.3-.4c.1-.2.1-.4 0-.5l-.8-1.9c-.2-.5-.5-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3 4.9 4.2.7.3 1.2.5 1.6.6.7.2 1.4.2 1.9.1.6-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.2-.3-.3-.5-.4Z" />
+              </svg>
+              <span>WhatsApp</span>
+            </a>
+            <a class="fb" href="https://www.facebook.com/profile.php?id=100067199886406" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M14 8.5V6.8c0-.8.5-1 1-1h2.6V2h-3.5C10.7 2 10 4.4 10 6.5v2H7v4h3V22h4v-9.5h3.1l.5-4H14Z" />
+              </svg>
+              <span>Facebook</span>
+            </a>
+            <a class="ig" href="https://www.instagram.com/loftdesign_dz" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm5 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm6.2-1.4a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Z" />
+              </svg>
+              <span>Instagram</span>
+            </a>
+          </div>
+        </div>
+
+        <form class="quickForm form" id="quickForm" method="post" action="{% url 'frontend:contact_submit' %}">
+          {% csrf_token %}
+          {% include "partials/errorList.html" with form_id="quickForm" %}
+          <input name="name" placeholder="{% trans 'Nom complet' %}" required>
+          <input name="email" type="email" placeholder="{% trans 'E-mail' %}" required>
+          <input name="phone" placeholder="{% trans 'Téléphone' %}">
+          <textarea name="message" placeholder="{% trans 'Parlez-nous de votre projet…' %}" required></textarea>
+          <button class="btn neonCyan" type="submit">{% trans "Envoyer par e-mail" %}</button>
+          <button class="btn neonViolet" type="button" id="quickWa">{% trans "Envoyer sur WhatsApp" %}</button>
+          <small id="quickStatus" style="text-align:center;color:#aeb6b3"></small>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- GALLERY OVERLAY APP -->
+<section class="galleryApp" id="galleryApp" aria-hidden="true">
+  <div class="galleryAppBg"></div>
+  <header class="galleryAppHeader">
+    <div class="galleryBrand" style="cursor:pointer;">
+      <img src="{% static 'img/icon.jpeg' %}" alt="LOFT DESIGN">
+      <div><b>LOFT DESIGN</b><small>{% trans "Galerie d’inspirations" %}</small></div>
+    </div>
+    <div class="galleryHeaderActions">
+      <button class="galleryCartTop" id="galleryCartTop" type="button">
+        {% trans "Panier" %} <span id="galleryCartCount">0</span>
+      </button>
+      <button class="galleryCloseTop" id="galleryCloseTop" type="button">✕</button>
+    </div>
+  </header>
+  <div class="galleryAppBody">
+    <div class="gallerySpacesNav">
+      <button class="gallerySpaceArrow prev" id="gallerySpacePrev" type="button" aria-label="{% trans 'Espace précédent' %}">‹</button>
+      <div class="gallerySpaces" id="gallerySpaces"></div>
+      <button class="gallerySpaceArrow next" id="gallerySpaceNext" type="button" aria-label="{% trans 'Espace suivant' %}">›</button>
+    </div>
+    <div class="galleryCategoryGrid" id="galleryCategoryGrid"></div>
+  </div>
+  <button class="galleryMobileCart" id="galleryMobileCart" type="button">
+    <span>{% trans "Panier" %} <b id="galleryMobileCount">0</b></span>
+    <strong>{% trans "Voir & envoyer" %}</strong>
+  </button>
+</section>
+
+<!-- GALLERY CART DRAWER -->
+<aside class="galleryCartDrawer" id="galleryCartDrawer" aria-hidden="true">
+  <div class="galleryCartHead">
+    <div>
+      <small>{% trans "VOTRE SÉLECTION" %}</small>
+      <h3>{% trans "Panier inspirations" %}</h3>
+    </div>
+    <button id="galleryCartClose" type="button">✕</button>
+  </div>
+  <div class="galleryCartItems" id="galleryCartItems"></div>
+  <div class="galleryCartActions">
+    <button id="galleryShareWa" type="button">WhatsApp</button>
+    <button id="galleryShareMail" type="button">E-mail</button>
+    <button id="galleryCopyLink" type="button">{% trans "Copier le lien" %}</button>
+  </div>
+</aside>
+
+<!-- GALLERY DETAIL MODAL -->
+<section class="galleryDetail" id="galleryDetail" aria-hidden="true">
+  <button class="galleryDetailClose" id="galleryDetailClose" type="button">✕</button>
+  <div class="galleryDetailPanel" id="galleryDetailPanel"></div>
+</section>
+
+<!-- GALLERY LIGHTBOX -->
+<section class="galleryLightbox" id="galleryLightbox" aria-hidden="true">
+  <button class="galleryLightboxClose" id="galleryLightboxClose" type="button">✕</button>
+  <button class="galleryLightboxNav prev" id="galleryLightboxPrev" type="button" aria-label="{% trans 'Image précédente' %}">‹</button>
+  <div class="galleryLightboxStage">
+    <img id="galleryLightboxImg" src="" alt="">
+  </div>
+  <button class="galleryLightboxNav next" id="galleryLightboxNext" type="button" aria-label="{% trans 'Image suivante' %}">›</button>
+  <div class="galleryLightboxThumbs" id="galleryLightboxThumbs"></div>
+</section>
+
+<div class="galleryToast" id="galleryToast">{% trans "Lien copié" %}</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap foot">
+    <b>LOFT DESIGN</b>
+    <span>{% trans "Design d’espace · 360° · VR · Bilnov · Store 3D/AR" %}</span>
+    <div class="footLinks">
+      <a href="https://store.bilnov.com" target="_blank" rel="noopener">{% trans "Store Bilnov" %}</a>
+      <a href="https://wa.me/213776139475">WhatsApp</a>
+      <a href="https://www.facebook.com/profile.php?id=100067199886406" target="_blank" rel="noopener">Facebook</a>
+      <a href="https://www.instagram.com/loftdesign_dz" target="_blank" rel="noopener">Instagram</a>
+      <a href="mailto:loftdesign@live.fr">E-mail</a>
+    </div>
+    <span>© 2026</span>
+  </div>
+</footer>
+
+<section class="gallerySheet" id="gallerySheet">
+  <button class="galleryClose" id="galleryClose">⌄</button>
+  <div class="galleryInner" id="galleryInner"></div>
+</section>
+
+{% include "components/video_player.html" with target_btn=".videoCard, .videoInsideBtn, [data-explain-video]" %}
+{% endblock content %}
+
 {% block extra_js %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="{% static "js/three-sixty-bg.js" %}?v={{ ASSET_VERSION }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script src="{% static "js/video_player.js" %}?v={{ ASSET_VERSION }}"></script>
-<script src="{% static "js/home.js" %}?v={{ ASSET_VERSION }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script>
+  window.PORTFOLIO_DATA = {{ portfolio_data_json | safe }};
+  window.SPACES_DATA = {{ spaces_json | safe }};
+  window.SERVICES_DATA = {{ services_json | safe }};
+  window.VIDEOS_DATA = {{ video_data_json | safe }};
+  window.GALLERY_DATA = {{ gallery_data_json | safe }};
+</script>
+<script src="{% static 'js/video_player.js' %}?v={{ ASSET_VERSION }}"></script>
+<script src="{% static 'js/home.js' %}?v={{ ASSET_VERSION }}"></script>
+<script src="{% static 'js/gallery.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

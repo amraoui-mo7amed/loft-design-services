@@ -1,12 +1,12 @@
 {% extends "dash/dash_index.html" %}
 {% load i18n %}
 {% load static %}
-
 {% block dashTitle %}{{ project.project_name }} ({{ project.project_number }}){% endblock dashTitle %}
-
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/kanban.css' %}?v={{ ASSET_VERSION }}">
-    <link rel="stylesheet" href="{% static 'css/inspiration_lightbox.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/kanban.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/inspiration_lightbox.css' %}?v={{ ASSET_VERSION }}">
     <style>
         /* Dark Liquid Glass Theme for Admin Project Details */
         .admin-detail-hero {
@@ -309,606 +309,626 @@
         }
     </style>
 {% endblock extra_css %}
-
 {% block dashContent %}
-<div class="container-fluid py-3">
-
-    <!-- Hero Header with High Contrast and Fixed Z-Index -->
-    <div class="admin-detail-hero rounded-4 p-4 mb-4" data-status="{{ project.status }}">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-            <div>
-                <a href="{% url 'dash:admin_crm' %}" class="btn btn-sm btn-outline-light rounded-pill mb-2 px-3">
-                    <i class="fas fa-arrow-left me-1"></i>{% trans "Back to Kanban CRM" %}
-                </a>
-                <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <h3 class="fw-bold text-white mb-0">{{ project.project_name }}</h3>
-                    <span class="crm-project-number-badge font-monospace">
-                        {{ project.project_number }}
-                    </span>
-                    <span class="crm-status-pill status-{{ project.status }}">
-                        {{ project.get_status_display }}
-                    </span>
-                </div>
-                <div class="text-white-50 small mt-2">
-                    <i class="far fa-calendar-alt me-1 text-warning"></i> {% trans "Submitted on" %} <strong class="text-white">{{ project.created_at|date:"d M Y, H:i" }}</strong>
-                    {% if project.project_type %}
-                    <span class="mx-2">•</span>
-                    <i class="fas fa-home me-1 text-warning"></i> <strong class="text-white">{{ project.project_type.name }}</strong>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Quick Status Change Dropdown -->
-            <div class="d-flex align-items-center gap-2">
-                <div class="dropdown crm-status-dropdown" data-project-id="{{ project.id }}">
-                    <button class="btn btn-sm btn-outline-warning d-flex align-items-center gap-2 rounded-pill px-3 py-2 fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-edit"></i>
-                        <span>{% trans "Change Status" %}</span>
-                        <i class="fas fa-chevron-down ms-1 small"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 crm-status-menu bg-dark text-light">
-                        {% for val, label in status_choices %}
-                        <li>
-                            <button class="dropdown-item text-light crm-status-option {% if project.status == val %}active bg-warning text-dark fw-bold{% endif %}" type="button" data-value="{{ val }}" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}">
-                                <span class="crm-option-dot bg-{{ val }}"></span>
-                                {{ label }}
-                                {% if project.status == val %}
-                                <i class="fas fa-check ms-auto"></i>
-                                {% endif %}
-                            </button>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4">
-        <!-- Left Column: Detailed Specifications, Tables & Gallery Selections -->
-        <div class="col-lg-8">
-
-            <!-- Restyled Project Details Section -->
-            <div class="admin-glass-card p-4 mb-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="fw-bold text-white mb-0">
-                        <i class="fas fa-info-circle text-warning me-2"></i>{% trans "Project Overview & Architecture" %}
-                    </h5>
-                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-30 rounded-pill px-3 py-2 fw-bold">
-                        {{ project.total|floatformat:"0" }} DA {% trans "Total" %}
-                    </span>
-                </div>
-
-                <div class="row g-3">
-                    <div class="col-sm-6 col-md-3">
-                        <div class="stat-badge-chip">
-                            <div class="stat-badge-icon gold">
-                                <i class="fas fa-coins"></i>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Total Quoted" %}</small>
-                                <span class="fw-bold text-warning fs-5">{{ project.total|floatformat:"0" }} DA</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-md-3">
-                        <div class="stat-badge-chip">
-                            <div class="stat-badge-icon blue">
-                                <i class="fas fa-vector-square"></i>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Total Surface" %}</small>
-                                <span class="fw-bold text-white fs-5">{{ project.total_surface|default:"0" }} m²</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-md-3">
-                        <div class="stat-badge-chip">
-                            <div class="stat-badge-icon purple">
-                                <i class="fas fa-layer-group"></i>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Floor Levels" %}</small>
-                                <span class="fw-bold text-white fs-5">{{ floors|length }} {% trans "Levels" %}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-6 col-md-3">
-                        <div class="stat-badge-chip">
-                            <div class="stat-badge-icon green">
-                                <i class="fas fa-paint-brush"></i>
-                            </div>
-                            <div>
-                                <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Designer" %}</small>
-                                <span class="fw-bold text-white fs-6 text-truncate d-inline-block" style="max-width: 110px;">
-                                    {{ project.designer.get_full_name|default:_("Unassigned") }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="border-secondary border-opacity-25 my-3">
-
-                <div class="row g-3 small">
-                    <div class="col-6 col-md-3">
-                        <span class="text-muted d-block">{% trans "Property Type" %}</span>
-                        <strong class="text-white fs-6">{{ project.project_type.name|default:_("Custom") }}</strong>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <span class="text-muted d-block">{% trans "Delivery Date" %}</span>
-                        <strong class="text-white fs-6">{{ project.delivery_date|date:"d M Y"|default:_("Pending") }}</strong>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <span class="text-muted d-block">{% trans "Revision Count" %}</span>
-                        <strong class="text-white fs-6">{{ project.revision_count }} {% trans "Revisions" %}</strong>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <span class="text-muted d-block">{% trans "Terrace Configured" %}</span>
-                        <strong class="{% if project.has_terrace %}text-warning{% else %}text-white-50{% endif %} fs-6">
-                            {% if project.has_terrace %}{% trans "Yes (Included)" %}{% else %}{% trans "No" %}{% endif %}
-                        </strong>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <span class="text-muted d-block">{% trans "Garden Configured" %}</span>
-                        <strong class="{% if project.has_garden %}text-success{% else %}text-white-50{% endif %} fs-6">
-                            {% if project.has_garden %}{% trans "Yes (Included)" %}{% else %}{% trans "No" %}{% endif %}
-                        </strong>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SELECTED GALLERY & MOODBOARD INSPIRATIONS CARD -->
-            <div class="admin-glass-card p-4 mb-4">
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-                    <h5 class="fw-bold text-white mb-0">
-                        <i class="fas fa-palette text-warning me-2"></i>{% trans "Selected Gallery & Moodboard (Inspirations)" %}
-                    </h5>
-                    {% if gallery_selections %}
-                    <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-30 rounded-pill px-3 py-2 fw-bold">
-                        <i class="fas fa-check-circle me-1"></i>{{ gallery_selections|length }} {% trans "Inspirations Chosen" %}
-                    </span>
-                    {% elif latest_gallery_invitation %}
-                        {% if latest_gallery_invitation.is_used %}
-                        <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-30 rounded-pill px-3 py-2 fw-bold">
-                            <i class="fas fa-check me-1"></i>{% trans "Submitted by Client" %}
-                        </span>
-                        {% else %}
-                        <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-30 rounded-pill px-3 py-2 fw-bold">
-                            <i class="fas fa-hourglass-half me-1"></i>{% trans "Invitation Sent (Awaiting Client)" %}
-                        </span>
-                        {% endif %}
-                    {% else %}
-                    <span class="badge bg-secondary bg-opacity-20 text-light border border-secondary border-opacity-30 rounded-pill px-3 py-2">
-                        {% trans "No Invitation Sent" %}
-                    </span>
-                    {% endif %}
-                </div>
-
-                {% if gallery_selections %}
-                <div class="row g-3" data-inspiration-gallery>
-                    {% for item in gallery_selections %}
-                    <div class="col-sm-6 col-md-4">
-                        <div class="rounded-3 overflow-hidden border border-secondary border-opacity-25 bg-dark">
-                            <img src="{{ item.space_image.image.url }}" alt="{{ item.space_image.category.category_name }}" loading="lazy" class="w-100 inspo-thumb" style="aspect-ratio: 16/10; object-fit: cover; cursor: pointer;" data-lightbox>
-                            <div class="p-3">
-                                <span class="badge bg-secondary bg-opacity-25 text-warning font-monospace mb-1" style="font-size: 0.7rem;">
-                                    {{ item.space_image.category.space.name }}
-                                </span>
-                                <h6 class="text-white fw-bold mb-0 fs-6">{{ item.space_image.category.category_name }}</h6>
-                                {% if item.notes %}
-                                <p class="text-white-50 small mt-1 mb-0 fst-italic">"{{ item.notes }}"</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% elif latest_gallery_invitation %}
-                <div class="p-3 rounded-3 bg-white bg-opacity-5 border border-secondary border-opacity-25">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                        <div>
-                            <small class="text-muted d-block">{% trans "Active Gallery Selection Link" %}</small>
-                            <span class="text-warning font-monospace small text-break">{{ latest_gallery_invitation.get_selection_url }}</span>
-                        </div>
-                        <a href="{{ latest_gallery_invitation.get_selection_url }}" target="_blank" class="btn btn-sm btn-outline-warning rounded-pill px-3">
-                            <i class="fas fa-external-link-alt me-1"></i>{% trans "Open Link" %}
-                        </a>
-                    </div>
-                    <small class="text-muted d-block mt-2">
-                        <i class="far fa-clock me-1"></i>{% trans "Sent on" %} {{ latest_gallery_invitation.created_at|date:"d M Y, H:i" }} &bull; {% if latest_gallery_invitation.is_used %}<span class="text-success fw-bold">{% trans "Used" %}</span>{% else %}<span class="text-warning fw-bold">{% trans "Pending client submission" %}</span>{% endif %}
-                    </small>
-                </div>
-                {% else %}
-                <div class="text-center py-4">
-                    <i class="fas fa-palette fa-2x text-white-50 mb-2 opacity-50"></i>
-                    <p class="text-muted small mb-0">{% trans "No inspiration gallery selected yet. Use the 'Send Gallery Link' button in Actions to invite the client." %}</p>
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Floor Levels & Surface Areas Breakdown (Etages) -->
-            <div class="admin-glass-card p-4 mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold text-white mb-0">
-                        <i class="fas fa-building text-warning me-2"></i>{% trans "Floor Levels & Spatial Dimensions (Étages)" %}
-                    </h5>
-                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-30 rounded-pill px-3 py-2 fw-bold">
-                        {{ project.total_surface }} m² {% trans "Total Surface" %}
-                    </span>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table table-glass mb-0">
-                        <thead>
-                            <tr>
-                                <th style="width: 20%;">{% trans "Level" %}</th>
-                                <th>{% trans "Floor Designation" %}</th>
-                                <th class="text-end" style="width: 25%;">{% trans "Surface Area (m²)" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for f in floors %}
-                            <tr>
-                                <td><span class="floor-pill-tag">{{ f.name }}</span></td>
-                                <td class="fw-semibold text-white">{{ f.name }}</td>
-                                <td class="text-end fw-bold font-monospace text-warning fs-6">{{ f.surface|floatformat:"1" }} m²</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="3" class="text-center text-muted py-3">{% trans "No floors recorded." %}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Selected Services & Options Breakdown -->
-            <div class="admin-glass-card p-4 mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold text-white mb-0">
-                        <i class="fas fa-drafting-compass text-warning me-2"></i>{% trans "Architectural & Design Services (Options)" %}
-                    </h5>
-                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-30 rounded-pill px-3 py-2 fw-bold">
-                        {{ options|length|default:"1" }} {% trans "Service(s)" %}
-                    </span>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table table-glass mb-0">
-                        <thead>
-                            <tr>
-                                <th>{% trans "Service" %}</th>
-                                <th class="text-center">{% trans "Pricing Model / Rate" %}</th>
-                                <th class="text-end">{% trans "Calculated Amount (DA)" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for opt in options %}
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i class="fas fa-check-circle text-warning"></i>
-                                        <span class="fw-bold text-white">{{ opt.name }}</span>
-                                    </div>
-                                </td>
-                                <td class="text-center font-monospace text-white-50">
-                                    {% if opt.service.pricing_type == "area" %}
-                                    {{ opt.service.service_price|floatformat:"0" }} DA / m²
-                                    {% elif opt.service.pricing_type == "hourly" %}
-                                    {{ opt.service.service_price|floatformat:"0" }} DA / hr
-                                    {% else %}
-                                    {% trans "Fixed Rate" %}
-                                    {% endif %}
-                                </td>
-                                <td class="text-end font-monospace text-warning fw-bold fs-6">
-                                    {{ opt.price_at_time|floatformat:"0" }} DA
-                                </td>
-                            </tr>
-                            {% empty %}
-                            {% if project.service %}
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i class="fas fa-check-circle text-warning"></i>
-                                        <span class="fw-bold text-white">{{ project.service.service_name }}</span>
-                                    </div>
-                                </td>
-                                <td class="text-center font-monospace text-white-50">
-                                    {% if project.service.pricing_type == "area" %}
-                                    {{ project.service.service_price|floatformat:"0" }} DA / m²
-                                    {% else %}
-                                    {% trans "Fixed Rate" %}
-                                    {% endif %}
-                                </td>
-                                <td class="text-end font-monospace text-warning fw-bold fs-6">
-                                    {{ project.total|floatformat:"0" }} DA
-                                </td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="3" class="text-center text-muted py-3">{% trans "Standard Architectural Service" %}</td>
-                            </tr>
-                            {% endif %}
-                            {% endfor %}
-                        </tbody>
-                        <tfoot>
-                            <tr style="border-top: 2px solid rgba(255, 214, 90, 0.4);">
-                                <td colspan="2" class="fw-bold text-uppercase text-white pt-3">
-                                    {% trans "Total Project Quotation" %}
-                                </td>
-                                <td class="text-end fw-bold text-warning fs-5 pt-3 font-monospace">
-                                    {{ project.total|floatformat:"0" }} DA
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Legacy Spaces & Inspirations (if any) -->
-            {% if spaces %}
-            <div class="admin-glass-card p-4 mb-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="fw-bold text-white mb-0">
-                        <i class="fas fa-th-large text-info me-2"></i>{% trans "Configured Spaces & Inspirations" %}
-                    </h5>
-                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-20 rounded-pill px-3">
-                        {{ spaces|length }} {% trans "Spaces" %}
-                    </span>
-                </div>
-
-                <div class="table-responsive mb-3">
-                    <table class="table table-glass mb-0">
-                        <thead>
-                            <tr>
-                                <th>{% trans "Floor" %}</th>
-                                <th>{% trans "Space" %}</th>
-                                <th class="text-end">{% trans "Price" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for s in spaces %}
-                            <tr>
-                                <td><span class="badge bg-light text-dark rounded-pill">{{ s.floor.name }}</span></td>
-                                <td class="fw-semibold text-white">{{ s.custom_name|default:s.space.name }}</td>
-                                <td class="text-end fw-bold text-warning">{{ s.price_at_time|floatformat:"0" }} DA</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            {% endif %}
-
-        </div>
-
-        <!-- Right Column: Actions, Contact Info, Activity & Notes -->
-        <div class="col-lg-4">
-
-            <!-- ACTIONS CARD (Redesigned with Gallery Invitation Button) -->
-            <div class="admin-glass-card p-4 mb-4">
-                <h5 class="fw-bold text-white mb-3">
-                    <i class="fas fa-tasks text-warning me-2"></i>{% trans "Actions & Management" %}
-                </h5>
-
-                <div class="d-grid gap-3">
-                    <!-- Email Facture (Gmail / WeasyPrint PDF) -->
-                    <button type="button" class="btn btn-action-gmail d-flex align-items-center justify-content-center gap-2"
-                            id="btnAdminEmailFacture"
-                            data-project-id="{{ project.pk }}"
-                            data-client-email="{{ project.contact_email }}">
-                        <i class="fas fa-paper-plane"></i>
-                        <span>{% trans "Email Facture (PDF)" %}</span>
-                    </button>
-
-                    <!-- Send Gallery Link to Client -->
-                    <button type="button" class="btn btn-action-gallery d-flex align-items-center justify-content-center gap-2"
-                            id="btnAdminSendGalleryLink"
-                            data-project-id="{{ project.pk }}"
-                            data-client-email="{{ project.contact_email }}"
-                            data-project-type="{{ project.project_type.name|default:'General' }}">
-                        <i class="fas fa-palette"></i>
-                        <span>{% trans "Send Gallery Link (Email)" %}</span>
-                    </button>
-
-                    <!-- Download Facture PDF -->
-                    <a href="{% url 'dash:admin_download_facture' project.pk %}"
-                       class="btn btn-action-pdf d-flex align-items-center justify-content-center gap-2" target="_blank">
-                        <i class="fas fa-file-pdf text-danger"></i>
-                        <span>{% trans "Download Facture PDF" %}</span>
+    <div class="container-fluid py-3">
+        <!-- Hero Header with High Contrast and Fixed Z-Index -->
+        <div class="admin-detail-hero rounded-4 p-4 mb-4"
+             data-status="{{ project.status }}">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div>
+                    <a href="{% url 'dash:admin_crm' %}"
+                       class="btn btn-sm btn-outline-light rounded-pill mb-2 px-3">
+                        <i class="fas fa-arrow-left me-1"></i>{% trans "Back to Kanban CRM" %}
                     </a>
-
-                    <hr class="border-secondary border-opacity-25 my-1">
-
-                    <!-- Quick Status Actions -->
-                    {% if project.status == "pending" %}
-                    <button class="btn btn-action-approve d-flex align-items-center justify-content-center gap-2 quick-status-btn" data-status="approved" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
-                        <i class="fas fa-check"></i>
-                        <span>{% trans "Approve Project" %}</span>
-                    </button>
-                    <button class="btn btn-action-decline d-flex align-items-center justify-content-center gap-2 quick-status-btn" data-status="declined" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
-                        <i class="fas fa-times"></i>
-                        <span>{% trans "Decline Project" %}</span>
-                    </button>
-                    {% elif project.status == "approved" %}
-                    <button class="btn btn-action-pending d-flex align-items-center justify-content-center gap-2 quick-status-btn" data-status="pending" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
-                        <i class="fas fa-undo"></i>
-                        <span>{% trans "Move to Pending" %}</span>
-                    </button>
-                    <button class="btn btn-action-decline d-flex align-items-center justify-content-center gap-2 quick-status-btn" data-status="declined" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
-                        <i class="fas fa-times"></i>
-                        <span>{% trans "Decline Project" %}</span>
-                    </button>
-                    {% elif project.status == "declined" %}
-                    <button class="btn btn-action-approve d-flex align-items-center justify-content-center gap-2 quick-status-btn" data-status="approved" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
-                        <i class="fas fa-check"></i>
-                        <span>{% trans "Approve Project" %}</span>
-                    </button>
-                    <button class="btn btn-action-pending d-flex align-items-center justify-content-center gap-2 quick-status-btn" data-status="pending" data-project-id="{{ project.pk }}" data-url="{% url 'dash:crm_update_status' project.pk %}" data-reload="true">
-                        <i class="fas fa-undo"></i>
-                        <span>{% trans "Move to Pending" %}</span>
-                    </button>
-                    {% endif %}
-
-                    <!-- Delete Project Button -->
-                    <form method="post" action="{% url 'dash:crm_delete_project' project.pk %}" class="d-inline mt-2" id="deleteProjectForm">
-                        {% csrf_token %}
-                        <button type="button" class="btn btn-action-delete w-100 d-flex align-items-center justify-content-center gap-2" id="btnConfirmDeleteProject">
-                            <i class="fas fa-trash-alt"></i>
-                            <span>{% trans "Delete Project" %}</span>
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <h3 class="fw-bold text-white mb-0">{{ project.project_name }}</h3>
+                        <span class="crm-project-number-badge font-monospace">{{ project.project_number }}</span>
+                        <span class="crm-status-pill status-{{ project.status }}">{{ project.get_status_display }}</span>
+                    </div>
+                    <div class="text-white-50 small mt-2">
+                        <i class="far fa-calendar-alt me-1 text-warning"></i> {% trans "Submitted on" %} <strong class="text-white">{{ project.created_at|date:"d M Y, H:i" }}</strong>
+                        {% if project.project_type %}
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-home me-1 text-warning"></i> <strong class="text-white">{{ project.project_type.name }}</strong>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Quick Status Change Dropdown -->
+                <div class="d-flex align-items-center gap-2">
+                    <div class="dropdown crm-status-dropdown"
+                         data-project-id="{{ project.id }}">
+                        <button class="btn btn-sm btn-outline-warning d-flex align-items-center gap-2 rounded-pill px-3 py-2 fw-bold"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                            <i class="fas fa-edit"></i>
+                            <span>{% trans "Change Status" %}</span>
+                            <i class="fas fa-chevron-down ms-1 small"></i>
                         </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- RESTYLED CONTACT INFORMATION CARD -->
-            <div class="admin-glass-card p-4 mb-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="fw-bold text-white mb-0">
-                        <i class="fas fa-id-card text-warning me-2"></i>{% trans "Contact Information" %}
-                    </h5>
-                    {% if project.client %}
-                    <span class="badge bg-primary bg-opacity-20 text-primary border border-primary border-opacity-30 rounded-pill px-3 py-1 fw-bold">
-                        {% trans "Registered" %}
-                    </span>
-                    {% else %}
-                    <span class="badge bg-secondary bg-opacity-20 text-light border border-secondary border-opacity-30 rounded-pill px-3 py-1 fw-bold">
-                        {% trans "Direct Guest" %}
-                    </span>
-                    {% endif %}
-                </div>
-
-                <!-- Client Name -->
-                <div class="contact-info-item">
-                    <div class="contact-info-icon" style="background: rgba(255, 214, 90, 0.18); color: #FFD65A; border: 1.5px solid rgba(255, 214, 90, 0.4);">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div>
-                        <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Client Name" %}</small>
-                        <span class="fw-bold text-white fs-6">{{ project.contact_name }}</span>
-                    </div>
-                </div>
-
-                <!-- Email -->
-                <div class="contact-info-item">
-                    <div class="contact-info-icon" style="background: rgba(56, 189, 248, 0.18); color: #38bdf8; border: 1.5px solid rgba(56, 189, 248, 0.4);">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <div>
-                        <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Email Address" %}</small>
-                        <span class="fw-bold text-white font-monospace fs-6">{{ project.contact_email|default:"—" }}</span>
-                    </div>
-                </div>
-
-                <!-- Phone -->
-                <div class="contact-info-item">
-                    <div class="contact-info-icon" style="background: rgba(52, 211, 153, 0.18); color: #34d399; border: 1.5px solid rgba(52, 211, 153, 0.4);">
-                        <i class="fas fa-phone"></i>
-                    </div>
-                    <div>
-                        <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Phone Number" %}</small>
-                        <span class="fw-bold text-white font-monospace fs-6">{{ project.contact_phone|default:"—" }}</span>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 crm-status-menu bg-dark text-light">
+                            {% for val, label in status_choices %}
+                                <li>
+                                    <button class="dropdown-item text-light crm-status-option {% if project.status == val %}active bg-warning text-dark fw-bold{% endif %}"
+                                            type="button"
+                                            data-value="{{ val }}"
+                                            data-project-id="{{ project.pk }}"
+                                            data-url="{% url 'dash:crm_update_status' project.pk %}">
+                                        <span class="crm-option-dot bg-{{ val }}"></span>
+                                        {{ label }}
+                                        {% if project.status == val %}
+                                            <i class="fas fa-check ms-auto"></i>
+                                        {% endif %}
+                                    </button>
+                                </li>
+                            {% endfor %}
+                        </ul>
                     </div>
                 </div>
             </div>
-
-            <!-- Activity Timeline -->
-            <div class="admin-glass-card p-4 mb-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="fw-bold text-white mb-0">
-                        <i class="fas fa-clock text-warning me-2"></i>{% trans "Activity History" %}
-                    </h5>
-                    <span class="badge bg-secondary bg-opacity-20 text-light rounded-pill px-2">{{ activity|length }}</span>
-                </div>
-
-                {% if activity %}
-                <div class="crm-timeline">
-                    {% for log in activity %}
-                    <div class="crm-timeline-item">
-                        <div class="crm-timeline-dot"></div>
-                        <div class="crm-timeline-content">
-                            <div class="fw-semibold small text-white">{{ log.action }}</div>
-                            <div class="text-white-50" style="font-size:0.75rem;">{{ log.description }}</div>
-                            <div class="crm-timeline-time text-muted">{{ log.created_at|date:"d M Y H:i" }}</div>
+        </div>
+        <div class="row g-4">
+            <!-- Left Column: Detailed Specifications, Tables & Gallery Selections -->
+            <div class="col-lg-8">
+                <!-- Restyled Project Details Section -->
+                <div class="admin-glass-card p-4 mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="fw-bold text-white mb-0">
+                            <i class="fas fa-info-circle text-warning me-2"></i>{% trans "Project Overview & Architecture" %}
+                        </h5>
+                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-30 rounded-pill px-3 py-2 fw-bold">
+                            {{ project.total|floatformat:"0" }} DA {% trans "Total" %}
+                        </span>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-md-3">
+                            <div class="stat-badge-chip">
+                                <div class="stat-badge-icon gold">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Total Quoted" %}</small>
+                                    <span class="fw-bold text-warning fs-5">{{ project.total|floatformat:"0" }} DA</span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="text-center py-3">
-                    <i class="fas fa-clock fa-2x text-white-50 mb-2"></i>
-                    <p class="small text-muted mb-0">{% trans "No activity recorded yet." %}</p>
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Notes -->
-            <div class="admin-glass-card p-4 mb-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="fw-bold text-white mb-0">
-                        <i class="fas fa-sticky-note text-warning me-2"></i>{% trans "Admin Notes" %}
-                    </h5>
-                    <span class="badge bg-warning bg-opacity-20 text-warning rounded-pill px-2">{{ notes|length }}</span>
-                </div>
-
-                {% for note in notes %}
-                <div class="crm-note-item mb-2 p-3 rounded bg-white bg-opacity-5">
-                    <div class="d-flex justify-content-between align-items-start mb-1">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="crm-note-avatar">{{ note.author.get_full_name|default:note.author.username|first|upper }}</div>
-                            <div>
-                                <small class="fw-semibold text-white d-block">{{ note.author.get_full_name|default:note.author.username }}</small>
-                                <small class="text-muted" style="font-size:0.65rem;">{{ note.created_at|date:"d M Y" }}</small>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="stat-badge-chip">
+                                <div class="stat-badge-icon blue">
+                                    <i class="fas fa-vector-square"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Total Surface" %}</small>
+                                    <span class="fw-bold text-white fs-5">{{ project.total_surface|default:"0" }} m²</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="stat-badge-chip">
+                                <div class="stat-badge-icon purple">
+                                    <i class="fas fa-layer-group"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Floor Levels" %}</small>
+                                    <span class="fw-bold text-white fs-5">{{ floors|length }} {% trans "Levels" %}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <div class="stat-badge-chip">
+                                <div class="stat-badge-icon green">
+                                    <i class="fas fa-paint-brush"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Designer" %}</small>
+                                    <span class="fw-bold text-white fs-6 text-truncate d-inline-block"
+                                          style="max-width: 110px">
+                                        {{ project.designer.get_full_name|default:_("Unassigned") }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <p class="crm-note-text text-white-50 small mb-0">{{ note.note }}</p>
-                </div>
-                {% empty %}
-                <div class="text-center py-3">
-                    <i class="fas fa-sticky-note fa-2x text-white-50 mb-2"></i>
-                    <p class="small text-muted mb-0">{% trans "No notes yet." %}</p>
-                </div>
-                {% endfor %}
-            </div>
-
-            <!-- Deliverable Files -->
-            {% if files %}
-            <div class="admin-glass-card p-4 mb-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="fw-bold text-white mb-0">
-                        <i class="fas fa-paperclip text-info me-2"></i>{% trans "Attached Files" %}
-                    </h5>
-                    <span class="badge bg-info bg-opacity-20 text-info rounded-pill px-2">{{ files|length }}</span>
-                </div>
-
-                {% for f in files %}
-                <a href="{{ f.file.url }}" target="_blank" class="crm-file-item d-flex align-items-center justify-content-between p-2 mb-2 rounded bg-white bg-opacity-5 text-decoration-none text-white">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="fas fa-file-alt text-info"></i>
-                        <span class="small">{{ f.file.name|cut:"design-requests/files/" }}</span>
+                    <hr class="border-secondary border-opacity-25 my-3">
+                    <div class="row g-3 small">
+                        <div class="col-6 col-md-3">
+                            <span class="text-muted d-block">{% trans "Property Type" %}</span>
+                            <strong class="text-white fs-6">{{ project.project_type.name|default:_("Custom") }}</strong>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <span class="text-muted d-block">{% trans "Delivery Date" %}</span>
+                            <strong class="text-white fs-6">{{ project.delivery_date|date:"d M Y"|default:_("Pending") }}</strong>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <span class="text-muted d-block">{% trans "Revision Count" %}</span>
+                            <strong class="text-white fs-6">{{ project.revision_count }} {% trans "Revisions" %}</strong>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <span class="text-muted d-block">{% trans "Terrace Configured" %}</span>
+                            <strong class="{% if project.has_terrace %}text-warning{% else %}text-white-50{% endif %} fs-6">
+                                {% if project.has_terrace %}
+                                    {% trans "Yes (Included)" %}
+                                {% else %}
+                                    {% trans "No" %}
+                                {% endif %}
+                            </strong>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <span class="text-muted d-block">{% trans "Garden Configured" %}</span>
+                            <strong class="{% if project.has_garden %}text-success{% else %}text-white-50{% endif %} fs-6">
+                                {% if project.has_garden %}
+                                    {% trans "Yes (Included)" %}
+                                {% else %}
+                                    {% trans "No" %}
+                                {% endif %}
+                            </strong>
+                        </div>
                     </div>
-                    <i class="fas fa-download text-muted small"></i>
-                </a>
-                {% endfor %}
+                </div>
+                <!-- SELECTED GALLERY & MOODBOARD INSPIRATIONS CARD -->
+                <div class="admin-glass-card p-4 mb-4">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                        <h5 class="fw-bold text-white mb-0">
+                            <i class="fas fa-palette text-warning me-2"></i>{% trans "Selected Gallery & Moodboard (Inspirations)" %}
+                        </h5>
+                        {% if gallery_selections %}
+                            <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-30 rounded-pill px-3 py-2 fw-bold">
+                                <i class="fas fa-check-circle me-1"></i>{{ gallery_selections|length }} {% trans "Inspirations Chosen" %}
+                            </span>
+                        {% elif latest_gallery_invitation %}
+                            {% if latest_gallery_invitation.is_used %}
+                                <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-30 rounded-pill px-3 py-2 fw-bold">
+                                    <i class="fas fa-check me-1"></i>{% trans "Submitted by Client" %}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-30 rounded-pill px-3 py-2 fw-bold">
+                                    <i class="fas fa-hourglass-half me-1"></i>{% trans "Invitation Sent (Awaiting Client)" %}
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge bg-secondary bg-opacity-20 text-light border border-secondary border-opacity-30 rounded-pill px-3 py-2">
+                                {% trans "No Invitation Sent" %}
+                            </span>
+                        {% endif %}
+                    </div>
+                    {% if gallery_selections %}
+                        <div class="row g-3" data-inspiration-gallery>
+                            {% for item in gallery_selections %}
+                                <div class="col-sm-6 col-md-4">
+                                    <div class="rounded-3 overflow-hidden border border-secondary border-opacity-25 bg-dark">
+                                        <img src="{{ item.space_image.image.url }}"
+                                             alt="{{ item.space_image.category.category_name }}"
+                                             loading="lazy"
+                                             class="w-100 inspo-thumb"
+                                             style="aspect-ratio: 16/10;
+                                                    object-fit: cover;
+                                                    cursor: pointer"
+                                             data-lightbox>
+                                        <div class="p-3">
+                                            <span class="badge bg-secondary bg-opacity-25 text-warning font-monospace mb-1"
+                                                  style="font-size: 0.7rem">
+                                                {{ item.space_image.category.space.name }}
+                                            </span>
+                                            <h6 class="text-white fw-bold mb-0 fs-6">{{ item.space_image.category.category_name }}</h6>
+                                            {% if item.notes %}
+                                                <p class="text-white-50 small mt-1 mb-0 fst-italic">"{{ item.notes }}"</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% elif latest_gallery_invitation %}
+                        <div class="p-3 rounded-3 bg-white bg-opacity-5 border border-secondary border-opacity-25">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div>
+                                    <small class="text-muted d-block">{% trans "Active Gallery Selection Link" %}</small>
+                                    <span class="text-warning font-monospace small text-break">{{ latest_gallery_invitation.get_selection_url }}</span>
+                                </div>
+                                <a href="{{ latest_gallery_invitation.get_selection_url }}"
+                                   target="_blank"
+                                   class="btn btn-sm btn-outline-warning rounded-pill px-3">
+                                    <i class="fas fa-external-link-alt me-1"></i>{% trans "Open Link" %}
+                                </a>
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                <i class="far fa-clock me-1"></i>{% trans "Sent on" %} {{ latest_gallery_invitation.created_at|date:"d M Y, H:i" }} &bull; {% if latest_gallery_invitation.is_used %}<span class="text-success fw-bold">{% trans "Used" %}</span>{% else %}<span class="text-warning fw-bold">{% trans "Pending client submission" %}</span>{% endif %}
+                            </small>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-palette fa-2x text-white-50 mb-2 opacity-50"></i>
+                            <p class="text-muted small mb-0">{% trans "No inspiration gallery selected yet. Use the 'Send Gallery Link' button in Actions to invite the client." %}</p>
+                        </div>
+                    {% endif %}
+                </div>
+                <!-- Floor Levels & Surface Areas Breakdown (Etages) -->
+                <div class="admin-glass-card p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-white mb-0">
+                            <i class="fas fa-building text-warning me-2"></i>{% trans "Floor Levels & Spatial Dimensions (Étages)" %}
+                        </h5>
+                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-30 rounded-pill px-3 py-2 fw-bold">
+                            {{ project.total_surface }} m² {% trans "Total Surface" %}
+                        </span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-glass mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 20%;">{% trans "Level" %}</th>
+                                    <th>{% trans "Floor Designation" %}</th>
+                                    <th class="text-end" style="width: 25%;">{% trans "Surface Area (m²)" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for f in floors %}
+                                    <tr>
+                                        <td><span class="floor-pill-tag">{{ f.name }}</span></td>
+                                        <td class="fw-semibold text-white">{{ f.name }}</td>
+                                        <td class="text-end fw-bold font-monospace text-warning fs-6">{{ f.surface|floatformat:"1" }} m²</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-3">{% trans "No floors recorded." %}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Selected Services & Options Breakdown -->
+                <div class="admin-glass-card p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-white mb-0">
+                            <i class="fas fa-drafting-compass text-warning me-2"></i>{% trans "Architectural & Design Services (Options)" %}
+                        </h5>
+                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-30 rounded-pill px-3 py-2 fw-bold">
+                            {{ options|length|default:"1" }} {% trans "Service(s)" %}
+                        </span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-glass mb-0">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Service" %}</th>
+                                    <th class="text-center">{% trans "Pricing Model / Rate" %}</th>
+                                    <th class="text-end">{% trans "Calculated Amount (DA)" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for opt in options %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="fas fa-check-circle text-warning"></i>
+                                                <span class="fw-bold text-white">{{ opt.name }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center font-monospace text-white-50">
+                                            {% if opt.service.pricing_type == "area" %}
+                                                {{ opt.service.service_price|floatformat:"0" }} DA / m²
+                                            {% elif opt.service.pricing_type == "hourly" %}
+                                                {{ opt.service.service_price|floatformat:"0" }} DA / hr
+                                            {% else %}
+                                                {% trans "Fixed Rate" %}
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end font-monospace text-warning fw-bold fs-6">{{ opt.price_at_time|floatformat:"0" }} DA</td>
+                                    </tr>
+                                {% empty %}
+                                    {% if project.service %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="fas fa-check-circle text-warning"></i>
+                                                    <span class="fw-bold text-white">{{ project.service.service_name }}</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-center font-monospace text-white-50">
+                                                {% if project.service.pricing_type == "area" %}
+                                                    {{ project.service.service_price|floatformat:"0" }} DA / m²
+                                                {% else %}
+                                                    {% trans "Fixed Rate" %}
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end font-monospace text-warning fw-bold fs-6">{{ project.total|floatformat:"0" }} DA</td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted py-3">{% trans "Standard Architectural Service" %}</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr style="border-top: 2px solid rgba(255, 214, 90, 0.4);">
+                                    <td colspan="2" class="fw-bold text-uppercase text-white pt-3">{% trans "Total Project Quotation" %}</td>
+                                    <td class="text-end fw-bold text-warning fs-5 pt-3 font-monospace">{{ project.total|floatformat:"0" }} DA</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <!-- Legacy Spaces & Inspirations (if any) -->
+                {% if spaces %}
+                    <div class="admin-glass-card p-4 mb-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h5 class="fw-bold text-white mb-0">
+                                <i class="fas fa-th-large text-info me-2"></i>{% trans "Configured Spaces & Inspirations" %}
+                            </h5>
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-20 rounded-pill px-3">
+                                {{ spaces|length }} {% trans "Spaces" %}
+                            </span>
+                        </div>
+                        <div class="table-responsive mb-3">
+                            <table class="table table-glass mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "Floor" %}</th>
+                                        <th>{% trans "Space" %}</th>
+                                        <th class="text-end">{% trans "Price" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for s in spaces %}
+                                        <tr>
+                                            <td><span class="badge bg-light text-dark rounded-pill">{{ s.floor.name }}</span></td>
+                                            <td class="fw-semibold text-white">{{ s.custom_name|default:s.space.name }}</td>
+                                            <td class="text-end fw-bold text-warning">{{ s.price_at_time|floatformat:"0" }} DA</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
-            {% endif %}
-
+            <!-- Right Column: Actions, Contact Info, Activity & Notes -->
+            <div class="col-lg-4">
+                <!-- ACTIONS CARD (Redesigned with Gallery Invitation Button) -->
+                <div class="admin-glass-card p-4 mb-4">
+                    <h5 class="fw-bold text-white mb-3">
+                        <i class="fas fa-tasks text-warning me-2"></i>{% trans "Actions & Management" %}
+                    </h5>
+                    <div class="d-grid gap-3">
+                        <!-- Email Facture (Gmail / WeasyPrint PDF) -->
+                        <button type="button"
+                                class="btn btn-action-gmail d-flex align-items-center justify-content-center gap-2"
+                                id="btnAdminEmailFacture"
+                                data-project-id="{{ project.pk }}"
+                                data-client-email="{{ project.contact_email }}">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>{% trans "Email Facture (PDF)" %}</span>
+                        </button>
+                        <!-- Send Gallery Link to Client -->
+                        <button type="button"
+                                class="btn btn-action-gallery d-flex align-items-center justify-content-center gap-2"
+                                id="btnAdminSendGalleryLink"
+                                data-project-id="{{ project.pk }}"
+                                data-client-email="{{ project.contact_email }}"
+                                data-project-type="{{ project.project_type.name|default:'General' }}">
+                            <i class="fas fa-palette"></i>
+                            <span>{% trans "Send Gallery Link (Email)" %}</span>
+                        </button>
+                        <!-- Download Facture PDF -->
+                        <a href="{% url 'dash:admin_download_facture' project.pk %}"
+                           class="btn btn-action-pdf d-flex align-items-center justify-content-center gap-2"
+                           target="_blank">
+                            <i class="fas fa-file-pdf text-danger"></i>
+                            <span>{% trans "Download Facture PDF" %}</span>
+                        </a>
+                        <hr class="border-secondary border-opacity-25 my-1">
+                        <!-- Quick Status Actions -->
+                        {% if project.status == "pending" %}
+                            <button class="btn btn-action-approve d-flex align-items-center justify-content-center gap-2 quick-status-btn"
+                                    data-status="approved"
+                                    data-project-id="{{ project.pk }}"
+                                    data-url="{% url 'dash:crm_update_status' project.pk %}"
+                                    data-reload="true">
+                                <i class="fas fa-check"></i>
+                                <span>{% trans "Approve Project" %}</span>
+                            </button>
+                            <button class="btn btn-action-decline d-flex align-items-center justify-content-center gap-2 quick-status-btn"
+                                    data-status="declined"
+                                    data-project-id="{{ project.pk }}"
+                                    data-url="{% url 'dash:crm_update_status' project.pk %}"
+                                    data-reload="true">
+                                <i class="fas fa-times"></i>
+                                <span>{% trans "Decline Project" %}</span>
+                            </button>
+                        {% elif project.status == "approved" %}
+                            <button class="btn btn-action-pending d-flex align-items-center justify-content-center gap-2 quick-status-btn"
+                                    data-status="pending"
+                                    data-project-id="{{ project.pk }}"
+                                    data-url="{% url 'dash:crm_update_status' project.pk %}"
+                                    data-reload="true">
+                                <i class="fas fa-undo"></i>
+                                <span>{% trans "Move to Pending" %}</span>
+                            </button>
+                            <button class="btn btn-action-decline d-flex align-items-center justify-content-center gap-2 quick-status-btn"
+                                    data-status="declined"
+                                    data-project-id="{{ project.pk }}"
+                                    data-url="{% url 'dash:crm_update_status' project.pk %}"
+                                    data-reload="true">
+                                <i class="fas fa-times"></i>
+                                <span>{% trans "Decline Project" %}</span>
+                            </button>
+                        {% elif project.status == "declined" %}
+                            <button class="btn btn-action-approve d-flex align-items-center justify-content-center gap-2 quick-status-btn"
+                                    data-status="approved"
+                                    data-project-id="{{ project.pk }}"
+                                    data-url="{% url 'dash:crm_update_status' project.pk %}"
+                                    data-reload="true">
+                                <i class="fas fa-check"></i>
+                                <span>{% trans "Approve Project" %}</span>
+                            </button>
+                            <button class="btn btn-action-pending d-flex align-items-center justify-content-center gap-2 quick-status-btn"
+                                    data-status="pending"
+                                    data-project-id="{{ project.pk }}"
+                                    data-url="{% url 'dash:crm_update_status' project.pk %}"
+                                    data-reload="true">
+                                <i class="fas fa-undo"></i>
+                                <span>{% trans "Move to Pending" %}</span>
+                            </button>
+                        {% endif %}
+                        <!-- Delete Project Button -->
+                        <form method="post"
+                              action="{% url 'dash:crm_delete_project' project.pk %}"
+                              class="d-inline mt-2"
+                              id="deleteProjectForm">
+                            {% csrf_token %}
+                            <button type="button"
+                                    class="btn btn-action-delete w-100 d-flex align-items-center justify-content-center gap-2"
+                                    id="btnConfirmDeleteProject">
+                                <i class="fas fa-trash-alt"></i>
+                                <span>{% trans "Delete Project" %}</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <!-- RESTYLED CONTACT INFORMATION CARD -->
+                <div class="admin-glass-card p-4 mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="fw-bold text-white mb-0">
+                            <i class="fas fa-id-card text-warning me-2"></i>{% trans "Contact Information" %}
+                        </h5>
+                        {% if project.client %}
+                            <span class="badge bg-primary bg-opacity-20 text-primary border border-primary border-opacity-30 rounded-pill px-3 py-1 fw-bold">
+                                {% trans "Registered" %}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary bg-opacity-20 text-light border border-secondary border-opacity-30 rounded-pill px-3 py-1 fw-bold">
+                                {% trans "Direct Guest" %}
+                            </span>
+                        {% endif %}
+                    </div>
+                    <!-- Client Name -->
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon"
+                             style="background: rgba(255, 214, 90, 0.18);
+                                    color: #FFD65A;
+                                    border: 1.5px solid rgba(255, 214, 90, 0.4)">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Client Name" %}</small>
+                            <span class="fw-bold text-white fs-6">{{ project.contact_name }}</span>
+                        </div>
+                    </div>
+                    <!-- Email -->
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon"
+                             style="background: rgba(56, 189, 248, 0.18);
+                                    color: #38bdf8;
+                                    border: 1.5px solid rgba(56, 189, 248, 0.4)">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Email Address" %}</small>
+                            <span class="fw-bold text-white font-monospace fs-6">{{ project.contact_email|default:"—" }}</span>
+                        </div>
+                    </div>
+                    <!-- Phone -->
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon"
+                             style="background: rgba(52, 211, 153, 0.18);
+                                    color: #34d399;
+                                    border: 1.5px solid rgba(52, 211, 153, 0.4)">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">{% trans "Phone Number" %}</small>
+                            <span class="fw-bold text-white font-monospace fs-6">{{ project.contact_phone|default:"—" }}</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Activity Timeline -->
+                <div class="admin-glass-card p-4 mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="fw-bold text-white mb-0">
+                            <i class="fas fa-clock text-warning me-2"></i>{% trans "Activity History" %}
+                        </h5>
+                        <span class="badge bg-secondary bg-opacity-20 text-light rounded-pill px-2">{{ activity|length }}</span>
+                    </div>
+                    {% if activity %}
+                        <div class="crm-timeline">
+                            {% for log in activity %}
+                                <div class="crm-timeline-item">
+                                    <div class="crm-timeline-dot"></div>
+                                    <div class="crm-timeline-content">
+                                        <div class="fw-semibold small text-white">{{ log.action }}</div>
+                                        <div class="text-white-50" style="font-size:0.75rem;">{{ log.description }}</div>
+                                        <div class="crm-timeline-time text-muted">{{ log.created_at|date:"d M Y H:i" }}</div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-clock fa-2x text-white-50 mb-2"></i>
+                            <p class="small text-muted mb-0">{% trans "No activity recorded yet." %}</p>
+                        </div>
+                    {% endif %}
+                </div>
+                <!-- Notes -->
+                <div class="admin-glass-card p-4 mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="fw-bold text-white mb-0">
+                            <i class="fas fa-sticky-note text-warning me-2"></i>{% trans "Admin Notes" %}
+                        </h5>
+                        <span class="badge bg-warning bg-opacity-20 text-warning rounded-pill px-2">{{ notes|length }}</span>
+                    </div>
+                    {% for note in notes %}
+                        <div class="crm-note-item mb-2 p-3 rounded bg-white bg-opacity-5">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="crm-note-avatar">{{ note.author.get_full_name|default:note.author.username|first|upper }}</div>
+                                    <div>
+                                        <small class="fw-semibold text-white d-block">{{ note.author.get_full_name|default:note.author.username }}</small>
+                                        <small class="text-muted" style="font-size:0.65rem;">{{ note.created_at|date:"d M Y" }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="crm-note-text text-white-50 small mb-0">{{ note.note }}</p>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-sticky-note fa-2x text-white-50 mb-2"></i>
+                            <p class="small text-muted mb-0">{% trans "No notes yet." %}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+                <!-- Deliverable Files -->
+                {% if files %}
+                    <div class="admin-glass-card p-4 mb-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h5 class="fw-bold text-white mb-0">
+                                <i class="fas fa-paperclip text-info me-2"></i>{% trans "Attached Files" %}
+                            </h5>
+                            <span class="badge bg-info bg-opacity-20 text-info rounded-pill px-2">{{ files|length }}</span>
+                        </div>
+                        {% for f in files %}
+                            <a href="{{ f.file.url }}"
+                               target="_blank"
+                               class="crm-file-item d-flex align-items-center justify-content-between p-2 mb-2 rounded bg-white bg-opacity-5 text-decoration-none text-white">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fas fa-file-alt text-info"></i>
+                                    <span class="small">{{ f.file.name|cut:"design-requests/files/" }}</span>
+                                </div>
+                                <i class="fas fa-download text-muted small"></i>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
-</div>
-{% include "components/inspiration_lightbox.html" %}
+    {% include "components/inspiration_lightbox.html" %}
 {% endblock dashContent %}
-
 {% block extra_js %}
-<script src="{% static 'js/kanban.js' %}?v={{ ASSET_VERSION }}"></script>
-<script src="{% static 'js/inspiration_lightbox.js' %}?v={{ ASSET_VERSION }}"></script>
-<script>
+    <script src="{% static 'js/kanban.js' %}?v={{ ASSET_VERSION }}"></script>
+    <script src="{% static 'js/inspiration_lightbox.js' %}?v={{ ASSET_VERSION }}"></script>
+    <script>
 document.addEventListener("DOMContentLoaded", function () {
     // Admin Send Facturation (WeasyPrint PDF via Email)
     const btnAdminEmailFacture = document.getElementById("btnAdminEmailFacture");
@@ -1095,5 +1115,5 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
-</script>
+    </script>
 {% endblock extra_js %}

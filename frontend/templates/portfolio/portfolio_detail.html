@@ -1,70 +1,85 @@
 {% extends "index.html" %}
 {% load i18n %}
 {% load static %}
-
 {% block body_class %}landing-page{% endblock body_class %}
-
 {% block extra_css %}
-<link rel="stylesheet" href="{% static "css/home.css" %}?v={{ ASSET_VERSION }}">
-<link rel="stylesheet" href="{% static "css/portfolio_list.css" %}?v={{ ASSET_VERSION }}">
-<link rel="stylesheet" href="{% static "css/portfolio_detail.css" %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static "css/home.css" %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static "css/portfolio_list.css" %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static "css/portfolio_detail.css" %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
-
-{% block nav %}{% endblock nav %}
-
-{% block sidebar %}{% endblock sidebar %}
-
+{% block nav %}
+{% endblock nav %}
+{% block sidebar %}
+{% endblock sidebar %}
 {% block content %}
-<div class="detail-viewer" id="portfolioViewer">
-  <div class="viewer-top-left">
-    <a href="{% url 'frontend:portfolio_list' %}" class="viewer-icon-btn viewer-back-btn" aria-label="{% trans 'Back' %}" title="{% trans 'Back' %}">
-      <i class="fas fa-arrow-left"></i>
-    </a>
-  </div>
-
-  {% if portfolio.external_link %}
-  <a href="{{ portfolio.external_link }}" target="_blank" rel="noopener" class="viewer-icon-btn viewer-external-btn" aria-label="{% trans 'View in 360' %}" title="{% trans 'View in 360' %}">
-    <i class="fas fa-vr-cardboard me-1"></i>360&deg;
-  </a>
-  {% endif %}
-
-  <div class="viewer-actions">
-    {% if model_3d_url %}
-    <button class="viewer-action-btn" id="view3dBtn" title="{% trans 'View in 3D' %}">
-      <i class="fas fa-cube"></i>
-    </button>
-    {% endif %}
-  </div>
-
-  <button class="nav-btn nav-prev"><i class="fas fa-chevron-left"></i></button>
-  <img class="viewer-main-img" id="heroImage" src="{{ gallery_images|first }}" alt="{{ portfolio.title }}">
-  <button class="nav-btn nav-next"><i class="fas fa-chevron-right"></i></button>
-
-  <div class="viewer-gallery-zone" id="galleryZone" role="button" tabindex="0" aria-label="{% trans 'View gallery' %}"></div>
-
-  {% if model_3d_url %}
-  <div class="model-viewer-overlay" id="modelViewerOverlay">
-    <model-viewer src="{{ model_3d_url }}" alt="{{ portfolio.title }} 3D model" auto-rotate camera-controls ar shadow-intensity="1" exposure="0.8" interaction-prompt="none"></model-viewer>
-  </div>
-  {% endif %}
-
-  <div class="thumb-strip" id="thumbStrip">
-    {% for img in gallery_images %}
-    <div class="thumb-item {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}">
-      <img src="{{ img }}" alt="">
+    <div class="detail-viewer" id="portfolioViewer">
+        <div class="viewer-top-left">
+            <a href="{% url 'frontend:portfolio_list' %}"
+               class="viewer-icon-btn viewer-back-btn"
+               aria-label="{% trans 'Back' %}"
+               title="{% trans 'Back' %}">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+        {% if portfolio.external_link %}
+            <a href="{{ portfolio.external_link }}"
+               target="_blank"
+               rel="noopener"
+               class="viewer-icon-btn viewer-external-btn"
+               aria-label="{% trans 'View in 360' %}"
+               title="{% trans 'View in 360' %}">
+                <i class="fas fa-vr-cardboard me-1"></i>360&deg;
+            </a>
+        {% endif %}
+        <div class="viewer-actions">
+            {% if model_3d_url %}
+                <button class="viewer-action-btn"
+                        id="view3dBtn"
+                        title="{% trans 'View in 3D' %}">
+                    <i class="fas fa-cube"></i>
+                </button>
+            {% endif %}
+        </div>
+        <button class="nav-btn nav-prev">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <img class="viewer-main-img"
+             id="heroImage"
+             src="{{ gallery_images|first }}"
+             alt="{{ portfolio.title }}">
+        <button class="nav-btn nav-next">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        <div class="viewer-gallery-zone"
+             id="galleryZone"
+             role="button"
+             tabindex="0"
+             aria-label="{% trans 'View gallery' %}"></div>
+        {% if model_3d_url %}
+            <div class="model-viewer-overlay" id="modelViewerOverlay">
+                <model-viewer src="{{ model_3d_url }}" alt="{{ portfolio.title }} 3D model" auto-rotate camera-controls ar shadow-intensity="1" exposure="0.8" interaction-prompt="none"></model-viewer>
+            </div>
+        {% endif %}
+        <div class="thumb-strip" id="thumbStrip">
+            {% for img in gallery_images %}
+                <div class="thumb-item {% if forloop.first %}active{% endif %}"
+                     data-index="{{ forloop.counter0 }}">
+                    <img src="{{ img }}" alt="">
+                </div>
+            {% endfor %}
+        </div>
     </div>
-    {% endfor %}
-  </div>
-</div>
-
-<!-- Hidden Gallery Data -->
-<script id="galleryData" type="application/json">{{ gallery_json|safe }}</script>
+    <!-- Hidden Gallery Data -->
+    <script id="galleryData" type="application/json">{{ gallery_json|safe }}</script>
 {% endblock content %}
-
-{% block footer %}{% endblock footer %}
-
+{% block footer %}
+{% endblock footer %}
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
-<script src="{% static "js/portfolio_detail.js" %}?v={{ ASSET_VERSION }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module"
+            src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    <script src="{% static "js/portfolio_detail.js" %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

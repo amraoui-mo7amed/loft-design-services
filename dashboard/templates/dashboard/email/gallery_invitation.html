@@ -1,103 +1,173 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inspiration & Gallery Selection - LoftDesign Studio</title>
-</head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; background-color: #0b0f17; color: #f1f5f9;">
-    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed; background-color: #0b0f17;">
-        <tr>
-            <td align="center" style="padding: 40px 10px;">
-                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background: linear-gradient(145deg, #161c2b, #0e121d); border-radius: 20px; overflow: hidden; border: 1.5px solid rgba(255, 214, 90, 0.35); box-shadow: 0 20px 60px rgba(0,0,0,0.8);">
-
-                    <!-- Header -->
-                    <tr>
-                        <td align="center" style="background: linear-gradient(135deg, #111827 0%, #1f2937 100%); padding: 36px 20px; border-bottom: 2px solid #FFD65A;">
-                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 1px;">
-                                LOFT<span style="color: #FFD65A;">DESIGN</span>
-                            </h1>
-                            <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px;">Haute Interior Architecture & Design</p>
-                        </td>
-                    </tr>
-
-                    <!-- English Section -->
-                    <tr>
-                        <td dir="ltr" style="padding: 36px 30px; text-align: left; border-bottom: 1px dashed rgba(255,255,255,0.15);">
-                            <h3 style="color: #FFD65A; margin: 0 0 12px; font-size: 20px; font-weight: 700;">
-                                Select Your Inspiration Gallery & Style
-                            </h3>
-                            <p style="font-size: 14px; line-height: 1.7; color: #cbd5e1; margin: 0 0 18px;">
-                                Hello <strong style="color: #ffffff;">{{ client_name }}</strong>,<br><br>
-                                To help our architects craft the optimal 3D concept for your project, we invite you to browse and select the inspiration styles that match your vision for <strong>{{ project.project_name }}</strong> ({{ project.project_type.name|default:"Architectural Project" }}).
-                            </p>
-
-                            <!-- Project Card -->
-                            <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px 20px; margin: 20px 0;">
-                                <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                                    <tr>
-                                        <td width="140" style="padding: 5px 0; color: #94a3b8; font-size: 13px;">Project Number:</td>
-                                        <td style="padding: 5px 0; font-weight: 700; font-size: 13px; color: #FFD65A; font-family: monospace;">{{ project.project_number }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td width="140" style="padding: 5px 0; color: #94a3b8; font-size: 13px;">Property Type:</td>
-                                        <td style="padding: 5px 0; font-weight: 600; font-size: 13px; color: #ffffff;">{{ project.project_type.name|default:"Custom" }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td width="140" style="padding: 5px 0; color: #94a3b8; font-size: 13px;">Configured Area:</td>
-                                        <td style="padding: 5px 0; font-weight: 600; font-size: 13px; color: #ffffff;">{{ project.total_surface }} m²</td>
-                                    </tr>
-                                </table>
-                            </div>
-
-                            <p style="font-size: 13px; color: #94a3b8; margin: 0 0 24px;">
-                                Click below to open your personalized, single-use gallery moodboard link:
-                            </p>
-
-                            <div style="text-align: center; margin: 26px 0;">
-                                <a href="{{ selection_url }}" style="background: linear-gradient(135deg, #FFD65A 0%, #eab308 100%); color: #000000; padding: 14px 34px; border-radius: 999px; text-decoration: none; font-weight: 800; font-size: 15px; display: inline-block; box-shadow: 0 6px 20px rgba(255, 214, 90, 0.4);">
-                                    Select Inspiration Gallery &rarr;
-                                </a>
-                            </div>
-
-                            <p style="font-size: 12px; color: #64748b; margin: 20px 0 0; text-align: center;">
-                                Note: This is a secure link reserved specifically for your architectural request.
-                            </p>
-                        </td>
-                    </tr>
-
-                    <!-- French Section -->
-                    <tr>
-                        <td dir="ltr" style="padding: 36px 30px; text-align: left;">
-                            <h3 style="color: #FFD65A; margin: 0 0 12px; font-size: 20px; font-weight: 700;">
-                                Choisissez Votre Galerie d'Inspirations & Style
-                            </h3>
-                            <p style="font-size: 14px; line-height: 1.7; color: #cbd5e1; margin: 0 0 18px;">
-                                Bonjour <strong style="color: #ffffff;">{{ client_name }}</strong>,<br><br>
-                                Afin de permettre à nos architectes d'élaborer le meilleur concept 3D pour votre projet <strong>{{ project.project_name }}</strong>, nous vous invitons à sélectionner vos inspirations et ambiances préférées parmi notre catalogue.
-                            </p>
-
-                            <div style="text-align: center; margin: 26px 0;">
-                                <a href="{{ selection_url }}" style="background: rgba(255,255,255,0.08); border: 1.5px solid #FFD65A; color: #FFD65A; padding: 12px 30px; border-radius: 999px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">
-                                    Ouvrir la Sélection de Galerie &rarr;
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- Footer -->
-                    <tr>
-                        <td align="center" style="background: #090d14; padding: 24px 20px; border-top: 1px solid rgba(255,255,255,0.08);">
-                            <p style="color: #64748b; font-size: 12px; margin: 0;">
-                                LoftDesign Studio &bull; Interior Architecture & Design Platform<br>
-                                &copy; 2026 LoftDesign. All rights reserved.
-                            </p>
-                        </td>
-                    </tr>
-
-                </table>
-            </td>
-        </tr>
-    </table>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Inspiration & Gallery Selection - LoftDesign Studio</title>
+    </head>
+    <body style="margin: 0;
+                 padding: 0;
+                 font-family: 'Segoe UI', Arial, sans-serif;
+                 background-color: #0b0f17;
+                 color: #f1f5f9">
+        <table border="0"
+               cellpadding="0"
+               cellspacing="0"
+               width="100%"
+               style="table-layout: fixed;
+                      background-color: #0b0f17">
+            <tr>
+                <td align="center" style="padding: 40px 10px;">
+                    <table border="0"
+                           cellpadding="0"
+                           cellspacing="0"
+                           width="600"
+                           style="background: linear-gradient(145deg, #161c2b, #0e121d);
+                                  border-radius: 20px;
+                                  overflow: hidden;
+                                  border: 1.5px solid rgba(255, 214, 90, 0.35);
+                                  box-shadow: 0 20px 60px rgba(0,0,0,0.8)">
+                        <!-- Header -->
+                        <tr>
+                            <td align="center"
+                                style="background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+                                       padding: 36px 20px;
+                                       border-bottom: 2px solid #FFD65A">
+                                <h1 style="color: #ffffff;
+                                           margin: 0;
+                                           font-size: 24px;
+                                           font-weight: 800;
+                                           letter-spacing: 1px">
+                                    LOFT<span style="color: #FFD65A;">DESIGN</span>
+                                </h1>
+                                <p style="color: rgba(255,255,255,0.7);
+                                          margin: 6px 0 0;
+                                          font-size: 13px;
+                                          text-transform: uppercase;
+                                          letter-spacing: 1.5px">Haute Interior Architecture & Design</p>
+                            </td>
+                        </tr>
+                        <!-- English Section -->
+                        <tr>
+                            <td dir="ltr"
+                                style="padding: 36px 30px;
+                                       text-align: left;
+                                       border-bottom: 1px dashed rgba(255,255,255,0.15)">
+                                <h3 style="color: #FFD65A;
+                                           margin: 0 0 12px;
+                                           font-size: 20px;
+                                           font-weight: 700">Select Your Inspiration Gallery & Style</h3>
+                                <p style="font-size: 14px;
+                                          line-height: 1.7;
+                                          color: #cbd5e1;
+                                          margin: 0 0 18px">
+                                    Hello <strong style="color: #ffffff;">{{ client_name }}</strong>,
+                                    <br>
+                                    <br>
+                                    To help our architects craft the optimal 3D concept for your project, we invite you to browse and select the inspiration styles that match your vision for <strong>{{ project.project_name }}</strong> ({{ project.project_type.name|default:"Architectural Project" }}).
+                                </p>
+                                <!-- Project Card -->
+                                <div style="background: rgba(255,255,255,0.04);
+                                            border: 1px solid rgba(255,255,255,0.1);
+                                            border-radius: 12px;
+                                            padding: 16px 20px;
+                                            margin: 20px 0">
+                                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                        <tr>
+                                            <td width="140" style="padding: 5px 0; color: #94a3b8; font-size: 13px;">Project Number:</td>
+                                            <td style="padding: 5px 0;
+                                                       font-weight: 700;
+                                                       font-size: 13px;
+                                                       color: #FFD65A;
+                                                       font-family: monospace">{{ project.project_number }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td width="140" style="padding: 5px 0; color: #94a3b8; font-size: 13px;">Property Type:</td>
+                                            <td style="padding: 5px 0;
+                                                       font-weight: 600;
+                                                       font-size: 13px;
+                                                       color: #ffffff">{{ project.project_type.name|default:"Custom" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td width="140" style="padding: 5px 0; color: #94a3b8; font-size: 13px;">Configured Area:</td>
+                                            <td style="padding: 5px 0;
+                                                       font-weight: 600;
+                                                       font-size: 13px;
+                                                       color: #ffffff">{{ project.total_surface }} m²</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <p style="font-size: 13px; color: #94a3b8; margin: 0 0 24px;">
+                                    Click below to open your personalized, single-use gallery moodboard link:
+                                </p>
+                                <div style="text-align: center; margin: 26px 0;">
+                                    <a href="{{ selection_url }}"
+                                       style="background: linear-gradient(135deg, #FFD65A 0%, #eab308 100%);
+                                              color: #000000;
+                                              padding: 14px 34px;
+                                              border-radius: 999px;
+                                              text-decoration: none;
+                                              font-weight: 800;
+                                              font-size: 15px;
+                                              display: inline-block;
+                                              box-shadow: 0 6px 20px rgba(255, 214, 90, 0.4)">
+                                        Select Inspiration Gallery &rarr;
+                                    </a>
+                                </div>
+                                <p style="font-size: 12px;
+                                          color: #64748b;
+                                          margin: 20px 0 0;
+                                          text-align: center">
+                                    Note: This is a secure link reserved specifically for your architectural request.
+                                </p>
+                            </td>
+                        </tr>
+                        <!-- French Section -->
+                        <tr>
+                            <td dir="ltr" style="padding: 36px 30px; text-align: left;">
+                                <h3 style="color: #FFD65A;
+                                           margin: 0 0 12px;
+                                           font-size: 20px;
+                                           font-weight: 700">Choisissez Votre Galerie d'Inspirations & Style</h3>
+                                <p style="font-size: 14px;
+                                          line-height: 1.7;
+                                          color: #cbd5e1;
+                                          margin: 0 0 18px">
+                                    Bonjour <strong style="color: #ffffff;">{{ client_name }}</strong>,
+                                    <br>
+                                    <br>
+                                    Afin de permettre à nos architectes d'élaborer le meilleur concept 3D pour votre projet <strong>{{ project.project_name }}</strong>, nous vous invitons à sélectionner vos inspirations et ambiances préférées parmi notre catalogue.
+                                </p>
+                                <div style="text-align: center; margin: 26px 0;">
+                                    <a href="{{ selection_url }}"
+                                       style="background: rgba(255,255,255,0.08);
+                                              border: 1.5px solid #FFD65A;
+                                              color: #FFD65A;
+                                              padding: 12px 30px;
+                                              border-radius: 999px;
+                                              text-decoration: none;
+                                              font-weight: 700;
+                                              font-size: 14px;
+                                              display: inline-block">Ouvrir la Sélection de Galerie &rarr;</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Footer -->
+                        <tr>
+                            <td align="center"
+                                style="background: #090d14;
+                                       padding: 24px 20px;
+                                       border-top: 1px solid rgba(255,255,255,0.08)">
+                                <p style="color: #64748b; font-size: 12px; margin: 0;">
+                                    LoftDesign Studio &bull; Interior Architecture & Design Platform
+                                    <br>
+                                    &copy; 2026 LoftDesign. All rights reserved.
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
 </html>

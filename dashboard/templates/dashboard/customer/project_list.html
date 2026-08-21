@@ -2,67 +2,69 @@
 {% load i18n %}
 {% load static %}
 {% load tags %}
-
-{% block dashTitle %}{% trans "My Projects" %}{% endblock dashTitle %}
-
+{% block dashTitle %}
+    {% trans "My Projects" %}
+{% endblock dashTitle %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/users.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/users.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
-
 {% block dashContent %}
-<div class="container-fluid">
-    {% if projects %}
-    <div class="row g-4">
-        {% for project in projects %}
-        <div class="col-lg-4 col-md-6">
-            <div class="card h-100 shadow-sm border-0 rounded-4">
-                <div class="card-header-gradient">
-                    <div class="avatar-wrapper-floating">
-                        <div class="avatar-circle-premium">
-                            <i class="fas fa-drafting-compass text-white"></i>
+    <div class="container-fluid">
+        {% if projects %}
+            <div class="row g-4">
+                {% for project in projects %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 shadow-sm border-0 rounded-4">
+                            <div class="card-header-gradient">
+                                <div class="avatar-wrapper-floating">
+                                    <div class="avatar-circle-premium">
+                                        <i class="fas fa-drafting-compass text-white"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body pt-5">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="fw-bold mb-0">{{ project.project_name }}</h5>
+                                    <span class="badge {% if project.status == 'new' %}bg-info{% elif project.status == 'design' %}bg-primary{% elif project.status == 'delivered' or project.status == 'completed' %}bg-success{% elif project.status == 'cancelled' %}bg-danger{% else %}bg-warning{% endif %} rounded-pill px-3 py-2">
+                                        {{ project.get_status_display }}
+                                    </span>
+                                </div>
+                                <div class="small text-muted mb-2">{{ project.project_number }}</div>
+                                <div class="d-flex gap-2 mb-3 flex-wrap">
+                                    {% if project.project_type %}<span class="badge bg-light text-dark rounded-pill">{{ project.project_type.name }}</span>{% endif %}
+                                    {% if project.package %}<span class="badge bg-light text-dark rounded-pill">{{ project.package.name }}</span>{% endif %}
+                                </div>
+                                <div class="progress mb-2" style="height:6px;">
+                                    {% widthratio project.get_status_progress 1 100 as progress %}
+                                    <div class="progress-bar bg-primary" style="width:{{ progress }}%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <small class="text-muted"><i class="far fa-calendar me-1"></i>{{ project.created_at|date:"d M, Y" }}</small>
+                                    <span class="fw-bold text-primary">{{ project.total|floatformat:"0u" }} DA</span>
+                                </div>
+                                <a href="{% url 'dash:customer_project_detail' project.uuid %}"
+                                   class="btn btn-outline-primary w-100 rounded-3 mt-3 fw-bold">
+                                    {% trans "View Details" %} <i class="fas fa-arrow-right ms-2"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="card-body pt-5">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h5 class="fw-bold mb-0">{{ project.project_name }}</h5>
-                        <span class="badge {% if project.status == 'new' %}bg-info{% elif project.status == 'design' %}bg-primary{% elif project.status == 'delivered' or project.status == 'completed' %}bg-success{% elif project.status == 'cancelled' %}bg-danger{% else %}bg-warning{% endif %} rounded-pill px-3 py-2">
-                            {{ project.get_status_display }}
-                        </span>
-                    </div>
-                    <div class="small text-muted mb-2">{{ project.project_number }}</div>
-                    <div class="d-flex gap-2 mb-3 flex-wrap">
-                        {% if project.project_type %}<span class="badge bg-light text-dark rounded-pill">{{ project.project_type.name }}</span>{% endif %}
-                        {% if project.package %}<span class="badge bg-light text-dark rounded-pill">{{ project.package.name }}</span>{% endif %}
-                    </div>
-                    <div class="progress mb-2" style="height:6px;">
-                        {% widthratio project.get_status_progress 1 100 as progress %}
-                        <div class="progress-bar bg-primary" style="width:{{ progress }}%"></div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mt-3">
-                        <small class="text-muted"><i class="far fa-calendar me-1"></i>{{ project.created_at|date:"d M, Y" }}</small>
-                        <span class="fw-bold text-primary">{{ project.total|floatformat:"0u" }} DA</span>
-                    </div>
-                    <a href="{% url 'dash:customer_project_detail' project.uuid %}" class="btn btn-outline-primary w-100 rounded-3 mt-3 fw-bold">
-                        {% trans "View Details" %} <i class="fas fa-arrow-right ms-2"></i>
-                    </a>
-                </div>
+                {% endfor %}
             </div>
-        </div>
-        {% endfor %}
+            {% if page_obj.paginator.num_pages > 1 %}
+                <div class="mt-5">{% render_pagination page_obj %}</div>
+            {% endif %}
+        {% else %}
+            <div class="card border-0 shadow-sm p-5 text-center rounded-4">
+                <i class="fas fa-drafting-compass fa-4x text-light mb-4"></i>
+                <h4 class="text-muted fw-bold">{% trans "No projects yet" %}</h4>
+                <p class="text-muted">{% trans "Start your first design project today!" %}</p>
+                <a href="{% url 'design_service' %}"
+                   class="btn btn-primary rounded-3 px-4 fw-bold mt-2">
+                    <i class="fas fa-plus me-2"></i>{% trans "Start New Project" %}
+                </a>
+            </div>
+        {% endif %}
     </div>
-    {% if page_obj.paginator.num_pages > 1 %}
-    <div class="mt-5">{% render_pagination page_obj %}</div>
-    {% endif %}
-    {% else %}
-    <div class="card border-0 shadow-sm p-5 text-center rounded-4">
-        <i class="fas fa-drafting-compass fa-4x text-light mb-4"></i>
-        <h4 class="text-muted fw-bold">{% trans "No projects yet" %}</h4>
-        <p class="text-muted">{% trans "Start your first design project today!" %}</p>
-        <a href="{% url 'design_service' %}" class="btn btn-primary rounded-3 px-4 fw-bold mt-2">
-            <i class="fas fa-plus me-2"></i>{% trans "Start New Project" %}
-        </a>
-    </div>
-    {% endif %}
-</div>
 {% endblock dashContent %}

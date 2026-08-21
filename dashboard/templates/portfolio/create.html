@@ -1,134 +1,153 @@
 {% extends "dash/dash_index.html" %}
 {% load i18n %}
 {% load static %}
-
-{% block dashTitle %}{% trans "New Portfolio" %}{% endblock dashTitle %}
-
+{% block dashTitle %}
+    {% trans "New Portfolio" %}
+{% endblock dashTitle %}
 {% block extra_css %}
-  <link rel="stylesheet" href="{% static 'css/portfolio.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/portfolio.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
-
 {% block dashContent %}
-<div class="editorial-form-wrapper">
-  <div class="d-flex align-items-center gap-3 mb-4 pb-2">
-    <a href="{% url 'dash:portfolio_list' %}" class="btn btn-outline-light rounded-3 px-3 fw-bold shadow-sm">
-      <i class="fas fa-arrow-left me-2"></i>{% trans "Back" %}
-    </a>
-    <div>
-      <h5 class="fw-bold mb-0">{% trans "New Masterpiece" %}</h5>
-      <p class="text-muted small mb-0">{% trans "Add a new project to your portfolio" %}</p>
+    <div class="editorial-form-wrapper">
+        <div class="d-flex align-items-center gap-3 mb-4 pb-2">
+            <a href="{% url 'dash:portfolio_list' %}"
+               class="btn btn-outline-light rounded-3 px-3 fw-bold shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i>{% trans "Back" %}
+            </a>
+            <div>
+                <h5 class="fw-bold mb-0">{% trans "New Masterpiece" %}</h5>
+                <p class="text-muted small mb-0">{% trans "Add a new project to your portfolio" %}</p>
+            </div>
+        </div>
+        <form method="post"
+              action="{% url 'dash:portfolio_create' %}"
+              enctype="multipart/form-data"
+              id="portfolioForm">
+            {% csrf_token %}
+            {% include "partials/errorList.html" with form_id="portfolioForm" %}
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="editorial-form-card">
+                        <h6 class="editorial-form-card-title"><i class="fas fa-info-circle"></i>{% trans "General Information" %}</h6>
+                        <div class="mb-3">
+                            <label class="editorial-form-label">{% trans "Title" %}</label>
+                            <input type="text"
+                                   name="title"
+                                   class="form-control"
+                                   placeholder="{% trans 'e.g. Modern Villa Renovation' %}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="editorial-form-label">{% trans "Description" %}</label>
+                            <textarea name="description"
+                                      class="form-control"
+                                      rows="5"
+                                      placeholder="{% trans 'Describe the project...' %}"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="editorial-form-label">{% trans "Tags" %}</label>
+                            <input type="text"
+                                   name="tags"
+                                   class="form-control"
+                                   placeholder="{% trans 'e.g. modern, villa, renovation' %}">
+                            <small class="text-muted">{% trans "Comma separated tags" %}</small>
+                        </div>
+                    </div>
+                    <div class="editorial-form-card mt-4">
+                        <h6 class="editorial-form-card-title"><i class="fas fa-images"></i>{% trans "Gallery" %}</h6>
+                        <div class="file-drop-zone" id="galleryZone">
+                            <div class="upload-progress" id="galleryProgress">
+                                <div class="progress-ring"></div>
+                                <span class="progress-text">{% trans "Optimizing images..." %}</span>
+                            </div>
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p class="fw-semibold mt-2 mb-1">{% trans "Drop images here or click to browse" %}</p>
+                            <p class="small text-muted">{% trans "JPEG, PNG · Automatically optimized" %}</p>
+                            <input type="file"
+                                   name="gallery_images"
+                                   id="galleryInput"
+                                   multiple
+                                   accept="image/*">
+                        </div>
+                        <div class="preview-grid" id="galleryPreview"></div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="editorial-form-card">
+                        <h6 class="editorial-form-card-title"><i class="fas fa-cog"></i>{% trans "Settings" %}</h6>
+                        <label class="editorial-form-label">{% trans "Thumbnail" %}</label>
+                        <div class="thumbnail-preview" id="thumbnailPreview">
+                            <div class="upload-progress" id="thumbProgress">
+                                <div class="progress-ring"></div>
+                                <span class="progress-text">{% trans "Optimizing..." %}</span>
+                            </div>
+                            <div class="thumbnail-placeholder">
+                                <i class="fas fa-image"></i>
+                                <p>{% trans "Click to upload" %}</p>
+                            </div>
+                        </div>
+                        <div class="file-drop-zone thumbnail-zone mb-3" id="thumbnailZone">
+                            <p class="small mb-0">{% trans "Upload thumbnail image" %}</p>
+                            <input type="file"
+                                   name="thumbnail"
+                                   id="thumbnailInput"
+                                   accept="image/*"
+                                   required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="editorial-form-label">{% trans "External Link" %}</label>
+                            <input type="url"
+                                   name="external_link"
+                                   class="form-control"
+                                   placeholder="{% trans 'https://...' %}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="editorial-form-label">{% trans "3D Model" %}</label>
+                            <div class="file-drop-zone thumbnail-zone" id="model3dZone">
+                                <div class="upload-progress" id="model3dProgress">
+                                    <div class="progress-ring"></div>
+                                    <span class="progress-text">{% trans "Loading..." %}</span>
+                                </div>
+                                <i class="fas fa-cube"></i>
+                                <p class="small mb-0 mt-1">{% trans "Upload GLB/GLTF model" %}</p>
+                                <input type="file" name="model_3d" id="model3dInput" accept=".glb,.gltf">
+                            </div>
+                            <div id="model3dPreview" class="d-none mt-2">
+                                <div class="d-flex align-items-center gap-2 p-2 bg-light rounded-3">
+                                    <i class="fas fa-cube text-info"></i>
+                                    <span class="small fw-semibold" id="model3dFilename"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card border-0 bg-light rounded-4 p-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="form-check mb-0">
+                                    <input type="checkbox"
+                                           name="is_featured"
+                                           class="form-check-input"
+                                           id="featuredCheck">
+                                    <label class="form-check-label fw-bold" for="featuredCheck">{% trans "Featured" %}</label>
+                                </div>
+                                <div class="ms-auto">
+                                    <span class="badge bg-warning bg-opacity-10 text-warning editorial-badge-sm rounded-pill">{% trans "Highlight" %}</span>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block mt-2 editorial-text-xs">{% trans "Show this project on the homepage" %}</small>
+                        </div>
+                        <div class="editorial-actions-bar">
+                            <a href="{% url 'dash:portfolio_list' %}"
+                               class="btn btn-outline-light rounded-3 px-4 fw-bold">{% trans "Cancel" %}</a>
+                            <button type="submit"
+                                    class="dash-btn dash-btn-primary rounded-3 px-4 fw-bold shadow-sm">
+                                <i class="fas fa-save me-2"></i>{% trans "Save" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
-  </div>
-
-  <form method="post" action="{% url 'dash:portfolio_create' %}" enctype="multipart/form-data" id="portfolioForm">
-    {% csrf_token %}
-    {% include "partials/errorList.html" with form_id="portfolioForm" %}
-
-    <div class="row g-4">
-      <div class="col-lg-8">
-        <div class="editorial-form-card">
-          <h6 class="editorial-form-card-title"><i class="fas fa-info-circle"></i>{% trans "General Information" %}</h6>
-          <div class="mb-3">
-            <label class="editorial-form-label">{% trans "Title" %}</label>
-            <input type="text" name="title" class="form-control" placeholder="{% trans 'e.g. Modern Villa Renovation' %}">
-          </div>
-          <div class="mb-3">
-            <label class="editorial-form-label">{% trans "Description" %}</label>
-            <textarea name="description" class="form-control" rows="5" placeholder="{% trans 'Describe the project...' %}"></textarea>
-          </div>
-          <div class="mb-3">
-            <label class="editorial-form-label">{% trans "Tags" %}</label>
-            <input type="text" name="tags" class="form-control" placeholder="{% trans 'e.g. modern, villa, renovation' %}">
-            <small class="text-muted">{% trans "Comma separated tags" %}</small>
-          </div>
-        </div>
-
-        <div class="editorial-form-card mt-4">
-          <h6 class="editorial-form-card-title"><i class="fas fa-images"></i>{% trans "Gallery" %}</h6>
-          <div class="file-drop-zone" id="galleryZone">
-            <div class="upload-progress" id="galleryProgress">
-              <div class="progress-ring"></div>
-              <span class="progress-text">{% trans "Optimizing images..." %}</span>
-            </div>
-            <i class="fas fa-cloud-upload-alt"></i>
-            <p class="fw-semibold mt-2 mb-1">{% trans "Drop images here or click to browse" %}</p>
-            <p class="small text-muted">{% trans "JPEG, PNG · Automatically optimized" %}</p>
-            <input type="file" name="gallery_images" id="galleryInput" multiple accept="image/*">
-          </div>
-          <div class="preview-grid" id="galleryPreview"></div>
-        </div>
-      </div>
-
-      <div class="col-lg-4">
-        <div class="editorial-form-card">
-          <h6 class="editorial-form-card-title"><i class="fas fa-cog"></i>{% trans "Settings" %}</h6>
-
-          <label class="editorial-form-label">{% trans "Thumbnail" %}</label>
-          <div class="thumbnail-preview" id="thumbnailPreview">
-            <div class="upload-progress" id="thumbProgress">
-              <div class="progress-ring"></div>
-              <span class="progress-text">{% trans "Optimizing..." %}</span>
-            </div>
-            <div class="thumbnail-placeholder">
-              <i class="fas fa-image"></i>
-              <p>{% trans "Click to upload" %}</p>
-            </div>
-          </div>
-          <div class="file-drop-zone thumbnail-zone mb-3" id="thumbnailZone">
-            <p class="small mb-0">{% trans "Upload thumbnail image" %}</p>
-            <input type="file" name="thumbnail" id="thumbnailInput" accept="image/*" required>
-          </div>
-
-          <div class="mb-3">
-            <label class="editorial-form-label">{% trans "External Link" %}</label>
-            <input type="url" name="external_link" class="form-control" placeholder="{% trans 'https://...' %}">
-          </div>
-
-          <div class="mb-3">
-            <label class="editorial-form-label">{% trans "3D Model" %}</label>
-            <div class="file-drop-zone thumbnail-zone" id="model3dZone">
-              <div class="upload-progress" id="model3dProgress">
-                <div class="progress-ring"></div>
-                <span class="progress-text">{% trans "Loading..." %}</span>
-              </div>
-              <i class="fas fa-cube"></i>
-              <p class="small mb-0 mt-1">{% trans "Upload GLB/GLTF model" %}</p>
-              <input type="file" name="model_3d" id="model3dInput" accept=".glb,.gltf">
-            </div>
-            <div id="model3dPreview" class="d-none mt-2">
-              <div class="d-flex align-items-center gap-2 p-2 bg-light rounded-3">
-                <i class="fas fa-cube text-info"></i>
-                <span class="small fw-semibold" id="model3dFilename"></span>
-              </div>
-            </div>
-          </div>
-
-          <div class="card border-0 bg-light rounded-4 p-3">
-            <div class="d-flex align-items-center gap-3">
-              <div class="form-check mb-0">
-                <input type="checkbox" name="is_featured" class="form-check-input" id="featuredCheck">
-                <label class="form-check-label fw-bold" for="featuredCheck">{% trans "Featured" %}</label>
-              </div>
-              <div class="ms-auto">
-                <span class="badge bg-warning bg-opacity-10 text-warning editorial-badge-sm rounded-pill">{% trans "Highlight" %}</span>
-              </div>
-            </div>
-            <small class="text-muted d-block mt-2 editorial-text-xs">{% trans "Show this project on the homepage" %}</small>
-          </div>
-
-          <div class="editorial-actions-bar">
-            <a href="{% url 'dash:portfolio_list' %}" class="btn btn-outline-light rounded-3 px-4 fw-bold">{% trans "Cancel" %}</a>
-            <button type="submit" class="dash-btn dash-btn-primary rounded-3 px-4 fw-bold shadow-sm">
-              <i class="fas fa-save me-2"></i>{% trans "Save" %}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </form>
-</div>
 {% endblock dashContent %}
-
 {% block extra_js %}
-<script src="{% static 'js/portfolio.js' %}?v={{ ASSET_VERSION }}"></script>
+    <script src="{% static 'js/portfolio.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}

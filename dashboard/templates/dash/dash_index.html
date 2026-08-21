@@ -1,8 +1,6 @@
 {% extends "index.html" %}
-
 {% load static %}
 {% load i18n %}
-
 {% block css %}
     <link rel="stylesheet"
           href="{% static 'css/dash_index.css' %}?v={{ ASSET_VERSION }}" />
@@ -35,155 +33,157 @@
                 <!-- Sidebar Header -->
                 <div class="sidebar-header">
                     {% if site_config.logo %}
-                        <img src="{{ site_config.logo }}" alt="{{ site_config.name }} Logo" class="sidebar-logo" />
+                        <img src="{{ site_config.logo }}"
+                             alt="{{ site_config.name }} Logo"
+                             class="sidebar-logo" />
                     {% else %}
-<!--                         {% include "components/logo.html" with size=36 icon_size=20 %}
+                        <!--                         {% include "components/logo.html" with size=36 icon_size=20 %}
  -->                    {% endif %}
-                    <div class="sidebar-brand-text">
-                        <h6 class="sidebar-brand-title">
-                            {% if IS_RTL %}
-                                {{ site_config.ar_name }}
-                            {% else %}
-                                {{ site_config.name }}
-                            {% endif %}
-                        </h6>
-                    </div>
-                </div>
-
-                <!-- Sidebar Navigation -->
-                <nav class="sidebar-nav">
-                    <div class="sidebar-nav-inner">
-                        {% regroup dashboard_menu by section as menu_sections %}
-                        {% if not menu_sections %}
-                            {% for item in dashboard_menu %}
-                                {% if not item.admin_only or request.user.is_superuser %}
-                                    {% include "partials/sidebar_item.html" with item=item counter=forloop.counter %}
-                                {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            {% for section in menu_sections %}
-                                <div class="sidebar-section-label">{{ section.grouper }}</div>
-                                {% for item in section.list %}
-                                    {% if not item.admin_only or request.user.is_superuser %}
-                                        {% include "partials/sidebar_item.html" with item=item counter=forloop.counter %}
-                                    {% endif %}
-                                {% endfor %}
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-                </nav>
-
-                <!-- Sidebar Footer -->
-                <div class="sidebar-footer">
-                    <a href="{% url 'frontend:home' %}" class="sidebar-view-site" target="_blank" rel="noopener">
-                        <i class="fas fa-globe sidebar-view-site-icon"></i><span class="sidebar-view-site-text">{% trans "View Website" %}</span>
-                    </a>
-                    <div class="sidebar-user">
-                        <div class="sidebar-user-avatar">
-                            <span>{{ request.user.username|slice:":1"|upper }}</span>
-                        </div>
-                        <div class="sidebar-user-info">
-                            <span class="sidebar-user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
-                            <span class="sidebar-user-role">
-                                {% if request.user.is_superuser %}
-                                    {% trans "Admin" %}
-                                {% elif profile and profile.is_designer %}
-                                    {% trans "Designer" %}
+                        <div class="sidebar-brand-text">
+                            <h6 class="sidebar-brand-title">
+                                {% if IS_RTL %}
+                                    {{ site_config.ar_name }}
                                 {% else %}
-                                    {% trans "User" %}
+                                    {{ site_config.name }}
                                 {% endif %}
-                            </span>
+                            </h6>
                         </div>
-                        <a href="{% url "user_auth:logout" %}" class="sidebar-logout-btn" title="{% trans 'Logout' %}">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </a>
+                        </div>
+                        <!-- Sidebar Navigation -->
+                        <nav class="sidebar-nav">
+                            <div class="sidebar-nav-inner">
+                                {% regroup dashboard_menu by section as menu_sections %}
+                                {% if not menu_sections %}
+                                    {% for item in dashboard_menu %}
+                                        {% if not item.admin_only or request.user.is_superuser %}
+                                            {% include "partials/sidebar_item.html" with item=item counter=forloop.counter %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    {% for section in menu_sections %}
+                                        <div class="sidebar-section-label">{{ section.grouper }}</div>
+                                        {% for item in section.list %}
+                                            {% if not item.admin_only or request.user.is_superuser %}
+                                                {% include "partials/sidebar_item.html" with item=item counter=forloop.counter %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </nav>
+                        <!-- Sidebar Footer -->
+                        <div class="sidebar-footer">
+                            <a href="{% url 'frontend:home' %}"
+                               class="sidebar-view-site"
+                               target="_blank"
+                               rel="noopener">
+                                <i class="fas fa-globe sidebar-view-site-icon"></i><span class="sidebar-view-site-text">{% trans "View Website" %}</span>
+                            </a>
+                            <div class="sidebar-user">
+                                <div class="sidebar-user-avatar">
+                                    <span>{{ request.user.username|slice:":1"|upper }}</span>
+                                </div>
+                                <div class="sidebar-user-info">
+                                    <span class="sidebar-user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+                                    <span class="sidebar-user-role">
+                                        {% if request.user.is_superuser %}
+                                            {% trans "Admin" %}
+                                        {% elif profile and profile.is_designer %}
+                                            {% trans "Designer" %}
+                                        {% else %}
+                                            {% trans "User" %}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <a href="{% url "user_auth:logout" %}"
+                                   class="sidebar-logout-btn"
+                                   title="{% trans 'Logout' %}">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                        </aside>
+                    {% endblock sidebar %}
+                    <div class="dashContent">
+                        <header class="dash-header d-flex align-items-center justify-content-between sticky-top">
+                            <div class="d-flex align-items-center gap-3">
+                                <button class="dash-toggle-btn"
+                                        id="sidebarToggleBtn"
+                                        aria-label="{% trans 'Toggle sidebar' %}">
+                                    <i class="fas fa-bars"></i>
+                                </button>
+                                <h4 class="dash-header-title">
+                                    {% block dashTitle %}
+                                        {% trans "Dashboard" %}
+                                    {% endblock dashTitle %}
+                                </h4>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 gap-md-3">
+                                {% include "partials/language_switcher.html" %}
+                                {% include "components/notification_dropdown.html" %}
+                                <div class="vr mx-1 d-none d-md-block opacity-10"></div>
+                                <div class="dropdown">
+                                    <a href="#"
+                                       class="d-flex align-items-center gap-2 text-decoration-none text-dark dropdown-toggle no-caret user-dropdown-trigger"
+                                       data-bs-toggle="dropdown">
+                                        <div class="avatar-circle rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                             style="width: 36px;
+                                                    height: 36px;
+                                                    font-size: 0.85rem">
+                                            {{ request.user.username|slice:":1"|upper }}
+                                        </div>
+                                        <div class="d-none d-md-block">
+                                            <p class="small fw-bold mb-0 leading-tight">{{ request.user.get_full_name|default:request.user.username }}</p>
+                                            <p class="smaller text-muted mb-0" style="font-size: 0.65rem;">
+                                                {% if request.user.is_superuser %}
+                                                    {% trans "Administrator" %}
+                                                {% else %}
+                                                    {{ profile.activity_type|title|default:_("User") }}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                        <i class="fas fa-chevron-down smaller text-muted ms-1 d-none d-md-block"></i>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2 mt-2"
+                                        style="min-width: 200px">
+                                        <div class="px-3 py-2 border-bottom mb-2 d-md-none">
+                                            <p class="small fw-bold mb-0 text-dark">{{ request.user.get_full_name|default:request.user.username }}</p>
+                                            <p class="smaller text-muted mb-0">{{ request.user.email }}</p>
+                                        </div>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2"
+                                               href="{% url 'user_auth:profile_edit' %}"><i class="far fa-user-circle text-muted"></i> {% trans "My Profile" %}</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="#"><i class="fas fa-cog text-muted"></i> {% trans "Settings" %}</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="#"><i class="fas fa-headset text-muted"></i> {% trans "Help & Support" %}</a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider mx-2" />
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item text-danger d-flex align-items-center gap-2"
+                                               href="{% url "user_auth:logout" %}"><i class="fas fa-sign-out-alt"></i> {% trans "Logout" %}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </header>
+                        <main class="dash-main">
+                            {% block dashContent %}
+                            {% endblock dashContent %}
+                        </main>
                     </div>
                 </div>
-            </aside>
-        {% endblock sidebar %}
-
-        <div class="dashContent">
-            <header class="dash-header d-flex align-items-center justify-content-between sticky-top">
-                <div class="d-flex align-items-center gap-3">
-                    <button class="dash-toggle-btn" id="sidebarToggleBtn" aria-label="{% trans 'Toggle sidebar' %}">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h4 class="dash-header-title">
-                        {% block dashTitle %}
-                            {% trans "Dashboard" %}
-                        {% endblock dashTitle %}
-                    </h4>
-                </div>
-                <div class="d-flex align-items-center gap-2 gap-md-3">
-                    {% include "partials/language_switcher.html" %}
-                    {% include "components/notification_dropdown.html" %}
-
-                    <div class="vr mx-1 d-none d-md-block opacity-10">
-                    </div>
-                    <div class="dropdown">
-                        <a href="#"
-                           class="d-flex align-items-center gap-2 text-decoration-none text-dark dropdown-toggle no-caret user-dropdown-trigger"
-                           data-bs-toggle="dropdown">
-                            <div class="avatar-circle rounded-circle d-flex align-items-center justify-content-center fw-bold"
-                                 style="width: 36px; height: 36px; font-size: 0.85rem">
-                                {{ request.user.username|slice:":1"|upper }}
-                            </div>
-                            <div class="d-none d-md-block">
-                                <p class="small fw-bold mb-0 leading-tight">
-                                    {{ request.user.get_full_name|default:request.user.username }}
-                                </p>
-                                <p class="smaller text-muted mb-0" style="font-size: 0.65rem;">
-                                    {% if request.user.is_superuser %}
-                                        {% trans "Administrator" %}
-                                    {% else %}
-                                        {{ profile.activity_type|title|default:_("User") }}
-                                    {% endif %}
-                                </p>
-                            </div>
-                            <i class="fas fa-chevron-down smaller text-muted ms-1 d-none d-md-block"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2 mt-2"
-                            style="min-width: 200px">
-                            <div class="px-3 py-2 border-bottom mb-2 d-md-none">
-                                <p class="small fw-bold mb-0 text-dark">
-                                    {{ request.user.get_full_name|default:request.user.username }}
-                                </p>
-                                <p class="smaller text-muted mb-0">
-                                    {{ request.user.email }}
-                                </p>
-                            </div>
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center gap-2" href="{% url 'user_auth:profile_edit' %}"><i class="far fa-user-circle text-muted"></i> {% trans "My Profile" %}</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center gap-2" href="#"><i class="fas fa-cog text-muted"></i> {% trans "Settings" %}</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item d-flex align-items-center gap-2" href="#"><i class="fas fa-headset text-muted"></i> {% trans "Help & Support" %}</a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider mx-2" />
-                            </li>
-                            <li>
-                                <a class="dropdown-item text-danger d-flex align-items-center gap-2"
-                                   href="{% url "user_auth:logout" %}"><i class="fas fa-sign-out-alt"></i> {% trans "Logout" %}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </header>
-            <main class="dash-main">
-                {% block dashContent %}
-                {% endblock dashContent %}
-            </main>
-        </div>
-    </div>
-{% endblock content %}
-{% block footer %}
-{% endblock footer %}
-{% block js %}
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{% static 'js/dash_index.js' %}?v={{ ASSET_VERSION }}"></script>
-    <script src="{% static 'js/notifications.js' %}?v={{ ASSET_VERSION }}"></script>
-{% endblock js %}
-{% block extra_js %}{% endblock extra_js %}
+        {% endblock content %}
+        {% block footer %}
+        {% endblock footer %}
+        {% block js %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script src="{% static 'js/dash_index.js' %}?v={{ ASSET_VERSION }}"></script>
+            <script src="{% static 'js/notifications.js' %}?v={{ ASSET_VERSION }}"></script>
+        {% endblock js %}
+        {% block extra_js %}
+        {% endblock extra_js %}

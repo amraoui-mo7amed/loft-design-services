@@ -2,429 +2,531 @@
 {% load i18n %}
 {% load static %}
 {% load l10n %}
-
 {% block dashTitle %}{{ space.name }} - {% trans "Space Details & Categories" %}{% endblock dashTitle %}
-
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/space_details.css' %}?v={{ ASSET_VERSION }}">
+    <link rel="stylesheet"
+          href="{% static 'css/space_details.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
-
 {% block dashContent %}
-<div class="space-management-container container-fluid px-0" data-space-id="{{ space.pk }}">
-    <!-- Header Section & Breadcrumbs -->
-    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-        <div class="d-flex align-items-center gap-3">
-            {% if pt %}
-            <a href="{% url 'dash:project_type_detail' pt.pk %}" class="btn btn-outline-light btn-sm rounded-3 d-inline-flex align-items-center justify-content-center"
-               style="width: 38px; height: 38px;"
-               title="{% trans 'Back to project type' %}"
-               aria-label="{% trans 'Back to' %} {{ pt.name }}">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            {% else %}
-            <a href="{% url 'dash:project_type_list' %}" class="btn btn-outline-light btn-sm rounded-3 d-inline-flex align-items-center justify-content-center"
-               style="width: 38px; height: 38px;"
-               title="{% trans 'Back to project types' %}">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            {% endif %}
-            <div>
-                <div class="d-flex align-items-center gap-2 mb-1">
-                    <h4 class="fw-bold text-light mb-0">{{ space.name }}</h4>
-                    {% if pt %}
-                    <span class="badge bg-secondary-subtle text-light border border-secondary rounded-pill px-3 py-1 font-monospace" style="font-size: 0.75rem;">
-                        {{ pt.name }}
-                    </span>
-                    {% endif %}
-                </div>
-                <p class="text-muted small mb-0">{% trans "Configure space pricing, categorize design inspiration photos, and assign default thumbnails." %}</p>
-            </div>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn dash-btn-primary rounded-3 px-3 py-2 fw-bold d-flex align-items-center gap-2"
-                    data-bs-toggle="modal" data-bs-target="#newCategoryModal">
-                <i class="fas fa-plus"></i>
-                <span>{% trans "New Category" %}</span>
-            </button>
-            <button type="button" class="btn btn-outline-danger rounded-3 px-3 py-2 delete_button d-flex align-items-center gap-2"
-                    data-delete-url="{% url 'dash:space_delete' space.pk %}"
-                    {% if pt %}data-project-type-id="{{ pt.pk }}"{% endif %}
-                    data-csrf-token="{{ csrf_token }}"
-                    data-item-title="{{ space.name }}">
-                <i class="fas fa-trash"></i>
-                <span>{% trans "Delete Space" %}</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Main Content Layout -->
-    <div class="row g-4">
-        <!-- Left: Space Parameters Card -->
-        <div class="col-xl-4 col-lg-5">
-            <div class="sd-card mb-4">
-                <div class="sd-card-head">
-                    <h5 class="sd-card-title">
-                        <i class="fas fa-sliders-h text-warning"></i>
-                        <span>{% trans "Space Parameters" %}</span>
-                    </h5>
-                </div>
-                <div class="sd-card-body">
-                    <form method="post" action="{% url 'dash:space_detail' space.pk %}" class="form" id="editSpaceForm">
-                        {% csrf_token %}
+    <div class="space-management-container container-fluid px-0"
+         data-space-id="{{ space.pk }}">
+        <!-- Header Section & Breadcrumbs -->
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                {% if pt %}
+                    <a href="{% url 'dash:project_type_detail' pt.pk %}"
+                       class="btn btn-outline-light btn-sm rounded-3 d-inline-flex align-items-center justify-content-center"
+                       style="width: 38px;
+                              height: 38px"
+                       title="{% trans 'Back to project type' %}"
+                       aria-label="{% trans 'Back to' %} {{ pt.name }}">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                {% else %}
+                    <a href="{% url 'dash:project_type_list' %}"
+                       class="btn btn-outline-light btn-sm rounded-3 d-inline-flex align-items-center justify-content-center"
+                       style="width: 38px;
+                              height: 38px"
+                       title="{% trans 'Back to project types' %}">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                {% endif %}
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h4 class="fw-bold text-light mb-0">{{ space.name }}</h4>
                         {% if pt %}
-                        <input type="hidden" name="project_type_id" value="{{ pt.pk }}">
+                            <span class="badge bg-secondary-subtle text-light border border-secondary rounded-pill px-3 py-1 font-monospace"
+                                  style="font-size: 0.75rem">{{ pt.name }}</span>
                         {% endif %}
-                        {% include "partials/errorList.html" with form_id="editSpaceForm" %}
-                        
-                        <div class="mb-3">
-                            <label class="form-label text-light fw-semibold small">{% trans "Space Name" %} <span class="text-danger">*</span></label>
-                            <input type="text" name="name" class="form-control sd-input" value="{{ space.name }}" required placeholder="{% trans 'e.g. Master Bedroom' %}">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label text-light fw-semibold small">{% trans "Base Price" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span></label>
-                            <input type="number" step="0.01" name="base_price" class="form-control sd-input" value="{{ space.base_price|unlocalize }}" min="0" placeholder="0">
-                        </div>
-
-                        <button type="submit" class="btn dash-btn-primary w-100 rounded-3 py-2 fw-bold mt-2">
-                            <i class="fas fa-save me-2"></i>{% trans "Save Space Changes" %}
-                        </button>
-                    </form>
+                    </div>
+                    <p class="text-muted small mb-0">{% trans "Configure space pricing, categorize design inspiration photos, and assign default thumbnails." %}</p>
                 </div>
             </div>
-
-            <!-- Categories Quick Overview -->
-            <div class="sd-card">
-                <div class="sd-card-head">
-                    <h5 class="sd-card-title">
-                        <i class="fas fa-layer-group text-warning"></i>
-                        <span>{% trans "Space Categories" %}</span>
-                    </h5>
-                    <span class="badge bg-warning text-dark font-monospace fw-bold">{{ categories|length }}</span>
-                </div>
-                <div class="sd-card-body p-3">
-                    {% if categories %}
-                    <div class="d-flex flex-column gap-1" id="categorySidebarList">
-                        {% for cat in categories %}
-                        <div class="cat-tab-btn w-100 justify-content-between{% if forloop.first %} active{% endif %}"
-                             data-cat-id="{{ cat.pk }}"
-                             data-cat-name="{{ cat.category_name }}"
-                             data-cat-count="{{ cat.images.all|length }}"
-                             data-upload-url="{% url 'dash:space_category_image_upload' space.pk cat.pk %}"
-                             data-update-url="{% url 'dash:space_category_update' space.pk cat.pk %}"
-                             data-delete-url="{% url 'dash:space_category_delete' space.pk cat.pk %}">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="fas fa-folder text-warning"></i>
-                                <span class="cat-tab-title">{{ cat.category_name }}</span>
-                            </div>
-                            <span class="badge bg-secondary text-light rounded-pill cat-tab-badge font-monospace">{{ cat.images.all|length }}</span>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <p class="text-muted small mb-0 p-2">{% trans "No categories created yet. Click 'New Category' to add your first inspiration category." %}</p>
-                    {% endif %}
-                </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button"
+                        class="btn dash-btn-primary rounded-3 px-3 py-2 fw-bold d-flex align-items-center gap-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#newCategoryModal">
+                    <i class="fas fa-plus"></i>
+                    <span>{% trans "New Category" %}</span>
+                </button>
+                <button type="button"
+                        class="btn btn-outline-danger rounded-3 px-3 py-2 delete_button d-flex align-items-center gap-2"
+                        data-delete-url="{% url 'dash:space_delete' space.pk %}"
+                        {% if pt %}data-project-type-id="{{ pt.pk }}"{% endif %}
+                        data-csrf-token="{{ csrf_token }}"
+                        data-item-title="{{ space.name }}">
+                    <i class="fas fa-trash"></i>
+                    <span>{% trans "Delete Space" %}</span>
+                </button>
             </div>
         </div>
-
-        <!-- Right: Entirely Redesigned Category & Gallery Workspace (.col-xl-8 col-lg-7) -->
-        <div class="col-xl-8 col-lg-7" id="categoryWorkspaceArea">
-            {% if categories %}
-                <!-- Horizontal Category Navigation Tabs Bar -->
-                <div class="cat-tabs-bar" id="categoryHorizontalTabs">
-                    {% for cat in categories %}
-                    <button type="button" class="cat-tab-btn{% if forloop.first %} active{% endif %}"
-                            data-cat-id="{{ cat.pk }}"
-                            data-cat-name="{{ cat.category_name }}"
-                            data-cat-count="{{ cat.images.all|length }}"
-                            data-upload-url="{% url 'dash:space_category_image_upload' space.pk cat.pk %}"
-                            data-update-url="{% url 'dash:space_category_update' space.pk cat.pk %}"
-                            data-delete-url="{% url 'dash:space_category_delete' space.pk cat.pk %}">
-                        <i class="fas fa-folder"></i>
-                        <span class="cat-tab-title">{{ cat.category_name }}</span>
-                        <span class="badge bg-secondary text-light rounded-pill cat-tab-badge font-monospace ms-1">{{ cat.images.all|length }}</span>
-                    </button>
-                    {% endfor %}
-                </div>
-
-                <!-- Active Category Header Banner -->
-                <div class="sd-category-banner" id="activeCategoryBanner">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="sd-cat-icon">
-                            <i class="fas fa-images"></i>
-                        </div>
-                        <div>
-                            <div class="d-flex align-items-center gap-2">
-                                <h5 class="fw-bold text-light mb-0" id="activeCategoryNameDisplay">{{ categories.0.category_name }}</h5>
-                                <span class="badge bg-secondary text-light font-monospace" id="activeCategoryCountBadge">{{ categories.0.images.all|length }} {% trans "photos" %}</span>
-                            </div>
-                            <small class="text-muted">{% trans "Active Category Inspiration Gallery" %}</small>
-                        </div>
+        <!-- Main Content Layout -->
+        <div class="row g-4">
+            <!-- Left: Space Parameters Card -->
+            <div class="col-xl-4 col-lg-5">
+                <div class="sd-card mb-4">
+                    <div class="sd-card-head">
+                        <h5 class="sd-card-title">
+                            <i class="fas fa-sliders-h text-warning"></i>
+                            <span>{% trans "Space Parameters" %}</span>
+                        </h5>
                     </div>
-
-                    <!-- Action buttons with backgrounds -->
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <button type="button" class="btn-pill-action btn-pill-upload" id="activeUploadPhotosBtn" title="{% trans 'Upload photos into this category' %}">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <span>{% trans "Upload Photos" %}</span>
-                        </button>
-                        <button type="button" class="btn-pill-action btn-pill-edit" id="activeEditCategoryBtn" title="{% trans 'Edit Category Name' %}">
-                            <i class="fas fa-edit"></i>
-                            <span>{% trans "Rename" %}</span>
-                        </button>
-                        <button type="button" class="btn-pill-action btn-pill-delete" id="activeDeleteCategoryBtn" title="{% trans 'Delete Category' %}">
-                            <i class="fas fa-trash"></i>
-                            <span>{% trans "Delete" %}</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Category Gallery Panels (Only selected is visible) -->
-                <div id="categoryGalleriesHost">
-                    {% for cat in categories %}
-                    <div class="category-gallery-view" id="cat-view-{{ cat.pk }}" data-cat-id="{{ cat.pk }}" {% if not forloop.first %}style="display: none;"{% endif %}>
-                        <!-- Hidden Photo Upload Form for Custom JS Upload Code -->
-                        <form method="post" action="{% url 'dash:space_category_image_upload' space.pk cat.pk %}" enctype="multipart/form-data" class="d-none cat-upload-form" id="catForm-{{ cat.pk }}" data-cat-id="{{ cat.pk }}">
+                    <div class="sd-card-body">
+                        <form method="post"
+                              action="{% url 'dash:space_detail' space.pk %}"
+                              class="form"
+                              id="editSpaceForm">
                             {% csrf_token %}
-                            <input type="file" name="gallery_images" multiple accept="image/*" class="cat-images-input" data-cat-id="{{ cat.pk }}">
+                            {% if pt %}
+                                <input type="hidden" name="project_type_id" value="{{ pt.pk }}">
+                            {% endif %}
+                            {% include "partials/errorList.html" with form_id="editSpaceForm" %}
+                            <div class="mb-3">
+                                <label class="form-label text-light fw-semibold small">{% trans "Space Name" %} <span class="text-danger">*</span></label>
+                                <input type="text"
+                                       name="name"
+                                       class="form-control sd-input"
+                                       value="{{ space.name }}"
+                                       required
+                                       placeholder="{% trans 'e.g. Master Bedroom' %}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-light fw-semibold small">{% trans "Base Price" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span></label>
+                                <input type="number"
+                                       step="0.01"
+                                       name="base_price"
+                                       class="form-control sd-input"
+                                       value="{{ space.base_price|unlocalize }}"
+                                       min="0"
+                                       placeholder="0">
+                            </div>
+                            <button type="submit"
+                                    class="btn dash-btn-primary w-100 rounded-3 py-2 fw-bold mt-2">
+                                <i class="fas fa-save me-2"></i>{% trans "Save Space Changes" %}
+                            </button>
                         </form>
-
-                        {% if cat.images.all %}
-                            <!-- Gallery Photos Grid (When category has photos) -->
-                            <div class="row g-3 gallery-photos-grid" id="photoGrid-{{ cat.pk }}">
-                                {% for img in cat.images.all %}
-                                <div class="col-md-6 col-xxl-4" id="image-card-{{ img.pk }}">
-                                    <div class="sd-photo-card{% if img.is_default %} is-default-photo{% endif %}">
-                                        <div class="sd-photo-img-wrap">
-                                            <img src="{{ img.image.url }}" alt="{{ cat.category_name }}" class="sd-photo-img" loading="lazy">
-                                            {% if img.is_default %}
-                                            <span class="sd-photo-badge"><i class="fas fa-star me-1"></i>{% trans "Default" %}</span>
-                                            {% endif %}
+                    </div>
+                </div>
+                <!-- Categories Quick Overview -->
+                <div class="sd-card">
+                    <div class="sd-card-head">
+                        <h5 class="sd-card-title">
+                            <i class="fas fa-layer-group text-warning"></i>
+                            <span>{% trans "Space Categories" %}</span>
+                        </h5>
+                        <span class="badge bg-warning text-dark font-monospace fw-bold">{{ categories|length }}</span>
+                    </div>
+                    <div class="sd-card-body p-3">
+                        {% if categories %}
+                            <div class="d-flex flex-column gap-1" id="categorySidebarList">
+                                {% for cat in categories %}
+                                    <div class="cat-tab-btn w-100 justify-content-between{% if forloop.first %} active{% endif %}"
+                                         data-cat-id="{{ cat.pk }}"
+                                         data-cat-name="{{ cat.category_name }}"
+                                         data-cat-count="{{ cat.images.all|length }}"
+                                         data-upload-url="{% url 'dash:space_category_image_upload' space.pk cat.pk %}"
+                                         data-update-url="{% url 'dash:space_category_update' space.pk cat.pk %}"
+                                         data-delete-url="{% url 'dash:space_category_delete' space.pk cat.pk %}">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fas fa-folder text-warning"></i>
+                                            <span class="cat-tab-title">{{ cat.category_name }}</span>
                                         </div>
-                                        <div class="sd-photo-info">
-                                            <div class="sd-photo-meta mb-3">
-                                                {% if img.reference %}
-                                                <div class="sd-ref-pill text-truncate mb-1" id="ref-display-{{ img.pk }}" title="{{ img.reference }}">
-                                                    <i class="fas fa-hashtag me-1 text-info"></i><span class="font-monospace">{{ img.reference }}</span>
-                                                </div>
-                                                {% else %}
-                                                <div class="sd-ref-pill text-muted fst-italic mb-1" id="ref-display-{{ img.pk }}" style="color: #64748b !important; background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08);">
-                                                    <i class="fas fa-hashtag me-1"></i>{% trans "No reference" %}
-                                                </div>
-                                                {% endif %}
-
-                                                {% if img.tags %}
-                                                <div class="sd-tags-pill text-truncate mb-1" id="tags-display-{{ img.pk }}" title="{{ img.tags }}">
-                                                    <i class="fas fa-tags me-1 text-warning"></i>{{ img.tags }}
-                                                </div>
-                                                {% else %}
-                                                <div class="sd-tags-pill text-muted fst-italic mb-1" id="tags-display-{{ img.pk }}">
-                                                    <i class="fas fa-tags me-1"></i>{% trans "No tags" %}
-                                                </div>
-                                                {% endif %}
-
-                                                {% if img.description %}
-                                                <p class="sd-desc-snip text-truncate mb-0" id="desc-display-{{ img.pk }}" title="{{ img.description }}">
-                                                    {{ img.description }}
-                                                </p>
-                                                {% else %}
-                                                <p class="sd-desc-snip text-muted fst-italic mb-0" id="desc-display-{{ img.pk }}">
-                                                    {% trans "No description" %}
-                                                </p>
-                                                {% endif %}
-                                            </div>
-
-                                            <!-- Photo Action Buttons (Text with backgrounds, No Checkbox) -->
-                                            <div class="sd-photo-actions">
-                                                {% if not img.is_default %}
-                                                <button type="button" class="btn-pill-action btn-pill-gold set-default-btn"
-                                                        data-default-url="{% url 'dash:space_category_image_set_default' space.pk img.pk %}"
-                                                        data-csrf="{{ csrf_token }}"
-                                                        data-img-id="{{ img.pk }}"
-                                                        title="{% trans 'Set as default thumbnail' %}">
-                                                    <i class="fas fa-star"></i>
-                                                    <span>{% trans "Default" %}</span>
-                                                </button>
-                                                {% else %}
-                                                <span class="badge bg-warning text-dark font-monospace py-1 px-2">
-                                                    <i class="fas fa-check-circle me-1"></i>{% trans "Thumbnail" %}
-                                                </span>
-                                                {% endif %}
-
-                                                <div class="d-flex align-items-center gap-1">
-                                                    <button type="button" class="btn-pill-action btn-pill-edit open-img-modal-btn"
-                                                            data-img-id="{{ img.pk }}"
-                                                            data-reference="{{ img.reference|default:'' }}"
-                                                            data-tags="{{ img.tags|default:'' }}"
-                                                            data-description="{{ img.description|default:'' }}"
-                                                            data-update-url="{% url 'dash:space_category_image_update' space.pk img.pk %}"
-                                                            data-img-url="{{ img.image.url }}">
-                                                        {% trans "Edit" %}
-                                                    </button>
-
-                                                    <button type="button" class="btn-pill-action btn-pill-delete delete-img-btn"
-                                                            data-delete-url="{% url 'dash:space_category_image_delete' %}"
-                                                            data-image-id="{{ img.pk }}"
-                                                            data-csrf="{{ csrf_token }}"
-                                                            title="{% trans 'Delete Photo' %}">
-                                                        {% trans "Delete" %}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <span class="badge bg-secondary text-light rounded-pill cat-tab-badge font-monospace">{{ cat.images.all|length }}</span>
                                     </div>
-                                </div>
                                 {% endfor %}
                             </div>
                         {% else %}
-                            <!-- Drag & Drop Zone (Shown only when category has no photos) -->
-                            <div class="sd-dropzone dropzone-trigger" data-cat-id="{{ cat.pk }}">
-                                <div class="sd-dropzone-icon">
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                </div>
-                                <div class="sd-dropzone-title">{% trans "Drag & drop photos here or click to browse" %}</div>
-                                <div class="sd-dropzone-desc">{% trans "Upload multiple high-resolution inspiration images for" %} <strong class="text-warning">{{ cat.category_name }}</strong></div>
-                                <div class="sd-dropzone-pills">
-                                    <span class="sd-dropzone-pill"><i class="fas fa-file-image me-1"></i>JPG / PNG</span>
-                                    <span class="sd-dropzone-pill"><i class="fas fa-bolt me-1"></i>WEBP</span>
-                                    <span class="sd-dropzone-pill"><i class="fas fa-layer-group me-1"></i>{% trans "Multiple Photos" %}</span>
-                                </div>
-                            </div>
+                            <p class="text-muted small mb-0 p-2">{% trans "No categories created yet. Click 'New Category' to add your first inspiration category." %}</p>
                         {% endif %}
                     </div>
-                    {% endfor %}
                 </div>
-            {% else %}
-                <div class="sd-card p-5 text-center">
-                    <i class="fas fa-layer-group fa-4x text-light opacity-25 mb-3"></i>
-                    <h5 class="text-light fw-bold">{% trans "No categories defined for this space" %}</h5>
-                    <p class="text-muted small mb-4">{% trans "Organize your space photos into categories (e.g. Modern, Minimal, Classic) to display them in the catalog." %}</p>
-                    <button type="button" class="btn dash-btn-primary rounded-3 px-4 py-2 fw-bold"
-                            data-bs-toggle="modal" data-bs-target="#newCategoryModal">
-                        <i class="fas fa-plus me-2"></i>{% trans "Add First Category" %}
-                    </button>
-                </div>
-            {% endif %}
-        </div>
-    </div>
-</div>
-
-<!-- New Category Modal -->
-<div class="modal fade" id="newCategoryModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content sd-glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
-            <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="fas fa-layer-group text-warning fa-lg"></i>
-                    <h5 class="modal-title fw-bold text-light mb-0">{% trans "New Space Category" %}</h5>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="newCategoryForm" class="form" method="post" action="{% url 'dash:space_category_create' space.pk %}" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="modal-body p-4">
-                    {% include "partials/errorList.html" with form_id="newCategoryForm" %}
-                    <div class="mb-3">
-                        <label class="form-label text-light fw-semibold small">{% trans "Category Name" %} <span class="text-danger">*</span></label>
-                        <input type="text" name="category_name" class="form-control sd-input" required placeholder="{% trans 'e.g. Modern Minimalist, Luxury Wood' %}" maxlength="150">
+            <!-- Right: Entirely Redesigned Category & Gallery Workspace (.col-xl-8 col-lg-7) -->
+            <div class="col-xl-8 col-lg-7" id="categoryWorkspaceArea">
+                {% if categories %}
+                    <!-- Horizontal Category Navigation Tabs Bar -->
+                    <div class="cat-tabs-bar" id="categoryHorizontalTabs">
+                        {% for cat in categories %}
+                            <button type="button"
+                                    class="cat-tab-btn{% if forloop.first %} active{% endif %}"
+                                    data-cat-id="{{ cat.pk }}"
+                                    data-cat-name="{{ cat.category_name }}"
+                                    data-cat-count="{{ cat.images.all|length }}"
+                                    data-upload-url="{% url 'dash:space_category_image_upload' space.pk cat.pk %}"
+                                    data-update-url="{% url 'dash:space_category_update' space.pk cat.pk %}"
+                                    data-delete-url="{% url 'dash:space_category_delete' space.pk cat.pk %}">
+                                <i class="fas fa-folder"></i>
+                                <span class="cat-tab-title">{{ cat.category_name }}</span>
+                                <span class="badge bg-secondary text-light rounded-pill cat-tab-badge font-monospace ms-1">{{ cat.images.all|length }}</span>
+                            </button>
+                        {% endfor %}
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label text-light fw-semibold small">{% trans "Initial Photos" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span></label>
-                        <input type="file" name="category_images" multiple accept="image/*" class="form-control sd-input">
+                    <!-- Active Category Header Banner -->
+                    <div class="sd-category-banner" id="activeCategoryBanner">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="sd-cat-icon">
+                                <i class="fas fa-images"></i>
+                            </div>
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <h5 class="fw-bold text-light mb-0" id="activeCategoryNameDisplay">{{ categories.0.category_name }}</h5>
+                                    <span class="badge bg-secondary text-light font-monospace"
+                                          id="activeCategoryCountBadge">{{ categories.0.images.all|length }} {% trans "photos" %}</span>
+                                </div>
+                                <small class="text-muted">{% trans "Active Category Inspiration Gallery" %}</small>
+                            </div>
+                        </div>
+                        <!-- Action buttons with backgrounds -->
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <button type="button"
+                                    class="btn-pill-action btn-pill-upload"
+                                    id="activeUploadPhotosBtn"
+                                    title="{% trans 'Upload photos into this category' %}">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>{% trans "Upload Photos" %}</span>
+                            </button>
+                            <button type="button"
+                                    class="btn-pill-action btn-pill-edit"
+                                    id="activeEditCategoryBtn"
+                                    title="{% trans 'Edit Category Name' %}">
+                                <i class="fas fa-edit"></i>
+                                <span>{% trans "Rename" %}</span>
+                            </button>
+                            <button type="button"
+                                    class="btn-pill-action btn-pill-delete"
+                                    id="activeDeleteCategoryBtn"
+                                    title="{% trans 'Delete Category' %}">
+                                <i class="fas fa-trash"></i>
+                                <span>{% trans "Delete" %}</span>
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
-                    <button type="button" class="btn btn-outline-light rounded-3 px-3" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
-                    <button type="submit" class="btn dash-btn-primary rounded-3 px-4 fw-bold">
-                        <i class="fas fa-save me-2"></i>{% trans "Create Category" %}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Category Modal -->
-<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content sd-glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
-            <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="fas fa-edit text-warning fa-lg"></i>
-                    <h5 class="modal-title fw-bold text-light mb-0">{% trans "Edit Category" %}</h5>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <!-- Category Gallery Panels (Only selected is visible) -->
+                    <div id="categoryGalleriesHost">
+                        {% for cat in categories %}
+                            <div class="category-gallery-view"
+                                 id="cat-view-{{ cat.pk }}"
+                                 data-cat-id="{{ cat.pk }}"
+                                 {% if not forloop.first %}style="display: none;"{% endif %}>
+                                <!-- Hidden Photo Upload Form for Custom JS Upload Code -->
+                                <form method="post"
+                                      action="{% url 'dash:space_category_image_upload' space.pk cat.pk %}"
+                                      enctype="multipart/form-data"
+                                      class="d-none cat-upload-form"
+                                      id="catForm-{{ cat.pk }}"
+                                      data-cat-id="{{ cat.pk }}">
+                                    {% csrf_token %}
+                                    <input type="file"
+                                           name="gallery_images"
+                                           multiple
+                                           accept="image/*"
+                                           class="cat-images-input"
+                                           data-cat-id="{{ cat.pk }}">
+                                </form>
+                                {% if cat.images.all %}
+                                    <!-- Gallery Photos Grid (When category has photos) -->
+                                    <div class="row g-3 gallery-photos-grid" id="photoGrid-{{ cat.pk }}">
+                                        {% for img in cat.images.all %}
+                                            <div class="col-md-6 col-xxl-4" id="image-card-{{ img.pk }}">
+                                                <div class="sd-photo-card{% if img.is_default %} is-default-photo{% endif %}">
+                                                    <div class="sd-photo-img-wrap">
+                                                        <img src="{{ img.image.url }}"
+                                                             alt="{{ cat.category_name }}"
+                                                             class="sd-photo-img"
+                                                             loading="lazy">
+                                                        {% if img.is_default %}
+                                                            <span class="sd-photo-badge"><i class="fas fa-star me-1"></i>{% trans "Default" %}</span>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="sd-photo-info">
+                                                        <div class="sd-photo-meta mb-3">
+                                                            {% if img.reference %}
+                                                                <div class="sd-ref-pill text-truncate mb-1"
+                                                                     id="ref-display-{{ img.pk }}"
+                                                                     title="{{ img.reference }}">
+                                                                    <i class="fas fa-hashtag me-1 text-info"></i><span class="font-monospace">{{ img.reference }}</span>
+                                                                </div>
+                                                            {% else %}
+                                                                <div class="sd-ref-pill text-muted fst-italic mb-1"
+                                                                     id="ref-display-{{ img.pk }}"
+                                                                     style="color: #64748b !important;
+                                                                            background: rgba(255,255,255,0.03);
+                                                                            border-color: rgba(255,255,255,0.08)">
+                                                                    <i class="fas fa-hashtag me-1"></i>{% trans "No reference" %}
+                                                                </div>
+                                                            {% endif %}
+                                                            {% if img.tags %}
+                                                                <div class="sd-tags-pill text-truncate mb-1"
+                                                                     id="tags-display-{{ img.pk }}"
+                                                                     title="{{ img.tags }}">
+                                                                    <i class="fas fa-tags me-1 text-warning"></i>{{ img.tags }}
+                                                                </div>
+                                                            {% else %}
+                                                                <div class="sd-tags-pill text-muted fst-italic mb-1"
+                                                                     id="tags-display-{{ img.pk }}">
+                                                                    <i class="fas fa-tags me-1"></i>{% trans "No tags" %}
+                                                                </div>
+                                                            {% endif %}
+                                                            {% if img.description %}
+                                                                <p class="sd-desc-snip text-truncate mb-0"
+                                                                   id="desc-display-{{ img.pk }}"
+                                                                   title="{{ img.description }}">
+                                                                    {{ img.description }}
+                                                                </p>
+                                                            {% else %}
+                                                                <p class="sd-desc-snip text-muted fst-italic mb-0"
+                                                                   id="desc-display-{{ img.pk }}">
+                                                                    {% trans "No description" %}
+                                                                </p>
+                                                            {% endif %}
+                                                        </div>
+                                                        <!-- Photo Action Buttons (Text with backgrounds, No Checkbox) -->
+                                                        <div class="sd-photo-actions">
+                                                            {% if not img.is_default %}
+                                                                <button type="button"
+                                                                        class="btn-pill-action btn-pill-gold set-default-btn"
+                                                                        data-default-url="{% url 'dash:space_category_image_set_default' space.pk img.pk %}"
+                                                                        data-csrf="{{ csrf_token }}"
+                                                                        data-img-id="{{ img.pk }}"
+                                                                        title="{% trans 'Set as default thumbnail' %}">
+                                                                    <i class="fas fa-star"></i>
+                                                                    <span>{% trans "Default" %}</span>
+                                                                </button>
+                                                            {% else %}
+                                                                <span class="badge bg-warning text-dark font-monospace py-1 px-2">
+                                                                    <i class="fas fa-check-circle me-1"></i>{% trans "Thumbnail" %}
+                                                                </span>
+                                                            {% endif %}
+                                                            <div class="d-flex align-items-center gap-1">
+                                                                <button type="button"
+                                                                        class="btn-pill-action btn-pill-edit open-img-modal-btn"
+                                                                        data-img-id="{{ img.pk }}"
+                                                                        data-reference="{{ img.reference|default:'' }}"
+                                                                        data-tags="{{ img.tags|default:'' }}"
+                                                                        data-description="{{ img.description|default:'' }}"
+                                                                        data-update-url="{% url 'dash:space_category_image_update' space.pk img.pk %}"
+                                                                        data-img-url="{{ img.image.url }}">
+                                                                    {% trans "Edit" %}
+                                                                </button>
+                                                                <button type="button"
+                                                                        class="btn-pill-action btn-pill-delete delete-img-btn"
+                                                                        data-delete-url="{% url 'dash:space_category_image_delete' %}"
+                                                                        data-image-id="{{ img.pk }}"
+                                                                        data-csrf="{{ csrf_token }}"
+                                                                        title="{% trans 'Delete Photo' %}">
+                                                                    {% trans "Delete" %}
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <!-- Drag & Drop Zone (Shown only when category has no photos) -->
+                                    <div class="sd-dropzone dropzone-trigger" data-cat-id="{{ cat.pk }}">
+                                        <div class="sd-dropzone-icon">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                        </div>
+                                        <div class="sd-dropzone-title">{% trans "Drag & drop photos here or click to browse" %}</div>
+                                        <div class="sd-dropzone-desc">{% trans "Upload multiple high-resolution inspiration images for" %} <strong class="text-warning">{{ cat.category_name }}</strong></div>
+                                        <div class="sd-dropzone-pills">
+                                            <span class="sd-dropzone-pill"><i class="fas fa-file-image me-1"></i>JPG / PNG</span>
+                                            <span class="sd-dropzone-pill"><i class="fas fa-bolt me-1"></i>WEBP</span>
+                                            <span class="sd-dropzone-pill"><i class="fas fa-layer-group me-1"></i>{% trans "Multiple Photos" %}</span>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="sd-card p-5 text-center">
+                        <i class="fas fa-layer-group fa-4x text-light opacity-25 mb-3"></i>
+                        <h5 class="text-light fw-bold">{% trans "No categories defined for this space" %}</h5>
+                        <p class="text-muted small mb-4">{% trans "Organize your space photos into categories (e.g. Modern, Minimal, Classic) to display them in the catalog." %}</p>
+                        <button type="button"
+                                class="btn dash-btn-primary rounded-3 px-4 py-2 fw-bold"
+                                data-bs-toggle="modal"
+                                data-bs-target="#newCategoryModal">
+                            <i class="fas fa-plus me-2"></i>{% trans "Add First Category" %}
+                        </button>
+                    </div>
+                {% endif %}
             </div>
-            <form id="editCategoryForm" class="form" method="post" action="">
-                {% csrf_token %}
-                <div class="modal-body p-4">
-                    {% include "partials/errorList.html" with form_id="editCategoryForm" %}
-                    <div class="mb-3">
-                        <label class="form-label text-light fw-semibold small">{% trans "Category Name" %} <span class="text-danger">*</span></label>
-                        <input type="text" name="category_name" id="editCategoryNameInput" class="form-control sd-input" required maxlength="150">
-                    </div>
-                </div>
-                <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
-                    <button type="button" class="btn btn-outline-light rounded-3 px-3" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
-                    <button type="submit" class="btn dash-btn-primary rounded-3 px-4 fw-bold">
-                        <i class="fas fa-save me-2"></i>{% trans "Save Changes" %}
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
-</div>
-
-<!-- Image Details Edit Modal -->
-<div class="modal fade" id="imageEditModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content sd-glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
-            <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="fas fa-image text-warning fa-lg"></i>
-                    <h5 class="modal-title fw-bold text-light mb-0">{% trans "Edit Photo Details" %}</h5>
+    <!-- New Category Modal -->
+    <div class="modal fade"
+         id="newCategoryModal"
+         tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content sd-glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
+                <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-layer-group text-warning fa-lg"></i>
+                        <h5 class="modal-title fw-bold text-light mb-0">{% trans "New Space Category" %}</h5>
+                    </div>
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <form id="newCategoryForm"
+                      class="form"
+                      method="post"
+                      action="{% url 'dash:space_category_create' space.pk %}"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="modal-body p-4">
+                        {% include "partials/errorList.html" with form_id="newCategoryForm" %}
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small">{% trans "Category Name" %} <span class="text-danger">*</span></label>
+                            <input type="text"
+                                   name="category_name"
+                                   class="form-control sd-input"
+                                   required
+                                   placeholder="{% trans 'e.g. Modern Minimalist, Luxury Wood' %}"
+                                   maxlength="150">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small">{% trans "Initial Photos" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span></label>
+                            <input type="file"
+                                   name="category_images"
+                                   multiple
+                                   accept="image/*"
+                                   class="form-control sd-input">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
+                        <button type="button"
+                                class="btn btn-outline-light rounded-3 px-3"
+                                data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                        <button type="submit" class="btn dash-btn-primary rounded-3 px-4 fw-bold">
+                            <i class="fas fa-save me-2"></i>{% trans "Create Category" %}
+                        </button>
+                    </div>
+                </form>
             </div>
-            <form id="imageEditForm" class="form" method="post" action="">
-                {% csrf_token %}
-                <div class="modal-body p-4">
-                    {% include "partials/errorList.html" with form_id="imageEditForm" %}
-                    
-                    <div class="text-center mb-3">
-                        <img id="modalImgPreview" src="" alt="Preview" class="img-fluid rounded-3 shadow" style="max-height: 180px; object-fit: cover;">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-light fw-semibold small">{% trans "Reference (Code, Item #, or Source URL)" %}</label>
-                        <input type="text" name="reference" id="modalImgRef" class="form-control sd-input font-monospace" placeholder="{% trans 'e.g. REF-LIV-001, PIN-409, or https://...' %}">
-                        <small class="text-muted">{% trans "Custom identifier or source reference for this inspiration photo." %}</small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-light fw-semibold small">{% trans "Tags (Comma separated)" %}</label>
-                        <input type="text" name="tags" id="modalImgTags" class="form-control sd-input" placeholder="{% trans 'e.g. Modern, Minimal, Warm Wood' %}">
-                        <small class="text-muted">{% trans "Optional keyword tags used for filtering inspirations." %}</small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-light fw-semibold small">{% trans "Description / Caption" %}</label>
-                        <textarea name="description" id="modalImgDesc" rows="3" class="form-control sd-input" placeholder="{% trans 'Detailed notes about materials, style, lighting...' %}"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
-                    <button type="button" class="btn btn-outline-light rounded-3 px-3" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
-                    <button type="submit" class="btn dash-btn-primary rounded-3 px-4 fw-bold" id="saveImageDetailsBtn">
-                        <i class="fas fa-save me-2"></i>{% trans "Save Details" %}
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
-</div>
+    <!-- Edit Category Modal -->
+    <div class="modal fade"
+         id="editCategoryModal"
+         tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content sd-glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
+                <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-edit text-warning fa-lg"></i>
+                        <h5 class="modal-title fw-bold text-light mb-0">{% trans "Edit Category" %}</h5>
+                    </div>
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <form id="editCategoryForm" class="form" method="post" action="">
+                    {% csrf_token %}
+                    <div class="modal-body p-4">
+                        {% include "partials/errorList.html" with form_id="editCategoryForm" %}
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small">{% trans "Category Name" %} <span class="text-danger">*</span></label>
+                            <input type="text"
+                                   name="category_name"
+                                   id="editCategoryNameInput"
+                                   class="form-control sd-input"
+                                   required
+                                   maxlength="150">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
+                        <button type="button"
+                                class="btn btn-outline-light rounded-3 px-3"
+                                data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                        <button type="submit" class="btn dash-btn-primary rounded-3 px-4 fw-bold">
+                            <i class="fas fa-save me-2"></i>{% trans "Save Changes" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Image Details Edit Modal -->
+    <div class="modal fade"
+         id="imageEditModal"
+         tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content sd-glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
+                <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-image text-warning fa-lg"></i>
+                        <h5 class="modal-title fw-bold text-light mb-0">{% trans "Edit Photo Details" %}</h5>
+                    </div>
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <form id="imageEditForm" class="form" method="post" action="">
+                    {% csrf_token %}
+                    <div class="modal-body p-4">
+                        {% include "partials/errorList.html" with form_id="imageEditForm" %}
+                        <div class="text-center mb-3">
+                            <img id="modalImgPreview"
+                                 src=""
+                                 alt="Preview"
+                                 class="img-fluid rounded-3 shadow"
+                                 style="max-height: 180px;
+                                        object-fit: cover">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small">{% trans "Reference (Code, Item #, or Source URL)" %}</label>
+                            <input type="text"
+                                   name="reference"
+                                   id="modalImgRef"
+                                   class="form-control sd-input font-monospace"
+                                   placeholder="{% trans 'e.g. REF-LIV-001, PIN-409, or https://...' %}">
+                            <small class="text-muted">{% trans "Custom identifier or source reference for this inspiration photo." %}</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small">{% trans "Tags (Comma separated)" %}</label>
+                            <input type="text"
+                                   name="tags"
+                                   id="modalImgTags"
+                                   class="form-control sd-input"
+                                   placeholder="{% trans 'e.g. Modern, Minimal, Warm Wood' %}">
+                            <small class="text-muted">{% trans "Optional keyword tags used for filtering inspirations." %}</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small">{% trans "Description / Caption" %}</label>
+                            <textarea name="description"
+                                      id="modalImgDesc"
+                                      rows="3"
+                                      class="form-control sd-input"
+                                      placeholder="{% trans 'Detailed notes about materials, style, lighting...' %}"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
+                        <button type="button"
+                                class="btn btn-outline-light rounded-3 px-3"
+                                data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                        <button type="submit"
+                                class="btn dash-btn-primary rounded-3 px-4 fw-bold"
+                                id="saveImageDetailsBtn">
+                            <i class="fas fa-save me-2"></i>{% trans "Save Details" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 {% endblock dashContent %}
-
 {% block extra_js %}
-<script src="{% static 'js/space_details.js' %}?v={{ ASSET_VERSION }}"></script>
+    <script src="{% static 'js/space_details.js' %}?v={{ ASSET_VERSION }}"></script>
 {% endblock extra_js %}
