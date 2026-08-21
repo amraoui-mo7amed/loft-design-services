@@ -89,9 +89,28 @@ const money=v=>new Intl.NumberFormat('fr-DZ').format(Math.round(v))+' DA';
 const spaces = (window.SPACES_DATA && window.SPACES_DATA.length > 0) ? window.SPACES_DATA : [{id:'living',name:'Living room',price:8000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/living-room/16757/image_1.jpg'},{id:'bed',name:'Bedroom',price:6000,img:'https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-02-05-20-45-23_Enscape_scene_8.jpg'},{id:'kitchen',name:'Kitchen',price:12000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/kitchen-interior/11154/image_1.jpg'},{id:'bath',name:'Bathroom',price:7000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/bathroom/15230/image_1_dsgPgFt.jpg'},{id:'kids',name:'Children room',price:6500,img:'https://loftdesign.bilnov.com/media/spaces/gallery/children-room/10567/image_1_qP62mWe.jpg'}];
 const services = (window.SERVICES_DATA && window.SERVICES_DATA.length > 0) ? window.SERVICES_DATA : [{id:'3d',name:'Modélisation 3D',price:750},{id:'360',name:'Visite virtuelle 360°',price:8000},{id:'light',name:'Étude d’éclairage',price:12000}];
 const defaultSelectedSpaces = (spaces.length >= 2) ? [spaces[0].id, spaces[1].id] : (spaces[0] ? [spaces[0].id] : ['living', 'bed']);
+const defaultSelectedServices = (services.length >= 2) ? [services[0].id, services[1].id] : (services.length === 1 ? [services[0].id] : ['3d', '360']);
 let upperLevels=['R+3','R+2','R+1'];const middleLevels=['Terrasse / Jardin','RDC'];let lowerLevels=['R-1'];
-let st={mode:'quick',step:'project',spaces:defaultSelectedSpaces,services:['3d','360'],projectType:'',levels:[],surfaces:{},promptLevel:null,typeAttention:false,missing:[],clientType:'particular',success:false,ref:'',client:null};
-const area=()=>st.levels.reduce((s,l)=>s+(+st.surfaces[l]||0),0);const base=()=>st.mode==='quick'?spaces.filter(x=>st.spaces.includes(x.id)).reduce((s,x)=>s+(x.price||0),0):0;const servicePrice=id=>id==='3d'?750*(st.mode==='custom'?area():320):id==='360'?8000:12000;const servTotal=()=>st.services.reduce((s,id)=>s+servicePrice(id),0);const totalHT=()=>base()+servTotal();const tva=()=>st.clientType==='professional'?totalHT()*.19:0;const totalFinal=()=>totalHT()+tva();
+let st={mode:'quick',step:'project',spaces:defaultSelectedSpaces,services:defaultSelectedServices,projectType:'',levels:[],surfaces:{},promptLevel:null,typeAttention:false,missing:[],clientType:'particular',success:false,ref:'',client:null};
+const area=()=>st.levels.reduce((s,l)=>s+(+st.surfaces[l]||0),0);
+const base=()=>st.mode==='quick'?spaces.filter(x=>st.spaces.includes(x.id)).reduce((s,x)=>s+(x.price||0),0):0;
+const servicePrice=id=>{
+  const s = services.find(x => String(x.id) === String(id) || (x.name && x.name.toLowerCase().includes('3d') && String(id) === '3d') || (x.name && x.name.toLowerCase().includes('360') && String(id) === '360') || (x.name && x.name.toLowerCase().includes('éclairage') && String(id) === 'light'));
+  if (!s) {
+    return id === '3d' ? (750 * (st.mode === 'custom' ? (area() || 320) : 320)) : (id === '360' ? 8000 : 12000);
+  }
+  const is3d = (s.name && s.name.toLowerCase().includes('3d')) || s.pricing_type === 'per_sqm' || id === '3d';
+  if (is3d) {
+    const unitP = s.price || 750;
+    const a = st.mode === 'custom' ? area() : 320;
+    return unitP * (a > 0 ? a : 320);
+  }
+  return s.price || 0;
+};
+const servTotal=()=>st.services.reduce((s,id)=>s+servicePrice(id),0);
+const totalHT=()=>base()+servTotal();
+const tva=()=>st.clientType==='professional'?totalHT()*.19:0;
+const totalFinal=()=>totalHT()+tva();
 function gotoStep(step){st.step=step;st.success=false;renderComposer();document.querySelector('#composer').scrollIntoView({behavior:'smooth',block:'start'})}function updateProgress(){const order={project:0,services:1,contact:2};document.querySelectorAll('.progress button').forEach(b=>{const s=b.dataset.step;b.classList.toggle('active',s===st.step);b.classList.toggle('done',order[s]<order[st.step]);b.querySelector('i').textContent=order[s]<order[st.step]?'✓':String(order[s]+1).padStart(2,'0');b.onclick=()=>gotoStep(s)})}
 function drawTypeAttention(){st.typeAttention=true;renderComposer();setTimeout(()=>{const x=document.querySelector('#projectType');x?.focus()},80);setTimeout(()=>{st.typeAttention=false;document.querySelector('.typeBox')?.classList.remove('attention')},2500)}
 function levelClick(l){if(!st.projectType){drawTypeAttention();return}if(st.projectType==='Appartement'&&!st.levels.includes(l)&&st.levels.length>=1){const selected=document.querySelector('.levelRow.selected');selected?.classList.add('attention');setTimeout(()=>selected?.classList.remove('attention'),1000);return}if(st.levels.includes(l)){st.levels=st.levels.filter(x=>x!==l);delete st.surfaces[l];st.promptLevel=null}else{st.levels.push(l);st.promptLevel=l;st.missing=[]}renderComposer();setTimeout(()=>{const x=document.querySelector(`[data-surface="${CSS.escape(l)}"]`);if(x){x.focus();x.select?.()}},80)}
@@ -224,20 +243,361 @@ function renderProject(){
   document.querySelector('#toServices').onclick=()=>{if(validateSurfaces())gotoStep('services')};
 }
 
-function renderServices(){const b=document.querySelector('#composerBody');b.innerHTML=`<div class="serviceStage"><div class="serviceChoices"><h3>Prestations disponibles</h3><p>Choisissez les services à ajouter. Le total évolue immédiatement.</p>${services.map(s=>`<button class="serviceChoice ${st.services.includes(s.id)?'selected':''}" data-service="${s.id}"><i>${st.services.includes(s.id)?'✓':'+'}</i><span><strong>${s.name}</strong><small>${s.id==='3d'?money(s.price)+' / m²':money(s.price)+' / forfait'}</small></span><b>${money(servicePrice(s.id))}</b></button>`).join('')}</div><aside class="quote"><h3>Votre estimation</h3>${services.filter(s=>st.services.includes(s.id)).map(s=>`<div class="quoteRow"><span>✓ ${s.name}</span><b>${money(servicePrice(s.id))}</b></div>`).join('')}<div class="quoteRow"><span>Base projet</span><b>${money(base())}</b></div><strong class="grand"><small>TOTAL ESTIMÉ HT</small>${money(totalHT())}</strong><button class="nextBtn" style="width:100%;margin-top:11px" id="toContact">Continuer →</button></aside></div>`;b.querySelectorAll('[data-service]').forEach(x=>x.onclick=()=>{const id=x.dataset.service;st.services=st.services.includes(id)?st.services.filter(y=>y!==id):[...st.services,id];renderComposer()});document.querySelector('#toContact').onclick=()=>gotoStep('contact')}
+function renderServices() {
+  const b = document.querySelector('#composerBody');
+  b.innerHTML = `
+    <div class="serviceStage">
+      <div class="serviceChoices">
+        <h3>Prestations disponibles</h3>
+        <p>Choisissez les services à ajouter. Le total évolue immédiatement.</p>
+        ${services.map(s => {
+          const isSelected = st.services.some(id => String(id) === String(s.id) || String(id) === s.slug);
+          const is3d = (s.name && s.name.toLowerCase().includes('3d')) || s.pricing_type === 'per_sqm' || s.id === '3d';
+          return `
+            <button type="button" class="serviceChoice ${isSelected ? 'selected' : ''}" data-service="${s.id}">
+              <i>${isSelected ? '✓' : '+'}</i>
+              <span>
+                <strong>${s.name}</strong>
+                <small>${is3d ? money(s.price || 750) + ' / m²' : money(s.price || 0) + ' / forfait'}</small>
+              </span>
+              <b>${money(servicePrice(s.id))}</b>
+            </button>
+          `;
+        }).join('')}
+      </div>
+      <aside class="quote">
+        <h3>Votre estimation</h3>
+        ${services.filter(s => st.services.some(id => String(id) === String(s.id) || String(id) === s.slug)).map(s => `
+          <div class="quoteRow">
+            <span>✓ ${s.name}</span>
+            <b>${money(servicePrice(s.id))}</b>
+          </div>
+        `).join('')}
+        <div class="quoteRow">
+          <span>Base projet</span>
+          <b>${money(base())}</b>
+        </div>
+        <strong class="grand">
+          <small>TOTAL ESTIMÉ HT</small>
+          ${money(totalHT())}
+        </strong>
+        <button class="nextBtn" style="width:100%;margin-top:16px" id="toContact">Continuer →</button>
+      </aside>
+    </div>
+  `;
+
+  b.querySelectorAll('[data-service]').forEach(x => x.onclick = () => {
+    const id = x.dataset.service;
+    const matching = services.find(s => String(s.id) === String(id));
+    const finalId = matching ? matching.id : id;
+    const has = st.services.some(y => String(y) === String(finalId));
+    st.services = has ? st.services.filter(y => String(y) !== String(finalId)) : [...st.services, finalId];
+    renderComposer();
+  });
+  document.querySelector('#toContact').onclick = () => gotoStep('contact');
+}
+
 /* Algeria 2026 dataset */
 let geo={wilayas:[],communes:[]};const fallbackWilayas=['Adrar','Chlef','Laghouat','Oum El Bouaghi','Batna','Béjaïa','Biskra','Béchar','Blida','Bouira','Tamanrasset','Tébessa','Tlemcen','Tiaret','Tizi Ouzou','Alger','Djelfa','Jijel','Sétif','Saïda','Skikda','Sidi Bel Abbès','Annaba','Guelma','Constantine','Médéa','Mostaganem','M’Sila','Mascara','Ouargla','Oran','El Bayadh','Illizi','Bordj Bou Arréridj','Boumerdès','El Tarf','Tindouf','Tissemsilt','El Oued','Khenchela','Souk Ahras','Tipaza','Mila','Aïn Defla','Naâma','Aïn Témouchent','Ghardaïa','Relizane','Timimoun','Bordj Badji Mokhtar','Ouled Djellal','Béni Abbès','In Salah','In Guezzam','Touggourt','Djanet','El M’Ghair','El Meniaa','Aflou','El Abiodh Sidi Cheikh','El Aricha','El Kantara','Barika','Bou Saâda','Bir El Ater','Ksar El Boukhari','Ksar Chellala','Aïn Oussera','Messaad'];
 async function loadGeo(){try{const [w,c]=await Promise.all([fetch('https://mohamed-gp.github.io/algeria_69_wilayas/main.json').then(r=>r.json()),fetch('https://mohamed-gp.github.io/algeria_69_wilayas/communes.json').then(r=>r.json())]);geo.wilayas=w.wilayas||[];geo.communes=c.communes||[]}catch(_){geo.wilayas=fallbackWilayas.map((name,i)=>({id:i+1,name}));geo.communes=[]}refreshGeoSelects()}loadGeo();
-function refreshGeoSelects(){const ws=document.querySelector('#wilaya');if(!ws)return;const current=ws.value;ws.innerHTML='<option value="">Choisir la wilaya</option>'+geo.wilayas.map(w=>`<option value="${w.id}" ${String(w.id)===current?'selected':''}>${String(w.id).padStart(2,'0')} - ${w.name}</option>`).join('');populateCommunes(ws.value)}function populateCommunes(id){const cs=document.querySelector('#commune');if(!cs)return;const list=geo.communes.filter(c=>String(c.wilaya_id)===String(id));cs.innerHTML='<option value="">Choisir la commune</option>'+list.map(c=>`<option>${c.name}</option>`).join('')+(list.length?'':'<option>Autre / à préciser</option>')}
-function quoteRows(){const rows=[];if(st.mode==='quick')spaces.filter(x=>st.spaces.includes(x.id)).forEach(x=>rows.push({designation:`Conception espace - ${x.name}`,pu:x.price,unit:'ESPACE',qty:1,total:x.price}));st.services.filter(id=>st.services.includes(id)).forEach(id=>{const s=services.find(x=>x.id===id);if(id==='3d'&&st.mode==='custom')rows.push({designation:'Modélisation 3D - rendu immersif',pu:750,unit:'M2',qty:area(),total:750*area()});else rows.push({designation:s.name,pu:servicePrice(id),unit:'FORFAIT',qty:1,total:servicePrice(id)})});return rows}
-function clientLabel(c){return st.clientType==='professional'?c.company:`${c.firstName||''} ${c.lastName||''}`.trim()}function summary(c=st.client||{}){const proj=st.mode==='quick'?`Espaces: ${spaces.filter(x=>st.spaces.includes(x.id)).map(x=>x.name).join(', ')}`:`Type: ${st.projectType}; Niveaux: ${st.levels.map(l=>l+' '+(st.surfaces[l]||0)+' m²').join(', ')}`;return `${proj}\nPrestations: ${services.filter(x=>st.services.includes(x.id)).map(x=>x.name).join(', ')}\nClient: ${clientLabel(c)}\nTotal HT: ${money(totalHT())}${st.clientType==='professional'?`\nTVA 19%: ${money(tva())}\nTotal TTC: ${money(totalFinal())}`:''}`}
-function makeRef(){const d=new Date(),n=Math.floor(1000+Math.random()*9000);return `${String(d.getFullYear()).slice(-2)}${String(d.getMonth()+1).padStart(2,'0')}-${n}/${d.getFullYear()}`}
-async function emailProject(c){const payload={_subject:`Nouvelle demande LOFT DESIGN - Devis ${st.ref}`,_template:'table','N° devis':st.ref,'Type client':st.clientType==='professional'?'Professionnel':'Particulier','Client':clientLabel(c),'Téléphone':c.phone,'E-mail':c.email,'Wilaya':c.wilayaName,'Commune':c.commune,'Projet':summary(c),'Message':c.message||''};const r=await fetch('https://formsubmit.co/ajax/loftdesign@live.fr',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(payload)});if(!r.ok)throw Error('mail')}
+function refreshGeoSelects(){const ws=document.querySelector('#wilaya');if(!ws)return;const current=ws.value;ws.innerHTML='<option value="">Choisir la wilaya</option>'+geo.wilayas.map(w=>`<option value="${w.id}" ${String(w.id)===current?'selected':''}>${String(w.id).padStart(2,'0')} - ${w.name}</option>`).join('');populateCommunes(ws.value)}
+function populateCommunes(id){const cs=document.querySelector('#commune');if(!cs)return;const list=geo.communes.filter(c=>String(c.wilaya_id)===String(id));cs.innerHTML='<option value="">Choisir la commune</option>'+list.map(c=>`<option>${c.name}</option>`).join('')+(list.length?'':'<option>Autre / à préciser</option>')}
+
+function quoteRows(){
+  const rows=[];
+  if(st.mode==='quick') {
+    spaces.filter(x=>st.spaces.includes(x.id)).forEach(x=>rows.push({designation:`Conception espace - ${x.name}`,pu:x.price,unit:'ESPACE',qty:1,total:x.price}));
+  }
+  services.filter(s=>st.services.some(id=>String(id)===String(s.id)||String(id)===s.slug)).forEach(s=>{
+    const is3d = (s.name && s.name.toLowerCase().includes('3d')) || s.pricing_type === 'per_sqm' || s.id === '3d';
+    if(is3d && st.mode==='custom') {
+      const a = area() > 0 ? area() : 1;
+      rows.push({designation:'Modélisation 3D - rendu immersif',pu:(s.price||750),unit:'M2',qty:a,total:(s.price||750)*a});
+    } else {
+      rows.push({designation:s.name,pu:servicePrice(s.id),unit:'FORFAIT',qty:1,total:servicePrice(s.id)});
+    }
+  });
+  return rows;
+}
+
+function clientLabel(c){return st.clientType==='professional'?(c.company||'Entreprise'):`${c.firstName||''} ${c.lastName||''}`.trim()}
+function summary(c=st.client||{}){
+  const proj=st.mode==='quick'?`Espaces: ${spaces.filter(x=>st.spaces.includes(x.id)).map(x=>x.name).join(', ')}`:`Type: ${st.projectType||'Non spécifié'}; Niveaux: ${st.levels.map(l=>l+' '+(st.surfaces[l]||0)+' m²').join(', ')}`;
+  const selServices = services.filter(s=>st.services.some(id=>String(id)===String(s.id)||String(id)===s.slug)).map(x=>x.name).join(', ');
+  return `${proj}\nPrestations: ${selServices}\nClient: ${clientLabel(c)}\nTotal HT: ${money(totalHT())}${st.clientType==='professional'?`\nTVA 19%: ${money(tva())}\nTotal TTC: ${money(totalFinal())}`:''}`;
+}
+
+function makeRef(){const d=new Date(),n=Math.floor(1000+Math.random()*9000);return `LOFT-${d.getFullYear()}-${n}`}
 function getClientData(form){const d=Object.fromEntries(new FormData(form).entries());const w=geo.wilayas.find(x=>String(x.id)===String(d.wilaya));return {...d,wilayaName:w?.name||d.wilaya}}
-function renderContactStep(){const b=document.querySelector('#composerBody');if(st.success){renderSuccess();return}b.innerHTML=`<div class="clientType"><button class="${st.clientType==='particular'?'active':''}" data-client="particular">Particulier</button><button class="${st.clientType==='professional'?'active':''}" data-client="professional">Professionnel</button></div><form class="contactForm" id="composerForm">${st.clientType==='particular'?'<label>Prénom<input required name="firstName" placeholder="Votre prénom"></label><label>Nom<input required name="lastName" placeholder="Votre nom"></label>':'<label class="full">Nom de l’entreprise<input required name="company" placeholder="Raison sociale / nom de l’entreprise"></label>'}<label>Téléphone<input required name="phone" placeholder="+213 ..."></label><label>E-mail<input required type="email" name="email" placeholder="vous@exemple.com"></label><label>Wilaya<select required name="wilaya" id="wilaya"><option value="">Chargement…</option></select></label><label>Commune<select required name="commune" id="commune"><option value="">Choisir la commune</option></select></label><label class="full">Message / observations<textarea name="message" placeholder="Décrivez brièvement vos attentes…"></textarea></label><div class="contactTotal"><div><strong>${st.clientType==='professional'?'Devis professionnel TTC':'Devis particulier HT'}</strong><div class="tax">${st.clientType==='professional'?`HT ${money(totalHT())} · TVA 19% ${money(tva())}`:'TVA non ajoutée dans cette estimation'}</div></div><b>${money(totalFinal())}</b></div><div class="submitRow"><button class="btn neonCyan" type="submit" id="sendProject">Valider & envoyer</button></div><small class="full" id="formStatus" style="text-align:center;color:#aeb6b3"></small></form>`;document.querySelectorAll('[data-client]').forEach(x=>x.onclick=()=>{st.clientType=x.dataset.client;renderComposer()});refreshGeoSelects();document.querySelector('#wilaya').onchange=e=>populateCommunes(e.target.value);const f=document.querySelector('#composerForm');f.onsubmit=async e=>{e.preventDefault();const c=getClientData(f),btn=document.querySelector('#sendProject'),status=document.querySelector('#formStatus');st.ref=makeRef();st.client=c;btn.disabled=true;btn.textContent='Envoi…';const waText=`Bonjour LOFT DESIGN,\nNouvelle demande ${st.ref}\n${summary(c)}`;const waWin=window.open('about:blank','_blank');try{await emailProject(c);if(waWin)waWin.location=`https://wa.me/213776139475?text=${encodeURIComponent(waText)}`;st.success=true;renderComposer()}catch(_){if(waWin)waWin.location=`https://wa.me/213776139475?text=${encodeURIComponent(waText)}`;status.textContent='Le message WhatsApp est prêt. L’envoi e-mail automatique doit être activé/autorisé pour cette adresse.';btn.disabled=false;btn.textContent='Réessayer'}}}
-function renderSuccess(){const b=document.querySelector('#composerBody'),rows=quoteRows(),c=st.client;b.innerHTML=`<div class="success"><div class="successTop"><div class="ok">✓</div><h3>Votre devis est prêt.</h3><p>Référence <b style="color:var(--cyan)">${st.ref}</b> · ${st.clientType==='professional'?'Professionnel - TTC':'Particulier - HT'}</p></div><div class="quotePreview"><div class="qpHeader"><div><strong>${COMPANY.name}</strong><small>R.I.B N°: ${COMPANY.rib}<br>RC N°: ${COMPANY.rc} · NIS: ${COMPANY.nis}<br>NIF: ${COMPANY.nif} · N ART: ${COMPANY.nart}<br>${COMPANY.mail} · ${COMPANY.mobile}<br>${COMPANY.address}</small></div><div class="qpLogo">LOFT<br>DESIGN</div></div><div class="qpMeta"><div><h4>DEVIS ${st.ref}</h4><small>CLIENT : ${clientLabel(c)}<br>ADRESSE : ${c.commune}, ${c.wilayaName}</small></div><strong>${new Date().toLocaleDateString('fr-DZ')}</strong></div><table class="qpTable"><thead><tr><th>DÉSIGNATION</th><th>PRIX UNITAIRE HT</th><th>UNITÉ</th><th>QUANTITÉ</th><th>MONTANT HT</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.designation}</td><td>${money(r.pu)}</td><td>${r.unit}</td><td>${r.qty}</td><td>${money(r.total)}</td></tr>`).join('')}</tbody></table><div class="qpTotals"><div><span>TOTAL HT</span><b>${money(totalHT())}</b></div>${st.clientType==='professional'?`<div><span>TVA 19%</span><b>${money(tva())}</b></div><div><span>TOTAL TTC</span><b>${money(totalFinal())}</b></div>`:''}</div></div><div class="downloadRow"><button class="btn neonCyan" id="downloadQuote">Télécharger le devis PDF</button><a class="btn storeTop" href="https://store.bilnov.com" target="_blank" rel="noopener"><span class="storeIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 4h2l2.1 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H7"/><circle cx="10" cy="19" r="1.4"/><circle cx="18" cy="19" r="1.4"/></svg></span>Explorer Store Bilnov</a><button class="btn neonViolet" id="restart">Nouveau projet</button></div></div>`;document.querySelector('#downloadQuote').onclick=downloadQuotePdf;document.querySelector('#restart').onclick=()=>{st.success=false;st.step='project';st.ref='';st.client=null;renderComposer()}}
-function downloadQuotePdf(){if(!window.jspdf){alert('Le module PDF se charge. Réessayez dans un instant.');return}const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'a4'}),rows=quoteRows(),c=st.client;const teal=[18,126,143],dark=[9,84,96],light=[231,238,229],cyan=[221,241,244],cyan2=[157,208,218];doc.setFillColor(...light);doc.rect(0,0,150,55,'F');doc.setTextColor(72,77,75);doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text(COMPANY.name,25,15);doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.text([`R.I.B N°: ${COMPANY.rib}`,`RC N°: ${COMPANY.rc}`,`NIS N°: ${COMPANY.nis}`,`NIF: ${COMPANY.nif}`,`N ART: ${COMPANY.nart}`],25,23,{lineHeightFactor:1.55});doc.setFont('helvetica','bold');doc.text('MAIL:',116,25);doc.setFont('helvetica','normal');doc.text(COMPANY.mail,127,25);doc.setFont('helvetica','bold');doc.text('MOBILE:',116,32);doc.setFont('helvetica','normal');doc.text(COMPANY.mobile,132,32);doc.setFont('helvetica','bold');doc.text('ADRESSE:',92,39);doc.setFont('helvetica','normal');doc.text(COMPANY.address,111,39);doc.setDrawColor(244,184,95);doc.setLineWidth(.8);doc.rect(164,14,32,22);doc.setFont('helvetica','bold');doc.setFontSize(18);doc.text('LOFT',180,24,{align:'center'});doc.setFontSize(9);doc.text('DESIGN',180,30,{align:'center'});doc.setFontSize(17);doc.text(`DEVIS ${st.ref}`,105,77,{align:'center'});doc.setFontSize(11);doc.text('CLIENT :',25,91);doc.setFont('helvetica','normal');doc.text(clientLabel(c),48,91);doc.setFont('helvetica','bold');doc.text('ADRESSE :',25,102);doc.setFont('helvetica','normal');doc.text(`${c.commune}, ${c.wilayaName}`,50,102);doc.setFont('helvetica','bold');doc.text('DATE',153,116);doc.setFont('helvetica','normal');doc.text(new Date().toLocaleDateString('fr-DZ'),164,116);doc.autoTable({startY:127,margin:{left:25,right:25},head:[['DESIGNATION','PRIX UNITAIRE HT','UNITE','QUANTITE','MONTANT HT DA']],body:rows.map(r=>[r.designation,`${new Intl.NumberFormat('fr-DZ').format(r.pu)} DA`,r.unit,String(r.qty),`${new Intl.NumberFormat('fr-DZ').format(r.total)} DA`]),headStyles:{fillColor:teal,textColor:255,fontSize:8,halign:'center'},styles:{fontSize:8,cellPadding:3,textColor:[75,80,78]},alternateRowStyles:{fillColor:[245,245,245]},columnStyles:{0:{cellWidth:47},1:{cellWidth:32},2:{cellWidth:22,halign:'center'},3:{cellWidth:22,halign:'center'},4:{cellWidth:32,halign:'right'}}});let y=doc.lastAutoTable.finalY+2;doc.setFillColor(...cyan);doc.rect(92,y,103,st.clientType==='professional'?27:9,'F');doc.setFont('helvetica','bold');doc.setTextColor(76,81,79);doc.setFontSize(10);doc.text('TOTAL HT',120,y+6);doc.setFillColor(...cyan2);doc.rect(160,y,35,9,'F');doc.text(`${new Intl.NumberFormat('fr-DZ').format(totalHT())} DA`,191,y+6,{align:'right'});if(st.clientType==='professional'){doc.text('TVA 19%',120,y+15);doc.setFillColor(96,180,196);doc.rect(160,y+9,35,9,'F');doc.text(`${new Intl.NumberFormat('fr-DZ').format(tva())} DA`,191,y+15,{align:'right'});doc.text('TOTAL TTC',120,y+24);doc.setFillColor(...cyan2);doc.rect(160,y+18,35,9,'F');doc.text(`${new Intl.NumberFormat('fr-DZ').format(totalFinal())} DA`,191,y+24,{align:'right'})}doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(130);doc.text('Document généré depuis le compositeur LOFT DESIGN.',105,287,{align:'center'});doc.save(`DEVIS_LOFT_DESIGN_${st.ref.replaceAll('/','-')}.pdf`)}
-function renderComposer(){updateProgress();if(st.step==='project')renderProject();if(st.step==='services')renderServices();if(st.step==='contact')renderContactStep()}renderComposer();
+
+function renderContactStep(){
+  const b=document.querySelector('#composerBody');
+  if(st.success){renderSuccess();return}
+  b.innerHTML=`
+    <div class="clientType">
+      <button type="button" class="${st.clientType==='particular'?'active':''}" data-client="particular">Particulier</button>
+      <button type="button" class="${st.clientType==='professional'?'active':''}" data-client="professional">Professionnel</button>
+    </div>
+    <form class="contactForm" id="composerForm">
+      ${st.clientType==='particular'?`
+        <label>Prénom
+          <input required name="firstName" placeholder="Votre prénom">
+        </label>
+        <label>Nom
+          <input required name="lastName" placeholder="Votre nom">
+        </label>
+      `:`
+        <label class="full">Nom de l’entreprise
+          <input required name="company" placeholder="Raison sociale / nom de l’entreprise">
+        </label>
+      `}
+      <label>Téléphone
+        <input required name="phone" placeholder="+213 ...">
+      </label>
+      <label>E-mail
+        <input required type="email" name="email" placeholder="vous@exemple.com">
+      </label>
+      <label>Wilaya
+        <select required name="wilaya" id="wilaya">
+          <option value="">Chargement…</option>
+        </select>
+      </label>
+      <label>Commune
+        <select required name="commune" id="commune">
+          <option value="">Choisir la commune</option>
+        </select>
+      </label>
+      <label class="full">Message / observations
+        <textarea name="message" placeholder="Décrivez brièvement vos attentes…"></textarea>
+      </label>
+      <div class="contactTotal">
+        <div>
+          <strong>${st.clientType==='professional'?'Devis professionnel TTC':'Devis particulier HT'}</strong>
+          <div class="tax">${st.clientType==='professional'?`HT ${money(totalHT())} · TVA 19% ${money(tva())}`:'TVA non ajoutée dans cette estimation'}</div>
+        </div>
+        <b>${money(totalFinal())}</b>
+      </div>
+      <div class="submitRow">
+        <button class="btn neonCyan" type="submit" id="sendProject">Valider & envoyer</button>
+      </div>
+      <small class="full" id="formStatus" style="text-align:center;color:#ff8e9b;margin-top:8px;display:block;"></small>
+    </form>
+  `;
+
+  document.querySelectorAll('[data-client]').forEach(x=>x.onclick=()=>{st.clientType=x.dataset.client;renderComposer()});
+  refreshGeoSelects();
+  document.querySelector('#wilaya').onchange=e=>populateCommunes(e.target.value);
+
+  const f=document.querySelector('#composerForm');
+  f.onsubmit=async e=>{
+    e.preventDefault();
+    const c=getClientData(f),btn=document.querySelector('#sendProject'),status=document.querySelector('#formStatus');
+    btn.disabled=true;
+    btn.textContent='Envoi…';
+    status.textContent='';
+
+    const payload = {
+      mode: st.mode,
+      client_type: st.clientType,
+      company: c.company || '',
+      company_name: c.company || '',
+      first_name: c.firstName || '',
+      last_name: c.lastName || '',
+      phone: c.phone || '',
+      email: c.email || '',
+      wilaya: c.wilaya || '',
+      wilayaName: c.wilayaName || '',
+      commune: c.commune || '',
+      message: c.message || '',
+      project_type_name: st.projectType,
+      project_type: st.projectType,
+      total_surface: area(),
+      total: totalFinal(),
+      floors: st.levels.map((l, idx) => ({
+        name: l,
+        level: idx,
+        surface: parseFloat(st.surfaces[l] || 0),
+      })),
+      spaces: st.mode === 'quick' ? st.spaces : [],
+      service_ids: st.services,
+    };
+
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+      (document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/) || [])[1] || '';
+
+    try {
+      const r = await fetch('/api/design/requests/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await r.json();
+      if (!data.success) {
+        throw new Error(data.errors ? (Array.isArray(data.errors) ? data.errors.join(', ') : (typeof data.errors === 'object' ? Object.values(data.errors).flat().join(', ') : String(data.errors))) : 'Erreur lors de la soumission.');
+      }
+      st.ref = data.project_number || makeRef();
+      st.client = c;
+      st.success = true;
+      renderComposer();
+
+      // Open WhatsApp notification
+      const waText = `Bonjour LOFT DESIGN,\nNouvelle demande ${st.ref}\n${summary(c)}`;
+      window.open(`https://wa.me/213776139475?text=${encodeURIComponent(waText)}`, '_blank');
+    } catch(err) {
+      status.textContent = err.message || 'Une erreur est survenue lors de l’envoi.';
+      btn.disabled = false;
+      btn.textContent = 'Réessayer';
+    }
+  };
+}
+
+function renderSuccess(){
+  const b=document.querySelector('#composerBody'),rows=quoteRows(),c=st.client||{};
+  b.innerHTML=`
+    <div class="success">
+      <div class="successTop">
+        <div class="ok">✓</div>
+        <h3>Votre devis est prêt.</h3>
+        <p>Référence <b style="color:var(--cyan)">${st.ref}</b> · ${st.clientType==='professional'?'Professionnel - TTC':'Particulier - HT'}</p>
+      </div>
+      <div class="quotePreview">
+        <div class="qpHeader">
+          <div>
+            <strong>${COMPANY.name}</strong>
+            <small>
+              R.I.B N°: ${COMPANY.rib}<br>
+              RC N°: ${COMPANY.rc} · NIS: ${COMPANY.nis}<br>
+              NIF: ${COMPANY.nif} · N ART: ${COMPANY.nart}<br>
+              ${COMPANY.mail} · ${COMPANY.mobile}<br>
+              ${COMPANY.address}
+            </small>
+          </div>
+          <div class="qpLogo">LOFT<br>DESIGN</div>
+        </div>
+        <div class="qpMeta">
+          <div>
+            <h4>DEVIS ${st.ref}</h4>
+            <small>CLIENT : ${clientLabel(c)}<br>ADRESSE : ${c.commune||''}, ${c.wilayaName||c.wilaya||''}</small>
+          </div>
+          <strong>${new Date().toLocaleDateString('fr-DZ')}</strong>
+        </div>
+        <table class="qpTable">
+          <thead>
+            <tr>
+              <th>DÉSIGNATION</th>
+              <th>PRIX UNITAIRE HT</th>
+              <th>UNITÉ</th>
+              <th>QUANTITÉ</th>
+              <th>MONTANT HT</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(r=>`
+              <tr>
+                <td>${r.designation}</td>
+                <td>${money(r.pu)}</td>
+                <td>${r.unit}</td>
+                <td>${r.qty}</td>
+                <td>${money(r.total)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <div class="qpTotals">
+          <div>
+            <span>TOTAL HT</span>
+            <b>${money(totalHT())}</b>
+          </div>
+          ${st.clientType==='professional'?`
+            <div>
+              <span>TVA 19%</span>
+              <b>${money(tva())}</b>
+            </div>
+            <div>
+              <span>TOTAL TTC</span>
+              <b>${money(totalFinal())}</b>
+            </div>
+          `:''}
+        </div>
+      </div>
+      <div class="downloadRow">
+        <button class="btn neonCyan" id="downloadQuote">Télécharger le devis PDF</button>
+        <a class="btn storeTop" href="https://store.bilnov.com" target="_blank" rel="noopener">
+          <span class="storeIcon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M3.5 4h2l2.1 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H7"/>
+              <circle cx="10" cy="19" r="1.4"/>
+              <circle cx="18" cy="19" r="1.4"/>
+            </svg>
+          </span>
+          Explorer Store Bilnov
+        </a>
+        <button class="btn neonViolet" id="restart">Nouveau projet</button>
+      </div>
+    </div>
+  `;
+  document.querySelector('#downloadQuote').onclick=downloadQuotePdf;
+  document.querySelector('#restart').onclick=()=>{
+    st.success=false;
+    st.step='project';
+    st.ref='';
+    st.client=null;
+    renderComposer();
+  };
+}
+
+function downloadQuotePdf(){
+  if(!window.jspdf){alert('Le module PDF se charge. Réessayez dans un instant.');return}
+  const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'a4'}),rows=quoteRows(),c=st.client||{};
+  const teal=[18,126,143],dark=[9,84,96],light=[231,238,229],cyan=[221,241,244],cyan2=[157,208,218];
+  doc.setFillColor(...light);doc.rect(0,0,150,55,'F');doc.setTextColor(72,77,75);doc.setFont('helvetica','bold');doc.setFontSize(14);
+  doc.text(COMPANY.name,25,15);doc.setFont('helvetica','normal');doc.setFontSize(8.5);
+  doc.text([`R.I.B N°: ${COMPANY.rib}`,`RC N°: ${COMPANY.rc}`,`NIS N°: ${COMPANY.nis}`,`NIF: ${COMPANY.nif}`,`N ART: ${COMPANY.nart}`],25,23,{lineHeightFactor:1.55});
+  doc.setFont('helvetica','bold');doc.text('MAIL:',116,25);doc.setFont('helvetica','normal');doc.text(COMPANY.mail,127,25);
+  doc.setFont('helvetica','bold');doc.text('MOBILE:',116,32);doc.setFont('helvetica','normal');doc.text(COMPANY.mobile,132,32);
+  doc.setFont('helvetica','bold');doc.text('ADRESSE:',92,39);doc.setFont('helvetica','normal');doc.text(COMPANY.address,111,39);
+  doc.setDrawColor(244,184,95);doc.setLineWidth(.8);doc.rect(164,14,32,22);
+  doc.setFont('helvetica','bold');doc.setFontSize(18);doc.text('LOFT',180,24,{align:'center'});doc.setFontSize(9);doc.text('DESIGN',180,30,{align:'center'});
+  doc.setFontSize(17);doc.text(`DEVIS ${st.ref}`,105,77,{align:'center'});doc.setFontSize(11);
+  doc.text('CLIENT :',25,91);doc.setFont('helvetica','normal');doc.text(clientLabel(c),48,91);
+  doc.setFont('helvetica','bold');doc.text('ADRESSE :',25,102);doc.setFont('helvetica','normal');doc.text(`${c.commune||''}, ${c.wilayaName||c.wilaya||''}`,50,102);
+  doc.setFont('helvetica','bold');doc.text('DATE',153,116);doc.setFont('helvetica','normal');doc.text(new Date().toLocaleDateString('fr-DZ'),164,116);
+  doc.autoTable({
+    startY:127,margin:{left:25,right:25},
+    head:[['DESIGNATION','PRIX UNITAIRE HT','UNITE','QUANTITE','MONTANT HT DA']],
+    body:rows.map(r=>[r.designation,`${new Intl.NumberFormat('fr-DZ').format(r.pu)} DA`,r.unit,String(r.qty),`${new Intl.NumberFormat('fr-DZ').format(r.total)} DA`]),
+    headStyles:{fillColor:teal,textColor:255,fontSize:8,halign:'center'},
+    styles:{fontSize:8,cellPadding:3,textColor:[75,80,78]},
+    alternateRowStyles:{fillColor:[245,245,245]},
+    columnStyles:{0:{cellWidth:47},1:{cellWidth:32},2:{cellWidth:22,halign:'center'},3:{cellWidth:22,halign:'center'},4:{cellWidth:32,halign:'right'}}
+  });
+  let y=doc.lastAutoTable.finalY+2;
+  doc.setFillColor(...cyan);doc.rect(92,y,103,st.clientType==='professional'?27:9,'F');
+  doc.setFont('helvetica','bold');doc.setTextColor(76,81,79);doc.setFontSize(10);
+  doc.text('TOTAL HT',120,y+6);doc.setFillColor(...cyan2);doc.rect(160,y,35,9,'F');
+  doc.text(`${new Intl.NumberFormat('fr-DZ').format(totalHT())} DA`,191,y+6,{align:'right'});
+  if(st.clientType==='professional'){
+    doc.text('TVA 19%',120,y+15);doc.setFillColor(96,180,196);doc.rect(160,y+9,35,9,'F');
+    doc.text(`${new Intl.NumberFormat('fr-DZ').format(tva())} DA`,191,y+15,{align:'right'});
+    doc.text('TOTAL TTC',120,y+24);doc.setFillColor(...cyan2);doc.rect(160,y+18,35,9,'F');
+    doc.text(`${new Intl.NumberFormat('fr-DZ').format(totalFinal())} DA`,191,y+24,{align:'right'});
+  }
+  doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(130);
+  doc.text('Document généré depuis le compositeur LOFT DESIGN.',105,287,{align:'center'});
+  doc.save(`DEVIS_LOFT_DESIGN_${st.ref.replaceAll('/','-')}.pdf`);
+}
+
+function renderComposer(){
+  updateProgress();
+  if(st.step==='project')renderProject();
+  if(st.step==='services')renderServices();
+  if(st.step==='contact')renderContactStep();
+}
+renderComposer();
 /* Quick contact */
 const quickWaBtn = document.querySelector('#quickWa');
 if (quickWaBtn) {

@@ -298,6 +298,41 @@ class RequestFlowFeatureTests(TestCase):
         self.assertEqual(floors[4].name, "Terrasse / Toiture")
         self.assertEqual(floors[5].name, "Jardin / Extérieur")
 
+    def test_submit_composer_professional_and_spaces(self):
+        payload = {
+            "mode": "quick",
+            "client_type": "professional",
+            "company": "Bilnov SARL",
+            "phone": "+213555123456",
+            "email": "contact@bilnov.com",
+            "wilaya": "16",
+            "wilayaName": "Alger",
+            "commune": "Hydra",
+            "message": "Besoin d'un devis pro urgent",
+            "total": 298000,
+            "spaces": ["living", "kitchen"],
+            "service_ids": [self.svc.pk],
+        }
+        response = self.client.post(
+            reverse("api_submit_request"),
+            data=json.dumps(payload),
+            content_type="application/json",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["success"])
+        self.assertIn("LOFT-", data["project_number"])
+
+        req = DesignRequest.objects.get(email="contact@bilnov.com")
+        self.assertEqual(req.client_type, "professional")
+        self.assertEqual(req.company_name, "Bilnov SARL")
+        self.assertEqual(req.wilaya, "Alger")
+        self.assertEqual(req.commune, "Hydra")
+        self.assertEqual(req.message, "Besoin d'un devis pro urgent")
+        self.assertEqual(req.mode, "quick")
+        self.assertEqual(req.total, Decimal("298000"))
+
 
 class InvitationFeatureTests(TestCase):
     def setUp(self):

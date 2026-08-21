@@ -53,6 +53,30 @@ class DesignRequest(models.Model):
     has_garden = models.BooleanField(default=False, verbose_name=_("Has Garden"))
     floors_above = models.IntegerField(default=0, verbose_name=_("Floors Above RDC"))
     floors_below = models.IntegerField(default=0, verbose_name=_("Floors Below RDC"))
+
+    class ClientType(models.TextChoices):
+        PARTICULAR = "particular", _("Particulier")
+        PROFESSIONAL = "professional", _("Professionnel")
+
+    client_type = models.CharField(
+        max_length=20,
+        choices=ClientType.choices,
+        default=ClientType.PARTICULAR,
+        verbose_name=_("Client Type"),
+    )
+    company_name = models.CharField(
+        max_length=200, blank=True, verbose_name=_("Company Name")
+    )
+    wilaya = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Wilaya")
+    )
+    commune = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Commune")
+    )
+    message = models.TextField(blank=True, verbose_name=_("Message / Notes"))
+    mode = models.CharField(
+        max_length=20, default="quick", blank=True, verbose_name=_("Composer Mode")
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created At"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated At"))
 

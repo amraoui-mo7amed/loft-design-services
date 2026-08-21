@@ -127,8 +127,14 @@ def submit_design_request(request):
 
             first_name = data.get("first_name", "").strip()
             last_name = data.get("last_name", "").strip()
+            company_name = data.get("company") or data.get("company_name", "").strip()
+            client_type = data.get("client_type") or ("professional" if company_name else "particular")
             email = data.get("email", "").strip()
             phone = data.get("phone", "").strip()
+            wilaya = data.get("wilayaName") or data.get("wilaya", "").strip()
+            commune = data.get("commune", "").strip()
+            message = data.get("message", "").strip()
+            mode = data.get("mode", "quick")
             
             floors_above = int(data.get("floors_above", 0) or 0)
             floors_below = int(data.get("floors_below", 0) or 0)
@@ -137,14 +143,20 @@ def submit_design_request(request):
             total_surface = Decimal(str(data.get("total_surface", 0) or 0))
             total = Decimal(str(data.get("total", 0) or 0))
 
-            project_name = data.get("project_name") or f"{project_type.name if project_type else 'Design'} - {first_name} {last_name}".strip()
+            project_name = data.get("project_name") or f"{project_type.name if project_type else 'Design'} - {company_name or f'{first_name} {last_name}'.strip()}".strip()
 
             design_request = DesignRequest.objects.create(
                 client=request.user if request.user.is_authenticated else None,
+                client_type=client_type,
+                company_name=company_name,
                 first_name=first_name,
                 last_name=last_name,
                 email=email,
                 phone=phone,
+                wilaya=wilaya,
+                commune=commune,
+                message=message,
+                mode=mode,
                 project_name=project_name,
                 project_type=project_type,
                 service=service,
@@ -168,7 +180,11 @@ def submit_design_request(request):
 
             primary_service = service
             for s_id in service_ids:
-                s_obj = Service.objects.filter(id=s_id).first()
+                s_obj = None
+                if str(s_id).isdigit():
+                    s_obj = Service.objects.filter(id=int(s_id)).first()
+                else:
+                    s_obj = Service.objects.filter(service_name__icontains=str(s_id)).first()
                 if s_obj:
                     if not primary_service:
                         primary_service = s_obj
@@ -199,6 +215,7 @@ def submit_design_request(request):
                     return 0
 
             sorted_floors = sorted(floors_data, key=get_floor_sort_key)
+            created_floors = []
 
             for i, f in enumerate(sorted_floors):
                 f_name = f.get("name") or f"Level {i}"
@@ -212,13 +229,45 @@ def submit_design_request(request):
                 else:
                     f_level = i
 
-                DesignRequestFloor.objects.create(
+                floor_obj = DesignRequestFloor.objects.create(
                     design_request=design_request,
                     name=f_name,
                     level=f_level,
                     order=i,
                     surface=f_surface,
                 )
+                created_floors.append(floor_obj)
+
+            # Selected spaces (quick mode or wizard)
+            spaces_data = data.get("spaces", [])
+            if isinstance(spaces_data, str):
+                try:
+                    spaces_data = json.loads(spaces_data)
+                except Exception:
+                    spaces_data = [s.strip() for s in spaces_data.split(",") if s.strip()]
+
+            if spaces_data:
+                target_floor = created_floors[0] if created_floors else DesignRequestFloor.objects.create(
+                    design_request=design_request,
+                    name="RDC",
+                    level=0,
+                    order=0,
+                    surface=total_surface,
+                )
+                for sp_id in spaces_data:
+                    space_obj = None
+                    if str(sp_id).isdigit():
+                        space_obj = Space.objects.filter(id=int(sp_id)).first()
+                    else:
+                        space_obj = Space.objects.filter(slug=str(sp_id)).first() or Space.objects.filter(name__icontains=str(sp_id)).first()
+                    
+                    if space_obj:
+                        DesignRequestSpace.objects.create(
+                            design_request=design_request,
+                            floor=target_floor,
+                            space=space_obj,
+                            price_at_time=space_obj.base_price,
+                        )
 
             # Clear session
             if "request_flow_data" in request.session:
