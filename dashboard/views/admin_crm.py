@@ -9,7 +9,6 @@ from django.db import models, transaction
 from ..decorator import admin_required
 from ..models import (
     DesignRequest,
-    Inquiry,
     ProjectGalleryInvitation,
     DesignRequestGalleryImage,
     DesignActivityLog,
@@ -17,7 +16,6 @@ from ..models import (
 from ..utils import notify_user, humanize_error
 from ..email_service import (
     send_status_update_email,
-    send_inquiry_status_update_email,
     send_gallery_invitation_email,
 )
 
@@ -70,7 +68,10 @@ def update_status(request, pk):
                     project.status = new_status
                     project.save(update_fields=["status"])
                 if new_status != old_status:
-                    send_status_update_email(project)
+                    try:
+                        send_status_update_email(project)
+                    except Exception:
+                        pass
             except Exception as e:
                 return JsonResponse({"success": False, "errors": humanize_error(e)})
 
@@ -245,77 +246,3 @@ def assign_designer(request, pk):
             return JsonResponse({"success": True, "message": _("Designer assigned.")})
         return JsonResponse({"success": False, "errors": [_("Designer not specified.")]})
     return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
-
-
-@admin_required
-def inquiry_list(request):
-    qs = Inquiry.objects.all().order_by("-created_at")
-
-    status_filter = request.GET.get("status", "")
-    if status_filter in dict(Inquiry.Status.choices):
-        qs = qs.filter(status=status_filter)
-
-    search_query = request.GET.get("q", "").strip()
-    if search_query:
-        qs = qs.filter(
-            models.Q(first_name__icontains=search_query)
-            | models.Q(last_name__icontains=search_query)
-            | models.Q(email__icontains=search_query)
-            | models.Q(phone__icontains=search_query)
-        )
-
-    paginator = Paginator(qs, 12)
-    page_number = request.GET.get("page", 1)
-    try:
-        page_obj = paginator.page(page_number)
-    except Exception:
-        page_obj = paginator.page(1)
-
-    return render(request, "dashboard/admin/inquiry_list.html", {
-        "page_obj": page_obj,
-        "inquiries": page_obj,
-        "status_choices": Inquiry.Status.choices,
-        "active_status": status_filter,
-        "active_search": search_query,
-    })
-
-
-@admin_required
-def inquiry_detail(request, pk):
-    inquiry = get_object_or_404(Inquiry, pk=pk)
-
-    if not inquiry.is_read:
-        inquiry.is_read = True
-        inquiry.save(update_fields=["is_read"])
-
-    if request.method == "POST":
-        new_status = request.POST.get("status")
-        if new_status in dict(Inquiry.Status.choices):
-            try:
-                with transaction.atomic():
-                    inquiry.status = new_status
-                    inquiry.save(update_fields=["status"])
-                    send_inquiry_status_update_email(inquiry)
-            except RuntimeError:
-                return JsonResponse({"success": False, "errors": [_("Status update failed. Email could not be sent.")]})
-
-            return JsonResponse({"success": True, "message": _("Status updated.")})
-        return JsonResponse({"success": False, "errors": [_("Invalid status.")]})
-
-    return render(request, "dashboard/admin/inquiry_detail.html", {
-        "inquiry": inquiry,
-        "status_choices": Inquiry.Status.choices,
-    })
-
-
-@admin_required
-def delete_inquiry(request, pk):
-    inquiry = get_object_or_404(Inquiry, pk=pk)
-    if request.method == "POST":
-        name = inquiry.first_name + " " + inquiry.last_name
-        inquiry.delete()
-        return JsonResponse({
-            "success": True,
-            "message": _("Inquiry %(name)s deleted.") % {"name": name},
-        })
-    return redirect("dash:inquiry_list")

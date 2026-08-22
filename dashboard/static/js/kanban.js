@@ -52,10 +52,15 @@
                         headers: {
                             "Content-Type": "application/x-www-form-urlencoded",
                             "X-CSRFToken": getCsrfToken(),
+                            "X-Requested-With": "XMLHttpRequest",
                         },
                         body: "status=" + encodeURIComponent(newStatus),
                     })
-                    .then(function (r) { return r.json(); })
+                    .then(function (r) {
+                        return r.json().catch(function () {
+                            return { success: false, errors: ["Server returned status " + r.status] };
+                        });
+                    })
                     .then(function (data) {
                         if (data.success) {
                             if (card) {
@@ -92,11 +97,13 @@
                                 timer: 2000,
                             });
                         } else {
-                            Swal.fire({ icon: "error", title: "Update Failed", text: data.errors ? data.errors.join(", ") : "Failed to update." });
+                            var errMsg = data.errors ? (Array.isArray(data.errors) ? data.errors.join(", ") : String(data.errors)) : "Failed to update.";
+                            Swal.fire({ icon: "error", title: "Update Failed", text: errMsg });
                         }
                     }.bind(this))
-                    .catch(function () {
-                        Swal.fire({ icon: "error", title: "Connection Failed", text: "Could not reach the server." });
+                    .catch(function (err) {
+                        console.error("Status update error:", err);
+                        Swal.fire({ icon: "error", title: "Request Failed", text: "Could not complete the status update. Please try again." });
                     });
                 });
             });
@@ -136,10 +143,15 @@
                         headers: {
                             "Content-Type": "application/x-www-form-urlencoded",
                             "X-CSRFToken": getCsrfToken(),
+                            "X-Requested-With": "XMLHttpRequest",
                         },
                         body: "status=" + encodeURIComponent(status),
                     })
-                    .then(function (r) { return r.json(); })
+                    .then(function (r) {
+                        return r.json().catch(function () {
+                            return { success: false, errors: ["Server returned status " + r.status] };
+                        });
+                    })
                     .then(function (data) {
                         if (data.success) {
                             Swal.fire({
@@ -152,11 +164,13 @@
                                 if (shouldReload) location.reload();
                             });
                         } else {
-                            Swal.fire({ icon: "error", title: "Update Failed", text: data.errors ? data.errors.join(", ") : "Failed to update." });
+                            var errMsg = data.errors ? (Array.isArray(data.errors) ? data.errors.join(", ") : String(data.errors)) : "Failed to update.";
+                            Swal.fire({ icon: "error", title: "Update Failed", text: errMsg });
                         }
                     })
-                    .catch(function () {
-                        Swal.fire({ icon: "error", title: "Connection Failed", text: "Could not reach the server." });
+                    .catch(function (err) {
+                        console.error("Status update error:", err);
+                        Swal.fire({ icon: "error", title: "Request Failed", text: "Could not complete the status update. Please try again." });
                     });
                 });
             });
@@ -164,7 +178,9 @@
     });
 
     function getCsrfToken() {
-        var match = document.cookie.match(/csrftoken=([^;]+)/);
+        var input = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (input && input.value) return input.value;
+        var match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
         return match ? match[1] : "";
     }
 })();

@@ -283,7 +283,7 @@ def submit_public_gallery_selection(request):
         if not items:
             return JsonResponse({"success": False, "errors": [_("Veuillez sélectionner au moins une inspiration.")]})
 
-        from dashboard.models import Inquiry, Lead, Contact
+        from dashboard.models import Lead, Contact
 
         with transaction.atomic():
             lead = Lead.objects.filter(email=email).first()
@@ -294,21 +294,11 @@ def submit_public_gallery_selection(request):
                 )
 
             items_str = ", ".join(str(x) for x in items)
-            Contact.objects.create(
+            contact = Contact.objects.create(
                 name=name or email,
                 email=email,
                 phone=phone,
                 message=f"Sélection galerie ({len(items)} éléments) : {items_str}. Observations : {notes}",
-            )
-
-            inquiry = Inquiry.objects.create(
-                first_name=name.split()[0] if name else "Client",
-                last_name=" ".join(name.split()[1:]) if len(name.split()) > 1 else "Galerie",
-                email=email,
-                phone=phone,
-                spaces=[],
-                inspirations={"items": items, "notes": notes},
-                total=0,
             )
 
             UserModel = get_user_model()
@@ -322,8 +312,8 @@ def submit_public_gallery_selection(request):
                         user=adm,
                         title=str(_("New Gallery Selection: %(name)s") % {"name": name or email}),
                         message=f"{len(items)} inspirations sélectionnées. Notes: {notes[:80]}",
-                        notification_type="inquiry",
-                        link=reverse("dash:inquiry_detail", args=[inquiry.pk]),
+                        notification_type="contact",
+                        link=reverse("dash:contact_detail", args=[contact.pk]),
                     )
                 except Exception:
                     pass

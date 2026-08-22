@@ -1,5 +1,5 @@
 from django.urls import path
-from dashboard.views import dashboard, users, notifications, design, customer, designer, admin_crm, pricing, portfolio, videos, content, invitations
+from dashboard.views import dashboard, users, notifications, design, customer, designer, admin_crm, pricing, portfolio, videos, content
 
 app_name = "dash"
 
@@ -85,10 +85,6 @@ urlpatterns = [
     path("crm/update-status/<int:pk>/", admin_crm.update_status, name="crm_update_status"),
     path("crm/assign-designer/<int:pk>/", admin_crm.assign_designer, name="crm_assign_designer"),
     path("crm/<int:pk>/delete/", admin_crm.delete_project, name="crm_delete_project"),
-    # Inquiries
-    path("inquiries/", admin_crm.inquiry_list, name="inquiry_list"),
-    path("inquiries/<int:pk>/", admin_crm.inquiry_detail, name="inquiry_detail"),
-    path("inquiries/<int:pk>/delete/", admin_crm.delete_inquiry, name="inquiry_delete"),
     # Portfolio
     path("portfolio/", portfolio.portfolio_list, name="portfolio_list"),
     path("portfolio/create/", portfolio.portfolio_create, name="portfolio_create"),
@@ -106,9 +102,4 @@ urlpatterns = [
     # Leads
     path("leads/", content.lead_list, name="lead_list"),
     path("leads/<int:pk>/delete/", content.lead_delete, name="lead_delete"),
-    # Invitations
-    path("invitations/", invitations.invitation_list, name="invitation_list"),
-    path("invitations/create/", invitations.invitation_create, name="invitation_create"),
-    path("invitations/<int:pk>/resend/", invitations.invitation_resend, name="invitation_resend"),
-    path("invitations/<int:pk>/delete/", invitations.invitation_delete, name="invitation_delete"),
 ]

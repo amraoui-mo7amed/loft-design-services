@@ -7,7 +7,7 @@ from django.utils import timezone
 import json
 
 from dashboard.models.requests import DesignRequest
-from dashboard.models.inquiry import Inquiry
+from dashboard.models.contact import Contact
 from dashboard.models.portfolio import Portfolio
 
 
@@ -28,7 +28,7 @@ def dash_home(request):
     declined_projects = counts["declined"] or 0
     projects_today = counts["today"] or 0
 
-    total_inquiries = Inquiry.objects.count()
+    total_contacts = Contact.objects.count()
     total_portfolios = Portfolio.objects.count()
 
     recent_projects = DesignRequest.objects.select_related("project_type", "service").order_by("-created_at")[:5]
@@ -46,7 +46,7 @@ def dash_home(request):
         "pending_projects": pending_projects,
         "approved_projects": approved_projects,
         "declined_projects": declined_projects,
-        "total_inquiries": total_inquiries,
+        "total_contacts": total_contacts,
         "total_portfolios": total_portfolios,
         "projects_today": projects_today,
         "recent_projects": recent_projects,

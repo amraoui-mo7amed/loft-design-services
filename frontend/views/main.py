@@ -208,7 +208,6 @@ def submit_contact(request):
         from django.db.models import Q
         from django.contrib.auth import get_user_model
         from django.urls import reverse
-        from dashboard.models import Inquiry
         from dashboard.utils import notify_user
 
         with transaction.atomic():
@@ -226,19 +225,6 @@ def submit_contact(request):
                     name=full_name,
                 )
 
-            f_name = first_name or (full_name.split()[0] if full_name else "Contact")
-            l_name = last_name or (" ".join(full_name.split()[1:]) if len(full_name.split()) > 1 else "")
-
-            Inquiry.objects.create(
-                first_name=f_name,
-                last_name=l_name,
-                email=email,
-                phone=phone,
-                spaces=[],
-                inspirations={"message": message},
-                total=0,
-            )
-
             UserModel = get_user_model()
             admin_users = UserModel.objects.filter(
                 Q(is_superuser=True) | Q(profile__role="admin")
@@ -247,10 +233,10 @@ def submit_contact(request):
             for admin_u in admin_users:
                 notify_user(
                     user=admin_u,
-                    title=_("New Inquiry: %(name)s") % {"name": full_name},
+                    title=_("New Contact Message: %(name)s") % {"name": full_name},
                     message=message[:120],
-                    notification_type="inquiry",
-                    link=reverse("dash:inquiry_list"),
+                    notification_type="contact",
+                    link=reverse("dash:contact_detail", args=[contact.pk]),
                 )
 
         return JsonResponse({

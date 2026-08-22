@@ -10,7 +10,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from user_auth.models import UserProfile
 from dashboard.models import (
     ProjectType, Space, SpaceCategory, SpaceCategoryImages, ProjectTypeSpace,
-    Invitation, Service, DesignRequest
+    Service, DesignRequest
 )
 
 
@@ -352,78 +352,6 @@ class RequestFlowFeatureTests(TestCase):
         self.assertEqual(req.message, "Besoin d'un devis pro urgent")
         self.assertEqual(req.mode, "quick")
         self.assertEqual(req.total, Decimal("298000"))
-
-
-class InvitationFeatureTests(TestCase):
-    def setUp(self):
-        self.client = Client()
-        self.admin = User.objects.create_superuser("admin", "admin@test.com", "pass123")
-        self.profile = UserProfile.objects.create(
-            user=self.admin, role=UserProfile.Role.ADMIN, is_approved=True
-        )
-        self.client.force_login(self.admin)
-
-    def test_invitation_list_view(self):
-        Invitation.objects.create(
-            email="invited1@example.com", name="Client One", created_by=self.admin
-        )
-        response = self.client.get(reverse("dash:invitation_list"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "dashboard/admin/invitation_list.html")
-        self.assertEqual(response.context["total_count"], 1)
-
-    def test_invitation_create_ajax(self):
-        response = self.client.post(
-            reverse("dash:invitation_create"),
-            {
-                "email": "sarah.benali@example.com",
-                "name": "Sarah Benali",
-                "phone_number": "+213550123456",
-            },
-            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
-        )
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        self.assertTrue(data["success"])
-        self.assertTrue(Invitation.objects.filter(email="sarah.benali@example.com").exists())
-
-    def test_invitation_signup_flow(self):
-        invitation = Invitation.objects.create(
-            email="client.onboarding@example.com",
-            name="Nadia Karim",
-            phone_number="+213770987654",
-            created_by=self.admin,
-        )
-        self.assertFalse(invitation.is_accepted)
-
-        anon_client = Client()
-        signup_url = reverse("user_auth:invitation_signup", kwargs={"uuid": invitation.uuid})
-        get_res = anon_client.get(signup_url)
-        self.assertEqual(get_res.status_code, 200)
-        self.assertTemplateUsed(get_res, "auth/invitation_signup.html")
-
-        post_res = anon_client.post(
-            signup_url,
-            {
-                "first_name": "Nadia",
-                "last_name": "Karim",
-                "password": "SecurePassword123",
-                "confirm_password": "SecurePassword123",
-                "phone_number": "+213770987654",
-            },
-            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
-        )
-        self.assertEqual(post_res.status_code, 200)
-        data = post_res.json()
-        self.assertTrue(data.get("success"), msg=str(data))
-
-        user = User.objects.get(email="client.onboarding@example.com")
-        self.assertEqual(user.profile.role, UserProfile.Role.CUSTOMER)
-        self.assertTrue(user.profile.is_approved)
-
-        invitation.refresh_from_db()
-        self.assertTrue(invitation.is_accepted)
-        self.assertIsNotNone(invitation.accepted_at)
 
 
 class ProjectGalleryInvitationAndSelectionTests(TestCase):

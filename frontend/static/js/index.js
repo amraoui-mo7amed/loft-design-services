@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnContent;
+                console.error('Form submission error:', error);
 
                 if (window.Swal) {
                     Swal.fire({
@@ -144,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     li.innerHTML = '<i class="fas fa-times-circle me-2 flex-shrink-0"></i><span>An unexpected error occurred. Please try again.</span>';
                     errorList.appendChild(li);
                 }
-            }    console.error('Form submission error:', error);
             }
         });
     });

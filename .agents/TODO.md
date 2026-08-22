@@ -11,6 +11,9 @@
 - [x] Use atomic to submit the notification and Model
 - [x] The Two Forms Must use sweetAlert For Form Submission Handeling
 - [x] The SweetAlertMust Be Styled with the Style of `home.css`
+- [x] dont auto-select any space card
+- [x] Dont show `.quotePreview` instead of it show a button to send the facture via e-mail using sweetalert 
+- [x] fix this erro `index.js:148 Uncaught SyntaxError: missing ) after argument list`
  
 ### Gallery Page `/#Gallery`
 - [x] Allow User To Select Multiple Images
@@ -21,7 +24,28 @@
 - [x] the Invitation Link Must Be Tokenized and Must Be Used Only Once 
 - [x] Save the E-mail template in `dashboard/template/email`
 - [x] After The Project Is Sbmitted send a notification to admin and use atomic 
+- [x] make the `.galleryDetail.open` z-index: 9999
+- [x] fix this error 
+`index.js?v=1787353059:148 Uncaught SyntaxError: missing ) after argument list (at index.js?v=1787353059:148:13)
+/#gallery:1 Blocked aria-hidden on an element because its descendant retained focus. The focus must not be hidden from assistive technology users. Avoid using aria-hidden on a focused element or its ancestor. Consider using the inert attribute instead, which will also prevent focus. For more details, see the aria-hidden section of the WAI-ARIA specification at https://w3c.github.io/aria/#aria-hidden.
+Element with focus: <button.galleryDetailClose#galleryDetailClose>
+Ancestor with aria-hidden: <section.galleryDetail#galleryDetail> <section class=​"galleryDetail" id=​"galleryDetail" aria-hidden=​"true">​…​</section>​`
+- [x] add a button to view the drawer that containes the selected images 
 
 ## Space Details Page /dashboard/design/spaces/<id>
 
 - [x] Allow the admin to Move the Space to another Project Type 
+
+## Dashboard Project Details /dashboard/crm/
+- [x] fix the connection failed error of sweetalert when status updated
+
+## Dashboard Project Details /dashboard/crm/<id>/
+
+- [x] fix the connection failed error of sweetalert when status updated
+- [x] update the `badge.bg-light.text-dark.rounded-pill` to `badge.bg-light.text-dark.rounded-pill`
+- [x] Fix this error `Uncaught SyntaxError: missing ) after argument list (at index.js?v=1787353059:148:13)`
+- [x] the client must not be regsitred
+
+## dashboard 
+- [x] remove the Invitations Model and update the ui 
+- [x] Remove the Inquieries Model and update the ui

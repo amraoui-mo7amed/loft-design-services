@@ -89,10 +89,10 @@ const money=v=>new Intl.NumberFormat('fr-DZ').format(Math.round(v))+' DA';
 const spaces = (window.SPACES_DATA && window.SPACES_DATA.length > 0) ? window.SPACES_DATA : [{id:'living',name:'Living room',price:8000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/living-room/16757/image_1.jpg'},{id:'bed',name:'Bedroom',price:6000,img:'https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-02-05-20-45-23_Enscape_scene_8.jpg'},{id:'kitchen',name:'Kitchen',price:12000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/kitchen-interior/11154/image_1.jpg'},{id:'bath',name:'Bathroom',price:7000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/bathroom/15230/image_1_dsgPgFt.jpg'},{id:'kids',name:'Children room',price:6500,img:'https://loftdesign.bilnov.com/media/spaces/gallery/children-room/10567/image_1_qP62mWe.jpg'}];
 const services = (window.SERVICES_DATA && window.SERVICES_DATA.length > 0) ? window.SERVICES_DATA : [{id:'3d',name:'Modélisation 3D',price:750},{id:'360',name:'Visite virtuelle 360°',price:8000},{id:'light',name:'Étude d’éclairage',price:12000}];
 const projectTypes = (window.PROJECT_TYPES_DATA && window.PROJECT_TYPES_DATA.length > 0) ? window.PROJECT_TYPES_DATA : [{id:'residence',name:'Résidence'},{id:'villa',name:'Villa'},{id:'appartement',name:'Appartement'},{id:'commercial',name:'Commercial'},{id:'bureau',name:'Bureau'},{id:'hotel',name:'Hôtel'}];
-const defaultSelectedSpaces = (spaces.length >= 2) ? [spaces[0].id, spaces[1].id] : (spaces[0] ? [spaces[0].id] : ['living', 'bed']);
+const defaultSelectedSpaces = [];
 const defaultSelectedServices = (services.length >= 2) ? [services[0].id, services[1].id] : (services.length === 1 ? [services[0].id] : ['3d', '360']);
 let upperLevels=['R+3','R+2','R+1'];const middleLevels=['Terrasse / Jardin','RDC'];let lowerLevels=['R-1'];
-let st={mode:'quick',step:'project',spaces:defaultSelectedSpaces,services:defaultSelectedServices,projectType:'',levels:[],surfaces:{},promptLevel:null,typeAttention:false,missing:[],clientType:'particular',success:false,ref:'',client:null};
+let st={mode:'quick',step:'project',spaces:[],services:defaultSelectedServices,projectType:'',levels:[],surfaces:{},promptLevel:null,typeAttention:false,missing:[],clientType:'particular',success:false,ref:'',client:null};
 const area=()=>st.levels.reduce((s,l)=>s+(+st.surfaces[l]||0),0);
 const base=()=>st.mode==='quick'?spaces.filter(x=>st.spaces.includes(x.id)).reduce((s,x)=>s+(x.price||0),0):0;
 const servicePrice=id=>{
@@ -480,77 +480,37 @@ function renderContactStep(){
 }
 
 function renderSuccess(){
-  const b=document.querySelector('#composerBody'),rows=quoteRows(),c=st.client||{};
+  const b=document.querySelector('#composerBody'),c=st.client||{};
   b.innerHTML=`
-    <div class="success">
-      <div class="successTop">
-        <div class="ok">✓</div>
-        <h3>Votre devis est prêt.</h3>
-        <p>Référence <b style="color:var(--cyan)">${st.ref}</b> · ${st.clientType==='professional'?'Professionnel - TTC':'Particulier - HT'}</p>
+    <div class="success text-center py-4">
+      <div class="successTop mb-4">
+        <div class="ok mb-3" style="width:64px;height:64px;margin:0 auto;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(85,220,255,0.15);color:var(--cyan);font-size:28px;border:2px solid var(--cyan);box-shadow:0 0 20px rgba(85,220,255,0.35);">✓</div>
+        <h3 style="font-size:26px;font-weight:800;color:#fff;">Votre demande a été enregistrée avec succès !</h3>
+        <p style="color:#aeb6b3;font-size:15px;margin-top:8px;">Référence projet : <b style="color:var(--cyan);font-size:18px;">${st.ref}</b> · <span class="badge" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#e2e8f0;">${st.clientType==='professional'?'Professionnel - TTC':'Particulier - HT'}</span></p>
       </div>
-      <div class="quotePreview">
-        <div class="qpHeader">
-          <div>
-            <strong>${COMPANY.name}</strong>
-            <small>
-              R.I.B N°: ${COMPANY.rib}<br>
-              RC N°: ${COMPANY.rc} · NIS: ${COMPANY.nis}<br>
-              NIF: ${COMPANY.nif} · N ART: ${COMPANY.nart}<br>
-              ${COMPANY.mail} · ${COMPANY.mobile}<br>
-              ${COMPANY.address}
-            </small>
-          </div>
-          <div class="qpLogo">LOFT<br>DESIGN</div>
+
+      <div class="facture-summary-box mb-4 p-4" style="max-width:560px;margin:0 auto;background:rgba(255,255,255,0.03);border:1px solid rgba(85,220,255,0.25);border-radius:18px;backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(0,0,0,0.37);">
+        <div class="d-flex justify-content-between align-items-center mb-2" style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:12px;">
+          <span style="color:#94a3b8;font-size:14px;">Client</span>
+          <strong style="color:#fff;">${clientLabel(c)}</strong>
         </div>
-        <div class="qpMeta">
-          <div>
-            <h4>DEVIS ${st.ref}</h4>
-            <small>CLIENT : ${clientLabel(c)}<br>ADRESSE : ${c.commune||''}, ${c.wilayaName||c.wilaya||''}</small>
-          </div>
-          <strong>${new Date().toLocaleDateString('fr-DZ')}</strong>
+        <div class="d-flex justify-content-between align-items-center mb-2" style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:12px;">
+          <span style="color:#94a3b8;font-size:14px;">Total Estimé</span>
+          <strong style="color:var(--cyan);font-size:20px;font-weight:800;">${money(totalFinal())}</strong>
         </div>
-        <table class="qpTable">
-          <thead>
-            <tr>
-              <th>DÉSIGNATION</th>
-              <th>PRIX UNITAIRE HT</th>
-              <th>UNITÉ</th>
-              <th>QUANTITÉ</th>
-              <th>MONTANT HT</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows.map(r=>`
-              <tr>
-                <td>${r.designation}</td>
-                <td>${money(r.pu)}</td>
-                <td>${r.unit}</td>
-                <td>${r.qty}</td>
-                <td>${money(r.total)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <div class="qpTotals">
-          <div>
-            <span>TOTAL HT</span>
-            <b>${money(totalHT())}</b>
-          </div>
-          ${st.clientType==='professional'?`
-            <div>
-              <span>TVA 19%</span>
-              <b>${money(tva())}</b>
-            </div>
-            <div>
-              <span>TOTAL TTC</span>
-              <b>${money(totalFinal())}</b>
-            </div>
-          `:''}
-        </div>
+        <p class="small text-muted mb-0" style="font-size:12px;">Une équipe d'architectes et designers LoftDesign étudie actuellement votre dossier.</p>
       </div>
-      <div class="downloadRow">
-        <button class="btn neonCyan" id="downloadQuote">Télécharger le devis PDF</button>
-        <a class="btn storeTop" href="https://store.bilnov.com" target="_blank" rel="noopener">
+
+      <div class="downloadRow d-flex flex-wrap justify-content-center gap-3 mt-4">
+        <button class="btn neonCyan d-inline-flex align-items-center gap-2" id="sendEmailFacture">
+          <i class="fas fa-envelope"></i>
+          <span>Envoyer la facture par e-mail</span>
+        </button>
+        <button class="btn neonCyan d-inline-flex align-items-center gap-2" id="downloadQuote">
+          <i class="fas fa-file-pdf"></i>
+          <span>Télécharger le devis PDF</span>
+        </button>
+        <a class="btn storeTop d-inline-flex align-items-center gap-2" href="https://store.bilnov.com" target="_blank" rel="noopener">
           <span class="storeIcon" aria-hidden="true">
             <svg viewBox="0 0 24 24">
               <path d="M3.5 4h2l2.1 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H7"/>
@@ -565,11 +525,51 @@ function renderSuccess(){
     </div>
   `;
   document.querySelector('#downloadQuote').onclick=downloadQuotePdf;
+  document.querySelector('#sendEmailFacture').onclick=async ()=>{
+    const defaultEmail = (st.client && st.client.email) || '';
+    if (window.Swal) {
+      const { value: email } = await Swal.fire({
+        title: "Envoyer la facture",
+        text: `Recevez votre devis proforma pour le projet ${st.ref} directement par e-mail.`,
+        input: "email",
+        inputValue: defaultEmail,
+        inputPlaceholder: "votre-email@domaine.com",
+        showCancelButton: true,
+        confirmButtonText: "Envoyer la facture",
+        cancelButtonText: "Annuler",
+        customClass: {
+          popup: "swal2-popup",
+          confirmButton: "btn neonCyan",
+          cancelButton: "btn neonViolet"
+        },
+        buttonsStyling: false,
+        inputValidator: (value) => {
+          if (!value || !value.includes('@')) {
+            return "Veuillez saisir une adresse e-mail valide !";
+          }
+        }
+      });
+      if (email) {
+        Swal.fire({
+          icon: "success",
+          title: "Facture envoyée !",
+          text: `La facture du projet ${st.ref} a été envoyée avec succès à ${email}.`,
+          confirmButtonText: "Parfait",
+          customClass: {
+            popup: "swal2-popup",
+            confirmButton: "btn neonCyan"
+          },
+          buttonsStyling: false
+        });
+      }
+    }
+  };
   document.querySelector('#restart').onclick=()=>{
     st.success=false;
     st.step='project';
     st.ref='';
     st.client=null;
+    st.spaces=[];
     renderComposer();
   };
 }

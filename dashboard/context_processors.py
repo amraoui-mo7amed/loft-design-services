@@ -51,12 +51,6 @@ def _build_menu(is_admin, is_designer, is_customer, lang=None):
                     "admin_only": True,
                 },
                 {
-                    "title": _("Inquiries"),
-                    "icon": "fas fa-inbox",
-                    "url_name": "dash:inquiry_list",
-                    "admin_only": True,
-                },
-                {
                     "title": _("Portfolio"),
                     "icon": "fas fa-briefcase",
                     "url_name": "dash:portfolio_list",
@@ -78,12 +72,6 @@ def _build_menu(is_admin, is_designer, is_customer, lang=None):
                     "title": _("Leads"),
                     "icon": "fas fa-user-plus",
                     "url_name": "dash:lead_list",
-                    "admin_only": True,
-                },
-                {
-                    "title": _("Invitations"),
-                    "icon": "fas fa-paper-plane",
-                    "url_name": "dash:invitation_list",
                     "admin_only": True,
                 },
             ],

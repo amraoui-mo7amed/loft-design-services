@@ -91,14 +91,14 @@
             <div class="col-6 col-xl-3">
                 <div class="stat-card stat-card--inquiry">
                     <div class="stat-card-icon">
-                        <i class="fas fa-envelope"></i>
+                        <i class="fas fa-envelope-open-text"></i>
                     </div>
                     <div class="stat-card-body">
-                        <span class="stat-card-count">{{ total_inquiries }}</span>
-                        <span class="stat-card-title">{% trans "Inquiries" %}</span>
+                        <span class="stat-card-count">{{ total_contacts }}</span>
+                        <span class="stat-card-title">{% trans "Contacts" %}</span>
                     </div>
                     <div class="stat-card-trend">
-                        <a href="{% url 'dash:inquiry_list' %}"
+                        <a href="{% url 'dash:contact_list' %}"
                            class="badge bg-info-subtle text-info-emphasis text-decoration-none">{% trans "View all" %} &rarr;</a>
                     </div>
                 </div>
@@ -226,13 +226,13 @@
                 </a>
             </div>
             <div class="col-12 col-sm-6 col-lg-3">
-                <a href="{% url 'dash:inquiry_list' %}" class="action-card">
+                <a href="{% url 'dash:contact_list' %}" class="action-card">
                     <div class="action-card-icon" style="background: rgba(139, 92, 246, 0.1);">
-                        <i class="fas fa-inbox" style="color: #8b5cf6;"></i>
+                        <i class="fas fa-envelope-open-text" style="color: #8b5cf6;"></i>
                     </div>
                     <div>
-                        <div class="action-card-title">{% trans "Inquiries" %}</div>
-                        <div class="action-card-desc">{% trans "View incoming leads" %}</div>
+                        <div class="action-card-title">{% trans "Contacts" %}</div>
+                        <div class="action-card-desc">{% trans "View contact messages" %}</div>
                     </div>
                     <i class="fas fa-chevron-right action-card-arrow"></i>
                 </a>

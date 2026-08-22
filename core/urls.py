@@ -5,7 +5,6 @@ from django.conf.urls.static import static
 from user_auth import views as user_views
 import django_eventstream
 from dashboard.views import wizard, wizard_api, chat, file_manager, marketplace
-from frontend.views import inquiry
 
 
 from django.views.generic.base import RedirectView
@@ -24,7 +23,6 @@ urlpatterns = [
     path("api/design/spaces/", wizard_api.api_spaces, name="api_spaces"),
     path("api/design/packages/", wizard_api.api_packages, name="api_packages"),
     path("api/design/options/", wizard_api.api_options, name="api_options"),
-    path("api/design/inquiries/", inquiry.submit_inquiry, name="api_submit_inquiry"),
     path("api/design/calculate-price/", wizard_api.api_calculate_price, name="api_calculate_price"),
     path("api/design/requests/", wizard.submit_design_request, name="api_submit_request"),
     # Chat API

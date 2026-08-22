@@ -5942,9 +5942,54 @@ body.galleryOpen {
 }
 
 .galleryDetail.open {
+  z-index: 9999 !important;
   opacity: 1;
   visibility: visible;
-  pointer-events: auto
+  pointer-events: auto;
+}
+
+.galleryFloatingCartBtn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 900;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: rgba(8, 14, 18, 0.88);
+  border: 1px solid var(--cyan);
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 16px rgba(85, 220, 255, 0.35);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+[dir="rtl"] .galleryFloatingCartBtn {
+  right: auto;
+  left: 24px;
+}
+.galleryFloatingCartBtn:hover {
+  background: var(--cyan);
+  color: #030709;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(85, 220, 255, 0.5);
+}
+.galleryFloatingCartBtn .cartBadge {
+  background: var(--cyan);
+  color: #030709;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  transition: background 0.2s, color 0.2s;
+}
+.galleryFloatingCartBtn:hover .cartBadge {
+  background: #030709;
+  color: var(--cyan);
 }
 
 .galleryDetailClose {

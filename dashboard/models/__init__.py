@@ -1,5 +1,4 @@
 from .notification import Notification
-from .inquiry import Inquiry
 from .base import ProjectType, Space, SpaceCategory, SpaceCategoryImages, SpaceImage, ProjectTypeSpace
 from .catalog import Service, ServicePricing
 from .requests import (
@@ -34,10 +33,8 @@ from .portfolio import Portfolio, PortfolioGallery
 from .video import Video
 from .contact import Contact
 from .lead import Lead
-from .invitation import Invitation
 
 __all__ = [
-    "Inquiry",
     "PricingConfig",
     "Notification",
     "ProjectType",
@@ -73,5 +70,4 @@ __all__ = [
     "Video",
     "Contact",
     "Lead",
-    "Invitation",
 ]

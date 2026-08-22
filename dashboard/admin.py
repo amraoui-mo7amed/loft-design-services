@@ -1,7 +1,6 @@
 from django.contrib import admin
 
 from .models import (
-    Inquiry,
     Notification,
     ProjectType,
     Space,
@@ -32,14 +31,6 @@ from .models import (
     Contact,
     Lead,
 )
-
-
-@admin.register(Inquiry)
-class InquiryAdmin(admin.ModelAdmin):
-    list_display = ["first_name", "last_name", "email", "phone", "total", "status", "is_read", "created_at"]
-    list_filter = ["status", "is_read", "created_at"]
-    search_fields = ["first_name", "last_name", "email", "phone"]
-    readonly_fields = ["created_at", "spaces"]
 
 
 @admin.register(Notification)

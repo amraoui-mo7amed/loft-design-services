@@ -672,7 +672,7 @@
                                 <tbody>
                                     {% for s in spaces %}
                                         <tr>
-                                            <td><span class="badge bg-light text-dark rounded-pill">{{ s.floor.name }}</span></td>
+                                            <td><span class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-30 rounded-pill px-3 py-1">{{ s.floor.name }}</span></td>
                                             <td class="fw-semibold text-white">{{ s.custom_name|default:s.space.name }}</td>
                                             <td class="text-end fw-bold text-warning">{{ s.price_at_time|floatformat:"0" }} DA</td>
                                         </tr>

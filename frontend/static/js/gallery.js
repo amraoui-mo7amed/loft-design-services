@@ -242,7 +242,14 @@ function galleryRenderDetail(){
   document.getElementById('galleryViewerFull')?.addEventListener('click',galleryOpenLightbox);
 }
 
-document.getElementById('galleryDetailClose')?.addEventListener('click',()=>{galleryCloseLightbox();galleryDetail.classList.remove('open');galleryDetail.setAttribute('aria-hidden','true')});
+document.getElementById('galleryDetailClose')?.addEventListener('click',()=>{
+  if (document.activeElement && typeof document.activeElement.blur === 'function') {
+    document.activeElement.blur();
+  }
+  galleryCloseLightbox();
+  galleryDetail.classList.remove('open');
+  galleryDetail.setAttribute('aria-hidden','true');
+});
 
 
 const galleryLightbox=document.getElementById('galleryLightbox');
@@ -256,6 +263,9 @@ function galleryOpenLightbox(){
   galleryLightbox.setAttribute('aria-hidden','false');
 }
 function galleryCloseLightbox(){
+  if (document.activeElement && typeof document.activeElement.blur === 'function') {
+    document.activeElement.blur();
+  }
   galleryLightbox.classList.remove('open');
   galleryLightbox.setAttribute('aria-hidden','true');
 }
@@ -306,16 +316,34 @@ document.addEventListener('keydown',e=>{
 
 function galleryRenderCart(){
   const items=[...galleryState.cart].map(galleryGetCategory).filter(Boolean);
-  document.getElementById('galleryCartCount').textContent=items.length;
-  document.getElementById('galleryMobileCount').textContent=items.length;
+  const cartTop = document.getElementById('galleryCartCount');
+  if (cartTop) cartTop.textContent = items.length;
+  const mobileTop = document.getElementById('galleryMobileCount');
+  if (mobileTop) mobileTop.textContent = items.length;
+  document.querySelectorAll('.cartBadge').forEach(el => {
+    el.textContent = items.length;
+  });
   const host=document.getElementById('galleryCartItems');
-  host.innerHTML=items.length?items.map(c=>`<div class="galleryCartItem"><img src="${c.cover}" alt=""><div><b>${c.name}</b><small>${c.spaceName}</small></div><button type="button" class="galleryRemove" data-gremove="${c.id}">×</button></div>`).join(''):'<div class="galleryCartEmpty">Votre panier est vide.<br>Ajoutez une ou plusieurs inspirations.</div>';
-  host.querySelectorAll('[data-gremove]').forEach(b=>b.addEventListener('click',()=>galleryToggleCart(b.dataset.gremove)));
+  if (host) {
+    host.innerHTML=items.length?items.map(c=>`<div class="galleryCartItem"><img src="${c.cover}" alt=""><div><b>${c.name}</b><small>${c.spaceName}</small></div><button type="button" class="galleryRemove" data-gremove="${c.id}">×</button></div>`).join(''):'<div class="galleryCartEmpty">Votre panier est vide.<br>Ajoutez une ou plusieurs inspirations.</div>';
+    host.querySelectorAll('[data-gremove]').forEach(b=>b.addEventListener('click',()=>galleryToggleCart(b.dataset.gremove)));
+  }
 }
-function galleryOpenCart(){galleryDrawer.classList.add('open');galleryDrawer.setAttribute('aria-hidden','false')}
-function galleryCloseCart(){galleryDrawer.classList.remove('open');galleryDrawer.setAttribute('aria-hidden','true')}
+function galleryOpenCart(){
+  galleryDrawer.classList.add('open');
+  galleryDrawer.setAttribute('aria-hidden','false');
+}
+function galleryCloseCart(){
+  if (document.activeElement && typeof document.activeElement.blur === 'function') {
+    document.activeElement.blur();
+  }
+  galleryDrawer.classList.remove('open');
+  galleryDrawer.setAttribute('aria-hidden','true');
+}
 document.getElementById('galleryCartTop')?.addEventListener('click',galleryOpenCart);
 document.getElementById('galleryMobileCart')?.addEventListener('click',galleryOpenCart);
+document.getElementById('galleryFloatingCartBtn')?.addEventListener('click',galleryOpenCart);
+document.querySelectorAll('.galleryFloatingCartBtn').forEach(b=>b.addEventListener('click',galleryOpenCart));
 document.getElementById('galleryCartClose')?.addEventListener('click',galleryCloseCart);
 
 function gallerySummary(){
