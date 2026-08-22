@@ -28,6 +28,7 @@
 - [x] the Invitation Link Must Be Tokenized and Must Be Used Only Once 
 - [x] Save the E-mail template in `dashboard/template/email`
 - [x] After The Project Is Sbmitted send a notification to admin and use atomic 
+- [x] the selected images/spaces are not Submitted
 - [x] make the `.galleryDetail.open` z-index: 9999
 - [x] fix this error 
 `index.js?v=1787353059:148 Uncaught SyntaxError: missing ) after argument list (at index.js?v=1787353059:148:13)
@@ -39,6 +40,7 @@ Ancestor with aria-hidden: <section.galleryDetail#galleryDetail> <section class=
 - [x] add the `z-index:9999` to `.galleryCartDrawer.open`
 - [x] `gallerySpaceBtn` is not working
 - [x] when the image submitted, save the images/spaces/User Details to Project Model
+- [x] hide all the `.galleryCartActions` buttons except `#gallerySubmitSelection`
 
 ## Space Details Page /dashboard/design/spaces/<id>
 
@@ -48,8 +50,19 @@ Ancestor with aria-hidden: <section.galleryDetail#galleryDetail> <section class=
 - [x] fix the connection failed error of sweetalert when status updated
 - [x] fix this error in sweetalert `Request Failed
 Could not complete the status update. Please try again.`
+- [x] fix this kanban.js?v=1787358588:107 Status update error: TypeError: Cannot read properties of undefined (reading 'classList')
+    at kanban.js?v=1787358588:90:34
+(anonymous) @ kanban.js?v=1787358588:107
+Promise.catch
+(anonymous) @ kanban.js?v=1787358588:106
+Promise.then
+then @ sweetalert2@11:5
+(anonymous) @ kanban.js?v=1787358588:40
+
 
 ## Dashboard Project Details /dashboard/crm/<id>/
+- [x] Remoive the `#btnAdminSendGalleryLink` and its function
+- [x] replace the `.text-warning` with `text-dark`
 - [x] change the invite Link behaviour so the user will fill the rest of project details 
 - [x] fix the connection failed error of sweetalert when status updated
 - [x] update the `badge.bg-light.text-dark.rounded-pill` to `badge.bg-light.text-dark.rounded-pill`
@@ -57,6 +70,14 @@ Could not complete the status update. Please try again.`
 - [x] the client must not be regsitred
 - [x] fix this error in sweetalert `Request Failed
 Could not complete the status update. Please try again.`
+- [x] fix this kanban.js?v=1787358588:107 Status update error: TypeError: Cannot read properties of undefined (reading 'classList')
+    at kanban.js?v=1787358588:90:34
+(anonymous) @ kanban.js?v=1787358588:107
+Promise.catch
+(anonymous) @ kanban.js?v=1787358588:106
+Promise.then
+then @ sweetalert2@11:5
+(anonymous) @ kanban.js?v=1787358588:40
 
 ## dashboard 
 - [x] remove the Invitations Model and update the ui 

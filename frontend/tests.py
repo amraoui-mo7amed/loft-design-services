@@ -185,7 +185,7 @@ class FrontendContactAndLeadTests(TestCase):
         data = response.json()
         self.assertTrue(data.get("success"), msg=str(data))
 
-        from dashboard.models import Lead, Contact
+        from dashboard.models import Lead, Contact, DesignRequest, DesignRequestSpace
         lead = Lead.objects.filter(email="nadia.amrani@example.com").first()
         self.assertIsNotNone(lead)
         self.assertEqual(lead.name, "Nadia Amrani")
@@ -193,4 +193,9 @@ class FrontendContactAndLeadTests(TestCase):
         contact = Contact.objects.filter(email="nadia.amrani@example.com").first()
         self.assertIsNotNone(contact)
         self.assertIn("Salon - Contemporain", contact.message)
+
+        project = DesignRequest.objects.filter(email="nadia.amrani@example.com").first()
+        self.assertIsNotNone(project)
+        self.assertEqual(project.mode, "gallery")
+        self.assertTrue(DesignRequestSpace.objects.filter(design_request=project).exists())
 

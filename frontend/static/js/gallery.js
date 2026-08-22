@@ -432,13 +432,20 @@ document.getElementById('gallerySubmitSelection')?.addEventListener('click', asy
           email: email,
           phone: document.getElementById('swal_phone')?.value?.trim() || '',
           notes: document.getElementById('swal_notes')?.value?.trim() || '',
-          items: items.map(c => `${c.spaceName} - ${c.name}`)
+          items: items.map(c => ({
+            id: c.id,
+            name: c.name,
+            spaceId: c.spaceId,
+            spaceName: c.spaceName,
+            cover: c.cover
+          }))
         };
       }
     });
 
     if (formValues) {
-      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ||
+        document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
         (document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/) || [])[1] || '';
 
       try {

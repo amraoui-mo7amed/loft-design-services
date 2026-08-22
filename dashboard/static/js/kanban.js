@@ -16,6 +16,7 @@
         // Status option click in dropdown (kanban list cards)
         document.querySelectorAll(".crm-status-option").forEach(function (opt) {
             opt.addEventListener("click", function () {
+                var optionEl = this;
                 var dropdown = this.closest(".crm-status-dropdown");
                 var projectId = dropdown.dataset.projectId;
                 var newStatus = this.dataset.value;
@@ -87,10 +88,12 @@
                                     if (check) check.remove();
                                 });
                             }
-                            this.classList.add("active");
-                            var checkIcon = document.createElement("i");
-                            checkIcon.className = "fas fa-check ms-auto";
-                            this.appendChild(checkIcon);
+                            if (optionEl) {
+                                optionEl.classList.add("active");
+                                var checkIcon = document.createElement("i");
+                                checkIcon.className = "fas fa-check ms-auto";
+                                optionEl.appendChild(checkIcon);
+                            }
                             Swal.fire({
                                 icon: "success",
                                 title: "Status Updated",
@@ -102,7 +105,7 @@
                             var errMsg = data.errors ? (Array.isArray(data.errors) ? data.errors.join(", ") : String(data.errors)) : "Failed to update.";
                             Swal.fire({ icon: "error", title: "Update Failed", text: errMsg });
                         }
-                    }.bind(this))
+                    })
                     .catch(function (err) {
                         console.error("Status update error:", err);
                         Swal.fire({ icon: "error", title: "Request Failed", text: "Could not complete the status update. Please try again." });

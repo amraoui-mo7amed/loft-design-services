@@ -363,32 +363,95 @@ def submit_public_gallery_selection(request):
             # Link spaces and images to the project
             floor = None
             for item in items:
-                item_str = str(item).strip()
-                cat = SpaceCategory.objects.filter(
-                    Q(category_name__icontains=item_str)
-                    | Q(id=int(item_str) if item_str.isdigit() else 0)
-                ).select_related("space").first()
+                cat = None
+                target_space = None
+                cat_name = ""
 
-                if cat and cat.space:
+                if isinstance(item, dict):
+                    item_id = str(item.get("id", "")).strip()
+                    item_name = str(item.get("name", "")).strip()
+                    space_id = str(item.get("spaceId", "")).strip()
+                    space_name = str(item.get("spaceName", "")).strip()
+                    cat_name = item_name
+
+                    cat = SpaceCategory.objects.filter(
+                        Q(category_name__iexact=item_name)
+                        | Q(category_name__icontains=item_name)
+                        | Q(id=int(item_id) if item_id.isdigit() else 0)
+                    ).select_related("space").first()
+
+                    if not cat and space_id:
+                        target_space = Space.objects.filter(
+                            Q(slug=space_id)
+                            | Q(name__iexact=space_name)
+                            | Q(id=int(space_id) if space_id.isdigit() else 0)
+                        ).first()
+                else:
+                    item_str = str(item).strip()
+                    cat_name = item_str
+                    cat = SpaceCategory.objects.filter(
+                        Q(category_name__iexact=item_str)
+                        | Q(category_name__icontains=item_str)
+                        | Q(id=int(item_str) if item_str.isdigit() else 0)
+                    ).select_related("space").first()
+
+                    if not cat and " - " in item_str:
+                        parts = item_str.split(" - ", 1)
+                        target_space = Space.objects.filter(
+                            Q(name__iexact=parts[0].strip()) | Q(slug__iexact=parts[0].strip())
+                        ).first()
+                        if target_space:
+                            cat = SpaceCategory.objects.filter(
+                                space=target_space,
+                                category_name__icontains=parts[1].strip(),
+                            ).first()
+
+                space_obj = (cat.space if cat else target_space)
+                if not space_obj and Space.objects.exists():
+                    for s in Space.objects.all():
+                        if s.name.lower() in cat_name.lower():
+                            space_obj = s
+                            break
+
+                if not space_obj and Space.objects.exists():
+                    space_obj = Space.objects.first()
+
+                if not space_obj:
+                    space_title = (
+                        item.get("spaceName") if isinstance(item, dict) and item.get("spaceName")
+                        else (cat_name.split(" - ")[0].strip() if " - " in cat_name else (cat_name or "Espace"))
+                    )
+                    space_obj, space_created = Space.objects.get_or_create(
+                        name=space_title,
+                        defaults={"base_price": 0},
+                    )
+
+                if space_obj:
                     if not floor:
                         floor, floor_created = DesignRequestFloor.objects.get_or_create(
                             design_request=project,
                             name="Principal",
-                            defaults={"floor_number": 0},
+                            defaults={"level": 0, "order": 0, "surface": 0},
                         )
+                    display_name = (
+                        f"{space_obj.name} ({cat.category_name})"
+                        if cat
+                        else (cat_name or space_obj.name)
+                    )
                     DesignRequestSpace.objects.get_or_create(
                         design_request=project,
                         floor=floor,
-                        space=cat.space,
-                        defaults={"custom_name": f"{cat.space.name} ({cat.category_name})"},
+                        space=space_obj,
+                        defaults={"custom_name": display_name},
                     )
-                    img_obj = cat.images.filter(is_default=True).first() or cat.images.first()
-                    if img_obj:
-                        DesignRequestGalleryImage.objects.get_or_create(
-                            design_request=project,
-                            space_image=img_obj,
-                            defaults={"notes": notes},
-                        )
+                    if cat:
+                        img_obj = cat.images.filter(is_default=True).first() or cat.images.first()
+                        if img_obj:
+                            DesignRequestGalleryImage.objects.get_or_create(
+                                design_request=project,
+                                space_image=img_obj,
+                                defaults={"notes": notes},
+                            )
 
             DesignActivityLog.objects.create(
                 design_request=project,

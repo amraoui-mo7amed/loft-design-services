@@ -5917,16 +5917,8 @@ body.galleryOpen {
   transform: translateY(-1px);
 }
 
-.galleryCartActions button:nth-child(2) {
-  border-color: rgba(125, 229, 174, .48);
-}
-
-.galleryCartActions button:nth-child(3) {
-  border-color: rgba(85, 220, 255, .48);
-}
-
-.galleryCartActions button:nth-child(4) {
-  border-color: rgba(170, 124, 255, .48);
+.galleryCartActions button:not(#gallerySubmitSelection) {
+  display: none !important;
 }
 
 .galleryDetail {
