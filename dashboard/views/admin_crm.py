@@ -1,8 +1,9 @@
+import json
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.urls import reverse
 from django.core.paginator import Paginator
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, gettext
 from django.contrib.auth import get_user_model
 from django.db import models, transaction
 
@@ -61,24 +62,37 @@ def update_status(request, pk):
     if request.method == "POST":
         project = get_object_or_404(DesignRequest, pk=pk)
         new_status = request.POST.get("status")
+        if not new_status and request.body:
+            try:
+                body_data = json.loads(request.body.decode("utf-8"))
+                new_status = body_data.get("status")
+            except Exception:
+                pass
+
         if new_status in dict(DesignRequest.Status.choices):
             old_status = project.status
             try:
                 with transaction.atomic():
                     project.status = new_status
                     project.save(update_fields=["status"])
+                    DesignActivityLog.objects.create(
+                        design_request=project,
+                        action=_("Status Updated"),
+                        description=f"Status changed from {old_status} to {new_status}.",
+                    )
                 if new_status != old_status:
                     try:
                         send_status_update_email(project)
                     except Exception:
                         pass
             except Exception as e:
-                return JsonResponse({"success": False, "errors": humanize_error(e)})
+                err = humanize_error(e)
+                return JsonResponse({"success": False, "errors": [err] if isinstance(err, str) else err})
 
             status_label = dict(DesignRequest.Status.choices).get(new_status, new_status)
-            return JsonResponse({"success": True, "message": _("Status updated to %(status)s.") % {"status": status_label}})
-        return JsonResponse({"success": False, "errors": [_("Invalid status.")]})
-    return JsonResponse({"success": False, "errors": [_("Invalid request.")]})
+            return JsonResponse({"success": True, "message": str(_("Status updated to %(status)s.") % {"status": status_label})})
+        return JsonResponse({"success": False, "errors": [str(_("Invalid status."))]})
+    return JsonResponse({"success": False, "errors": [str(_("Invalid request."))]})
 
 
 @admin_required

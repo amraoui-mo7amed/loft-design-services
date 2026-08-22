@@ -3,6 +3,8 @@
 
 ## Home Page /
 
+- [x] add the `z-index:9999` to `.gallerySheet.open`
+
 ### The Compose Section `#composer`
 
 - [x] Make the request submitted in the dashboard instead of whatsapp
@@ -15,6 +17,8 @@
 - [x] Dont show `.quotePreview` instead of it show a button to send the facture via e-mail using sweetalert 
 - [x] fix this erro `index.js:148 Uncaught SyntaxError: missing ) after argument list`
  
+
+
 ### Gallery Page `/#Gallery`
 - [x] Allow User To Select Multiple Images
 - [x] Allow user to view his selected images
@@ -31,20 +35,28 @@
 Element with focus: <button.galleryDetailClose#galleryDetailClose>
 Ancestor with aria-hidden: <section.galleryDetail#galleryDetail> <section class=​"galleryDetail" id=​"galleryDetail" aria-hidden=​"true">​…​</section>​`
 - [x] add a button to view the drawer that containes the selected images 
+- [x] fix the icon of the button that views the drawer
+- [x] add the `z-index:9999` to `.galleryCartDrawer.open`
+- [x] `gallerySpaceBtn` is not working
+- [x] when the image submitted, save the images/spaces/User Details to Project Model
 
 ## Space Details Page /dashboard/design/spaces/<id>
 
 - [x] Allow the admin to Move the Space to another Project Type 
 
-## Dashboard Project Details /dashboard/crm/
+## Dashboard Projects /dashboard/crm/
 - [x] fix the connection failed error of sweetalert when status updated
+- [x] fix this error in sweetalert `Request Failed
+Could not complete the status update. Please try again.`
 
 ## Dashboard Project Details /dashboard/crm/<id>/
-
+- [x] change the invite Link behaviour so the user will fill the rest of project details 
 - [x] fix the connection failed error of sweetalert when status updated
 - [x] update the `badge.bg-light.text-dark.rounded-pill` to `badge.bg-light.text-dark.rounded-pill`
 - [x] Fix this error `Uncaught SyntaxError: missing ) after argument list (at index.js?v=1787353059:148:13)`
 - [x] the client must not be regsitred
+- [x] fix this error in sweetalert `Request Failed
+Could not complete the status update. Please try again.`
 
 ## dashboard 
 - [x] remove the Invitations Model and update the ui 

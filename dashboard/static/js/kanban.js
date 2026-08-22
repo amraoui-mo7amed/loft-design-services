@@ -47,7 +47,9 @@
                         allowOutsideClick: false,
                     });
 
-                    fetch("/dashboard/crm/update-status/" + projectId + "/", {
+                    var updateUrl = dropdown.dataset.updateStatusUrl || ("/dashboard/crm/update-status/" + projectId + "/");
+
+                    fetch(updateUrl, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/x-www-form-urlencoded",
@@ -178,6 +180,8 @@
     });
 
     function getCsrfToken() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta && meta.content) return meta.content;
         var input = document.querySelector('[name=csrfmiddlewaretoken]');
         if (input && input.value) return input.value;
         var match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);

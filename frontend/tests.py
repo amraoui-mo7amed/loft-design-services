@@ -183,7 +183,7 @@ class FrontendContactAndLeadTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertTrue(data.get("success"))
+        self.assertTrue(data.get("success"), msg=str(data))
 
         from dashboard.models import Lead, Contact
         lead = Lead.objects.filter(email="nadia.amrani@example.com").first()

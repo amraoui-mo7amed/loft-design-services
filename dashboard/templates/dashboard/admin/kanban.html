@@ -64,7 +64,8 @@
                                 </div>
                             </div>
                             <div class="dropdown crm-status-dropdown flex-shrink-0"
-                                 data-project-id="{{ project.id }}">
+                                 data-project-id="{{ project.id }}"
+                                 data-update-status-url="{% url 'dash:crm_update_status' project.id %}">
                                 <button class="crm-status-badge crm-badge-{{ project.status }} d-flex align-items-center gap-1"
                                         type="button"
                                         data-bs-toggle="dropdown"

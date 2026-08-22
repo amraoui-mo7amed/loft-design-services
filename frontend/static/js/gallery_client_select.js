@@ -206,23 +206,61 @@ document.addEventListener("DOMContentLoaded", function () {
             const csrfToken = submitBtn.dataset.csrf || "";
             const count = selectedImageIds.size;
             let swalNotes = "";
+            let swalFirstName = submitBtn.dataset.clientFirstName || "";
+            let swalLastName = submitBtn.dataset.clientLastName || "";
+            let swalPhone = submitBtn.dataset.clientPhone || "";
+            let swalWilaya = submitBtn.dataset.clientWilaya || "";
+            let swalCommune = submitBtn.dataset.clientCommune || "";
 
             if (typeof Swal !== "undefined") {
                 const confirmResult = await Swal.fire({
-                    title: submitBtn.dataset.confirmTitle || "Confirm Moodboard Selection",
+                    title: submitBtn.dataset.confirmTitle || "Compléter votre dossier projet",
                     html: `
                         <div class="text-start">
-                            <p class="mb-3 text-light">${count} ${submitBtn.dataset.confirmDesc || "inspiration photos selected for your project design team."}</p>
-                            <label class="form-label text-warning small fw-bold text-uppercase mb-1">
-                                ${submitBtn.dataset.notesLabel || "Optional Notes / Special Preferences"}
-                            </label>
-                            <textarea id="swalNotesInput" class="form-control" rows="3" placeholder="${submitBtn.dataset.notesPlaceholder || "e.g. We love the natural wood textures and ambient ceiling lights..."}"></textarea>
+                            <div class="p-3 mb-3 rounded-3" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);">
+                                <span class="badge bg-warning text-dark font-monospace mb-2"><i class="fas fa-sparkles me-1"></i>${count} inspirations</span>
+                                <p class="mb-0 text-light small">${count} ${submitBtn.dataset.confirmDesc || "photos d'inspiration sélectionnées pour votre concept."}</p>
+                            </div>
+                            
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label text-warning small fw-bold text-uppercase mb-1">Prénom</label>
+                                    <input type="text" id="swalClientFirstName" class="form-control form-control-sm" value="${swalFirstName}" placeholder="Prénom">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-warning small fw-bold text-uppercase mb-1">Nom</label>
+                                    <input type="text" id="swalClientLastName" class="form-control form-control-sm" value="${swalLastName}" placeholder="Nom">
+                                </div>
+                            </div>
+
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="form-label text-warning small fw-bold text-uppercase mb-1">Téléphone</label>
+                                    <input type="tel" id="swalClientPhone" class="form-control form-control-sm" value="${swalPhone}" placeholder="+213 555 00 00 00">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-warning small fw-bold text-uppercase mb-1">Wilaya / Ville</label>
+                                    <input type="text" id="swalClientWilaya" class="form-control form-control-sm" value="${swalWilaya}" placeholder="ex. Alger">
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label text-warning small fw-bold text-uppercase mb-1">Commune / Adresse</label>
+                                <input type="text" id="swalClientCommune" class="form-control form-control-sm" value="${swalCommune}" placeholder="ex. Hydra">
+                            </div>
+
+                            <div class="mb-0">
+                                <label class="form-label text-warning small fw-bold text-uppercase mb-1">
+                                    ${submitBtn.dataset.notesLabel || "Instructions & préférences particulières"}
+                                </label>
+                                <textarea id="swalNotesInput" class="form-control" rows="3" placeholder="${submitBtn.dataset.notesPlaceholder || "ex. Nous adorons les bois clairs, les rangements encastrés et les éclairages indirects..."}"></textarea>
+                            </div>
                         </div>
                     `,
                     icon: "question",
                     showCancelButton: true,
-                    confirmButtonText: `<i class="fas fa-check-circle me-1"></i> ${submitBtn.dataset.btnConfirm || "Submit Moodboard"}`,
-                    cancelButtonText: submitBtn.dataset.btnCancel || "Review Selection",
+                    confirmButtonText: `<i class="fas fa-check-circle me-1"></i> ${submitBtn.dataset.btnConfirm || "Valider mon dossier projet"}`,
+                    cancelButtonText: submitBtn.dataset.btnCancel || "Modifier la sélection",
                     confirmButtonColor: "#FFD65A",
                     cancelButtonColor: "#475569",
                     customClass: {
@@ -238,6 +276,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
 
                 if (!confirmResult.isConfirmed) return;
+                swalFirstName = document.getElementById("swalClientFirstName")?.value || "";
+                swalLastName = document.getElementById("swalClientLastName")?.value || "";
+                swalPhone = document.getElementById("swalClientPhone")?.value || "";
+                swalWilaya = document.getElementById("swalClientWilaya")?.value || "";
+                swalCommune = document.getElementById("swalClientCommune")?.value || "";
                 swalNotes = document.getElementById("swalNotesInput")?.value || "";
             } else {
                 if (!confirm(`Submit ${count} selected inspiration(s)?`)) return;
@@ -257,6 +300,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     },
                     body: JSON.stringify({
                         image_ids: Array.from(selectedImageIds),
+                        first_name: swalFirstName,
+                        last_name: swalLastName,
+                        phone: swalPhone,
+                        wilaya: swalWilaya,
+                        commune: swalCommune,
                         notes: swalNotes,
                     }),
                 });

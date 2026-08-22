@@ -215,6 +215,11 @@ def submit_client_gallery_selection(request, token):
             })
 
         notes = data.get("notes", "").strip()
+        first_name = data.get("first_name", "").strip()
+        last_name = data.get("last_name", "").strip()
+        phone = data.get("phone", "").strip()
+        wilaya = data.get("wilaya", "").strip()
+        commune = data.get("commune", "").strip()
 
         with transaction.atomic():
             images_to_add = SpaceCategoryImages.objects.filter(id__in=image_ids)
@@ -225,6 +230,33 @@ def submit_client_gallery_selection(request, token):
                     defaults={"notes": notes},
                 )
 
+            # Update client and project details if provided
+            update_fields = []
+            if first_name and not project.first_name:
+                project.first_name = first_name
+                update_fields.append("first_name")
+            if last_name and not project.last_name:
+                project.last_name = last_name
+                update_fields.append("last_name")
+            if phone:
+                project.phone = phone
+                update_fields.append("phone")
+            if wilaya:
+                project.wilaya = wilaya
+                update_fields.append("wilaya")
+            if commune:
+                project.commune = commune
+                update_fields.append("commune")
+            if notes:
+                if project.message:
+                    project.message += f"\n\n[Inspirations Moodboard]: {notes}"
+                else:
+                    project.message = notes
+                update_fields.append("message")
+
+            if update_fields:
+                project.save(update_fields=update_fields)
+
             invitation.is_used = True
             invitation.used_at = timezone.now()
             invitation.save(update_fields=["is_used", "used_at"])
@@ -233,7 +265,7 @@ def submit_client_gallery_selection(request, token):
             DesignActivityLog.objects.create(
                 design_request=project,
                 action=_("Gallery Moodboard Submitted"),
-                description=f"Client submitted {len(image_ids)} gallery inspiration images.",
+                description=f"Client submitted {len(image_ids)} gallery inspiration images and updated project details.",
             )
 
             # Realtime Notification to Admins
@@ -283,9 +315,24 @@ def submit_public_gallery_selection(request):
         if not items:
             return JsonResponse({"success": False, "errors": [_("Veuillez sélectionner au moins une inspiration.")]})
 
-        from dashboard.models import Lead, Contact
+        from dashboard.models import (
+            Lead,
+            Contact,
+            DesignRequest,
+            DesignRequestFloor,
+            DesignRequestSpace,
+            DesignRequestGalleryImage,
+            DesignActivityLog,
+            SpaceCategory,
+            SpaceCategoryImages,
+            Space,
+        )
 
         with transaction.atomic():
+            name_parts = name.split(None, 1) if name else ["Client", "Galerie"]
+            first_name = name_parts[0]
+            last_name = name_parts[1] if len(name_parts) > 1 else ""
+
             lead = Lead.objects.filter(email=email).first()
             if not lead:
                 lead = Lead.objects.create(
@@ -301,6 +348,54 @@ def submit_public_gallery_selection(request):
                 message=f"Sélection galerie ({len(items)} éléments) : {items_str}. Observations : {notes}",
             )
 
+            project = DesignRequest.objects.create(
+                client=request.user if request.user.is_authenticated else None,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                phone=phone,
+                project_name=f"Inspirations Galerie - {name or email}",
+                status=DesignRequest.Status.PENDING,
+                message=f"Sélection de {len(items)} inspirations depuis la galerie.\nNotes client: {notes}" if notes else f"Sélection de {len(items)} inspirations depuis la galerie.",
+                mode="gallery",
+            )
+
+            # Link spaces and images to the project
+            floor = None
+            for item in items:
+                item_str = str(item).strip()
+                cat = SpaceCategory.objects.filter(
+                    Q(category_name__icontains=item_str)
+                    | Q(id=int(item_str) if item_str.isdigit() else 0)
+                ).select_related("space").first()
+
+                if cat and cat.space:
+                    if not floor:
+                        floor, floor_created = DesignRequestFloor.objects.get_or_create(
+                            design_request=project,
+                            name="Principal",
+                            defaults={"floor_number": 0},
+                        )
+                    DesignRequestSpace.objects.get_or_create(
+                        design_request=project,
+                        floor=floor,
+                        space=cat.space,
+                        defaults={"custom_name": f"{cat.space.name} ({cat.category_name})"},
+                    )
+                    img_obj = cat.images.filter(is_default=True).first() or cat.images.first()
+                    if img_obj:
+                        DesignRequestGalleryImage.objects.get_or_create(
+                            design_request=project,
+                            space_image=img_obj,
+                            defaults={"notes": notes},
+                        )
+
+            DesignActivityLog.objects.create(
+                design_request=project,
+                action=_("Gallery Inspirations Submitted"),
+                description=f"Client submitted {len(items)} gallery inspiration items from the website.",
+            )
+
             UserModel = get_user_model()
             admins = UserModel.objects.filter(
                 Q(is_superuser=True) | Q(profile__role="admin")
@@ -310,17 +405,17 @@ def submit_public_gallery_selection(request):
                 try:
                     notify_user(
                         user=adm,
-                        title=str(_("New Gallery Selection: %(name)s") % {"name": name or email}),
+                        title=str(_("New Project from Gallery: %(name)s") % {"name": name or email}),
                         message=f"{len(items)} inspirations sélectionnées. Notes: {notes[:80]}",
-                        notification_type="contact",
-                        link=reverse("dash:contact_detail", args=[contact.pk]),
+                        notification_type="project",
+                        link=reverse("dash:admin_project_detail", args=[project.pk]),
                     )
                 except Exception:
                     pass
 
         return JsonResponse({
             "success": True,
-            "message": str(_("Votre sélection d'inspirations a bien été envoyée à nos architectes !")),
+            "message": str(_("Votre sélection d'inspirations a bien été enregistrée et transmise à nos architectes !")),
         })
     except Exception as e:
         return JsonResponse({"success": False, "errors": [humanize_error(e)]})

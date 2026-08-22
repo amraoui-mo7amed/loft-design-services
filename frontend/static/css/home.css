@@ -2101,6 +2101,7 @@ header.nav,
 }
 
 .gallerySheet.open {
+  z-index: 9999 !important;
   transform: none
 }
 
@@ -5803,6 +5804,7 @@ body.galleryOpen {
 }
 
 .galleryCartDrawer.open {
+  z-index: 9999 !important;
   transform: none
 }
 
@@ -7302,6 +7304,7 @@ body.galleryOpen {
 }
 
 [dir="rtl"] .galleryCartDrawer.open {
+  z-index: 9999 !important;
   transform: translateX(0);
 }
 

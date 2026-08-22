@@ -82,8 +82,12 @@ const galleryDetail = document.getElementById('galleryDetail');
 function galleryAllCategories(){
   return GALLERY_DATA.flatMap(s=>s.categories.map(c=>({...c,spaceId:s.id,spaceName:s.name})));
 }
-function galleryGetSpace(id){return GALLERY_DATA.find(s=>s.id===id)}
-function galleryGetCategory(id){return galleryAllCategories().find(c=>c.id===id)}
+function galleryGetSpace(id){
+  return GALLERY_DATA.find(s=>String(s.id)===String(id)||(s.slug&&String(s.slug)===String(id)));
+}
+function galleryGetCategory(id){
+  return galleryAllCategories().find(c=>String(c.id)===String(id)||(c.slug&&String(c.slug)===String(id)));
+}
 function gallerySelectionUrl(){
   const u=new URL(location.href);
   u.hash='gallery';
@@ -129,7 +133,11 @@ window.addEventListener('popstate',()=>{
 
 function galleryRenderSpaces(){
   const host=document.getElementById('gallerySpaces');
-  host.innerHTML=GALLERY_DATA.map(s=>`<button type="button" class="gallerySpaceBtn ${s.id===galleryState.space?'active':''}" data-gspace="${s.id}"><img src="${s.cover}" alt="${s.name}"><b>${s.name}</b></button>`).join('');
+  if(!host) return;
+  if(!galleryGetSpace(galleryState.space) && GALLERY_DATA.length > 0) {
+    galleryState.space = GALLERY_DATA[0].id;
+  }
+  host.innerHTML=GALLERY_DATA.map(s=>`<button type="button" class="gallerySpaceBtn ${String(s.id)===String(galleryState.space)?'active':''}" data-gspace="${s.id}"><img src="${s.cover}" alt="${s.name}"><b>${s.name}</b></button>`).join('');
   host.querySelectorAll('[data-gspace]').forEach(b=>b.addEventListener('click',()=>{
     galleryState.space=b.dataset.gspace;
     galleryRenderSpaces();
@@ -145,7 +153,11 @@ function galleryRenderSpaces(){
   });
 }
 function galleryRenderCategories(){
-  const s=galleryGetSpace(galleryState.space);
+  let s=galleryGetSpace(galleryState.space);
+  if(!s && GALLERY_DATA.length > 0){
+    galleryState.space = GALLERY_DATA[0].id;
+    s = GALLERY_DATA[0];
+  }
   const host=document.getElementById('galleryCategoryGrid');
   if(!host || !s) return;
 
