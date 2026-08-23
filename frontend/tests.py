@@ -116,6 +116,17 @@ class FrontendGalleryAndHomeTests(TestCase):
         self.assertIn(self.img1, images)
         self.assertIn(self.img2, images)
 
+    def test_gallery_data_json_structure(self):
+        from frontend.utils import build_gallery_data
+        data = build_gallery_data()
+        self.assertEqual(len(data), 2)
+        living_room = next((s for s in data if s["name"] == "Living Room"), None)
+        self.assertIsNotNone(living_room)
+        self.assertTrue(len(living_room["categories"]) >= 1)
+        cat = living_room["categories"][0]
+        self.assertEqual(cat["name"], "Living General")
+        self.assertTrue(len(cat["subs"]) >= 1)
+
 
 class FrontendContactAndLeadTests(TestCase):
     def setUp(self):

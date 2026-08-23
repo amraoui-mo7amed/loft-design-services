@@ -83,10 +83,22 @@ function galleryAllCategories(){
   return GALLERY_DATA.flatMap(s=>s.categories.map(c=>({...c,spaceId:s.id,spaceName:s.name})));
 }
 function galleryGetSpace(id){
-  return GALLERY_DATA.find(s=>String(s.id)===String(id)||(s.slug&&String(s.slug)===String(id)));
+  if (id == null) return null;
+  const target = String(id).trim().toLowerCase();
+  return GALLERY_DATA.find(s => 
+    String(s.id).trim().toLowerCase() === target ||
+    (s.slug && String(s.slug).trim().toLowerCase() === target) ||
+    (s.name && String(s.name).trim().toLowerCase() === target)
+  ) || GALLERY_DATA[0];
 }
 function galleryGetCategory(id){
-  return galleryAllCategories().find(c=>String(c.id)===String(id)||(c.slug&&String(c.slug)===String(id)));
+  if (id == null) return null;
+  const target = String(id).trim().toLowerCase();
+  return galleryAllCategories().find(c => 
+    String(c.id).trim().toLowerCase() === target ||
+    (c.slug && String(c.slug).trim().toLowerCase() === target) ||
+    (c.name && String(c.name).trim().toLowerCase() === target)
+  );
 }
 function gallerySelectionUrl(){
   const u=new URL(location.href);
@@ -131,21 +143,48 @@ window.addEventListener('popstate',()=>{
   else if(galleryApp.classList.contains('open') && !document.querySelector('.gallery-standalone'))closeGalleryApp(true);
 });
 
+function gallerySelectSpace(spaceId){
+  if (!spaceId) return;
+  galleryState.space = spaceId;
+  const s = galleryGetSpace(spaceId);
+  if (s) {
+    galleryRenderSpaces();
+    galleryRenderCategories();
+    if (galleryDetail && galleryDetail.classList.contains('open')) {
+      if (s.categories && s.categories.length > 0) {
+        galleryOpenDetail(s.categories[0].id);
+      } else {
+        galleryDetail.classList.remove('open');
+        galleryDetail.setAttribute('aria-hidden', 'true');
+      }
+    }
+    requestAnimationFrame(()=>{
+      document.querySelector('.gallerySpaceBtn.active')?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+      galleryUpdateSpaceArrows();
+    });
+  }
+}
+window.gallerySelectSpace = gallerySelectSpace;
+
 function galleryRenderSpaces(){
   const host=document.getElementById('gallerySpaces');
   if(!host) return;
   if(!galleryGetSpace(galleryState.space) && GALLERY_DATA.length > 0) {
     galleryState.space = GALLERY_DATA[0].id;
   }
-  host.innerHTML=GALLERY_DATA.map(s=>`<button type="button" class="gallerySpaceBtn ${String(s.id)===String(galleryState.space)?'active':''}" data-gspace="${s.id}"><img src="${s.cover}" alt="${s.name}"><b>${s.name}</b></button>`).join('');
-  host.querySelectorAll('[data-gspace]').forEach(b=>b.addEventListener('click',()=>{
-    galleryState.space=b.dataset.gspace;
-    galleryRenderSpaces();
-    galleryRenderCategories();
-    requestAnimationFrame(()=>{
-      document.querySelector('.gallerySpaceBtn.active')?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-      galleryUpdateSpaceArrows();
-    });
+  host.innerHTML=GALLERY_DATA.map(s=>{
+    const isActive = String(s.id) === String(galleryState.space) || 
+                     (s.slug && String(s.slug) === String(galleryState.space)) ||
+                     (s.name && String(s.name).toLowerCase() === String(galleryState.space).toLowerCase());
+    return `<button type="button" class="gallerySpaceBtn ${isActive?'active':''}" data-gspace="${s.id}">
+      <img src="${s.cover}" alt="${s.name}">
+      <b>${s.name}</b>
+    </button>`;
+  }).join('');
+  
+  host.querySelectorAll('[data-gspace]').forEach(b=>b.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    gallerySelectSpace(b.dataset.gspace);
   }));
   requestAnimationFrame(()=>{
     document.querySelector('.gallerySpaceBtn.active')?.scrollIntoView({behavior:'auto',block:'nearest',inline:'center'});
@@ -162,7 +201,14 @@ function galleryRenderCategories(){
   if(!host || !s) return;
 
   const categories=Array.isArray(s.categories)?s.categories:[];
-  host.innerHTML=categories.map(c=>`<article class="galleryCategoryCard ${galleryState.cart.has(c.id)?'selected':''}">
+  if (categories.length === 0) {
+    host.innerHTML = `<div class="text-center text-muted py-5 col-12 w-100" style="grid-column: 1 / -1;">
+      <p class="mb-0">Aucune inspiration disponible pour cet espace.</p>
+    </div>`;
+    return;
+  }
+
+  host.innerHTML=categories.map(c=>`<article class="galleryCategoryCard ${galleryState.cart.has(c.id)?'selected':''}" data-cat-card="${c.id}">
     <img src="${c.cover||s.cover}" alt="${c.name}">
     ${galleryState.cart.has(c.id)?'<span class="gallerySelectedBadge">✓</span>':''}
     <div class="galleryCategoryCopy">
@@ -176,11 +222,25 @@ function galleryRenderCategories(){
     </div>
   </article>`).join('');
 
+  host.querySelectorAll('.galleryCategoryCard').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('[data-gadd]')) return;
+      const catId = card.dataset.catCard || card.querySelector('[data-gview]')?.dataset.gview;
+      if (catId) galleryOpenDetail(catId);
+    });
+  });
+
   host.querySelectorAll('[data-gview]').forEach(b=>
-    b.addEventListener('click',()=>galleryOpenDetail(b.dataset.gview))
+    b.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      galleryOpenDetail(b.dataset.gview);
+    })
   );
   host.querySelectorAll('[data-gadd]').forEach(b=>
-    b.addEventListener('click',()=>galleryToggleCart(b.dataset.gadd))
+    b.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      galleryToggleCart(b.dataset.gadd);
+    })
   );
 }
 function galleryToggleCart(id){
@@ -539,23 +599,42 @@ if(gallerySpacesRail){
     if(e.button!==0)return;
     dragging=true;moved=false;startX=e.clientX;startScroll=gallerySpacesRail.scrollLeft;
     gallerySpacesRail.classList.add('dragging');
-    try{gallerySpacesRail.setPointerCapture(e.pointerId)}catch(_){}
   });
   gallerySpacesRail.addEventListener('pointermove',e=>{
     if(!dragging)return;
     const dx=e.clientX-startX;
-    if(Math.abs(dx)>4)moved=true;
-    gallerySpacesRail.scrollLeft=startScroll-dx;
-    if(moved)e.preventDefault();
+    if(Math.abs(dx)>6){
+      moved=true;
+      try{gallerySpacesRail.setPointerCapture(e.pointerId)}catch(_){}
+    }
+    if(moved){
+      gallerySpacesRail.scrollLeft=startScroll-dx;
+      e.preventDefault();
+    }
   });
   const stopDrag=e=>{
     if(!dragging)return;
     dragging=false;
     gallerySpacesRail.classList.remove('dragging');
+    try{gallerySpacesRail.releasePointerCapture(e.pointerId)}catch(_){}
     setTimeout(()=>galleryUpdateSpaceArrows(),30);
   };
   gallerySpacesRail.addEventListener('pointerup',stopDrag);
   gallerySpacesRail.addEventListener('pointercancel',stopDrag);
+
+  // Delegated click on rail
+  gallerySpacesRail.addEventListener('click',e=>{
+    if(moved){
+      e.preventDefault();
+      e.stopPropagation();
+      moved=false;
+      return;
+    }
+    const btn=e.target.closest('.gallerySpaceBtn');
+    if(btn&&btn.dataset.gspace){
+      gallerySelectSpace(btn.dataset.gspace);
+    }
+  });
 
   /* Mouse wheel over the rail scrolls horizontally */
   gallerySpacesRail.addEventListener('wheel',e=>{
