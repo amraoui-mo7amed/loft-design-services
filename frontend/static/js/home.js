@@ -271,193 +271,235 @@ function openServiceDetailsModal(serviceId) {
   const bodyEl = document.getElementById('serviceDetailsBody');
   const toggleBtn = document.getElementById('serviceDetailsToggleActionBtn');
 
-  if (titleEl) titleEl.textContent = s.name;
+  // Translations object with robust fallbacks
+  const t = s.translations || {};
+  const trans = {
+    fr: Object.assign({
+      name: s.name,
+      short_description: s.short_description || '',
+      detailed_description: s.detailed_description || '',
+      included_items: s.included_items || [],
+      excluded_items: s.excluded_items || [],
+      deliverables: s.deliverables || [],
+      included_revisions: s.included_revisions || '',
+      estimated_delivery_time: s.estimated_delivery_time || '',
+    }, t.fr || {}),
+    en: Object.assign({
+      name: s.name,
+      short_description: s.short_description || '',
+      detailed_description: s.detailed_description || '',
+      included_items: s.included_items || [],
+      excluded_items: s.excluded_items || [],
+      deliverables: s.deliverables || [],
+      included_revisions: s.included_revisions || '',
+      estimated_delivery_time: s.estimated_delivery_time || '',
+    }, t.en || {}),
+    ar: Object.assign({
+      name: s.name,
+      short_description: s.short_description || '',
+      detailed_description: s.detailed_description || '',
+      included_items: s.included_items || [],
+      excluded_items: s.excluded_items || [],
+      deliverables: s.deliverables || [],
+      included_revisions: s.included_revisions || '',
+      estimated_delivery_time: s.estimated_delivery_time || '',
+    }, t.ar || {}),
+  };
 
-  if (badgesEl) {
-    let pBadge = '';
-    if (s.pricing_type === 'percent_project_cost') {
-      pBadge = `<span class="badge bg-warning-subtle text-light border border-warning border-opacity-25 font-monospace px-3 py-1 rounded-pill">${s.percentage_rate || 0}% du projet</span>`;
-    } else if (s.pricing_type === 'per_sqm' || s.pricing_type === 'area') {
-      pBadge = `<span class="badge bg-info-subtle text-light border border-info border-opacity-25 font-monospace px-3 py-1 rounded-pill">${money(s.price || 750)} / m²</span>`;
-    } else {
-      pBadge = `<span class="badge bg-secondary text-light font-monospace px-3 py-1 rounded-pill">${money(s.price || 0)} / forfait</span>`;
+  const dict = {
+    fr: {
+      badgePricing: (s.pricing_type === 'percent_project_cost') ? `${s.percentage_rate || 0}% du projet` : (s.pricing_type === 'per_sqm' || s.pricing_type === 'area' ? `${money(s.price || 750)} / m²` : `${money(s.price || 0)} / forfait`),
+      modalTitle: "Détails de la prestation",
+      included: "Ce qui est inclus",
+      excluded: "Ce qui n'est pas inclus",
+      deliverables: "Livrables garantis",
+      deliveryTime: "Délai estimé",
+      revisions: "Révisions incluses",
+      mediaTitle: "Aperçu vidéo & Animation",
+      watchVideo: "Visionner la vidéo explicative",
+      close: "Fermer",
+      addQuote: "Ajouter au devis",
+      removeQuote: "Retirer du devis",
+      defaultBadge: "Inclus par défaut",
+    },
+    en: {
+      badgePricing: (s.pricing_type === 'percent_project_cost') ? `${s.percentage_rate || 0}% of project` : (s.pricing_type === 'per_sqm' || s.pricing_type === 'area' ? `${money(s.price || 750)} / m²` : `${money(s.price || 0)} / package`),
+      modalTitle: "Service Details",
+      included: "What is included",
+      excluded: "What is excluded",
+      deliverables: "Guaranteed deliverables",
+      deliveryTime: "Estimated delivery",
+      revisions: "Included revisions",
+      mediaTitle: "Video & Animation Preview",
+      watchVideo: "Watch explanatory video",
+      close: "Close",
+      addQuote: "Add to quote",
+      removeQuote: "Remove from quote",
+      defaultBadge: "Default included",
+    },
+    ar: {
+      badgePricing: (s.pricing_type === 'percent_project_cost') ? `${s.percentage_rate || 0}% من تكلفة المشروع` : (s.pricing_type === 'per_sqm' || s.pricing_type === 'area' ? `${money(s.price || 750)} / م²` : `${money(s.price || 0)} / باقة`),
+      modalTitle: "تفاصيل الخدمة",
+      included: "ما تشمله الخدمة",
+      excluded: "ما لا تشمله الخدمة",
+      deliverables: "المخرجات والتسليمات المضمونة",
+      deliveryTime: "مدة التنفيذ المقدرة",
+      revisions: "التعديلات المتاحة",
+      mediaTitle: "معاينة الفيديو والرسوم المتحركة",
+      watchVideo: "مشاهدة الفيديو التوضيحي",
+      close: "إغلاق",
+      addQuote: "إضافة إلى العرض",
+      removeQuote: "إلغاء من العرض",
+      defaultBadge: "مدرجة افتراضياً",
     }
-    badgesEl.innerHTML = pBadge;
-  }
+  };
 
-  if (bodyEl) {
-    const t = s.translations || {};
-    const tFr = t.fr || {
-      name: s.name,
-      short_description: s.short_description,
-      detailed_description: s.detailed_description,
-      included_items: s.included_items,
-      excluded_items: s.excluded_items,
-      deliverables: s.deliverables,
-      included_revisions: s.included_revisions,
-      estimated_delivery_time: s.estimated_delivery_time,
-    };
-    const tEn = t.en || {
-      name: s.name,
-      short_description: s.short_description,
-      detailed_description: s.detailed_description,
-      included_items: s.included_items,
-      excluded_items: s.excluded_items,
-      deliverables: s.deliverables,
-      included_revisions: s.included_revisions,
-      estimated_delivery_time: s.estimated_delivery_time,
-    };
-    const tAr = t.ar || {
-      name: s.name,
-      short_description: s.short_description,
-      detailed_description: s.detailed_description,
-      included_items: s.included_items,
-      excluded_items: s.excluded_items,
-      deliverables: s.deliverables,
-      included_revisions: s.included_revisions,
-      estimated_delivery_time: s.estimated_delivery_time,
-    };
+  let currentLang = (document.documentElement.lang === 'ar' || document.documentElement.dir === 'rtl') ? 'ar' : (document.documentElement.lang === 'en' ? 'en' : 'fr');
 
-    function renderTabPane(langData, langCode, isActive) {
-      const isRtl = langCode === 'ar';
-      const name = langData.name || s.name || '';
-      const shortDesc = langData.short_description || '';
-      const detailedDesc = langData.detailed_description || '';
-      const inc = Array.isArray(langData.included_items) ? langData.included_items : (langData.included_items ? String(langData.included_items).split('\n').filter(Boolean) : []);
-      const exc = Array.isArray(langData.excluded_items) ? langData.excluded_items : (langData.excluded_items ? String(langData.excluded_items).split('\n').filter(Boolean) : []);
-      const deliv = Array.isArray(langData.deliverables) ? langData.deliverables : (langData.deliverables ? String(langData.deliverables).split('\n').filter(Boolean) : []);
-      const rev = langData.included_revisions || '';
-      const delTime = langData.estimated_delivery_time || '';
+  function renderView(lang) {
+    currentLang = lang;
+    const lData = trans[lang] || trans.fr;
+    const labels = dict[lang] || dict.fr;
+    const isRtl = lang === 'ar';
 
-      const labels = {
-        fr: {
-          inc: "Ce qui est inclus",
-          exc: "Ce qui n'est pas inclus",
-          deliv: "Livrables garantis",
-          rev: "Révisions",
-          delTime: "Délai estimé",
-        },
-        en: {
-          inc: "What is included",
-          exc: "What is excluded",
-          deliv: "Guaranteed deliverables",
-          rev: "Revisions",
-          delTime: "Estimated delivery",
-        },
-        ar: {
-          inc: "ما يشمله العرض",
-          exc: "ما لا يشمله العرض",
-          deliv: "المخرجات والتسليمات",
-          rev: "التعديلات",
-          delTime: "مدة التنفيذ",
-        }
-      }[langCode] || labels.fr;
-
-      return `
-        <div class="tab-pane fade ${isActive ? 'show active' : ''}" id="svc-pane-${langCode}" role="tabpanel" dir="${isRtl ? 'rtl' : 'ltr'}">
-          <div class="row g-3">
-            <div class="col-12">
-              <h5 class="fw-bold text-light mb-2">${name}</h5>
-              ${shortDesc ? `<p class="lead fs-6 text-light opacity-90 mb-2">${shortDesc}</p>` : ''}
-              ${detailedDesc ? `<div class="p-3 rounded-3 mb-3 text-light" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); font-size:0.88rem; line-height:1.6;">${detailedDesc.replace(/\n/g, '<br>')}</div>` : ''}
-            </div>
-
-            ${(delTime || rev) ? `
-              <div class="col-12 d-flex flex-wrap gap-2 mb-2">
-                ${delTime ? `<span class="badge bg-dark border border-secondary text-light px-3 py-2 rounded-3"><i class="fas fa-clock text-warning ${isRtl ? 'ms-1' : 'me-1'}"></i><strong>${labels.delTime}:</strong> ${delTime}</span>` : ''}
-                ${rev ? `<span class="badge bg-dark border border-secondary text-light px-3 py-2 rounded-3"><i class="fas fa-redo text-info ${isRtl ? 'ms-1' : 'me-1'}"></i><strong>${labels.rev}:</strong> ${rev}</span>` : ''}
-              </div>
-            ` : ''}
-
-            ${inc.length > 0 ? `
-              <div class="col-md-6">
-                <h6 class="text-success fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
-                  <i class="fas fa-check-circle"></i> ${labels.inc}
-                </h6>
-                <ul class="list-unstyled mb-0" style="font-size:0.85rem;">
-                  ${inc.map(item => `<li class="d-flex align-items-start gap-2 mb-1 text-light"><i class="fas fa-check text-success mt-1" style="font-size:0.75rem;"></i><span>${item}</span></li>`).join('')}
-                </ul>
-              </div>
-            ` : ''}
-
-            ${exc.length > 0 ? `
-              <div class="col-md-6">
-                <h6 class="text-danger fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
-                  <i class="fas fa-times-circle"></i> ${labels.exc}
-                </h6>
-                <ul class="list-unstyled mb-0" style="font-size:0.85rem;">
-                  ${exc.map(item => `<li class="d-flex align-items-start gap-2 mb-1 text-light opacity-75"><i class="fas fa-times text-danger mt-1" style="font-size:0.75rem;"></i><span>${item}</span></li>`).join('')}
-                </ul>
-              </div>
-            ` : ''}
-
-            ${deliv.length > 0 ? `
-              <div class="col-12 mt-2">
-                <h6 class="text-warning fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
-                  <i class="fas fa-box-open"></i> ${labels.deliv}
-                </h6>
-                <div class="d-flex flex-wrap gap-2">
-                  ${deliv.map(item => `<span class="badge bg-dark border border-warning border-opacity-25 text-light px-3 py-2 rounded-3" style="font-size:0.8rem;"><i class="fas fa-file-alt text-warning ${isRtl ? 'ms-1' : 'me-1'}"></i>${item}</span>`).join('')}
-                </div>
-              </div>
-            ` : ''}
-          </div>
-        </div>
-      `;
+    // 1. Header Title & Badges
+    if (titleEl) {
+      titleEl.textContent = lData.name || s.name || labels.modalTitle;
+    }
+    if (badgesEl) {
+      let pBadge = `<span class="badge bg-warning text-dark font-monospace px-3 py-1 rounded-pill fw-bold">${labels.badgePricing}</span>`;
+      let defBadge = s.is_default ? `<span class="badge bg-warning text-dark font-monospace px-2 py-1 rounded-pill fw-bold"><i class="fas fa-check-circle me-1"></i>${labels.defaultBadge}</span>` : '';
+      badgesEl.innerHTML = `<div class="d-flex align-items-center gap-2 flex-wrap">${pBadge}${defBadge}</div>`;
     }
 
-    bodyEl.innerHTML = `
-      <!-- Single Row Language Switcher -->
-      <ul class="nav nav-pills gap-2 flex-nowrap w-100 mb-4 position-relative" id="svcDetailsLangTabs" role="tablist" style="background: rgba(255,255,255,0.03); padding: 5px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); position: relative; z-index: 5;">
-        <li class="nav-item flex-fill text-center position-relative" role="presentation" style="position: relative;">
-          <button class="nav-link active w-100 py-2 px-2 rounded-pill fw-bold text-light text-nowrap d-flex align-items-center justify-content-center gap-1 position-relative" id="svc-tab-btn-fr" data-bs-toggle="pill" data-bs-target="#svc-pane-fr" type="button" role="tab" style="font-size:0.84rem; position: relative;">
-            <span>🇫🇷 Français</span>
-          </button>
-        </li>
-        <li class="nav-item flex-fill text-center position-relative" role="presentation" style="position: relative;">
-          <button class="nav-link w-100 py-2 px-2 rounded-pill fw-bold text-light text-nowrap d-flex align-items-center justify-content-center gap-1 position-relative" id="svc-tab-btn-en" data-bs-toggle="pill" data-bs-target="#svc-pane-en" type="button" role="tab" style="font-size:0.84rem; position: relative;">
-            <span>🇬🇧 English</span>
-          </button>
-        </li>
-        <li class="nav-item flex-fill text-center position-relative" role="presentation" style="position: relative;">
-          <button class="nav-link w-100 py-2 px-2 rounded-pill fw-bold text-light text-nowrap d-flex align-items-center justify-content-center gap-1 position-relative" id="svc-tab-btn-ar" data-bs-toggle="pill" data-bs-target="#svc-pane-ar" type="button" role="tab" style="font-size:0.84rem; position: relative;">
-            <span>🇩🇿 العربية</span>
-          </button>
-        </li>
-      </ul>
-
-      <div class="tab-content" id="svcDetailsLangContent">
-        ${renderTabPane(tFr, 'fr', true)}
-        ${renderTabPane(tEn, 'en', false)}
-        ${renderTabPane(tAr, 'ar', false)}
-      </div>
-
-      ${(s.video_link || s.gif_url) ? `
-        <div class="col-12 mt-4 pt-3 border-top border-secondary border-opacity-25">
-          <h6 class="text-info fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
-            <i class="fas fa-play-circle"></i> Aperçu vidéo / Animation
-          </h6>
-          ${s.gif_url ? `<img src="${s.gif_url}" class="img-fluid rounded-3 border border-secondary border-opacity-25 mb-2" style="max-height:220px; object-fit:cover;" alt="Preview">` : ''}
-          ${s.video_link ? `<a href="${s.video_link}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info rounded-pill px-3 mt-1 text-light"><i class="fas fa-external-link-alt me-1"></i>Visionner la vidéo explicative</a>` : ''}
-        </div>
-      ` : ''}
-    `;
-  }
-
-  function updateToggleBtnState() {
+    // 2. Footer Buttons Localization & State
     const currentlySelected = st.services.some(id => String(id) === String(s.id) || String(id) === s.slug);
     if (toggleBtn) {
       if (currentlySelected) {
-        toggleBtn.innerHTML = '<i class="fas fa-minus-circle me-1"></i> Retirer du devis';
-        toggleBtn.className = 'btn btn-outline-danger btn-sm px-4 rounded-3 fw-bold';
+        toggleBtn.innerHTML = `<i class="fas fa-minus-circle ${isRtl ? 'ms-1' : 'me-1'}"></i> ${labels.removeQuote}`;
+        toggleBtn.className = 'btn btn-outline-danger btn-sm px-4 rounded-pill fw-bold';
       } else {
-        toggleBtn.innerHTML = '<i class="fas fa-plus-circle me-1"></i> Ajouter au devis';
-        toggleBtn.className = 'btn dash-btn-primary btn-sm px-4 rounded-3 fw-bold';
+        toggleBtn.innerHTML = `<i class="fas fa-plus-circle ${isRtl ? 'ms-1' : 'me-1'}"></i> ${labels.addQuote}`;
+        toggleBtn.className = 'btn dash-btn-primary btn-sm px-4 rounded-pill fw-bold';
       }
     }
+    const closeBtn = modalEl.querySelector('.modal-footer-close-btn');
+    if (closeBtn) closeBtn.textContent = labels.close;
+
+    // 3. Body Content (Showing ONLY corresponding language)
+    const inc = Array.isArray(lData.included_items) ? lData.included_items : (lData.included_items ? String(lData.included_items).split('\n').filter(Boolean) : []);
+    const exc = Array.isArray(lData.excluded_items) ? lData.excluded_items : (lData.excluded_items ? String(lData.excluded_items).split('\n').filter(Boolean) : []);
+    const deliv = Array.isArray(lData.deliverables) ? lData.deliverables : (lData.deliverables ? String(lData.deliverables).split('\n').filter(Boolean) : []);
+    const rev = lData.included_revisions || '';
+    const delTime = lData.estimated_delivery_time || '';
+
+    bodyEl.innerHTML = `
+      <!-- Single Row Relative Language Switcher -->
+      <div class="svc-lang-switcher-wrap mb-4 position-relative" style="position: relative; z-index: 10;">
+        <div class="d-flex align-items-center gap-2 w-100 p-1 rounded-pill" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); position: relative;">
+          <button type="button" class="btn svc-lang-btn flex-fill rounded-pill py-2 px-2 fw-bold text-nowrap position-relative ${lang === 'fr' ? 'active' : ''}" data-svc-set-lang="fr" style="font-size:0.84rem; position: relative;">
+            🇫🇷 Français
+          </button>
+          <button type="button" class="btn svc-lang-btn flex-fill rounded-pill py-2 px-2 fw-bold text-nowrap position-relative ${lang === 'en' ? 'active' : ''}" data-svc-set-lang="en" style="font-size:0.84rem; position: relative;">
+            🇬🇧 English
+          </button>
+          <button type="button" class="btn svc-lang-btn flex-fill rounded-pill py-2 px-2 fw-bold text-nowrap position-relative ${lang === 'ar' ? 'active' : ''}" data-svc-set-lang="ar" style="font-size:0.84rem; position: relative;">
+            🇩🇿 العربية
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Language View ONLY -->
+      <div class="svc-lang-view-pane" dir="${isRtl ? 'rtl' : 'ltr'}">
+        <div class="row g-3">
+          <!-- Main Description Header -->
+          <div class="col-12">
+            <h4 class="fw-bold text-light mb-2">${lData.name || s.name}</h4>
+            ${lData.short_description ? `<p class="lead fs-6 text-light opacity-90 mb-3">${lData.short_description}</p>` : ''}
+            ${lData.detailed_description ? `
+              <div class="p-3 rounded-3 mb-3 text-light" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.88rem; line-height: 1.65;">
+                ${lData.detailed_description.replace(/\n/g, '<br>')}
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Key Metrics Badges -->
+          ${(delTime || rev) ? `
+            <div class="col-12 d-flex flex-wrap gap-2 mb-2">
+              ${delTime ? `<span class="badge bg-dark border border-secondary text-light px-3 py-2 rounded-3" style="font-size:0.82rem;"><i class="fas fa-clock text-warning ${isRtl ? 'ms-1' : 'me-1'}"></i><strong>${labels.deliveryTime}:</strong> ${delTime}</span>` : ''}
+              ${rev ? `<span class="badge bg-dark border border-secondary text-light px-3 py-2 rounded-3" style="font-size:0.82rem;"><i class="fas fa-redo text-info ${isRtl ? 'ms-1' : 'me-1'}"></i><strong>${labels.revisions}:</strong> ${rev}</span>` : ''}
+            </div>
+          ` : ''}
+
+          <!-- Included Features Card -->
+          ${inc.length > 0 ? `
+            <div class="col-md-6">
+              <div class="p-3 rounded-3 h-100" style="background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.18);">
+                <h6 class="text-success fw-bold small text-uppercase mb-3 d-flex align-items-center gap-2">
+                  <i class="fas fa-check-circle"></i> ${labels.included}
+                </h6>
+                <ul class="list-unstyled mb-0" style="font-size: 0.85rem;">
+                  ${inc.map(item => `<li class="d-flex align-items-start gap-2 mb-2 text-light"><i class="fas fa-check text-success mt-1" style="font-size:0.75rem;"></i><span>${item}</span></li>`).join('')}
+                </ul>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Excluded Features Card -->
+          ${exc.length > 0 ? `
+            <div class="col-md-6">
+              <div class="p-3 rounded-3 h-100" style="background: rgba(239, 68, 68, 0.04); border: 1px solid rgba(239, 68, 68, 0.18);">
+                <h6 class="text-danger fw-bold small text-uppercase mb-3 d-flex align-items-center gap-2">
+                  <i class="fas fa-times-circle"></i> ${labels.excluded}
+                </h6>
+                <ul class="list-unstyled mb-0" style="font-size: 0.85rem;">
+                  ${exc.map(item => `<li class="d-flex align-items-start gap-2 mb-2 text-light opacity-75"><i class="fas fa-times text-danger mt-1" style="font-size:0.75rem;"></i><span>${item}</span></li>`).join('')}
+                </ul>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Guaranteed Deliverables Card -->
+          ${deliv.length > 0 ? `
+            <div class="col-12 mt-3">
+              <div class="p-3 rounded-3" style="background: rgba(244, 184, 95, 0.04); border: 1px solid rgba(244, 184, 95, 0.18);">
+                <h6 class="text-warning fw-bold small text-uppercase mb-3 d-flex align-items-center gap-2">
+                  <i class="fas fa-box-open"></i> ${labels.deliverables}
+                </h6>
+                <div class="d-flex flex-wrap gap-2">
+                  ${deliv.map(item => `<span class="badge bg-dark border border-warning border-opacity-25 text-light px-3 py-2 rounded-3" style="font-size:0.82rem;"><i class="fas fa-file-alt text-warning ${isRtl ? 'ms-1' : 'me-1'}"></i>${item}</span>`).join('')}
+                </div>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Media Section -->
+          ${(s.video_link || s.gif_url) ? `
+            <div class="col-12 mt-3">
+              <div class="p-3 rounded-3" style="background: rgba(85, 220, 255, 0.04); border: 1px solid rgba(85, 220, 255, 0.18);">
+                <h6 class="text-info fw-bold small text-uppercase mb-2 d-flex align-items-center gap-2">
+                  <i class="fas fa-play-circle"></i> ${labels.mediaTitle}
+                </h6>
+                ${s.gif_url ? `<img src="${s.gif_url}" class="img-fluid rounded-3 border border-secondary border-opacity-25 mb-2 w-100" style="max-height:220px; object-fit:cover;" alt="Preview">` : ''}
+                ${s.video_link ? `<a href="${s.video_link}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info rounded-pill px-3 mt-1 text-light"><i class="fas fa-external-link-alt ${isRtl ? 'ms-1' : 'me-1'}"></i>${labels.watchVideo}</a>` : ''}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+
+    // Bind language switcher buttons
+    bodyEl.querySelectorAll('[data-svc-set-lang]').forEach(btn => {
+      btn.onclick = () => {
+        const nextLang = btn.dataset.svcSetLang;
+        renderView(nextLang);
+      };
+    });
   }
 
-  updateToggleBtnState();
+  // Initial render
+  renderView(currentLang);
 
   if (toggleBtn) {
     toggleBtn.onclick = () => {
@@ -518,7 +560,7 @@ function renderServices() {
                 <div class="svc-info">
                   <div class="d-flex align-items-center gap-2 flex-wrap">
                     <strong class="text-light">${s.name}</strong>
-                    ${s.is_default ? `<span class="badge bg-warning-subtle text-light border border-warning border-opacity-25 rounded-pill font-monospace" style="font-size:0.65rem;">Inclus par défaut</span>` : ''}
+                    ${s.is_default ? `<span class="badge bg-warning text-dark border border-warning border-opacity-25 rounded-pill font-monospace" style="font-size:0.65rem;">Inclus par défaut</span>` : ''}
                   </div>
                   ${s.short_description ? `<div class="svc-short-desc text-light opacity-75 small mt-1" style="font-size:0.8rem; line-height:1.3; max-width:320px;">${s.short_description}</div>` : ''}
                   <small class="text-info font-monospace d-block mt-1">${unitBadge}</small>

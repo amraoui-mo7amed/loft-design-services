@@ -7607,7 +7607,8 @@ body.galleryOpen {
 }
 
 #svcDetailsLangTabs .nav-link,
-#serviceLangTabs .nav-link {
+#serviceLangTabs .nav-link,
+.svc-lang-btn {
   position: relative !important;
   z-index: 2 !important;
   border-radius: 999px !important;
@@ -7622,13 +7623,15 @@ body.galleryOpen {
 }
 
 #svcDetailsLangTabs .nav-link:hover,
-#serviceLangTabs .nav-link:hover {
+#serviceLangTabs .nav-link:hover,
+.svc-lang-btn:hover {
   color: #ffffff !important;
   background: rgba(255, 255, 255, 0.08) !important;
 }
 
 #svcDetailsLangTabs .nav-link.active,
-#serviceLangTabs .nav-link.active {
+#serviceLangTabs .nav-link.active,
+.svc-lang-btn.active {
   background: rgba(85, 220, 255, 0.2) !important;
   color: #55dcff !important;
   border-color: rgba(85, 220, 255, 0.45) !important;
