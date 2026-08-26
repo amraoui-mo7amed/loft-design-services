@@ -1,0 +1,412 @@
+{% extends "dash/dash_index.html" %}
+{% load i18n %}
+{% load static %}
+{% load l10n %}
+
+{% block dashTitle %}
+    {% trans "Create New Commercial Quote" %}
+{% endblock dashTitle %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/service_list.css' %}?v={{ ASSET_VERSION }}">
+    <style>
+        .builder-section {
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(16px);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .builder-service-card, .builder-space-card {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 14px 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .builder-service-card:hover, .builder-space-card:hover {
+            border-color: rgba(255, 214, 90, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .builder-service-card.selected, .builder-space-card.selected {
+            border-color: #ffd65a;
+            background: rgba(255, 214, 90, 0.1);
+        }
+    </style>
+{% endblock extra_css %}
+
+{% block dashContent %}
+<div class="svc-management-container container-fluid px-0">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <a href="{% url 'dash:quote_list' %}" class="btn btn-outline-secondary btn-sm rounded-circle me-1" style="width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h4 class="fw-bold text-light mb-0">{% trans "Create New Commercial Quote" %}</h4>
+            </div>
+            <p class="text-muted small mb-0">{% trans "Configure customer profile, project parameters, space breakdown, percentage and fixed services, and apply commercial discounts." %}</p>
+        </div>
+    </div>
+
+    <form id="quoteBuilderForm" action="{% url 'dash:quote_create' %}" method="post" class="form">
+        {% csrf_token %}
+        <div class="row g-4">
+            <!-- Left: Builder Controls -->
+            <div class="col-lg-8">
+                <!-- 1. Client Profile -->
+                <div class="builder-section shadow-sm">
+                    <h6 class="text-warning fw-bold mb-3 d-flex align-items-center gap-2">
+                        <i class="fas fa-user-circle"></i> 1. {% trans "Customer Profile" %}
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-light fw-semibold small">{% trans "Client Type" %}</label>
+                            <select name="client_type" id="builderClientType" class="form-select svc-input">
+                                <option value="particular">{% trans "Particulier" %}</option>
+                                <option value="professional">{% trans "Professionnel (+ TVA 19%)" %}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 d-none" id="companyWrapper">
+                            <label class="form-label text-light fw-semibold small">{% trans "Company Name" %}</label>
+                            <input type="text" name="company_name" id="builderCompany" class="form-control svc-input" placeholder="{% trans 'e.g. SARL Architecture & Design' %}">
+                        </div>
+                        <div class="col-md-6" id="firstNameWrapper">
+                            <label class="form-label text-light fw-semibold small">{% trans "First Name" %} <span class="text-danger">*</span></label>
+                            <input type="text" name="first_name" id="builderFirstName" class="form-control svc-input" required placeholder="{% trans 'Client First Name' %}">
+                        </div>
+                        <div class="col-md-6" id="lastNameWrapper">
+                            <label class="form-label text-light fw-semibold small">{% trans "Last Name" %} <span class="text-danger">*</span></label>
+                            <input type="text" name="last_name" id="builderLastName" class="form-control svc-input" required placeholder="{% trans 'Client Last Name' %}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light fw-semibold small">{% trans "Email" %} <span class="text-danger">*</span></label>
+                            <input type="email" name="email" id="builderEmail" class="form-control svc-input" required placeholder="client@exemple.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light fw-semibold small">{% trans "Phone" %}</label>
+                            <input type="text" name="phone" id="builderPhone" class="form-control svc-input" placeholder="+213 ...">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light fw-semibold small">{% trans "Wilaya" %}</label>
+                            <input type="text" name="wilaya" class="form-control svc-input" placeholder="Alger, Oran, Béjaïa...">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light fw-semibold small">{% trans "Commune" %}</label>
+                            <input type="text" name="commune" class="form-control svc-input" placeholder="Commune">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Project Parameters -->
+                <div class="builder-section shadow-sm">
+                    <h6 class="text-warning fw-bold mb-3 d-flex align-items-center gap-2">
+                        <i class="fas fa-drafting-compass"></i> 2. {% trans "Project Parameters" %}
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-light fw-semibold small">{% trans "Project Name" %}</label>
+                            <input type="text" name="project_name" class="form-control svc-input" placeholder="{% trans 'e.g. Résidence Moderne Hydra' %}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light fw-semibold small">{% trans "Project Type" %}</label>
+                            <select name="project_type_id" class="form-select svc-input">
+                                <option value="">{% trans "Select Project Type" %}</option>
+                                {% for pt in project_types %}
+                                    <option value="{{ pt.id }}">{{ pt.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light fw-semibold small">
+                                <i class="fas fa-ruler-combined text-info me-1"></i> {% trans "Total Surface (m²)" %}
+                            </label>
+                            <input type="number" name="total_surface" id="builderSurface" class="form-control svc-input" min="0" step="1" value="120">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light fw-semibold small">
+                                <i class="fas fa-coins text-warning me-1"></i> {% trans "Estimated Total Project Cost (DA)" %}
+                            </label>
+                            <input type="number" name="estimated_total_project_cost" id="builderProjectCost" class="form-control svc-input" min="0" step="1000" placeholder="10000000" value="0">
+                            <small class="text-muted" style="font-size:0.75rem;">{% trans "Used as computation base for Percentage-of-Cost services." %}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Space Breakdown Selection -->
+                <div class="builder-section shadow-sm">
+                    <h6 class="text-warning fw-bold mb-3 d-flex align-items-center gap-2">
+                        <i class="fas fa-vector-square"></i> 3. {% trans "Spaces & Rooms" %}
+                    </h6>
+                    <div class="row g-3">
+                        {% for sp in spaces %}
+                            <div class="col-md-6">
+                                <label class="builder-space-card d-flex align-items-center justify-content-between cursor-pointer w-100">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="checkbox" name="space_ids" value="{{ sp.id }}" data-price="{{ sp.base_price|unlocalize }}" class="form-check-input space-checkbox m-0">
+                                        <span class="text-light fw-semibold small">{{ sp.name }}</span>
+                                    </div>
+                                    <span class="font-monospace text-warning small">{{ sp.base_price|unlocalize }} DA</span>
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 4. Prestations & Catalog Services -->
+                <div class="builder-section shadow-sm">
+                    <h6 class="text-warning fw-bold mb-3 d-flex align-items-center gap-2">
+                        <i class="fas fa-layer-group"></i> 4. {% trans "Catalog Services & Options" %}
+                    </h6>
+                    <div class="row g-3">
+                        {% for s in services %}
+                            <div class="col-12">
+                                <label class="builder-service-card d-flex align-items-center justify-content-between cursor-pointer w-100 {% if s.is_default %}selected{% endif %}">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <input type="checkbox" name="service_ids" value="{{ s.id }}" 
+                                               data-pricing-type="{{ s.pricing_type }}"
+                                               data-price="{{ s.service_price|unlocalize }}"
+                                               data-rate="{{ s.percentage_rate|default:'0'|unlocalize }}"
+                                               data-min-fee="{{ s.min_fee|default:'0'|unlocalize }}"
+                                               data-max-fee="{{ s.max_fee|default:'0'|unlocalize }}"
+                                               class="form-check-input service-checkbox m-0"
+                                               {% if s.is_default %}checked{% endif %}>
+                                        <div>
+                                            <div class="fw-bold text-light">{{ s.service_name }}</div>
+                                            <div class="text-muted small" style="font-size:0.75rem;">
+                                                <span class="badge bg-dark border border-secondary text-info rounded-pill font-monospace me-1">{{ s.get_pricing_type_display }}</span>
+                                                {% if s.short_description %}{{ s.short_description }}{% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end font-monospace text-warning fw-semibold service-computed-price" id="svc-computed-{{ s.id }}">
+                                        {{ s.service_price|unlocalize }} DA
+                                    </div>
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 5. Commercial Discount Section -->
+                <div class="builder-section shadow-sm">
+                    <h6 class="text-warning fw-bold mb-3 d-flex align-items-center gap-2">
+                        <i class="fas fa-percent"></i> 5. {% trans "Commercial Discount (Optional)" %}
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-light fw-semibold small">{% trans "Discount Type" %}</label>
+                            <select name="discount_type" id="builderDiscountType" class="form-select svc-input">
+                                <option value="">{% trans "No Discount" %}</option>
+                                <option value="percentage">{% trans "Percentage (%)" %}</option>
+                                <option value="fixed">{% trans "Fixed Amount (DA)" %}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light fw-semibold small">{% trans "Discount Value" %}</label>
+                            <input type="number" name="discount_value" id="builderDiscountValue" class="form-control svc-input" min="0" step="0.01" value="0">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-light fw-semibold small">
+                                <i class="fas fa-shield-alt text-warning me-1"></i> {% trans "Internal Reason (Mandatory if discount applied)" %}
+                            </label>
+                            <textarea name="internal_discount_reason" id="builderInternalReason" rows="2" class="form-control svc-input" placeholder="{% trans 'Required for audit trail when applying a discount...' %}"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-light fw-semibold small">
+                                <i class="fas fa-comment-alt text-info me-1"></i> {% trans "Client-Facing Note" %}
+                            </label>
+                            <input type="text" name="client_discount_note" class="form-control svc-input" placeholder="{% trans 'e.g. Remise commerciale de lancement' %}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Sticky Realtime Commercial Summary -->
+            <div class="col-lg-4">
+                <div class="builder-section shadow-sm sticky-top" style="top: 90px;">
+                    <h5 class="text-warning fw-bold mb-3 d-flex align-items-center gap-2 fs-6">
+                        <i class="fas fa-calculator"></i> {% trans "Quote Summary" %}
+                    </h5>
+
+                    <div class="d-flex justify-content-between mb-2 text-muted small">
+                        <span>{% trans "Spaces Subtotal" %}:</span>
+                        <strong class="text-light font-monospace" id="displaySpacesSubtotal">0 DA</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2 text-muted small">
+                        <span>{% trans "Services Subtotal" %}:</span>
+                        <strong class="text-light font-monospace" id="displayServicesSubtotal">0 DA</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2 text-muted small pt-2 border-top border-secondary border-opacity-25">
+                        <span>{% trans "Subtotal before discount" %}:</span>
+                        <strong class="text-light font-monospace" id="displaySubtotalBefore">0 DA</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2 text-success small" id="displayDiscountRow">
+                        <span>{% trans "Discount" %}:</span>
+                        <strong class="font-monospace" id="displayDiscountAmount">-0 DA</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2 text-muted small" id="displayTvaRow">
+                        <span>{% trans "TVA (19%)" %}:</span>
+                        <strong class="text-light font-monospace" id="displayTvaAmount">0 DA</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between pt-3 border-top border-secondary border-opacity-25 mb-4">
+                        <span class="fw-bold text-light fs-5">{% trans "Final Total" %}:</span>
+                        <strong class="text-warning font-monospace fs-4" id="displayFinalTotal">0 DA</strong>
+                    </div>
+
+                    <button type="submit" class="btn dash-btn-primary w-100 py-3 rounded-3 fw-bold shadow-lg d-flex align-items-center justify-content-center gap-2 fs-6" id="saveQuoteBtn">
+                        <i class="fas fa-save"></i>
+                        <span>{% trans "Create Quote" %}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock dashContent %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("quoteBuilderForm");
+    const clientType = document.getElementById("builderClientType");
+    const companyWrapper = document.getElementById("companyWrapper");
+    const surfaceInput = document.getElementById("builderSurface");
+    const projectCostInput = document.getElementById("builderProjectCost");
+    const discountType = document.getElementById("builderDiscountType");
+    const discountValue = document.getElementById("builderDiscountValue");
+
+    const displaySpaces = document.getElementById("displaySpacesSubtotal");
+    const displayServices = document.getElementById("displayServicesSubtotal");
+    const displaySubtotal = document.getElementById("displaySubtotalBefore");
+    const displayDiscount = document.getElementById("displayDiscountAmount");
+    const displayTva = document.getElementById("displayTvaAmount");
+    const displayFinal = document.getElementById("displayFinalTotal");
+
+    function calculateLive() {
+        const cost = parseFloat(projectCostInput?.value || 0);
+        const surface = parseFloat(surfaceInput?.value || 0);
+        const isPro = clientType?.value === "professional";
+
+        if (companyWrapper) {
+            companyWrapper.classList.toggle("d-none", !isPro);
+        }
+
+        // Spaces subtotal
+        let spacesSubtotal = 0;
+        document.querySelectorAll(".space-checkbox:checked").forEach(cb => {
+            spacesSubtotal += parseFloat(cb.dataset.price || 0);
+            cb.closest(".builder-space-card")?.classList.add("selected");
+        });
+        document.querySelectorAll(".space-checkbox:not(:checked)").forEach(cb => {
+            cb.closest(".builder-space-card")?.classList.remove("selected");
+        });
+
+        // Services subtotal
+        let servicesSubtotal = 0;
+        document.querySelectorAll(".service-checkbox").forEach(cb => {
+            const pType = cb.dataset.pricingType;
+            const price = parseFloat(cb.dataset.price || 0);
+            const rate = parseFloat(cb.dataset.rate || 0);
+            const minFee = parseFloat(cb.dataset.minFee || 0);
+            const maxFee = parseFloat(cb.dataset.maxFee || 0);
+            let fee = 0;
+
+            if (pType === "percent_project_cost") {
+                fee = (cost * rate) / 100;
+                if (minFee > 0) fee = Math.max(fee, minFee);
+                if (maxFee > 0) fee = Math.min(fee, maxFee);
+            } else if (pType === "area") {
+                fee = surface * price;
+            } else {
+                fee = price;
+            }
+
+            const labelEl = document.getElementById(`svc-computed-${cb.value}`);
+            if (labelEl) labelEl.textContent = `${Math.round(fee).toLocaleString()} DA`;
+
+            if (cb.checked) {
+                servicesSubtotal += fee;
+                cb.closest(".builder-service-card")?.classList.add("selected");
+            } else {
+                cb.closest(".builder-service-card")?.classList.remove("selected");
+            }
+        });
+
+        const subtotalBefore = spacesSubtotal + servicesSubtotal;
+
+        // Discount
+        const dType = discountType?.value;
+        const dVal = parseFloat(discountValue?.value || 0);
+        let discountAmount = 0;
+        if (dType === "percentage" && dVal > 0) {
+            discountAmount = (subtotalBefore * Math.min(100, dVal)) / 100;
+        } else if (dType === "fixed" && dVal > 0) {
+            discountAmount = Math.min(subtotalBefore, dVal);
+        }
+
+        const subtotalAfter = Math.max(0, subtotalBefore - discountAmount);
+        const tva = isPro ? subtotalAfter * 0.19 : 0;
+        const finalTotal = subtotalAfter + tva;
+
+        if (displaySpaces) displaySpaces.textContent = `${Math.round(spacesSubtotal).toLocaleString()} DA`;
+        if (displayServices) displayServices.textContent = `${Math.round(servicesSubtotal).toLocaleString()} DA`;
+        if (displaySubtotal) displaySubtotal.textContent = `${Math.round(subtotalBefore).toLocaleString()} DA`;
+        if (displayDiscount) displayDiscount.textContent = `-${Math.round(discountAmount).toLocaleString()} DA`;
+        if (displayTva) displayTva.textContent = `${Math.round(tva).toLocaleString()} DA`;
+        if (displayFinal) displayFinal.textContent = `${Math.round(finalTotal).toLocaleString()} DA`;
+    }
+
+    form.querySelectorAll("input, select, textarea").forEach(el => {
+        el.addEventListener("input", calculateLive);
+        el.addEventListener("change", calculateLive);
+    });
+
+    calculateLive();
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const submitBtn = document.getElementById("saveQuoteBtn");
+        if (submitBtn) submitBtn.disabled = true;
+
+        fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (submitBtn) submitBtn.disabled = false;
+            if (data.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "{% trans 'Quote Created' %}",
+                    text: data.message,
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = data.redirect_url;
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "{% trans 'Validation Error' %}",
+                    text: Array.isArray(data.errors) ? data.errors.join("\n") : (data.errors || "{% trans 'An error occurred' %}")
+                });
+            }
+        })
+        .catch(err => {
+            if (submitBtn) submitBtn.disabled = false;
+            Swal.fire({ icon: "error", title: "{% trans 'Error' %}", text: err.message });
+        });
+    });
+});
+</script>
+{% endblock extra_js %}

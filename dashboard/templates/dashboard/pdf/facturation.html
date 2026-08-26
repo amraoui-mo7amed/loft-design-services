@@ -279,6 +279,20 @@
                 </tr>
             </thead>
             <tbody>
+                <!-- Spaces Section -->
+                {% if spaces %}
+                    <tr class="category-header-row">
+                        <td colspan="3">{% trans "Selected Spaces & Spatial Program" %}</td>
+                    </tr>
+                    {% for sp in spaces %}
+                        <tr>
+                            <td>{{ sp.name }}</td>
+                            <td class="center">{% trans "Space Base" %}</td>
+                            <td class="right" style="font-weight:bold;">{{ sp.price|floatformat:2 }} DA</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+
                 <!-- Floor Levels Section -->
                 {% if items %}
                     <tr class="category-header-row">
@@ -292,6 +306,7 @@
                         </tr>
                     {% endfor %}
                 {% endif %}
+
                 <!-- Selected Services Section -->
                 {% if services_list %}
                     <tr class="category-header-row">
@@ -299,9 +314,28 @@
                     </tr>
                     {% for s in services_list %}
                         <tr>
-                            <td><strong>{{ s.name }}</strong></td>
+                            <td>
+                                <strong>{{ s.name }}</strong>
+                                {% if s.formula %}<div style="font-size: 8pt; color: #6b7280;">{{ s.formula }}</div>{% endif %}
+                            </td>
                             <td class="center">{{ s.rate }}</td>
-                            <td class="right" style="font-weight:bold;">{{ s.amount }}</td>
+                            <td class="right" style="font-weight:bold;">{{ s.amount|floatformat:2 }} DA</td>
+                        </tr>
+                    {% endfor %}
+                {% elif services %}
+                    <tr class="category-header-row">
+                        <td colspan="3">{% trans "Selected Architectural & Design Services" %}</td>
+                    </tr>
+                    {% for s in services %}
+                        <tr>
+                            <td>
+                                <strong>{{ s.name }}</strong>
+                                {% if s.percentage_rate %}
+                                    <div style="font-size: 8pt; color: #6b7280;">{{ s.percentage_rate }}% {% trans "of estimated project cost" %}</div>
+                                {% endif %}
+                            </td>
+                            <td class="center">{% if s.percentage_rate %}{{ s.percentage_rate }}%{% else %}{{ s.price|floatformat:2 }} DA / {{ s.unit|default:"FORFAIT" }}{% endif %}</td>
+                            <td class="right" style="font-weight:bold;">{{ s.line_total|floatformat:2 }} DA</td>
                         </tr>
                     {% endfor %}
                 {% elif package_name %}
@@ -316,6 +350,7 @@
                 {% endif %}
             </tbody>
         </table>
+
         <!-- Totals & Notes -->
         <table class="totals-table">
             <tr>
@@ -324,18 +359,45 @@
                         <strong>{% trans "Proforma Quotation Notice:" %}</strong>
                         <br>
                         {% trans "This document serves as an official preliminary architectural estimate based on the configured floor levels and selected design services. Valid for 30 days." %}
+                        {% if client_discount_note %}
+                            <div style="margin-top: 6px; color: #166534; font-weight: bold;">
+                                ↳ {{ client_discount_note }}
+                            </div>
+                        {% endif %}
                     </div>
                 </td>
                 <td class="totals-col-right">
                     <div class="grand-total-box">
-                        <div class="grand-total-label">{% trans "Total Estimated Price" %}</div>
-                        <div class="grand-total-val">{{ total }} DA</div>
+                        {% if discount_amount and discount_amount > 0 %}
+                            <div style="display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 4px; color: #9ca3af;">
+                                <span>{% trans "Subtotal HT:" %}</span>
+                                <span>{{ subtotal_before_discount|floatformat:2 }} DA</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 4px; color: #4ade80;">
+                                <span>{% trans "Commercial Discount:" %}</span>
+                                <span>-{{ discount_amount|floatformat:2 }} DA</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 6px; color: #cbd5e1;">
+                                <span>{% trans "Subtotal Net HT:" %}</span>
+                                <span>{{ subtotal_after_discount|floatformat:2 }} DA</span>
+                            </div>
+                        {% endif %}
+
+                        {% if tax_amount and tax_amount > 0 %}
+                            <div style="display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 6px; color: #9ca3af;">
+                                <span>{% trans "TVA (19%):" %}</span>
+                                <span>{{ tax_amount|floatformat:2 }} DA</span>
+                            </div>
+                        {% endif %}
+
+                        <div class="grand-total-label">{% trans "Total TTC" %}</div>
+                        <div class="grand-total-val">{{ final_total|default:total|floatformat:2 }} DA</div>
                     </div>
                 </td>
             </tr>
         </table>
         <div class="footer-note">
-            <p>{{ thank_you_message }}</p>
+            <p>{{ thank_you_message|default:"LoftDesign Studio — Thank you for choosing our architectural services." }}</p>
         </div>
     </body>
 </html>

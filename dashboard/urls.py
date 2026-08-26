@@ -1,9 +1,18 @@
 from django.urls import path
-from dashboard.views import dashboard, users, notifications, design, customer, designer, admin_crm, pricing, portfolio, videos, content
+from dashboard.views import dashboard, users, notifications, design, customer, designer, admin_crm, pricing, portfolio, videos, content, quotes
 
 app_name = "dash"
 
 urlpatterns = [
+    # Quotes Management
+    path("quotes/", quotes.quote_list, name="quote_list"),
+    path("quotes/create/", quotes.quote_create, name="quote_create"),
+    path("quotes/<int:pk>/", quotes.quote_detail, name="quote_detail"),
+    path("quotes/<int:pk>/discount/", quotes.quote_apply_discount, name="quote_apply_discount"),
+    path("quotes/<int:pk>/revision/", quotes.quote_create_revision, name="quote_create_revision"),
+    path("quotes/<int:pk>/send/", quotes.quote_send, name="quote_send"),
+    path("quotes/<int:pk>/download-pdf/", quotes.quote_download_pdf, name="quote_download_pdf"),
+    path("quote/<uuid:uuid>/", quotes.customer_quote_view, name="customer_quote_view"),
     # Dashboard
     path("home/", dashboard.dash_home, name="dash_home"),
     # Designers

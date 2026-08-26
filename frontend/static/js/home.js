@@ -90,17 +90,32 @@ const spaces = (window.SPACES_DATA && window.SPACES_DATA.length > 0) ? window.SP
 const services = (window.SERVICES_DATA && window.SERVICES_DATA.length > 0) ? window.SERVICES_DATA : [{id:'3d',name:'Modélisation 3D',price:750},{id:'360',name:'Visite virtuelle 360°',price:8000},{id:'light',name:'Étude d’éclairage',price:12000}];
 const projectTypes = (window.PROJECT_TYPES_DATA && window.PROJECT_TYPES_DATA.length > 0) ? window.PROJECT_TYPES_DATA : [{id:'residence',name:'Résidence'},{id:'villa',name:'Villa'},{id:'appartement',name:'Appartement'},{id:'commercial',name:'Commercial'},{id:'bureau',name:'Bureau'},{id:'hotel',name:'Hôtel'}];
 const defaultSelectedSpaces = [];
-const defaultSelectedServices = (services.length >= 2) ? [services[0].id, services[1].id] : (services.length === 1 ? [services[0].id] : ['3d', '360']);
+// Strictly enforce SINGLE default service invariant on initialization
+const defaultSelectedServices = (() => {
+  const def = services.find(s => s.is_default);
+  if (def) return [def.id];
+  return (services.length > 0) ? [services[0].id] : ['3d'];
+})();
 let upperLevels=['R+3','R+2','R+1'];const middleLevels=['Terrasse / Jardin','RDC'];let lowerLevels=['R-1'];
-let st={mode:'quick',step:'project',spaces:[],services:defaultSelectedServices,projectType:'',levels:[],surfaces:{},promptLevel:null,typeAttention:false,missing:[],clientType:'particular',success:false,ref:'',client:null};
+let st={mode:'quick',step:'project',spaces:[],services:defaultSelectedServices,estimatedProjectCost:10000000,projectType:'',levels:[],surfaces:{},promptLevel:null,typeAttention:false,missing:[],clientType:'particular',success:false,ref:'',client:null};
 const area=()=>st.levels.reduce((s,l)=>s+(+st.surfaces[l]||0),0);
 const base=()=>st.mode==='quick'?spaces.filter(x=>st.spaces.includes(x.id)).reduce((s,x)=>s+(x.price||0),0):0;
 const servicePrice=id=>{
-  const s = services.find(x => String(x.id) === String(id) || (x.name && x.name.toLowerCase().includes('3d') && String(id) === '3d') || (x.name && x.name.toLowerCase().includes('360') && String(id) === '360') || (x.name && x.name.toLowerCase().includes('éclairage') && String(id) === 'light'));
+  const s = services.find(x => String(x.id) === String(id) || (x.slug && String(x.slug) === String(id)) || (x.name && x.name.toLowerCase().includes('3d') && String(id) === '3d') || (x.name && x.name.toLowerCase().includes('360') && String(id) === '360') || (x.name && x.name.toLowerCase().includes('éclairage') && String(id) === 'light'));
   if (!s) {
     return id === '3d' ? (750 * (st.mode === 'custom' ? (area() || 320) : 320)) : (id === '360' ? 8000 : 12000);
   }
-  const is3d = (s.name && s.name.toLowerCase().includes('3d')) || s.pricing_type === 'per_sqm' || id === '3d';
+  if (s.pricing_type === 'percent_project_cost') {
+    const cost = parseFloat(st.estimatedProjectCost || 0);
+    const rate = parseFloat(s.percentage_rate || 0);
+    let fee = (cost * rate) / 100;
+    const minFee = parseFloat(s.min_fee || 0);
+    const maxFee = parseFloat(s.max_fee || 0);
+    if (minFee > 0) fee = Math.max(fee, minFee);
+    if (maxFee > 0) fee = Math.min(fee, maxFee);
+    return Math.round(fee);
+  }
+  const is3d = (s.name && s.name.toLowerCase().includes('3d')) || s.pricing_type === 'per_sqm' || s.pricing_type === 'area' || id === '3d';
   if (is3d) {
     const unitP = s.price || 750;
     const a = st.mode === 'custom' ? area() : 320;
@@ -244,25 +259,181 @@ function renderProject(){
   document.querySelector('#toServices').onclick=()=>{if(validateSurfaces())gotoStep('services')};
 }
 
+function openServiceDetailsModal(serviceId) {
+  const s = services.find(x => String(x.id) === String(serviceId) || String(x.slug) === String(serviceId));
+  if (!s) return;
+
+  const modalEl = document.getElementById('serviceDetailsModal');
+  if (!modalEl) return;
+
+  const titleEl = document.getElementById('serviceDetailsModalTitle');
+  const badgesEl = document.getElementById('serviceDetailsHeaderBadges');
+  const bodyEl = document.getElementById('serviceDetailsBody');
+  const toggleBtn = document.getElementById('serviceDetailsToggleActionBtn');
+
+  if (titleEl) titleEl.textContent = s.name;
+
+  if (badgesEl) {
+    let pBadge = '';
+    if (s.pricing_type === 'percent_project_cost') {
+      pBadge = `<span class="badge bg-warning text-dark font-monospace">${s.percentage_rate || 0}% du projet</span>`;
+    } else if (s.pricing_type === 'per_sqm' || s.pricing_type === 'area') {
+      pBadge = `<span class="badge bg-info text-dark font-monospace">${money(s.price || 750)} / m²</span>`;
+    } else {
+      pBadge = `<span class="badge bg-secondary font-monospace">${money(s.price || 0)} / forfait</span>`;
+    }
+    badgesEl.innerHTML = `
+      ${pBadge}
+      ${s.estimated_delivery_time ? `<span class="badge bg-dark border border-secondary text-light"><i class="fas fa-clock text-warning me-1"></i>${s.estimated_delivery_time}</span>` : ''}
+      ${s.included_revisions ? `<span class="badge bg-dark border border-secondary text-light"><i class="fas fa-redo text-info me-1"></i>${s.included_revisions}</span>` : ''}
+    `;
+  }
+
+  if (bodyEl) {
+    const includedList = Array.isArray(s.included_items) ? s.included_items : (s.included_items ? s.included_items.split('\n').filter(Boolean) : []);
+    const excludedList = Array.isArray(s.excluded_items) ? s.excluded_items : (s.excluded_items ? s.excluded_items.split('\n').filter(Boolean) : []);
+    const deliverablesList = Array.isArray(s.deliverables) ? s.deliverables : (s.deliverables ? s.deliverables.split('\n').filter(Boolean) : []);
+
+    bodyEl.innerHTML = `
+      <div class="row g-4">
+        <div class="col-12">
+          ${s.short_description ? `<p class="lead fs-6 text-light opacity-90 mb-3">${s.short_description}</p>` : ''}
+          ${s.detailed_description ? `<div class="p-3 rounded-3 mb-3" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); font-size:0.88rem; color:#cbd5e1; line-height:1.6;">${s.detailed_description.replace(/\n/g, '<br>')}</div>` : ''}
+        </div>
+
+        ${includedList.length > 0 ? `
+          <div class="col-md-6">
+            <h6 class="text-success fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
+              <i class="fas fa-check-circle"></i> Ce qui est inclus
+            </h6>
+            <ul class="list-unstyled mb-0" style="font-size:0.85rem;">
+              ${includedList.map(item => `<li class="d-flex align-items-start gap-2 mb-1 text-light"><i class="fas fa-check text-success mt-1" style="font-size:0.75rem;"></i><span>${item}</span></li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
+
+        ${excludedList.length > 0 ? `
+          <div class="col-md-6">
+            <h6 class="text-danger fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
+              <i class="fas fa-times-circle"></i> Ce qui n'est pas inclus
+            </h6>
+            <ul class="list-unstyled mb-0" style="font-size:0.85rem;">
+              ${excludedList.map(item => `<li class="d-flex align-items-start gap-2 mb-1 text-muted"><i class="fas fa-times text-danger mt-1" style="font-size:0.75rem;"></i><span>${item}</span></li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
+
+        ${deliverablesList.length > 0 ? `
+          <div class="col-12">
+            <h6 class="text-warning fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
+              <i class="fas fa-box-open"></i> Livrables garantis
+            </h6>
+            <div class="d-flex flex-wrap gap-2">
+              ${deliverablesList.map(item => `<span class="badge bg-dark border border-warning border-opacity-25 text-light px-3 py-2 rounded-3" style="font-size:0.8rem;"><i class="fas fa-file-alt text-warning me-1"></i>${item}</span>`).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        ${(s.video_url || s.video_preview_url || s.gif_preview_url) ? `
+          <div class="col-12 mt-3">
+            <h6 class="text-info fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
+              <i class="fas fa-play-circle"></i> Aperçu vidéo / Animation
+            </h6>
+            ${s.gif_preview_url ? `<img src="${s.gif_preview_url}" class="img-fluid rounded-3 border border-secondary border-opacity-25 mb-2" style="max-height:220px; object-fit:cover;" alt="Preview">` : ''}
+            ${s.video_url ? `<a href="${s.video_url}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill px-3 mt-1"><i class="fas fa-external-link-alt me-1"></i>Visionner la vidéo explicative</a>` : ''}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  function updateToggleBtnState() {
+    const currentlySelected = st.services.some(id => String(id) === String(s.id) || String(id) === s.slug);
+    if (toggleBtn) {
+      if (currentlySelected) {
+        toggleBtn.innerHTML = '<i class="fas fa-minus-circle me-1"></i> Retirer du devis';
+        toggleBtn.className = 'btn btn-outline-danger btn-sm px-4 rounded-3 fw-bold';
+      } else {
+        toggleBtn.innerHTML = '<i class="fas fa-plus-circle me-1"></i> Ajouter au devis';
+        toggleBtn.className = 'btn dash-btn-primary btn-sm px-4 rounded-3 fw-bold';
+      }
+    }
+  }
+
+  updateToggleBtnState();
+
+  if (toggleBtn) {
+    toggleBtn.onclick = () => {
+      const currentlySelected = st.services.some(id => String(id) === String(s.id) || String(id) === s.slug);
+      const finalId = s.id;
+      st.services = currentlySelected ? st.services.filter(y => String(y) !== String(finalId)) : [...st.services, finalId];
+      renderComposer();
+      if (typeof bootstrap !== 'undefined') {
+        bootstrap.Modal.getInstance(modalEl)?.hide();
+      }
+    };
+  }
+
+  if (typeof bootstrap !== 'undefined') {
+    let bsModal = bootstrap.Modal.getInstance(modalEl);
+    if (!bsModal) bsModal = new bootstrap.Modal(modalEl);
+    bsModal.show();
+  }
+}
+
 function renderServices() {
   const b = document.querySelector('#composerBody');
+  const hasPercentageService = services.some(s => s.pricing_type === 'percent_project_cost');
+
   b.innerHTML = `
     <div class="serviceStage">
       <div class="serviceChoices">
         <h3>Prestations disponibles</h3>
         <p>Choisissez les services à ajouter. Le total évolue immédiatement.</p>
+
+        ${hasPercentageService ? `
+          <div class="projectCostInputBox mb-3 p-3 rounded-3" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.12);">
+            <label class="d-flex align-items-center justify-content-between text-light small fw-bold mb-1">
+              <span><i class="fas fa-coins text-warning me-1"></i> Coût estimatif global du projet (DA)</span>
+              <span class="text-warning font-monospace" id="costLiveFormatted">${money(st.estimatedProjectCost || 10000000)}</span>
+            </label>
+            <input type="number" id="estimatedProjectCostInput" min="0" step="100000" class="form-control" style="background:rgba(0,0,0,0.4); border-color:rgba(255,255,255,0.2); color:#fff; font-family:monospace;" value="${st.estimatedProjectCost || 10000000}" placeholder="10000000">
+            <small class="text-muted d-block mt-1" style="font-size:0.75rem;">Ce montant sert de base de calcul pour les prestations calculées en pourcentage du coût du projet.</small>
+          </div>
+        ` : ''}
+
         ${services.map(s => {
           const isSelected = st.services.some(id => String(id) === String(s.id) || String(id) === s.slug);
-          const is3d = (s.name && s.name.toLowerCase().includes('3d')) || s.pricing_type === 'per_sqm' || s.id === '3d';
+          const is3d = (s.name && s.name.toLowerCase().includes('3d')) || s.pricing_type === 'per_sqm' || s.pricing_type === 'area' || s.id === '3d';
+          let unitBadge = '';
+          if (s.pricing_type === 'percent_project_cost') {
+            unitBadge = `${s.percentage_rate || 0}% du coût du projet`;
+          } else if (is3d) {
+            unitBadge = `${money(s.price || 750)} / m²`;
+          } else {
+            unitBadge = `${money(s.price || 0)} / forfait`;
+          }
+
           return `
-            <button type="button" class="serviceChoice ${isSelected ? 'selected' : ''}" data-service="${s.id}">
-              <i>${isSelected ? '✓' : '+'}</i>
-              <span>
-                <strong>${s.name}</strong>
-                <small>${is3d ? money(s.price || 750) + ' / m²' : money(s.price || 0) + ' / forfait'}</small>
-              </span>
-              <b>${money(servicePrice(s.id))}</b>
-            </button>
+            <div class="serviceChoice ${isSelected ? 'selected' : ''}" data-service="${s.id}">
+              <div class="d-flex align-items-center gap-3 flex-grow-1">
+                <i class="svc-check-icon">${isSelected ? '✓' : '+'}</i>
+                <div class="svc-info">
+                  <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <strong class="text-light">${s.name}</strong>
+                    ${s.is_default ? `<span class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 rounded-pill font-monospace" style="font-size:0.65rem;">Inclus par défaut</span>` : ''}
+                  </div>
+                  ${s.short_description ? `<div class="svc-short-desc text-muted small mt-1" style="font-size:0.8rem; line-height:1.3; max-width:320px;">${s.short_description}</div>` : ''}
+                  <small class="text-info font-monospace d-block mt-1">${unitBadge}</small>
+                </div>
+              </div>
+              <div class="d-flex flex-column align-items-end gap-2 ms-2">
+                <b class="font-monospace text-warning">${money(servicePrice(s.id))}</b>
+                <button type="button" class="btn btn-sm btn-service-details px-2 py-1 rounded-pill btn-outline-light" data-service-details="${s.id}" title="Détails de la prestation" style="font-size:0.75rem;">
+                  <i class="fas fa-info-circle me-1"></i>Détails
+                </button>
+              </div>
+            </div>
           `;
         }).join('')}
       </div>
@@ -287,14 +458,39 @@ function renderServices() {
     </div>
   `;
 
-  b.querySelectorAll('[data-service]').forEach(x => x.onclick = () => {
-    const id = x.dataset.service;
-    const matching = services.find(s => String(s.id) === String(id));
-    const finalId = matching ? matching.id : id;
-    const has = st.services.some(y => String(y) === String(finalId));
-    st.services = has ? st.services.filter(y => String(y) !== String(finalId)) : [...st.services, finalId];
-    renderComposer();
+  // Cost input binding
+  const costInput = b.querySelector('#estimatedProjectCostInput');
+  if (costInput) {
+    costInput.oninput = (e) => {
+      st.estimatedProjectCost = parseFloat(e.target.value) || 0;
+      const formatted = b.querySelector('#costLiveFormatted');
+      if (formatted) formatted.textContent = money(st.estimatedProjectCost);
+      renderComposer();
+    };
+  }
+
+  // Details button click -> stopPropagation and open details modal
+  b.querySelectorAll('.btn-service-details').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const sId = btn.dataset.serviceDetails;
+      openServiceDetailsModal(sId);
+    };
   });
+
+  // Card click -> toggle selection
+  b.querySelectorAll('.serviceChoice').forEach(card => {
+    card.onclick = (e) => {
+      if (e.target.closest('.btn-service-details')) return;
+      const id = card.dataset.service;
+      const matching = services.find(s => String(s.id) === String(id));
+      const finalId = matching ? matching.id : id;
+      const has = st.services.some(y => String(y) === String(finalId));
+      st.services = has ? st.services.filter(y => String(y) !== String(finalId)) : [...st.services, finalId];
+      renderComposer();
+    };
+  });
+
   document.querySelector('#toContact').onclick = () => gotoStep('contact');
 }
 
@@ -413,6 +609,7 @@ function renderContactStep(){
       project_type_name: st.projectType,
       project_type: st.projectType,
       total_surface: area(),
+      estimated_total_project_cost: st.estimatedProjectCost || 0,
       total: totalFinal(),
       floors: st.levels.map((l, idx) => ({
         name: l,

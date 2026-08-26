@@ -392,10 +392,38 @@
   </div>
 </footer>
 
-<section class="gallerySheet" id="gallerySheet">
-  <button class="galleryClose" id="galleryClose">⌄</button>
-  <div class="galleryInner" id="galleryInner"></div>
-</section>
+<!-- SERVICE DETAILS MODAL / RESPONSIVE SHEET -->
+<div class="modal fade" id="serviceDetailsModal" tabindex="-1" aria-labelledby="serviceDetailsModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content svc-details-glass border-0 rounded-4 shadow-lg overflow-hidden text-light">
+      <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom border-secondary border-opacity-25" style="background: rgba(15, 23, 42, 0.65);">
+        <div class="d-flex align-items-center gap-3">
+          <div class="svc-details-icon-badge">
+            <i class="fas fa-layer-group text-warning"></i>
+          </div>
+          <div>
+            <h4 class="modal-title fw-bold text-light mb-0 fs-5" id="serviceDetailsModalTitle">{% trans "Détails de la prestation" %}</h4>
+            <div class="d-flex align-items-center gap-2 mt-1" id="serviceDetailsHeaderBadges"></div>
+          </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{% trans 'Fermer' %}"></button>
+      </div>
+
+      <div class="p-4" id="serviceDetailsBody" style="max-height: 75vh; overflow-y: auto;">
+        <!-- Dynamic content injected by JS -->
+      </div>
+
+      <div class="px-4 py-3 d-flex align-items-center justify-content-between border-top border-secondary border-opacity-25" style="background: rgba(15, 23, 42, 0.65);">
+        <button type="button" class="btn btn-outline-light btn-sm px-4 rounded-3 fw-semibold" data-bs-dismiss="modal">
+          {% trans "Fermer" %}
+        </button>
+        <button type="button" class="btn dash-btn-primary btn-sm px-4 rounded-3 fw-bold shadow-sm" id="serviceDetailsToggleActionBtn">
+          <!-- Dynamic: Ajouter au devis / Retirer du devis -->
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 {% include "components/video_player.html" with target_btn=".videoCard, .videoInsideBtn, [data-explain-video]" %}
 {% endblock content %}

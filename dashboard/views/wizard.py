@@ -13,8 +13,9 @@ from ..models import (
     ProjectType, Space, SpaceCategoryImages, SpaceImage, Service, ServicePricing,
     DesignRequest, DesignRequestFloor, DesignRequestSpace, DesignRequestOption,
     DesignRequestSpaceImage, DesignRequestFile,
+    Quote, QuoteItem, QuoteSpace, QuoteAuditEvent,
 )
-from ..price_engine import calculate_full_price
+from ..price_engine import calculate_full_price, calculate_service_fee
 from ..pdf_generator import render_facturation_pdf_bytes
 from ..utils import build_packages_context, notify_user, humanize_error
 
@@ -269,6 +270,84 @@ def submit_design_request(request):
                             price_at_time=space_obj.base_price,
                         )
 
+            # Automatically create synchronized Commercial Quote for this request
+            estimated_project_cost = Decimal(str(data.get("estimated_total_project_cost", 0) or 0))
+            is_pro = (client_type == "professional")
+            subtotal_ht = total / Decimal("1.19") if is_pro else total
+            tax_amt = total - subtotal_ht if is_pro else Decimal("0.00")
+
+            quote = Quote.objects.create(
+                quote_number=f"LOFT-QUO-{design_request.project_number.replace('LOFT-', '') if 'LOFT-' in design_request.project_number else design_request.project_number}",
+                revision_number=1,
+                is_current_revision=True,
+                design_request=design_request,
+                client=request.user if request.user.is_authenticated else None,
+                origin=Quote.Origin.CUSTOMER,
+                status=Quote.Status.DRAFT,
+                first_name=first_name,
+                last_name=last_name,
+                company_name=company_name,
+                client_type=client_type,
+                email=email,
+                phone=phone,
+                wilaya=wilaya,
+                commune=commune,
+                project_name=project_name,
+                project_type=project_type,
+                total_surface=total_surface,
+                estimated_total_project_cost=estimated_project_cost,
+                subtotal_before_discount=subtotal_ht,
+                discount_amount=Decimal("0.00"),
+                subtotal_after_discount=subtotal_ht,
+                tax_amount=tax_amt,
+                final_total=total,
+            )
+
+            # Snapshot Quote items
+            for opt in design_request.options.select_related("service").all():
+                svc = opt.service
+                if svc:
+                    fee = calculate_service_fee(svc, estimated_project_cost=estimated_project_cost, total_surface=total_surface)
+                    trans = svc.get_translation("fr")
+                    QuoteItem.objects.create(
+                        quote=quote,
+                        service=svc,
+                        service_name=svc.service_name,
+                        pricing_model=svc.pricing_type,
+                        unit_price=svc.service_price,
+                        percentage_rate=svc.percentage_rate,
+                        estimated_project_cost_base=estimated_project_cost if svc.pricing_type == ServicePricing.PricingType.PERCENTAGE_PROJECT_COST else None,
+                        quantity=total_surface if svc.pricing_type == ServicePricing.PricingType.AREA else Decimal("1.00"),
+                        unit="M2" if svc.pricing_type == ServicePricing.PricingType.AREA else "FORFAIT",
+                        line_total=fee,
+                        details_snapshot={
+                            "included": trans.get("included_items", []),
+                            "excluded": trans.get("excluded_items", []),
+                            "deliverables": trans.get("deliverables", []),
+                            "revisions": trans.get("included_revisions", ""),
+                            "delivery_time": trans.get("estimated_delivery_time", ""),
+                        },
+                    )
+
+            # Snapshot Quote spaces
+            for dr_sp in design_request.spaces.select_related("space", "floor").all():
+                QuoteSpace.objects.create(
+                    quote=quote,
+                    space=dr_sp.space,
+                    space_name=dr_sp.space.name if dr_sp.space else "Space",
+                    floor_name=dr_sp.floor.name if dr_sp.floor else "",
+                    price_at_time=dr_sp.price_at_time,
+                )
+
+            # Initial Audit Log
+            QuoteAuditEvent.objects.create(
+                quote=quote,
+                actor=request.user if request.user.is_authenticated else None,
+                action="quote_created_by_customer",
+                new_value=f"Initial estimate: {total:,.2f} DA",
+                reason="Auto-created from customer online project composer",
+            )
+
             # Clear session
             if "request_flow_data" in request.session:
                 del request.session["request_flow_data"]
@@ -284,7 +363,7 @@ def submit_design_request(request):
                         title=str(_("New Architectural Request: %(number)s") % {"number": design_request.project_number}),
                         message=f"{first_name} {last_name} submitted a new request ({design_request.project_type.name if design_request.project_type else 'Design'}). Total: {total:,.0f} DA",
                         notification_type="request",
-                        link=reverse("dash:kanban_view"),
+                        link=reverse("dash:quote_detail", kwargs={"pk": quote.pk}),
                     )
             except Exception:
                 pass
@@ -293,7 +372,9 @@ def submit_design_request(request):
             "success": True,
             "message": _("Design request submitted successfully!"),
             "project_number": design_request.project_number,
+            "quote_number": quote.quote_number,
             "uuid": str(design_request.uuid),
+            "quote_uuid": str(quote.uuid),
             "redirect_url": reverse("dash:customer_projects"),
         })
     except Exception as e:

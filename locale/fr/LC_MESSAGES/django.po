@@ -3198,3 +3198,73 @@ msgstr "Identifiants invalides."
 
 #~ msgid "Password must be at least 8 characters long."
 #~ msgstr "Le mot de passe doit faire au moins 8 caractères."
+
+msgid "Quotes & Commercial Proposals"
+msgstr "Devis & propositions commerciales"
+
+msgid "Quotes"
+msgstr "Devis"
+
+msgid "New Quote"
+msgstr "Nouveau devis"
+
+msgid "Create New Commercial Quote"
+msgstr "Créer un nouveau devis commercial"
+
+msgid "Commercial Discount"
+msgstr "Remise commerciale"
+
+msgid "New Revision"
+msgstr "Nouvelle révision"
+
+msgid "Resend Quote"
+msgstr "Renvoyer le devis"
+
+msgid "Send Quote"
+msgstr "Envoyer le devis"
+
+msgid "Download PDF"
+msgstr "Télécharger PDF"
+
+msgid "Percentage of Total Project Cost"
+msgstr "Pourcentage du coût estimatif du projet"
+
+msgid "Percentage Rate (%)"
+msgstr "Taux de pourcentage (%)"
+
+msgid "Minimum Fee (DA)"
+msgstr "Honoraires minimums (DA)"
+
+msgid "Maximum Fee (DA)"
+msgstr "Plafond maximum (DA)"
+
+msgid "Short Description"
+msgstr "Description courte"
+
+msgid "Detailed Description"
+msgstr "Description détaillée"
+
+msgid "What is included"
+msgstr "Ce qui est inclus"
+
+msgid "What is not included"
+msgstr "Ce qui n'est pas inclus"
+
+msgid "Deliverables"
+msgstr "Livrables"
+
+msgid "Included revisions"
+msgstr "Révisions incluses"
+
+msgid "Estimated delivery time"
+msgstr "Délai de livraison estimé"
+
+msgid "Quote Created"
+msgstr "Devis créé"
+
+msgid "Internal Reason (Mandatory Audit Log)"
+msgstr "Motif interne (Audit obligatoire)"
+
+msgid "Client-Facing Note"
+msgstr "Note visible par le client"
+

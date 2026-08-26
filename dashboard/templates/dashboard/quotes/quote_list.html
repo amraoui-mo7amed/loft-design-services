@@ -1,0 +1,447 @@
+﻿{% extends "dash/dash_index.html" %}
+{% load i18n %}
+{% load static %}
+{% load l10n %}
+{% load tags %}
+
+{% block dashTitle %}
+    {% trans "Quotes & Commercial Proposals" %}
+{% endblock dashTitle %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/service_list.css' %}?v={{ ASSET_VERSION }}">
+    <style>
+        .quote-kpi-card {
+            background: rgba(22, 27, 34, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            backdrop-filter: blur(12px);
+        }
+        .quote-kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        .quote-kpi-icon--gold { background: rgba(255, 214, 90, 0.15); color: #ffd65a; border: 1px solid rgba(255, 214, 90, 0.3); }
+        .quote-kpi-icon--blue { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .quote-kpi-icon--green { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+        .quote-kpi-icon--purple { background: rgba(168, 85, 247, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); }
+        
+        .quote-table-wrapper {
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+        }
+        .quote-table {
+            width: 100%;
+            margin-bottom: 0;
+            color: #e2e8f0;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .quote-table th {
+            background: rgba(30, 41, 59, 0.6);
+            color: #94a3b8;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .quote-table td {
+            padding: 16px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            vertical-align: middle;
+            font-size: 0.88rem;
+        }
+        .quote-table tr:hover td {
+            background: rgba(255, 255, 255, 0.03);
+        }
+    </style>
+{% endblock extra_css %}
+
+{% block dashContent %}
+<div class="svc-management-container container-fluid px-0">
+    <!-- Header Section -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h4 class="fw-bold text-light mb-0">{% trans "Quotes & Commercial Proposals" %}</h4>
+                <span class="badge bg-secondary-subtle text-light border border-secondary rounded-pill px-3 py-1 font-monospace" style="font-size: 0.75rem">
+                    {{ total_quotes }} {% trans "Quotes" %}
+                </span>
+            </div>
+            <p class="text-muted small mb-0">{% trans "Manage customer and admin quotes, apply commercial discounts with audit reasons, track revisions, and send official PDFs." %}</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{% url 'dash:quote_create' %}" class="btn dash-btn-primary rounded-3 px-3 py-2 fw-bold shadow-sm d-flex align-items-center gap-2">
+                <i class="fas fa-plus"></i>
+                <span>{% trans "New Quote" %}</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- KPI Metrics Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="quote-kpi-card">
+                <div class="quote-kpi-icon quote-kpi-icon--gold"><i class="fas fa-file-invoice"></i></div>
+                <div>
+                    <div class="text-muted small">{% trans "Total Quotes" %}</div>
+                    <div class="fw-bold fs-4 text-light">{{ total_quotes }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="quote-kpi-card">
+                <div class="quote-kpi-icon quote-kpi-icon--blue"><i class="fas fa-paper-plane"></i></div>
+                <div>
+                    <div class="text-muted small">{% trans "Sent Quotes" %}</div>
+                    <div class="fw-bold fs-4 text-info">{{ sent_quotes }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="quote-kpi-card">
+                <div class="quote-kpi-icon quote-kpi-icon--green"><i class="fas fa-check-circle"></i></div>
+                <div>
+                    <div class="text-muted small">{% trans "Accepted Quotes" %}</div>
+                    <div class="fw-bold fs-4 text-success">{{ accepted_quotes }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="quote-kpi-card">
+                <div class="quote-kpi-icon quote-kpi-icon--purple"><i class="fas fa-coins"></i></div>
+                <div>
+                    <div class="text-muted small">{% trans "Active Quoted Value" %}</div>
+                    <div class="fw-bold fs-5 text-warning">{{ total_val|unlocalize }} <small class="text-muted" style="font-size:0.7rem">DA</small></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter Toolbar -->
+    <div class="svc-toolbar mb-4">
+        <form method="get" action="{% url 'dash:quote_list' %}" class="d-flex align-items-center gap-2 flex-wrap w-100">
+            <div class="input-group flex-grow-1" style="max-width: 360px;">
+                <span class="input-group-text bg-transparent border-secondary text-muted border-opacity-25"><i class="fas fa-search"></i></span>
+                <input type="text" name="q" value="{{ search_query }}" class="form-control svc-input" placeholder="{% trans 'Search quote #, client, project...' %}">
+            </div>
+
+            <select name="status" class="form-select svc-input" style="max-width: 180px;">
+                <option value="">{% trans "All Statuses" %}</option>
+                {% for code, label in status_choices %}
+                    <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="origin" class="form-select svc-input" style="max-width: 180px;">
+                <option value="">{% trans "All Origins" %}</option>
+                {% for code, label in origin_choices %}
+                    <option value="{{ code }}" {% if origin_filter == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" class="btn dash-btn-primary btn-sm rounded-3 px-3 py-2 fw-semibold">{% trans "Filter" %}</button>
+            {% if search_query or status_filter or origin_filter or date_from or date_to %}
+                <a href="{% url 'dash:quote_list' %}" class="btn btn-outline-light btn-sm rounded-3 px-3 py-2">{% trans "Reset" %}</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Quotes Table View -->
+    <div class="quote-table-wrapper shadow-lg">
+        <div class="table-responsive">
+            <table class="quote-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Quote #" %}</th>
+                        <th>{% trans "Origin" %}</th>
+                        <th>{% trans "Project & Client" %}</th>
+                        <th>{% trans "Subtotal" %}</th>
+                        <th>{% trans "Discount" %}</th>
+                        <th>{% trans "Final Total" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Date" %}</th>
+                        <th class="text-end">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for q in page_obj %}
+                        <tr id="quote-row-{{ q.pk }}">
+                            <td>
+                                <a href="{% url 'dash:quote_detail' q.pk %}" class="fw-bold text-warning text-decoration-none font-monospace">
+                                    {{ q.quote_number }}
+                                </a>
+                                {% if q.revision_number > 1 %}
+                                    <span class="badge bg-purple text-light border border-secondary rounded-pill font-monospace ms-1" style="font-size:0.65rem; background: #6b21a8;">
+                                        Rev {{ q.revision_number }}
+                                    </span>
+                                {% endif %}
+                                {% if not q.is_current_revision %}
+                                    <span class="badge bg-secondary rounded-pill font-monospace ms-1" style="font-size:0.6rem;">{% trans "Superseded" %}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if q.origin == "admin" %}
+                                    <span class="badge bg-info-subtle text-info border border-info border-opacity-25 rounded-pill" style="font-size:0.7rem;">
+                                        <i class="fas fa-user-shield me-1"></i>{% trans "Admin" %}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-primary-subtle text-primary border border-primary border-opacity-25 rounded-pill" style="font-size:0.7rem;">
+                                        <i class="fas fa-user me-1"></i>{% trans "Customer" %}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-light text-truncate" style="max-width: 220px;" title="{{ q.project_name }}">
+                                    {{ q.project_name }}
+                                </div>
+                                <div class="text-muted small text-truncate" style="max-width: 220px;">
+                                    {{ q.full_client_name }} {% if q.phone %}· <span class="font-monospace">{{ q.phone }}</span>{% endif %}
+                                </div>
+                            </td>
+                            <td class="font-monospace text-light">
+                                {{ q.subtotal_before_discount|unlocalize }} DA
+                            </td>
+                            <td>
+                                {% if q.discount_amount > 0 %}
+                                    <span class="badge bg-success-subtle text-success border border-success border-opacity-25 rounded-pill font-monospace" style="font-size:0.75rem;" title="{{ q.internal_discount_reason }}">
+                                        -{{ q.discount_amount|unlocalize }} DA
+                                        {% if q.discount_type == "percentage" %}({{ q.discount_value|unlocalize }}%){% endif %}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted small">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="fw-bold text-warning font-monospace fs-6">
+                                {{ q.final_total|unlocalize }} DA
+                            </td>
+                            <td>
+                                {% if q.status == "accepted" %}
+                                    <span class="badge bg-success rounded-pill px-2 py-1"><i class="fas fa-check me-1"></i>{{ q.get_status_display }}</span>
+                                {% elif q.status == "sent" %}
+                                    <span class="badge bg-info text-dark rounded-pill px-2 py-1"><i class="fas fa-paper-plane me-1"></i>{{ q.get_status_display }}</span>
+                                {% elif q.status == "viewed" %}
+                                    <span class="badge bg-primary rounded-pill px-2 py-1"><i class="fas fa-eye me-1"></i>{{ q.get_status_display }}</span>
+                                {% elif q.status == "superseded" %}
+                                    <span class="badge bg-secondary opacity-75 rounded-pill px-2 py-1">{{ q.get_status_display }}</span>
+                                {% elif q.status == "ready_to_send" %}
+                                    <span class="badge bg-warning text-dark rounded-pill px-2 py-1">{{ q.get_status_display }}</span>
+                                {% else %}
+                                    <span class="badge bg-dark border border-secondary text-muted rounded-pill px-2 py-1">{{ q.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted font-monospace">
+                                {{ q.created_at|date:"d/m/Y" }}
+                                {% if q.sent_at %}
+                                    <div class="text-info" style="font-size:0.7rem;">{% trans "Sent" %}: {{ q.sent_at|date:"d/m" }}</div>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex align-items-center gap-1">
+                                    <a href="{% url 'dash:quote_detail' q.pk %}" class="btn-text-pill btn-text-edit" title="{% trans 'View details & timeline' %}">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button type="button" class="btn-text-pill btn-text-edit apply-discount-btn" 
+                                            data-id="{{ q.pk }}"
+                                            data-num="{{ q.quote_number }}"
+                                            data-subtotal="{{ q.subtotal_before_discount|unlocalize }}"
+                                            data-discount-type="{{ q.discount_type|default:'' }}"
+                                            data-discount-val="{{ q.discount_value|unlocalize }}"
+                                            data-reason="{{ q.internal_discount_reason|default:'' }}"
+                                            data-client-note="{{ q.client_discount_note|default:'' }}"
+                                            data-url="{% url 'dash:quote_apply_discount' q.pk %}"
+                                            title="{% trans 'Apply discount' %}">
+                                        <i class="fas fa-percent"></i>
+                                    </button>
+                                    <a href="{% url 'dash:quote_download_pdf' q.pk %}" class="btn-text-pill btn-text-edit" title="{% trans 'Download PDF' %}">
+                                        <i class="fas fa-file-pdf text-danger"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-5">
+                                <div class="text-muted mb-2"><i class="fas fa-file-invoice-dollar fa-3x opacity-25"></i></div>
+                                <h6 class="text-light fw-bold">{% trans "No quotes found" %}</h6>
+                                <p class="text-muted small mb-3">{% trans "Create a commercial proposal or configure project requests from the composer." %}</p>
+                                <a href="{% url 'dash:quote_create' %}" class="btn dash-btn-primary btn-sm px-4 rounded-3 fw-bold">
+                                    <i class="fas fa-plus me-1"></i>{% trans "Create First Quote" %}
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+        <div class="mt-4">{% render_pagination page_obj %}</div>
+    {% endif %}
+</div>
+
+<!-- Commercial Discount Modal -->
+<div class="modal fade" id="discountModal" tabindex="-1" aria-labelledby="discountModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content svc-glass-modal border-0 rounded-4 shadow-lg overflow-hidden text-light">
+            <form id="discountForm" method="post" class="form">
+                {% csrf_token %}
+                <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom border-secondary border-opacity-25">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="svc-card-icon" style="width:34px;height:34px;font-size:0.95rem;">
+                            <i class="fas fa-percent text-success"></i>
+                        </div>
+                        <h5 class="modal-title fw-bold text-light mb-0" id="discountModalTitle">{% trans "Apply Commercial Discount" %}</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="p-4">
+                    <div class="alert alert-dark border border-secondary border-opacity-25 p-3 rounded-3 mb-3 d-flex justify-content-between align-items-center">
+                        <span class="text-muted small">{% trans "Subtotal before discount" %}:</span>
+                        <strong class="text-light font-monospace fs-6" id="modalSubtotalDisplay">0 DA</strong>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-light fw-semibold small" for="modalDiscountType">
+                                {% trans "Discount Type" %}
+                            </label>
+                            <select name="discount_type" id="modalDiscountType" class="form-select svc-input">
+                                <option value="">{% trans "No Discount" %}</option>
+                                <option value="percentage">{% trans "Percentage (%)" %}</option>
+                                <option value="fixed">{% trans "Fixed Amount (DA)" %}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light fw-semibold small" for="modalDiscountValue">
+                                <span id="modalDiscountValueLabel">{% trans "Value" %}</span>
+                            </label>
+                            <input type="number" name="discount_value" id="modalDiscountValue" class="form-control svc-input" min="0" step="0.01" placeholder="0">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light fw-semibold small" for="modalInternalReason">
+                            <i class="fas fa-shield-alt text-warning me-1"></i>
+                            {% trans "Internal Discount Reason (Audit Only)" %} <span class="text-danger">*</span>
+                        </label>
+                        <textarea name="internal_discount_reason" id="modalInternalReason" rows="2" class="form-control svc-input" placeholder="{% trans 'Mandatory explanation for internal audit (e.g. VIP client agreement, promotional offer, volume rebate)...' %}"></textarea>
+                        <small class="text-muted" style="font-size:0.72rem;">{% trans "This note is strictly confidential and will never appear on client documents or PDFs." %}</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light fw-semibold small" for="modalClientNote">
+                            <i class="fas fa-comment-alt text-info me-1"></i>
+                            {% trans "Client-Facing Discount Note" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span>
+                        </label>
+                        <input type="text" name="client_discount_note" id="modalClientNote" class="form-control svc-input" placeholder="{% trans 'e.g. Remise commerciale exceptionnelle' %}">
+                        <small class="text-muted" style="font-size:0.72rem;">{% trans "Visible to the client on their quote and invoice PDF." %}</small>
+                    </div>
+                </div>
+
+                <div class="px-4 py-3 d-flex gap-2 justify-content-end border-top border-secondary border-opacity-25">
+                    <button type="button" class="btn btn-outline-light btn-sm px-3 rounded-3" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn dash-btn-primary btn-sm px-4 rounded-3 fw-bold">
+                        <i class="fas fa-save me-1"></i> {% trans "Save Discount" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock dashContent %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const discountModalEl = document.getElementById("discountModal");
+    let discountModal = null;
+    if (discountModalEl && typeof bootstrap !== "undefined") {
+        discountModal = new bootstrap.Modal(discountModalEl);
+    }
+
+    const discountForm = document.getElementById("discountForm");
+    const modalDiscountType = document.getElementById("modalDiscountType");
+    const modalDiscountValue = document.getElementById("modalDiscountValue");
+    const modalInternalReason = document.getElementById("modalInternalReason");
+    const modalClientNote = document.getElementById("modalClientNote");
+    const modalSubtotalDisplay = document.getElementById("modalSubtotalDisplay");
+
+    document.querySelectorAll(".apply-discount-btn").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const url = this.dataset.url;
+            const subtotal = this.dataset.subtotal;
+            const type = this.dataset.discountType;
+            const val = this.dataset.discountVal;
+            const reason = this.dataset.reason;
+            const clientNote = this.dataset.clientNote;
+
+            discountForm.action = url;
+            if (modalSubtotalDisplay) modalSubtotalDisplay.textContent = `${subtotal} DA`;
+            if (modalDiscountType) modalDiscountType.value = type || "";
+            if (modalDiscountValue) modalDiscountValue.value = val || "0";
+            if (modalInternalReason) modalInternalReason.value = reason || "";
+            if (modalClientNote) modalClientNote.value = clientNote || "";
+
+            if (discountModal) discountModal.show();
+        });
+    });
+
+    if (discountForm) {
+        discountForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const formData = new FormData(discountForm);
+            const submitBtn = discountForm.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            fetch(discountForm.action, {
+                method: "POST",
+                body: formData,
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (submitBtn) submitBtn.disabled = false;
+                if (data.success) {
+                    if (discountModal) discountModal.hide();
+                    Swal.fire({
+                        icon: "success",
+                        title: "{% trans 'Success' %}",
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "{% trans 'Validation Error' %}",
+                        text: Array.isArray(data.errors) ? data.errors.join("\n") : (data.errors || "{% trans 'An error occurred' %}")
+                    });
+                }
+            })
+            .catch(err => {
+                if (submitBtn) submitBtn.disabled = false;
+                Swal.fire({ icon: "error", title: "{% trans 'Error' %}", text: err.message });
+            });
+        });
+    }
+});
+</script>
+{% endblock extra_js %}

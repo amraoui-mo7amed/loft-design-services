@@ -125,13 +125,13 @@
                                     <div class="svc-card-icon">
                                         <i class="fas fa-layer-group"></i>
                                     </div>
-                                    <div>
-                                        <h5 class="svc-card-title">{{ s.service_name }}</h5>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <h5 class="svc-card-title text-truncate" title="{{ s.service_name }}">{{ s.service_name }}</h5>
                                         <div class="d-flex align-items-center gap-2 flex-wrap">
                                             <span class="badge {% if s.is_default %}bg-warning text-dark{% else %}bg-secondary text-light opacity-75{% endif %} rounded-pill font-monospace"
                                                   style="font-size: 0.7rem">
                                                 {% if s.is_default %}
-                                                    <i class="fas fa-star me-1"></i>{% trans "Default" %}
+                                                    <i class="fas fa-star me-1"></i>{% trans "Single Default" %}
                                                 {% else %}
                                                     {% trans "Optional" %}
                                                 {% endif %}
@@ -144,6 +144,11 @@
                             </div>
                             <!-- Body & Price -->
                             <div class="svc-card-body">
+                                {% if s.short_description %}
+                                    <p class="text-light text-opacity-75 small mb-2 text-truncate-2" style="font-size:0.82rem; min-height: 2.4em;">
+                                        {{ s.short_description }}
+                                    </p>
+                                {% endif %}
                                 {% if s.video_link %}
                                     <div class="mb-2">
                                         <a href="{{ s.video_link }}"
@@ -160,46 +165,81 @@
                                             {% trans "Price / m²" %}
                                         {% elif s.pricing_type == "hourly" %}
                                             {% trans "Price / Hour" %}
+                                        {% elif s.pricing_type == "percent_project_cost" %}
+                                            {% trans "Percentage Rate" %}
                                         {% else %}
                                             {% trans "Fixed Price" %}
                                         {% endif %}
                                     </span>
                                     <div class="svc-price-value">
-                                        <span>{{ s.service_price|unlocalize }}</span>
-                                        <small>
-                                            {% if s.pricing_type == "area" %}
-                                                DA/m²
-                                            {% elif s.pricing_type == "hourly" %}
-                                                DA/hr
-                                            {% else %}
-                                                DA
-                                            {% endif %}
-                                        </small>
+                                        {% if s.pricing_type == "percent_project_cost" %}
+                                            <span>{{ s.percentage_rate|unlocalize }}</span>
+                                            <small>% {% trans "of project budget" %}</small>
+                                        {% else %}
+                                            <span>{{ s.service_price|unlocalize }}</span>
+                                            <small>
+                                                {% if s.pricing_type == "area" %}
+                                                    DA/m²
+                                                {% elif s.pricing_type == "hourly" %}
+                                                    DA/hr
+                                                {% else %}
+                                                    DA
+                                                {% endif %}
+                                            </small>
+                                        {% endif %}
                                     </div>
+                                    {% if s.pricing_type == "percent_project_cost" and s.min_fee or s.max_fee %}
+                                        <div class="mt-1 text-muted" style="font-size: 0.72rem;">
+                                            {% if s.min_fee %}<span class="me-2">Min: {{ s.min_fee|unlocalize }} DA</span>{% endif %}
+                                            {% if s.max_fee %}<span>Max: {{ s.max_fee|unlocalize }} DA</span>{% endif %}
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
-                        <!-- Footer Actions: Text-only buttons with background -->
+                        <!-- Footer Actions -->
                         <div class="svc-card-foot">
                             <div>
                                 {% if s.is_default %}
-                                    <span class="text-warning small fw-bold"><i class="fas fa-check-circle me-1"></i>{% trans "Default" %}</span>
+                                    <span class="text-warning small fw-bold"><i class="fas fa-check-circle me-1"></i>{% trans "Catalog Default" %}</span>
                                 {% else %}
                                     <span class="text-muted small">{% trans "Active" %}</span>
                                 {% endif %}
                             </div>
                             <div class="d-flex align-items-center gap-2">
+                                {% with fr_t=s.get_translation %}
                                 <button type="button"
                                         class="btn-text-pill btn-text-edit edit-service-btn"
                                         data-id="{{ s.pk }}"
                                         data-name="{{ s.service_name }}"
                                         data-pricing-type="{{ s.pricing_type }}"
-                                        data-price="{{ s.service_price }}"
+                                        data-price="{{ s.service_price|unlocalize }}"
+                                        data-percentage-rate="{{ s.percentage_rate|default:'0'|unlocalize }}"
+                                        data-min-fee="{{ s.min_fee|default:''|unlocalize }}"
+                                        data-max-fee="{{ s.max_fee|default:''|unlocalize }}"
                                         data-video-link="{{ s.video_link|default:'' }}"
                                         data-is-default="{{ s.is_default|yesno:'true,false' }}"
+                                        data-short-desc="{{ s.short_description|default:'' }}"
+                                        data-detailed-desc="{{ s.detailed_description|default:'' }}"
+                                        data-included="{{ s.included_items|join:'\n' }}"
+                                        data-excluded="{{ s.excluded_items|join:'\n' }}"
+                                        data-deliverables="{{ s.deliverables|join:'\n' }}"
+                                        data-revisions="{{ s.included_revisions|default:'' }}"
+                                        data-delivery-time="{{ s.estimated_delivery_time|default:'' }}"
+                                        {% for t in s.translations.all %}
+                                            data-name-{{ t.locale }}="{{ t.name|default:'' }}"
+                                            data-short-desc-{{ t.locale }}="{{ t.short_description|default:'' }}"
+                                            data-detailed-desc-{{ t.locale }}="{{ t.detailed_description|default:'' }}"
+                                            data-included-{{ t.locale }}="{{ t.included_items|join:'\n' }}"
+                                            data-excluded-{{ t.locale }}="{{ t.excluded_items|join:'\n' }}"
+                                            data-deliverables-{{ t.locale }}="{{ t.deliverables|join:'\n' }}"
+                                            data-revisions-{{ t.locale }}="{{ t.included_revisions|default:'' }}"
+                                            data-delivery-time-{{ t.locale }}="{{ t.estimated_delivery_time|default:'' }}"
+                                        {% endfor %}
                                         data-update-url="{% url 'dash:service_update' s.pk %}">
                                     {% trans "Edit" %}
                                 </button>
+                                {% endwith %}
                                 <button type="button"
                                         class="btn-text-pill btn-text-delete delete_button"
                                         data-delete-url="{% url 'dash:service_delete' s.pk %}"
@@ -222,7 +262,7 @@
                             <i class="fas fa-layer-group fa-3x text-light opacity-25"></i>
                         </div>
                         <h5 class="text-light fw-bold mb-1">{% trans "No services found" %}</h5>
-                        <p class="text-muted small mb-4">{% trans "Create catalog services to configure fixed, area-based (per m²), or hourly pricing models." %}</p>
+                        <p class="text-muted small mb-4">{% trans "Create catalog services to configure fixed, area-based (per m²), percentage of budget, or hourly pricing models." %}</p>
                         <div>
                             <button type="button"
                                     class="btn dash-btn-primary rounded-3 px-4 py-2 fw-bold"
@@ -239,13 +279,14 @@
             <div class="mt-5">{% render_pagination page_obj %}</div>
         {% endif %}
     </div>
-    <!-- Service Modal Form -->
+
+    <!-- Service Modal Form with Multilingual Tabs -->
     <div class="modal fade"
          id="serviceModal"
          tabindex="-1"
          aria-labelledby="serviceModalTitle"
          aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content svc-glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
                 <form method="post"
                       action="{% url 'dash:service_create' %}"
@@ -268,93 +309,285 @@
                                 data-bs-dismiss="modal"
                                 aria-label="Close"></button>
                     </div>
+
                     <div class="p-4">
                         {% include "partials/errorList.html" with form_id="serviceForm" %}
-                        <div class="mb-3">
-                            <label class="form-label text-light fw-semibold small"
-                                   for="serviceNameInput">
-                                <i class="fas fa-tag me-1 text-warning"></i>
-                                {% trans "Service Name" %} <span class="text-danger">*</span>
-                            </label>
-                            <input type="text"
-                                   name="service_name"
-                                   id="serviceNameInput"
-                                   class="form-control svc-input"
-                                   required
-                                   placeholder="{% trans 'e.g. 3D Architectural Visualization' %}"
-                                   maxlength="150">
+
+                        <!-- Pricing & Technical Configuration Section -->
+                        <div class="p-3 mb-4 rounded-3 border border-secondary border-opacity-25" style="background: rgba(0,0,0,0.25);">
+                            <h6 class="text-warning fw-bold mb-3 d-flex align-items-center gap-2" style="font-size:0.9rem;">
+                                <i class="fas fa-calculator"></i> {% trans "Pricing & Media Configuration" %}
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label text-light fw-semibold small" for="servicePricingTypeInput">
+                                        {% trans "Pricing Model" %} <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="pricing_type" id="servicePricingTypeInput" class="form-select svc-input">
+                                        <option value="fixed">{% trans "Fixed Price" %}</option>
+                                        <option value="area">{% trans "Price per Square Metre (m²)" %}</option>
+                                        <option value="hourly">{% trans "Price per Hour" %}</option>
+                                        <option value="percent_project_cost">{% trans "Percentage of Estimated Total Project Cost" %}</option>
+                                    </select>
+                                </div>
+
+                                <!-- Standard Price Field -->
+                                <div class="col-md-6" id="standardPriceWrapper">
+                                    <label class="form-label text-light fw-semibold small" id="servicePriceLabel" for="servicePriceInput">
+                                        <span id="priceLabelText">{% trans "Price (DA)" %}</span>
+                                    </label>
+                                    <input type="number" name="service_price" id="servicePriceInput" class="form-control svc-input" min="0" step="0.01" placeholder="0">
+                                </div>
+
+                                <!-- Percentage Project Cost Specific Fields -->
+                                <div class="col-md-6 d-none" id="percentRateWrapper">
+                                    <label class="form-label text-light fw-semibold small" for="servicePercentRateInput">
+                                        {% trans "Percentage Rate (%)" %} <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" name="percentage_rate" id="servicePercentRateInput" class="form-control svc-input" min="0.01" max="100" step="0.01" placeholder="5.00">
+                                </div>
+                                <div class="col-md-6 d-none" id="minFeeWrapper">
+                                    <label class="form-label text-light fw-semibold small" for="serviceMinFeeInput">
+                                        {% trans "Minimum Fee (DA)" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span>
+                                    </label>
+                                    <input type="number" name="min_fee" id="serviceMinFeeInput" class="form-control svc-input" min="0" step="0.01" placeholder="0">
+                                </div>
+                                <div class="col-md-6 d-none" id="maxFeeWrapper">
+                                    <label class="form-label text-light fw-semibold small" for="serviceMaxFeeInput">
+                                        {% trans "Maximum Fee (DA)" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span>
+                                    </label>
+                                    <input type="number" name="max_fee" id="serviceMaxFeeInput" class="form-control svc-input" min="0" step="0.01" placeholder="0">
+                                </div>
+
+                                <div class="col-12 d-none" id="percentExplanationBox">
+                                    <div class="alert alert-dark border border-warning border-opacity-25 p-2 rounded-3 text-warning mb-0" style="font-size:0.8rem;">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        {% trans "Formula: Fee = Estimated Total Project Cost × Percentage Rate ÷ 100 (applied with min/max bounds if configured)." %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label text-light fw-semibold small" for="serviceVideoInput">
+                                        <i class="fab fa-youtube me-1 text-danger"></i> {% trans "Video Link" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span>
+                                    </label>
+                                    <input type="url" name="video_link" id="serviceVideoInput" class="form-control svc-input" placeholder="https://youtube.com/watch?v=...">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-light fw-semibold small" for="serviceGifInput">
+                                        <i class="fas fa-image me-1 text-info"></i> {% trans "Preview File (GIF / Image / Video)" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span>
+                                    </label>
+                                    <input type="file" name="gif_file" id="serviceGifInput" accept="image/*,video/mp4" class="form-control svc-input">
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- Multilingual Content Tabs -->
                         <div class="mb-3">
-                            <label class="form-label text-light fw-semibold small"
-                                   for="servicePricingTypeInput">
-                                <i class="fas fa-calculator me-1 text-warning"></i>
-                                {% trans "Pricing Model" %} <span class="text-danger">*</span>
-                            </label>
-                            <select name="pricing_type"
-                                    id="servicePricingTypeInput"
-                                    class="form-select svc-input">
-                                <option value="fixed">{% trans "Fixed Price" %}</option>
-                                <option value="area">{% trans "Price per Square Metre (m²)" %}</option>
-                                <option value="hourly">{% trans "Price per Hour" %}</option>
-                            </select>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <label class="form-label text-light fw-semibold small mb-0">
+                                    <i class="fas fa-language me-1 text-warning"></i> {% trans "Multilingual Descriptions" %}
+                                </label>
+                                <span class="text-muted small">{% trans "French is required; English & Arabic are optional." %}</span>
+                            </div>
+
+                            <ul class="nav nav-pills mb-3 gap-2" id="serviceLangTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active px-3 py-1 fw-bold rounded-pill text-light" id="tab-fr-btn" data-bs-toggle="pill" data-bs-target="#tab-fr" type="button" role="tab">
+                                        🇫🇷 Français <span class="badge bg-warning text-dark ms-1">{% trans "Default" %}</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link px-3 py-1 fw-bold rounded-pill text-light" id="tab-en-btn" data-bs-toggle="pill" data-bs-target="#tab-en" type="button" role="tab">
+                                        🇬🇧 English
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link px-3 py-1 fw-bold rounded-pill text-light" id="tab-ar-btn" data-bs-toggle="pill" data-bs-target="#tab-ar" type="button" role="tab">
+                                        🇩🇿 العربية (RTL)
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content border border-secondary border-opacity-25 rounded-4 p-3" id="serviceLangTabsContent" style="background: rgba(255,255,255,0.02);">
+                                <!-- French Tab (Default) -->
+                                <div class="tab-pane fade show active" id="tab-fr" role="tabpanel">
+                                    <div class="mb-3">
+                                        <label class="form-label text-light fw-semibold small" for="serviceNameFrInput">
+                                            {% trans "Nom du service (FR)" %} <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" name="service_name_fr" id="serviceNameFrInput" class="form-control svc-input" required placeholder="Ex: Conception 3D immersive" maxlength="150">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-light fw-semibold small" for="shortDescFrInput">
+                                            {% trans "Description courte (FR)" %} <span class="text-muted font-monospace small">(Max ~180 car.)</span>
+                                        </label>
+                                        <input type="text" name="short_description_fr" id="shortDescFrInput" class="form-control svc-input" maxlength="255" placeholder="Résumé visible sur la carte du compositeur...">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-light fw-semibold small" for="detailedDescFrInput">
+                                            {% trans "Description détaillée (FR)" %}
+                                        </label>
+                                        <textarea name="detailed_description_fr" id="detailedDescFrInput" rows="3" class="form-control svc-input" placeholder="Explication complète de la prestation..."></textarea>
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="includedFrInput">
+                                                <i class="fas fa-check-circle text-success me-1"></i> {% trans "Ce qui est inclus (FR)" %}
+                                            </label>
+                                            <textarea name="included_items_fr" id="includedFrInput" rows="3" class="form-control svc-input" placeholder="Un élément par ligne:&#10;• Aménagement 3D&#10;• Choix matériaux"></textarea>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="excludedFrInput">
+                                                <i class="fas fa-times-circle text-danger me-1"></i> {% trans "Ce qui n'est pas inclus (FR)" %}
+                                            </label>
+                                            <textarea name="excluded_items_fr" id="excludedFrInput" rows="3" class="form-control svc-input" placeholder="Un élément par ligne:&#10;• Suivi de chantier&#10;• Achat mobilier"></textarea>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="deliverablesFrInput">
+                                                <i class="fas fa-box-open text-info me-1"></i> {% trans "Livrables (FR)" %}
+                                            </label>
+                                            <textarea name="deliverables_fr" id="deliverablesFrInput" rows="2" class="form-control svc-input" placeholder="Ex: Rendus 4K JPG, Dossier PDF"></textarea>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="revisionsFrInput">
+                                                {% trans "Révisions incluses (FR)" %}
+                                            </label>
+                                            <input type="text" name="included_revisions_fr" id="revisionsFrInput" class="form-control svc-input" placeholder="Ex: 2 révisions">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="deliveryTimeFrInput">
+                                                {% trans "Délai estimé (FR)" %}
+                                            </label>
+                                            <input type="text" name="estimated_delivery_time_fr" id="deliveryTimeFrInput" class="form-control svc-input" placeholder="Ex: 5 à 7 jours">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- English Tab -->
+                                <div class="tab-pane fade" id="tab-en" role="tabpanel">
+                                    <div class="mb-3">
+                                        <label class="form-label text-light fw-semibold small" for="serviceNameEnInput">
+                                            {% trans "Service Name (EN)" %}
+                                        </label>
+                                        <input type="text" name="service_name_en" id="serviceNameEnInput" class="form-control svc-input" placeholder="e.g. 3D Architectural Design" maxlength="150">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-light fw-semibold small" for="shortDescEnInput">
+                                            {% trans "Short Description (EN)" %}
+                                        </label>
+                                        <input type="text" name="short_description_en" id="shortDescEnInput" class="form-control svc-input" maxlength="255" placeholder="Short summary visible on composer card...">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-light fw-semibold small" for="detailedDescEnInput">
+                                            {% trans "Detailed Description (EN)" %}
+                                        </label>
+                                        <textarea name="detailed_description_en" id="detailedDescEnInput" rows="3" class="form-control svc-input" placeholder="Comprehensive explanation of the service..."></textarea>
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="includedEnInput">
+                                                <i class="fas fa-check-circle text-success me-1"></i> {% trans "What is Included (EN)" %}
+                                            </label>
+                                            <textarea name="included_items_en" id="includedEnInput" rows="3" class="form-control svc-input" placeholder="One item per line..."></textarea>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="excludedEnInput">
+                                                <i class="fas fa-times-circle text-danger me-1"></i> {% trans "What is Not Included (EN)" %}
+                                            </label>
+                                            <textarea name="excluded_items_en" id="excludedEnInput" rows="3" class="form-control svc-input" placeholder="One item per line..."></textarea>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="deliverablesEnInput">
+                                                <i class="fas fa-box-open text-info me-1"></i> {% trans "Deliverables (EN)" %}
+                                            </label>
+                                            <textarea name="deliverables_en" id="deliverablesEnInput" rows="2" class="form-control svc-input" placeholder="e.g. 4K JPG Renders, PDF Document"></textarea>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="revisionsEnInput">
+                                                {% trans "Included Revisions (EN)" %}
+                                            </label>
+                                            <input type="text" name="included_revisions_en" id="revisionsEnInput" class="form-control svc-input" placeholder="e.g. 2 revisions">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="deliveryTimeEnInput">
+                                                {% trans "Estimated Delivery (EN)" %}
+                                            </label>
+                                            <input type="text" name="estimated_delivery_time_en" id="deliveryTimeEnInput" class="form-control svc-input" placeholder="e.g. 5 to 7 days">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Arabic Tab (RTL) -->
+                                <div class="tab-pane fade" id="tab-ar" role="tabpanel" dir="rtl">
+                                    <div class="mb-3 text-end">
+                                        <label class="form-label text-light fw-semibold small" for="serviceNameArInput">
+                                            اسم الخدمة (AR)
+                                        </label>
+                                        <input type="text" name="service_name_ar" id="serviceNameArInput" class="form-control svc-input text-end" placeholder="مثال: تصميم معماري ثلاثي الأبعاد" maxlength="150">
+                                    </div>
+                                    <div class="mb-3 text-end">
+                                        <label class="form-label text-light fw-semibold small" for="shortDescArInput">
+                                            الوصف القصير (AR)
+                                        </label>
+                                        <input type="text" name="short_description_ar" id="shortDescArInput" class="form-control svc-input text-end" maxlength="255" placeholder="ملخص يظهر في بطاقة الخدمة...">
+                                    </div>
+                                    <div class="mb-3 text-end">
+                                        <label class="form-label text-light fw-semibold small" for="detailedDescArInput">
+                                            الوصف التفصيلي (AR)
+                                        </label>
+                                        <textarea name="detailed_description_ar" id="detailedDescArInput" rows="3" class="form-control svc-input text-end" placeholder="شرح كامل ومفصل للخدمة المقدمة..."></textarea>
+                                    </div>
+                                    <div class="row g-3 text-end">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="includedArInput">
+                                                <i class="fas fa-check-circle text-success me-1"></i> ما تشمله الخدمة (AR)
+                                            </label>
+                                            <textarea name="included_items_ar" id="includedArInput" rows="3" class="form-control svc-input text-end" placeholder="عنصر في كل سطر..."></textarea>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="excludedArInput">
+                                                <i class="fas fa-times-circle text-danger me-1"></i> ما لا تشمله الخدمة (AR)
+                                            </label>
+                                            <textarea name="excluded_items_ar" id="excludedArInput" rows="3" class="form-control svc-input text-end" placeholder="عنصر في كل سطر..."></textarea>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="deliverablesArInput">
+                                                <i class="fas fa-box-open text-info me-1"></i> المخرجات والملفات المسلمة (AR)
+                                            </label>
+                                            <textarea name="deliverables_ar" id="deliverablesArInput" rows="2" class="form-control svc-input text-end" placeholder="مثال: صور بدقة 4K، ملف PDF"></textarea>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="revisionsArInput">
+                                                التعديلات المتضمنة (AR)
+                                            </label>
+                                            <input type="text" name="included_revisions_ar" id="revisionsArInput" class="form-control svc-input text-end" placeholder="مثال: تعديلين">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label text-light fw-semibold small" for="deliveryTimeArInput">
+                                                مدة الإنجاز التقديرية (AR)
+                                            </label>
+                                            <input type="text" name="estimated_delivery_time_ar" id="deliveryTimeArInput" class="form-control svc-input text-end" placeholder="مثال: 5 إلى 7 أيام">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label text-light fw-semibold small"
-                                   id="servicePriceLabel"
-                                   for="servicePriceInput">
-                                <i class="fas fa-money-bill-wave me-1 text-warning"></i>
-                                <span id="priceLabelText">{% trans "Price (DA)" %}</span>
-                            </label>
-                            <input type="number"
-                                   name="service_price"
-                                   id="servicePriceInput"
-                                   class="form-control svc-input"
-                                   min="0"
-                                   step="0.01"
-                                   placeholder="0">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-light fw-semibold small"
-                                   for="serviceVideoInput">
-                                <i class="fab fa-youtube me-1 text-warning"></i>
-                                {% trans "Video Link" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span>
-                            </label>
-                            <input type="url"
-                                   name="video_link"
-                                   id="serviceVideoInput"
-                                   class="form-control svc-input"
-                                   placeholder="https://youtube.com/watch?v=...">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-light fw-semibold small" for="serviceGifInput">
-                                <i class="fas fa-image me-1 text-warning"></i>
-                                {% trans "GIF / Animation Preview File" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span>
-                            </label>
-                            <input type="file"
-                                   name="gif_file"
-                                   id="serviceGifInput"
-                                   accept="image/*,video/mp4"
-                                   class="form-control svc-input">
-                        </div>
+
+                        <!-- Single Default Invariant Checkbox -->
                         <div class="pt-3 border-top border-secondary border-opacity-25">
-                            <label class="form-check d-flex align-items-center gap-2 m-0 cursor-pointer"
-                                   for="serviceDefaultInput">
-                                <input type="checkbox"
-                                       name="is_default"
-                                       id="serviceDefaultInput"
-                                       value="1"
-                                       class="form-check-input">
-                                <span class="text-light small fw-semibold">{% trans "Set as default selected service in catalog" %}</span>
+                            <label class="form-check d-flex align-items-center gap-2 m-0 cursor-pointer" for="serviceDefaultInput">
+                                <input type="checkbox" name="is_default" id="serviceDefaultInput" value="1" class="form-check-input">
+                                <div>
+                                    <span class="text-light small fw-bold d-block">{% trans "Set as the single default service in the catalog" %}</span>
+                                    <small class="text-muted" style="font-size:0.75rem;">{% trans "Only one service can be default. Setting this service as default will automatically uncheck any previous default." %}</small>
+                                </div>
                             </label>
                         </div>
                     </div>
+
                     <div class="px-4 py-3 d-flex gap-2 justify-content-end border-top border-secondary border-opacity-25">
-                        <button type="button"
-                                class="btn btn-outline-light btn-sm px-3 rounded-3"
-                                data-bs-dismiss="modal">{% trans "Cancel" %}</button>
-                        <button type="submit"
-                                class="btn dash-btn-primary btn-sm px-4 rounded-3 fw-bold"
-                                id="serviceSubmitBtn">
+                        <button type="button" class="btn btn-outline-light btn-sm px-3 rounded-3" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                        <button type="submit" class="btn dash-btn-primary btn-sm px-4 rounded-3 fw-bold" id="serviceSubmitBtn">
                             <i class="fas fa-save me-1"></i> <span id="serviceSubmitBtnText">{% trans "Create Service" %}</span>
                         </button>
                     </div>
@@ -374,32 +607,85 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const serviceForm = document.getElementById("serviceForm");
     const modalTitle = document.getElementById("serviceModalTitle");
-    const nameInput = document.getElementById("serviceNameInput");
     const pricingTypeInput = document.getElementById("servicePricingTypeInput");
     const priceInput = document.getElementById("servicePriceInput");
+    const percentRateInput = document.getElementById("servicePercentRateInput");
+    const minFeeInput = document.getElementById("serviceMinFeeInput");
+    const maxFeeInput = document.getElementById("serviceMaxFeeInput");
+    const standardPriceWrapper = document.getElementById("standardPriceWrapper");
+    const percentRateWrapper = document.getElementById("percentRateWrapper");
+    const minFeeWrapper = document.getElementById("minFeeWrapper");
+    const maxFeeWrapper = document.getElementById("maxFeeWrapper");
+    const percentExplanationBox = document.getElementById("percentExplanationBox");
     const priceLabelText = document.getElementById("priceLabelText");
     const videoInput = document.getElementById("serviceVideoInput");
     const defaultInput = document.getElementById("serviceDefaultInput");
     const submitBtnText = document.getElementById("serviceSubmitBtnText");
     const openNewBtn = document.getElementById("openNewServiceModalBtn");
 
-    function updatePriceLabel() {
-        if (!pricingTypeInput || !priceLabelText) return;
+    // Form inputs by language
+    const nameFr = document.getElementById("serviceNameFrInput");
+    const shortDescFr = document.getElementById("shortDescFrInput");
+    const detailedDescFr = document.getElementById("detailedDescFrInput");
+    const includedFr = document.getElementById("includedFrInput");
+    const excludedFr = document.getElementById("excludedFrInput");
+    const deliverablesFr = document.getElementById("deliverablesFrInput");
+    const revisionsFr = document.getElementById("revisionsFrInput");
+    const deliveryTimeFr = document.getElementById("deliveryTimeFrInput");
+
+    const nameEn = document.getElementById("serviceNameEnInput");
+    const shortDescEn = document.getElementById("shortDescEnInput");
+    const detailedDescEn = document.getElementById("detailedDescEnInput");
+    const includedEn = document.getElementById("includedEnInput");
+    const excludedEn = document.getElementById("excludedEnInput");
+    const deliverablesEn = document.getElementById("deliverablesEnInput");
+    const revisionsEn = document.getElementById("revisionsEnInput");
+    const deliveryTimeEn = document.getElementById("deliveryTimeEnInput");
+
+    const nameAr = document.getElementById("serviceNameArInput");
+    const shortDescAr = document.getElementById("shortDescArInput");
+    const detailedDescAr = document.getElementById("detailedDescArInput");
+    const includedAr = document.getElementById("includedArInput");
+    const excludedAr = document.getElementById("excludedArInput");
+    const deliverablesAr = document.getElementById("deliverablesArInput");
+    const revisionsAr = document.getElementById("revisionsArInput");
+    const deliveryTimeAr = document.getElementById("deliveryTimeArInput");
+
+    function updatePricingModelFields() {
+        if (!pricingTypeInput) return;
         const val = pricingTypeInput.value;
-        if (val === "area") {
-            priceLabelText.textContent = "{% trans 'Price per Square Metre (DA/m²)' %}";
-            priceInput.placeholder = "{% trans 'e.g. 2500' %}";
-        } else if (val === "hourly") {
-            priceLabelText.textContent = "{% trans 'Price per Hour (DA/hr)' %}";
-            priceInput.placeholder = "{% trans 'e.g. 5000' %}";
+
+        if (val === "percent_project_cost") {
+            standardPriceWrapper?.classList.add("d-none");
+            percentRateWrapper?.classList.remove("d-none");
+            minFeeWrapper?.classList.remove("d-none");
+            maxFeeWrapper?.classList.remove("d-none");
+            percentExplanationBox?.classList.remove("d-none");
+            if (percentRateInput) percentRateInput.required = true;
+            if (priceInput) priceInput.required = false;
         } else {
-            priceLabelText.textContent = "{% trans 'Fixed Price (DA)' %}";
-            priceInput.placeholder = "{% trans 'e.g. 25000' %}";
+            standardPriceWrapper?.classList.remove("d-none");
+            percentRateWrapper?.classList.add("d-none");
+            minFeeWrapper?.classList.add("d-none");
+            maxFeeWrapper?.classList.add("d-none");
+            percentExplanationBox?.classList.add("d-none");
+            if (percentRateInput) percentRateInput.required = false;
+
+            if (val === "area") {
+                if (priceLabelText) priceLabelText.textContent = "{% trans 'Price per Square Metre (DA/m²)' %}";
+                if (priceInput) priceInput.placeholder = "e.g. 2500";
+            } else if (val === "hourly") {
+                if (priceLabelText) priceLabelText.textContent = "{% trans 'Price per Hour (DA/hr)' %}";
+                if (priceInput) priceInput.placeholder = "e.g. 5000";
+            } else {
+                if (priceLabelText) priceLabelText.textContent = "{% trans 'Fixed Price (DA)' %}";
+                if (priceInput) priceInput.placeholder = "e.g. 25000";
+            }
         }
     }
 
     if (pricingTypeInput) {
-        pricingTypeInput.addEventListener("change", updatePriceLabel);
+        pricingTypeInput.addEventListener("change", updatePricingModelFields);
     }
 
     if (openNewBtn) {
@@ -408,7 +694,11 @@ document.addEventListener("DOMContentLoaded", function () {
             serviceForm.action = "{% url 'dash:service_create' %}";
             modalTitle.textContent = "{% trans 'New Service' %}";
             submitBtnText.textContent = "{% trans 'Create Service' %}";
-            updatePriceLabel();
+            updatePricingModelFields();
+            const tabFrBtn = document.getElementById("tab-fr-btn");
+            if (tabFrBtn && typeof bootstrap !== "undefined") {
+                new bootstrap.Tab(tabFrBtn).show();
+            }
             const errList = serviceForm.querySelector("#errorList");
             if (errList) errList.innerHTML = "";
         });
@@ -416,24 +706,56 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelectorAll(".edit-service-btn").forEach(btn => {
         btn.addEventListener("click", function () {
-            const id = this.dataset.id;
-            const name = this.dataset.name;
-            const pricingType = this.dataset.pricingType || "fixed";
-            const price = this.dataset.price;
-            const videoLink = this.dataset.videoLink;
-            const isDefault = this.dataset.isDefault === "true";
-            const updateUrl = this.dataset.updateUrl;
-
             serviceForm.reset();
-            serviceForm.action = updateUrl;
+            serviceForm.action = this.dataset.updateUrl;
             modalTitle.textContent = "{% trans 'Edit Service' %}";
             submitBtnText.textContent = "{% trans 'Save Changes' %}";
-            nameInput.value = name;
-            pricingTypeInput.value = pricingType;
-            priceInput.value = price;
-            videoInput.value = videoLink || "";
-            defaultInput.checked = isDefault;
-            updatePriceLabel();
+
+            // Pricing & Config
+            if (pricingTypeInput) pricingTypeInput.value = this.dataset.pricingType || "fixed";
+            if (priceInput) priceInput.value = this.dataset.price || "0";
+            if (percentRateInput) percentRateInput.value = this.dataset.percentageRate || "0";
+            if (minFeeInput) minFeeInput.value = this.dataset.minFee || "";
+            if (maxFeeInput) maxFeeInput.value = this.dataset.maxFee || "";
+            if (videoInput) videoInput.value = this.dataset.videoLink || "";
+            if (defaultInput) defaultInput.checked = this.dataset.isDefault === "true";
+
+            updatePricingModelFields();
+
+            // French inputs
+            if (nameFr) nameFr.value = this.dataset.nameFr || this.dataset.name || "";
+            if (shortDescFr) shortDescFr.value = this.dataset.shortDescFr || this.dataset.shortDesc || "";
+            if (detailedDescFr) detailedDescFr.value = (this.dataset.detailedDescFr || this.dataset.detailedDesc || "").replace(/\\n/g, "\n");
+            if (includedFr) includedFr.value = (this.dataset.includedFr || this.dataset.included || "").replace(/\\n/g, "\n");
+            if (excludedFr) excludedFr.value = (this.dataset.excludedFr || this.dataset.excluded || "").replace(/\\n/g, "\n");
+            if (deliverablesFr) deliverablesFr.value = (this.dataset.deliverablesFr || this.dataset.deliverables || "").replace(/\\n/g, "\n");
+            if (revisionsFr) revisionsFr.value = this.dataset.revisionsFr || this.dataset.revisions || "";
+            if (deliveryTimeFr) deliveryTimeFr.value = this.dataset.deliveryTimeFr || this.dataset.deliveryTime || "";
+
+            // English inputs
+            if (nameEn) nameEn.value = this.dataset.nameEn || "";
+            if (shortDescEn) shortDescEn.value = this.dataset.shortDescEn || "";
+            if (detailedDescEn) detailedDescEn.value = (this.dataset.detailedDescEn || "").replace(/\\n/g, "\n");
+            if (includedEn) includedEn.value = (this.dataset.includedEn || "").replace(/\\n/g, "\n");
+            if (excludedEn) excludedEn.value = (this.dataset.excludedEn || "").replace(/\\n/g, "\n");
+            if (deliverablesEn) deliverablesEn.value = (this.dataset.deliverablesEn || "").replace(/\\n/g, "\n");
+            if (revisionsEn) revisionsEn.value = this.dataset.revisionsEn || "";
+            if (deliveryTimeEn) deliveryTimeEn.value = this.dataset.deliveryTimeEn || "";
+
+            // Arabic inputs
+            if (nameAr) nameAr.value = this.dataset.nameAr || "";
+            if (shortDescAr) shortDescAr.value = this.dataset.shortDescAr || "";
+            if (detailedDescAr) detailedDescAr.value = (this.dataset.detailedDescAr || "").replace(/\\n/g, "\n");
+            if (includedAr) includedAr.value = (this.dataset.includedAr || "").replace(/\\n/g, "\n");
+            if (excludedAr) excludedAr.value = (this.dataset.excludedAr || "").replace(/\\n/g, "\n");
+            if (deliverablesAr) deliverablesAr.value = (this.dataset.deliverablesAr || "").replace(/\\n/g, "\n");
+            if (revisionsAr) revisionsAr.value = this.dataset.revisionsAr || "";
+            if (deliveryTimeAr) deliveryTimeAr.value = this.dataset.deliveryTimeAr || "";
+
+            const tabFrBtn = document.getElementById("tab-fr-btn");
+            if (tabFrBtn && typeof bootstrap !== "undefined") {
+                new bootstrap.Tab(tabFrBtn).show();
+            }
 
             const errList = serviceForm.querySelector("#errorList");
             if (errList) errList.innerHTML = "";

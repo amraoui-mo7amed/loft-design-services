@@ -51,6 +51,12 @@ def _build_menu(is_admin, is_designer, is_customer, lang=None):
                     "admin_only": True,
                 },
                 {
+                    "title": _("Quotes"),
+                    "icon": "fas fa-file-invoice-dollar",
+                    "url_name": "dash:quote_list",
+                    "admin_only": True,
+                },
+                {
                     "title": _("Portfolio"),
                     "icon": "fas fa-briefcase",
                     "url_name": "dash:portfolio_list",

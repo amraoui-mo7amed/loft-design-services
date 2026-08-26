@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #0f172a; color: #e2e8f0; margin: 0; padding: 20px; }
+  .container { max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 16px; overflow: hidden; border: 1px solid #334155; }
+  .header { background: #0b0f19; padding: 24px; text-align: center; border-bottom: 2px solid #ffd65a; }
+  .header h1 { color: #ffd65a; margin: 0; font-size: 22px; font-weight: bold; }
+  .body { padding: 30px 24px; }
+  .highlight-box { background: #0f172a; border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid #334155; }
+  .total-row { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; color: #ffd65a; margin-top: 12px; padding-top: 12px; border-top: 1px solid #334155; }
+  .btn { display: inline-block; background: #ffd65a; color: #0f172a !important; font-weight: bold; text-decoration: none; padding: 12px 28px; border-radius: 8px; margin-top: 20px; }
+  .footer { padding: 20px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #334155; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>LOFT DESIGN</h1>
+    <div style="color: #94a3b8; font-size: 13px; margin-top: 4px;">Architecture d'intérieur & Visualisation 3D</div>
+  </div>
+  <div class="body">
+    <h2 style="color: #ffffff; font-size: 18px; margin-top: 0;">Devis commercial {{ quote.quote_number }} (Rev {{ quote.revision_number }})</h2>
+    <p>Bonjour {{ quote.full_client_name }},</p>
+    
+    {% if custom_message %}
+      <p style="white-space: pre-line; background: #0f172a; padding: 14px; border-radius: 8px; border-left: 3px solid #ffd65a;">{{ custom_message }}</p>
+    {% else %}
+      <p>Nous avons le plaisir de vous transmettre notre proposition commerciale officielle pour votre projet <strong>{{ quote.project_name }}</strong>.</p>
+    {% endif %}
+
+    <div class="highlight-box">
+      <div style="color: #94a3b8; font-size: 13px;">Récapitulatif financier :</div>
+      <div style="display: flex; justify-content: space-between; margin-top: 8px; color: #cbd5e1;">
+        <span>Sous-total HT :</span>
+        <strong>{{ quote.subtotal_before_discount|floatformat:2 }} DA</strong>
+      </div>
+      {% if quote.discount_amount > 0 %}
+        <div style="display: flex; justify-content: space-between; margin-top: 6px; color: #4ade80;">
+          <span>Remise accordée :</span>
+          <strong>-{{ quote.discount_amount|floatformat:2 }} DA {% if quote.client_discount_note %}({{ quote.client_discount_note }}){% endif %}</strong>
+        </div>
+      {% endif %}
+      {% if quote.tax_amount > 0 %}
+        <div style="display: flex; justify-content: space-between; margin-top: 6px; color: #cbd5e1;">
+          <span>TVA (19%) :</span>
+          <strong>{{ quote.tax_amount|floatformat:2 }} DA</strong>
+        </div>
+      {% endif %}
+      <div class="total-row">
+        <span>Total TTC :</span>
+        <span>{{ quote.final_total|floatformat:2 }} DA</span>
+      </div>
+    </div>
+
+    <p style="font-size: 13px; color: #94a3b8;">Le document PDF complet et chiffré est joint à cet e-mail.</p>
+    <div style="text-align: center;">
+      <a href="{{ site_url }}{% url 'dash:customer_quote_view' quote.uuid %}" class="btn">Consulter mon devis en ligne →</a>
+    </div>
+  </div>
+  <div class="footer">
+    LOFT DESIGN · contact: loftdesign@live.fr · Tél: +213 776 139 475<br>
+    © 2026 LOFT DESIGN. Tous droits réservés.
+  </div>
+</div>
+</body>
+</html>

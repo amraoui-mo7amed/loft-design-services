@@ -819,3 +819,73 @@ msgstr "هذا البريد الإلكتروني مسجل بالفعل."
 #: user_auth/views.py:116
 msgid "Your account has been created successfully."
 msgstr "تم إنشاء حسابك بنجاح."
+
+msgid "Quotes & Commercial Proposals"
+msgstr "عروض الأسعار والمقترحات التجارية"
+
+msgid "Quotes"
+msgstr "عروض الأسعار"
+
+msgid "New Quote"
+msgstr "عرض أسعار جديد"
+
+msgid "Create New Commercial Quote"
+msgstr "إنشاء عرض أسعار تجاري جديد"
+
+msgid "Commercial Discount"
+msgstr "خصم تجاري"
+
+msgid "New Revision"
+msgstr "مراجعة جديدة"
+
+msgid "Resend Quote"
+msgstr "إعادة إرسال عرض السعر"
+
+msgid "Send Quote"
+msgstr "إرسال عرض السعر"
+
+msgid "Download PDF"
+msgstr "تحميل PDF"
+
+msgid "Percentage of Total Project Cost"
+msgstr "نسبة مئوية من التكلفة التقديرية للمشروع"
+
+msgid "Percentage Rate (%)"
+msgstr "معدل النسبة المئوية (%)"
+
+msgid "Minimum Fee (DA)"
+msgstr "الحد الأدنى للأتعاب (دج)"
+
+msgid "Maximum Fee (DA)"
+msgstr "الحد الأقصى للأتعاب (دج)"
+
+msgid "Short Description"
+msgstr "وصف موجز"
+
+msgid "Detailed Description"
+msgstr "وصف تفصيلي"
+
+msgid "What is included"
+msgstr "ما تشمله الخدمة"
+
+msgid "What is not included"
+msgstr "ما لا تشمله الخدمة"
+
+msgid "Deliverables"
+msgstr "المخرجات"
+
+msgid "Included revisions"
+msgstr "التعديلات المشمولة"
+
+msgid "Estimated delivery time"
+msgstr "مدة التسليم التقديرية"
+
+msgid "Quote Created"
+msgstr "تم إنشاء عرض السعر"
+
+msgid "Internal Reason (Mandatory Audit Log)"
+msgstr "السبب الداخلي (سجل التدقيق الإلزامي)"
+
+msgid "Client-Facing Note"
+msgstr "ملاحظة موجهة للعميل"
+

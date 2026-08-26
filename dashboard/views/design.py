@@ -20,6 +20,8 @@ from ..models import (
     SpaceImage,
     ProjectTypeSpace,
     Service,
+    ServicePricing,
+    ServiceTranslation,
 )
 
 
@@ -488,11 +490,24 @@ def space_home_toggle(request, pk):
 # Service CRUD (replaces Packages)
 # ──────────────────────────────────────────────
 
+def _parse_bullet_list(raw_val):
+    if isinstance(raw_val, list):
+        return [str(x).strip() for x in raw_val if str(x).strip()]
+    if isinstance(raw_val, str):
+        lines = [line.strip().lstrip("-•*").strip() for line in raw_val.splitlines()]
+        return [line for line in lines if line]
+    return []
+
+
+# ──────────────────────────────────────────────
+# Service CRUD (Multilingual Descriptions & Pricing Models)
+# ──────────────────────────────────────────────
+
 @admin_required
 @with_pagination(per_page=12, template="dashboard/design/service_list", queryset_name="services")
 def service_list(request):
     q = request.GET.get("q", "").strip()
-    queryset = Service.objects.all()
+    queryset = Service.objects.prefetch_related("translations").all()
     if q:
         queryset = queryset.filter(service_name__icontains=q)
     queryset = queryset.order_by("-is_default", "service_name")
@@ -510,33 +525,120 @@ def service_list(request):
 @admin_required
 def service_create(request):
     if request.method == "POST":
-        service_name = request.POST.get("service_name", "").strip()
-        pricing_type = request.POST.get("pricing_type", Service.PricingType.FIXED)
+        service_name_fr = request.POST.get("service_name_fr", "").strip() or request.POST.get("service_name", "").strip()
+        service_name_en = request.POST.get("service_name_en", "").strip()
+        service_name_ar = request.POST.get("service_name_ar", "").strip()
+
+        pricing_type = request.POST.get("pricing_type", ServicePricing.PricingType.FIXED)
         service_price = request.POST.get("service_price", 0)
+        percentage_rate = request.POST.get("percentage_rate", 0)
+        min_fee = request.POST.get("min_fee")
+        max_fee = request.POST.get("max_fee")
+
         video_link = request.POST.get("video_link", "").strip() or None
         is_default = request.POST.get("is_default") in ("true", "1", "on", True)
         gif_file = request.FILES.get("gif_file")
 
-        if not service_name:
-            return JsonResponse({"success": False, "errors": [_("Service name is required.")]})
+        if not service_name_fr:
+            return JsonResponse({"success": False, "errors": [_("French service name is required as default.")]})
 
         try:
             try:
                 service_price = Decimal(str(service_price or 0))
             except Exception:
-                service_price = Decimal("0")
+                service_price = Decimal("0.00")
 
-            Service.objects.create(
-                service_name=service_name,
-                pricing_type=pricing_type,
-                service_price=service_price,
-                video_link=video_link,
-                gif_file=gif_file,
-                is_default=is_default,
-            )
+            try:
+                percentage_rate = Decimal(str(percentage_rate or 0))
+            except Exception:
+                percentage_rate = Decimal("0.00")
+
+            min_fee_val = Decimal(str(min_fee)) if (min_fee and str(min_fee).strip()) else None
+            max_fee_val = Decimal(str(max_fee)) if (max_fee and str(max_fee).strip()) else None
+
+            # Fallback descriptions for base model from FR
+            short_desc_fr = request.POST.get("short_description_fr", "").strip() or request.POST.get("short_description", "").strip()
+            detailed_desc_fr = request.POST.get("detailed_description_fr", "").strip() or request.POST.get("detailed_description", "").strip()
+            included_fr = _parse_bullet_list(request.POST.get("included_items_fr") or request.POST.get("included_items", ""))
+            excluded_fr = _parse_bullet_list(request.POST.get("excluded_items_fr") or request.POST.get("excluded_items", ""))
+            deliverables_fr = _parse_bullet_list(request.POST.get("deliverables_fr") or request.POST.get("deliverables", ""))
+            revisions_fr = request.POST.get("included_revisions_fr", "").strip() or request.POST.get("included_revisions", "").strip()
+            delivery_time_fr = request.POST.get("estimated_delivery_time_fr", "").strip() or request.POST.get("estimated_delivery_time", "").strip()
+
+            with transaction.atomic():
+                if is_default:
+                    ServicePricing.objects.filter(is_default=True).update(is_default=False)
+
+                service = ServicePricing.objects.create(
+                    service_name=service_name_fr,
+                    pricing_type=pricing_type,
+                    service_price=service_price,
+                    percentage_rate=percentage_rate,
+                    min_fee=min_fee_val,
+                    max_fee=max_fee_val,
+                    short_description=short_desc_fr,
+                    detailed_description=detailed_desc_fr,
+                    included_items=included_fr,
+                    excluded_items=excluded_fr,
+                    deliverables=deliverables_fr,
+                    included_revisions=revisions_fr,
+                    estimated_delivery_time=delivery_time_fr,
+                    video_link=video_link,
+                    gif_file=gif_file,
+                    is_default=is_default,
+                )
+
+                # Save translations for FR, EN, AR
+                locales_data = {
+                    "fr": {
+                        "name": service_name_fr,
+                        "short_description": short_desc_fr,
+                        "detailed_description": detailed_desc_fr,
+                        "included_items": included_fr,
+                        "excluded_items": excluded_fr,
+                        "deliverables": deliverables_fr,
+                        "included_revisions": revisions_fr,
+                        "estimated_delivery_time": delivery_time_fr,
+                    },
+                    "en": {
+                        "name": service_name_en or service_name_fr,
+                        "short_description": request.POST.get("short_description_en", "").strip(),
+                        "detailed_description": request.POST.get("detailed_description_en", "").strip(),
+                        "included_items": _parse_bullet_list(request.POST.get("included_items_en", "")),
+                        "excluded_items": _parse_bullet_list(request.POST.get("excluded_items_en", "")),
+                        "deliverables": _parse_bullet_list(request.POST.get("deliverables_en", "")),
+                        "included_revisions": request.POST.get("included_revisions_en", "").strip(),
+                        "estimated_delivery_time": request.POST.get("estimated_delivery_time_en", "").strip(),
+                    },
+                    "ar": {
+                        "name": service_name_ar or service_name_fr,
+                        "short_description": request.POST.get("short_description_ar", "").strip(),
+                        "detailed_description": request.POST.get("detailed_description_ar", "").strip(),
+                        "included_items": _parse_bullet_list(request.POST.get("included_items_ar", "")),
+                        "excluded_items": _parse_bullet_list(request.POST.get("excluded_items_ar", "")),
+                        "deliverables": _parse_bullet_list(request.POST.get("deliverables_ar", "")),
+                        "included_revisions": request.POST.get("included_revisions_ar", "").strip(),
+                        "estimated_delivery_time": request.POST.get("estimated_delivery_time_ar", "").strip(),
+                    },
+                }
+
+                for loc, l_data in locales_data.items():
+                    ServiceTranslation.objects.create(
+                        service=service,
+                        locale=loc,
+                        name=l_data["name"] or service.service_name,
+                        short_description=l_data["short_description"],
+                        detailed_description=l_data["detailed_description"],
+                        included_items=l_data["included_items"],
+                        excluded_items=l_data["excluded_items"],
+                        deliverables=l_data["deliverables"],
+                        included_revisions=l_data["included_revisions"],
+                        estimated_delivery_time=l_data["estimated_delivery_time"],
+                    )
+
             return JsonResponse({
                 "success": True,
-                "message": _("Service created successfully."),
+                "message": _("Service created successfully with translations."),
                 "redirect_url": reverse("dash:service_list"),
             })
         except Exception as e:
@@ -546,30 +648,119 @@ def service_create(request):
 
 @admin_required
 def service_update(request, pk):
-    obj = get_object_or_404(Service, pk=pk)
+    obj = get_object_or_404(ServicePricing.objects.prefetch_related("translations"), pk=pk)
     if request.method == "POST":
-        service_name = request.POST.get("service_name", obj.service_name).strip()
+        service_name_fr = request.POST.get("service_name_fr", "").strip() or request.POST.get("service_name", "").strip() or obj.service_name
+        service_name_en = request.POST.get("service_name_en", "").strip()
+        service_name_ar = request.POST.get("service_name_ar", "").strip()
+
         pricing_type = request.POST.get("pricing_type", obj.pricing_type)
         service_price = request.POST.get("service_price", obj.service_price)
+        percentage_rate = request.POST.get("percentage_rate", obj.percentage_rate)
+        min_fee = request.POST.get("min_fee")
+        max_fee = request.POST.get("max_fee")
+
         video_link = request.POST.get("video_link", "").strip() or None
         is_default = request.POST.get("is_default") in ("true", "1", "on", True)
         gif_file = request.FILES.get("gif_file")
 
-        if not service_name:
+        if not service_name_fr:
             return JsonResponse({"success": False, "errors": [_("Service name is required.")]})
 
         try:
             try:
-                obj.service_price = Decimal(str(service_price or 0))
+                service_price = Decimal(str(service_price or 0))
             except Exception:
-                pass
-            obj.service_name = service_name
-            obj.pricing_type = pricing_type
-            obj.video_link = video_link
-            if gif_file:
-                obj.gif_file = gif_file
-            obj.is_default = is_default
-            obj.save()
+                service_price = obj.service_price
+
+            try:
+                percentage_rate = Decimal(str(percentage_rate or 0))
+            except Exception:
+                percentage_rate = obj.percentage_rate
+
+            min_fee_val = Decimal(str(min_fee)) if (min_fee and str(min_fee).strip()) else None
+            max_fee_val = Decimal(str(max_fee)) if (max_fee and str(max_fee).strip()) else None
+
+            short_desc_fr = request.POST.get("short_description_fr", "").strip() or request.POST.get("short_description", "").strip()
+            detailed_desc_fr = request.POST.get("detailed_description_fr", "").strip() or request.POST.get("detailed_description", "").strip()
+            included_fr = _parse_bullet_list(request.POST.get("included_items_fr") or request.POST.get("included_items", ""))
+            excluded_fr = _parse_bullet_list(request.POST.get("excluded_items_fr") or request.POST.get("excluded_items", ""))
+            deliverables_fr = _parse_bullet_list(request.POST.get("deliverables_fr") or request.POST.get("deliverables", ""))
+            revisions_fr = request.POST.get("included_revisions_fr", "").strip() or request.POST.get("included_revisions", "").strip()
+            delivery_time_fr = request.POST.get("estimated_delivery_time_fr", "").strip() or request.POST.get("estimated_delivery_time", "").strip()
+
+            with transaction.atomic():
+                if is_default and not obj.is_default:
+                    ServicePricing.objects.exclude(pk=obj.pk).filter(is_default=True).update(is_default=False)
+
+                obj.service_name = service_name_fr
+                obj.pricing_type = pricing_type
+                obj.service_price = service_price
+                obj.percentage_rate = percentage_rate
+                obj.min_fee = min_fee_val
+                obj.max_fee = max_fee_val
+                obj.short_description = short_desc_fr
+                obj.detailed_description = detailed_desc_fr
+                obj.included_items = included_fr
+                obj.excluded_items = excluded_fr
+                obj.deliverables = deliverables_fr
+                obj.included_revisions = revisions_fr
+                obj.estimated_delivery_time = delivery_time_fr
+                obj.video_link = video_link
+                if gif_file:
+                    obj.gif_file = gif_file
+                obj.is_default = is_default
+                obj.save()
+
+                locales_data = {
+                    "fr": {
+                        "name": service_name_fr,
+                        "short_description": short_desc_fr,
+                        "detailed_description": detailed_desc_fr,
+                        "included_items": included_fr,
+                        "excluded_items": excluded_fr,
+                        "deliverables": deliverables_fr,
+                        "included_revisions": revisions_fr,
+                        "estimated_delivery_time": delivery_time_fr,
+                    },
+                    "en": {
+                        "name": service_name_en or service_name_fr,
+                        "short_description": request.POST.get("short_description_en", "").strip(),
+                        "detailed_description": request.POST.get("detailed_description_en", "").strip(),
+                        "included_items": _parse_bullet_list(request.POST.get("included_items_en", "")),
+                        "excluded_items": _parse_bullet_list(request.POST.get("excluded_items_en", "")),
+                        "deliverables": _parse_bullet_list(request.POST.get("deliverables_en", "")),
+                        "included_revisions": request.POST.get("included_revisions_en", "").strip(),
+                        "estimated_delivery_time": request.POST.get("estimated_delivery_time_en", "").strip(),
+                    },
+                    "ar": {
+                        "name": service_name_ar or service_name_fr,
+                        "short_description": request.POST.get("short_description_ar", "").strip(),
+                        "detailed_description": request.POST.get("detailed_description_ar", "").strip(),
+                        "included_items": _parse_bullet_list(request.POST.get("included_items_ar", "")),
+                        "excluded_items": _parse_bullet_list(request.POST.get("excluded_items_ar", "")),
+                        "deliverables": _parse_bullet_list(request.POST.get("deliverables_ar", "")),
+                        "included_revisions": request.POST.get("included_revisions_ar", "").strip(),
+                        "estimated_delivery_time": request.POST.get("estimated_delivery_time_ar", "").strip(),
+                    },
+                }
+
+                for loc, l_data in locales_data.items():
+                    t_obj, _ = ServiceTranslation.objects.get_or_create(
+                        service=obj,
+                        locale=loc,
+                        defaults={"name": l_data["name"] or obj.service_name},
+                    )
+                    t_obj.name = l_data["name"] or obj.service_name
+                    t_obj.short_description = l_data["short_description"]
+                    t_obj.detailed_description = l_data["detailed_description"]
+                    t_obj.included_items = l_data["included_items"]
+                    t_obj.excluded_items = l_data["excluded_items"]
+                    t_obj.deliverables = l_data["deliverables"]
+                    t_obj.included_revisions = l_data["included_revisions"]
+                    t_obj.estimated_delivery_time = l_data["estimated_delivery_time"]
+                    t_obj.save()
+
             return JsonResponse({
                 "success": True,
                 "message": _("Service updated successfully."),
@@ -582,10 +773,18 @@ def service_update(request, pk):
 
 @admin_required
 def service_delete(request, pk):
-    obj = get_object_or_404(Service, pk=pk)
+    obj = get_object_or_404(ServicePricing, pk=pk)
     if request.method == "POST":
         try:
-            obj.delete()
+            with transaction.atomic():
+                was_default = obj.is_default
+                obj.delete()
+                if was_default:
+                    replacement = ServicePricing.objects.first()
+                    if replacement:
+                        replacement.is_default = True
+                        replacement.save(update_fields=["is_default"])
+
             return JsonResponse({
                 "success": True,
                 "message": _("Service deleted successfully."),
@@ -598,17 +797,20 @@ def service_delete(request, pk):
 
 @admin_required
 def service_toggle_default(request, pk):
-    obj = get_object_or_404(Service, pk=pk)
+    obj = get_object_or_404(ServicePricing, pk=pk)
     if request.method == "POST":
         action = request.POST.get("action")
         try:
-            if action == "set":
-                obj.is_default = True
-                message = _("“%(name)s” is marked as default.") % {"name": obj.service_name}
-            else:
-                obj.is_default = False
-                message = _("“%(name)s” is no longer default.") % {"name": obj.service_name}
-            obj.save(update_fields=["is_default"])
+            with transaction.atomic():
+                if action == "set":
+                    ServicePricing.objects.exclude(pk=obj.pk).filter(is_default=True).update(is_default=False)
+                    obj.is_default = True
+                    message = _("“%(name)s” is now the single default service in the catalog.") % {"name": obj.service_name}
+                else:
+                    obj.is_default = False
+                    message = _("“%(name)s” is no longer default.") % {"name": obj.service_name}
+                obj.save(update_fields=["is_default"])
+
             return JsonResponse({
                 "success": True,
                 "message": message,

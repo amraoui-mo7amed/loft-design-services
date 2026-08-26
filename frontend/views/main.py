@@ -64,20 +64,81 @@ def home_view(request):
                 "thumbnail": default_sp["img"],
             })
 
-    services_qs = Service.objects.all().order_by("-is_default", "service_name")
+    from django.utils.translation import get_language
+    cur_lang = get_language() or "fr"
+    services_qs = Service.objects.prefetch_related("translations").all().order_by("-is_default", "service_name")
     if services_qs.exists():
-        services_data = [{
-            "id": s.id,
-            "name": s.service_name,
-            "price": float(s.service_price),
-            "pricing_type": s.pricing_type,
-            "is_default": s.is_default,
-        } for s in services_qs]
+        has_default = False
+        services_data = []
+        for s in services_qs:
+            t = s.get_translation(cur_lang)
+            is_def = bool(s.is_default and not has_default)
+            if is_def:
+                has_default = True
+            services_data.append({
+                "id": s.id,
+                "slug": s.id,
+                "name": t.get("name") or s.service_name,
+                "short_description": t.get("short_description") or s.short_description,
+                "detailed_description": t.get("detailed_description") or s.detailed_description,
+                "included_items": t.get("included_items") or s.included_items or [],
+                "excluded_items": t.get("excluded_items") or s.excluded_items or [],
+                "deliverables": t.get("deliverables") or s.deliverables or [],
+                "included_revisions": t.get("included_revisions") or s.included_revisions or "",
+                "estimated_delivery_time": t.get("estimated_delivery_time") or s.estimated_delivery_time or "",
+                "price": float(s.service_price),
+                "pricing_type": s.pricing_type,
+                "percentage_rate": float(s.percentage_rate or 0),
+                "min_fee": float(s.min_fee) if s.min_fee is not None else None,
+                "max_fee": float(s.max_fee) if s.max_fee is not None else None,
+                "video_link": s.video_link or "",
+                "gif_url": s.gif_file.url if s.gif_file else "",
+                "is_default": is_def,
+            })
+        if not has_default and services_data:
+            services_data[0]["is_default"] = True
     else:
         services_data = [
-            {"id": "3d", "name": "Modélisation 3D", "price": 750.0, "pricing_type": "per_sqm", "is_default": True},
-            {"id": "360", "name": "Visite virtuelle 360°", "price": 8000.0, "pricing_type": "fixed", "is_default": True},
-            {"id": "light", "name": "Étude d’éclairage", "price": 12000.0, "pricing_type": "fixed", "is_default": False},
+            {
+                "id": "3d",
+                "slug": "3d",
+                "name": _("3D Modeling & Rendering"),
+                "short_description": _("Detailed photorealistic 3D visualization of your project."),
+                "detailed_description": _("Full 3D modeling and photorealistic rendering adapted to your dimensions."),
+                "included_items": [_("3D layout"), _("Texture and lighting selection"), _("High-resolution renders")],
+                "excluded_items": [_("On-site supervision"), _("Furniture purchasing")],
+                "deliverables": [_("4K JPG Renders"), _("PDF Concept Presentation")],
+                "included_revisions": "2",
+                "estimated_delivery_time": "5-7 days",
+                "price": 750.0,
+                "pricing_type": "area",
+                "percentage_rate": 0.0,
+                "min_fee": None,
+                "max_fee": None,
+                "video_link": "",
+                "gif_url": "",
+                "is_default": True,
+            },
+            {
+                "id": "360",
+                "slug": "360",
+                "name": _("360° Virtual Tour"),
+                "short_description": _("Immersive panoramic 360 tour for interactive walkthroughs."),
+                "detailed_description": _("Interactive 360 degree panoramic walkthrough viewable on mobile and VR."),
+                "included_items": [_("Interactive 360 tour"), _("Mobile and browser compatibility")],
+                "excluded_items": [_("Physical execution")],
+                "deliverables": [_("Web link + VR tour files")],
+                "included_revisions": "1",
+                "estimated_delivery_time": "3-5 days",
+                "price": 8000.0,
+                "pricing_type": "fixed",
+                "percentage_rate": 0.0,
+                "min_fee": None,
+                "max_fee": None,
+                "video_link": "",
+                "gif_url": "",
+                "is_default": False,
+            },
         ]
 
     PORTFOLIO_DEFAULT_IMAGES = [
