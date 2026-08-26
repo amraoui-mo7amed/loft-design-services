@@ -8,159 +8,183 @@
 {% endblock title %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}?v={{ ASSET_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/quotes.css' %}?v={{ ASSET_VERSION }}">
 <style>
+    .customer-quote-wrapper {
+        min-height: 100vh;
+        padding: 100px 20px 60px 20px;
+        background: radial-gradient(circle at 50% 15%, rgba(85, 220, 255, 0.08), transparent 60%), #070b0d;
+    }
     .customer-quote-container {
-        max-width: 900px;
-        margin: 40px auto;
-        padding: 0 20px;
+        max-width: 920px;
+        margin: 0 auto;
     }
     .quote-paper {
-        background: rgba(15, 23, 42, 0.85);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(14, 22, 26, 0.88);
+        border: 1.5px solid rgba(85, 220, 255, 0.25);
         border-radius: 24px;
-        backdrop-filter: blur(20px);
-        padding: 40px;
-        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(28px) saturate(160%);
+        -webkit-backdrop-filter: blur(28px) saturate(160%);
+        padding: 44px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 30px rgba(85, 220, 255, 0.1);
+    }
+    @media (max-width: 768px) {
+        .quote-paper {
+            padding: 24px;
+        }
     }
 </style>
 {% endblock extra_css %}
 
 {% block content %}
-<div class="customer-quote-container text-light">
-    <!-- Revision Banner if superseded -->
-    {% if latest_revision %}
-        <div class="alert alert-warning border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background: rgba(234, 179, 8, 0.18); border: 1px solid rgba(234, 179, 8, 0.3) !important;">
-            <div class="d-flex align-items-center gap-3">
-                <i class="fas fa-exclamation-circle fs-3 text-warning"></i>
-                <div>
-                    <h6 class="fw-bold text-warning mb-1">{% trans "Version antérieure du devis" %}</h6>
-                    <p class="mb-0 text-light text-opacity-75 small">{% trans "Une version plus récente (Rev " %}{{ latest_revision.revision_number }}{% trans ") de cette proposition commerciale a été émise." %}</p>
+<div class="customer-quote-wrapper">
+    <div class="customer-quote-container text-light">
+        <!-- Revision Banner if superseded -->
+        {% if latest_revision %}
+            <div class="alert border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background: rgba(244, 184, 95, 0.15); border: 1.5px solid rgba(244, 184, 95, 0.35) !important;">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="fas fa-exclamation-triangle fs-3 text-warning"></i>
+                    <div>
+                        <h6 class="fw-bold text-warning mb-1">{% trans "Version antérieure du devis" %}</h6>
+                        <p class="mb-0 text-light text-opacity-75 small">{% trans "Une version plus récente (Rev " %}{{ latest_revision.revision_number }}{% trans ") de cette proposition commerciale a été émise." %}</p>
+                    </div>
                 </div>
-            </div>
-            <a href="{% url 'dash:customer_quote_view' latest_revision.uuid %}" class="btn btn-warning btn-sm fw-bold rounded-pill px-4 py-2">
-                {% trans "Voir la dernière version" %} →
-            </a>
-        </div>
-    {% endif %}
-
-    <div class="quote-paper">
-        <!-- Header -->
-        <div class="d-flex align-items-center justify-content-between mb-4 pb-4 border-bottom border-secondary border-opacity-25 flex-wrap gap-3">
-            <div>
-                <span class="badge bg-warning text-dark rounded-pill px-3 py-1 font-monospace fw-bold mb-2">LOFT DESIGN</span>
-                <h2 class="fw-bold mb-0 font-monospace">{{ quote.quote_number }}</h2>
-                <div class="text-muted small mt-1">{% trans "Date d’émission" %}: {{ quote.created_at|date:"d F Y" }} · Rev {{ quote.revision_number }}</div>
-            </div>
-            <div class="text-end">
-                <a href="{% url 'dash:quote_download_pdf' quote.pk %}" class="btn btn-outline-light btn-sm rounded-3 px-3 py-2 fw-semibold">
-                    <i class="fas fa-file-pdf text-danger me-1"></i> {% trans "Télécharger en PDF" %}
+                <a href="{% url 'dash:customer_quote_view' latest_revision.uuid %}" class="btn-neon-cyan">
+                    {% trans "Consulter la dernière révision" %} →
                 </a>
             </div>
-        </div>
+        {% endif %}
 
-        <!-- Client & Project Summary -->
-        <div class="row g-4 mb-4 pb-4 border-bottom border-secondary border-opacity-25">
-            <div class="col-md-6">
-                <div class="text-muted small text-uppercase">{% trans "Destinataire / Client" %}</div>
-                <h5 class="fw-bold text-light mt-1 mb-1">{{ quote.full_client_name }}</h5>
-                <div class="text-muted small">
-                    {{ quote.wilaya }} {% if quote.commune %}· {{ quote.commune }}{% endif %}<br>
-                    {{ quote.email }} · {{ quote.phone }}
+        <div class="quote-paper">
+            <!-- Header -->
+            <div class="d-flex align-items-center justify-content-between mb-4 pb-4 border-bottom border-secondary border-opacity-25 flex-wrap gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-warning text-dark rounded-pill px-3 py-1 font-monospace fw-bold" style="font-size: 0.75rem;">LOFT DESIGN</span>
+                        <span class="quote-badge quote-badge--{{ quote.status }}">
+                            {{ quote.get_status_display }}
+                        </span>
+                    </div>
+                    <h2 class="fw-bold mb-1 font-monospace text-light" style="letter-spacing: -0.5px;">{{ quote.quote_number }}</h2>
+                    <div class="text-muted small">{% trans "Date d’émission" %}: <span class="text-light">{{ quote.created_at|date:"d F Y" }}</span> · <span class="text-info font-monospace">Rev {{ quote.revision_number }}</span></div>
+                </div>
+                <div class="text-end">
+                    <a href="{% url 'dash:quote_download_pdf' quote.pk %}" class="btn-neon-cyan">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>{% trans "Télécharger PDF" %}</span>
+                    </a>
                 </div>
             </div>
-            <div class="col-md-6 text-md-end">
-                <div class="text-muted small text-uppercase">{% trans "Projet" %}</div>
-                <h5 class="fw-bold text-light mt-1 mb-1">{{ quote.project_name }}</h5>
-                <div class="text-muted small">
-                    {% trans "Type" %}: {{ quote.project_type.name|default:_("Architecture & Design") }}<br>
-                    {% if quote.total_surface > 0 %}{% trans "Superficie" %}: {{ quote.total_surface|unlocalize }} m²{% endif %}
+
+            <!-- Client & Project Summary -->
+            <div class="row g-4 mb-4 pb-4 border-bottom border-secondary border-opacity-25">
+                <div class="col-md-6">
+                    <div class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.5px;">{% trans "Destinataire / Client" %}</div>
+                    <h5 class="fw-bold text-light mt-1 mb-1">{{ quote.full_client_name }}</h5>
+                    <div class="text-muted small" style="line-height: 1.5;">
+                        {{ quote.wilaya }} {% if quote.commune %}· {{ quote.commune }}{% endif %}<br>
+                        <span class="font-monospace text-light opacity-75">{{ quote.email }}</span> · <span class="font-monospace text-light opacity-75">{{ quote.phone }}</span>
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="text-muted small text-uppercase fw-semibold" style="letter-spacing: 0.5px;">{% trans "Projet" %}</div>
+                    <h5 class="fw-bold text-light mt-1 mb-1">{{ quote.project_name }}</h5>
+                    <div class="text-muted small" style="line-height: 1.5;">
+                        {% trans "Type" %}: <span class="text-light">{{ quote.project_type.name|default:_("Architecture & Design") }}</span><br>
+                        {% if quote.total_surface > 0 %}{% trans "Superficie" %}: <span class="text-light font-monospace">{{ quote.total_surface|unlocalize }} m²</span>{% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Breakdown Table -->
-        <div class="table-responsive mb-4">
-            <table class="table table-dark table-borderless align-middle mb-0" style="background: transparent;">
-                <thead>
-                    <tr class="border-bottom border-secondary border-opacity-25 text-muted small text-uppercase">
-                        <th>{% trans "Désignation" %}</th>
-                        <th>{% trans "Unité" %}</th>
-                        <th class="text-end">{% trans "Montant HT" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in items %}
-                        <tr class="border-bottom border-secondary border-opacity-10">
-                            <td>
-                                <div class="fw-bold text-light">{{ item.service_name }}</div>
-                                {% if item.details_snapshot.deliverables %}
-                                    <small class="text-muted">{% trans "Livrables" %}: {{ item.details_snapshot.deliverables|join:", " }}</small>
-                                {% endif %}
-                            </td>
-                            <td class="text-muted small font-monospace">{{ item.unit }}</td>
-                            <td class="text-end font-monospace text-warning fw-semibold">{{ item.line_total|unlocalize }} DA</td>
+            <!-- Breakdown Table -->
+            <div class="table-responsive mb-4">
+                <table class="table quote-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Désignation" %}</th>
+                            <th>{% trans "Unité" %}</th>
+                            <th class="text-end">{% trans "Montant HT" %}</th>
                         </tr>
-                    {% endfor %}
-                    {% for sp in spaces %}
-                        <tr class="border-bottom border-secondary border-opacity-10">
-                            <td>
-                                <div class="text-light">{{ sp.space_name }}</div>
-                                {% if sp.floor_name %}<small class="text-muted">{{ sp.floor_name }}</small>{% endif %}
-                            </td>
-                            <td class="text-muted small font-monospace">ESPACE</td>
-                            <td class="text-end font-monospace text-warning fw-semibold">{{ sp.price_at_time|unlocalize }} DA</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Totals Block -->
-        <div class="p-4 rounded-4 border border-secondary border-opacity-25 mb-4" style="background: rgba(0,0,0,0.3);">
-            <div class="d-flex justify-content-between mb-2 text-muted small">
-                <span>{% trans "Sous-total HT" %}:</span>
-                <strong class="text-light font-monospace fs-6">{{ quote.subtotal_before_discount|unlocalize }} DA</strong>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-light">{{ item.service_name }}</div>
+                                    {% if item.details_snapshot.deliverables %}
+                                        <div class="d-flex flex-wrap gap-1 mt-1">
+                                            {% for deliv in item.details_snapshot.deliverables %}
+                                                <span class="badge bg-dark border border-secondary border-opacity-50 text-muted" style="font-size: 0.7rem;">{{ deliv }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="text-muted small font-monospace">{{ item.unit }}</td>
+                                <td class="text-end font-monospace text-warning fw-semibold fs-6">{{ item.line_total|unlocalize }} DA</td>
+                            </tr>
+                        {% endfor %}
+                        {% for sp in spaces %}
+                            <tr>
+                                <td>
+                                    <div class="text-light fw-semibold">{{ sp.space_name }}</div>
+                                    {% if sp.floor_name %}<small class="text-muted font-monospace">{{ sp.floor_name }}</small>{% endif %}
+                                </td>
+                                <td class="text-muted small font-monospace">ESPACE</td>
+                                <td class="text-end font-monospace text-warning fw-semibold fs-6">{{ sp.price_at_time|unlocalize }} DA</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
 
-            {% if quote.discount_amount > 0 %}
-                <div class="d-flex justify-content-between mb-2 text-success small">
-                    <span>
-                        <i class="fas fa-tag me-1"></i>
-                        {% trans "Remise commerciale" %}
-                        {% if quote.discount_type == "percentage" %}({{ quote.discount_value|unlocalize }}%){% endif %}:
-                    </span>
-                    <strong class="font-monospace fs-6">-{{ quote.discount_amount|unlocalize }} DA</strong>
+            <!-- Totals Block -->
+            <div class="p-4 rounded-4 mb-4" style="background: rgba(5, 9, 11, 0.75); border: 1px solid var(--loft-line);">
+                <div class="d-flex justify-content-between mb-2 text-muted small">
+                    <span>{% trans "Sous-total HT" %}:</span>
+                    <strong class="text-light font-monospace fs-6">{{ quote.subtotal_before_discount|unlocalize }} DA</strong>
                 </div>
-                {% if quote.client_discount_note %}
-                    <div class="text-info small mb-2 fst-italic ps-3">
-                        ↳ {{ quote.client_discount_note }}
+
+                {% if quote.discount_amount > 0 %}
+                    <div class="d-flex justify-content-between mb-2 text-success small">
+                        <span>
+                            <i class="fas fa-tag me-1"></i>
+                            {% trans "Remise commerciale" %}
+                            {% if quote.discount_type == "percentage" %}({{ quote.discount_value|unlocalize }}%){% endif %}:
+                        </span>
+                        <strong class="font-monospace fs-6 text-success">-{{ quote.discount_amount|unlocalize }} DA</strong>
+                    </div>
+                    {% if quote.client_discount_note %}
+                        <div class="text-info small mb-2 fst-italic ps-3">
+                            ↳ {{ quote.client_discount_note }}
+                        </div>
+                    {% endif %}
+                    <div class="d-flex justify-content-between mb-2 text-muted small">
+                        <span>{% trans "Sous-total net HT" %}:</span>
+                        <strong class="text-light font-monospace">{{ quote.subtotal_after_discount|unlocalize }} DA</strong>
                     </div>
                 {% endif %}
-                <div class="d-flex justify-content-between mb-2 text-muted small">
-                    <span>{% trans "Sous-total net HT" %}:</span>
-                    <strong class="text-light font-monospace">{{ quote.subtotal_after_discount|unlocalize }} DA</strong>
-                </div>
-            {% endif %}
 
-            {% if quote.tax_amount > 0 %}
-                <div class="d-flex justify-content-between mb-2 text-muted small">
-                    <span>{% trans "TVA (19%)" %}:</span>
-                    <strong class="text-light font-monospace">{{ quote.tax_amount|unlocalize }} DA</strong>
-                </div>
-            {% endif %}
+                {% if quote.tax_amount > 0 %}
+                    <div class="d-flex justify-content-between mb-2 text-muted small">
+                        <span>{% trans "TVA (19%)" %}:</span>
+                        <strong class="text-light font-monospace">{{ quote.tax_amount|unlocalize }} DA</strong>
+                    </div>
+                {% endif %}
 
-            <div class="d-flex justify-content-between pt-3 border-top border-secondary border-opacity-25">
-                <span class="fw-bold text-light fs-4">{% trans "Total TTC" %}:</span>
-                <strong class="text-warning font-monospace fs-3">{{ quote.final_total|unlocalize }} DA</strong>
+                <div class="d-flex justify-content-between pt-3 mt-2 border-top border-secondary border-opacity-25 align-items-center">
+                    <span class="fw-bold text-light fs-4">{% trans "Total TTC" %}:</span>
+                    <strong class="quote-amount-highlight">{{ quote.final_total|unlocalize }} DA</strong>
+                </div>
             </div>
+
+            {% if quote.client_notes %}
+                <div class="alert border border-secondary border-opacity-25 rounded-4 p-4 text-muted small" style="background: rgba(5, 9, 11, 0.5);">
+                    <strong class="text-light d-block mb-1 fs-6"><i class="fas fa-info-circle text-info me-1"></i> {% trans "Conditions & Remarques" %}:</strong>
+                    {{ quote.client_notes|linebreaksbr }}
+                </div>
+            {% endif %}
         </div>
-
-        {% if quote.client_notes %}
-            <div class="alert alert-dark border border-secondary border-opacity-25 rounded-3 p-3 text-muted small">
-                <strong class="text-light d-block mb-1">{% trans "Conditions & Remarques" %}:</strong>
-                {{ quote.client_notes|linebreaksbr }}
-            </div>
-        {% endif %}
     </div>
 </div>
 {% endblock content %}
