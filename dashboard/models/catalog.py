@@ -108,14 +108,20 @@ class ServicePricing(models.Model):
     def save(self, *args, **kwargs):
         if self.is_default:
             with transaction.atomic():
-                ServicePricing.objects.exclude(pk=self.pk).filter(is_default=True).update(is_default=False)
+                if self.pk:
+                    ServicePricing.objects.exclude(pk=self.pk).filter(is_default=True).update(is_default=False)
+                else:
+                    ServicePricing.objects.filter(is_default=True).update(is_default=False)
                 super().save(*args, **kwargs)
         else:
             super().save(*args, **kwargs)
 
     def get_translation(self, locale=None):
-        target_locale = locale or get_language() or "fr"
-        short_locale = target_locale.split("-")[0].lower()
+        if not locale or not isinstance(locale, str):
+            target_locale = get_language() or "fr"
+        else:
+            target_locale = locale
+        short_locale = str(target_locale).split("-")[0].lower()
 
         translations = list(self.translations.all())
         matched = next((t for t in translations if t.locale == short_locale), None)

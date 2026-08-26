@@ -66,6 +66,9 @@ def build_packages_context():
 
 
 def humanize_error(e):
+    logger.exception("Error handled by humanize_error: %s", e)
+    if isinstance(e, list):
+        return e
     if not isinstance(e, IntegrityError):
         return [str(e)]
     msg = str(e)

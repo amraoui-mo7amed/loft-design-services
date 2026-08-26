@@ -525,9 +525,9 @@ def service_list(request):
 @admin_required
 def service_create(request):
     if request.method == "POST":
-        service_name_fr = request.POST.get("service_name_fr", "").strip() or request.POST.get("service_name", "").strip()
-        service_name_en = request.POST.get("service_name_en", "").strip()
-        service_name_ar = request.POST.get("service_name_ar", "").strip()
+        service_name_fr = (request.POST.get("service_name_fr") or request.POST.get("service_name") or "").strip()
+        service_name_en = (request.POST.get("service_name_en") or "").strip()
+        service_name_ar = (request.POST.get("service_name_ar") or "").strip()
 
         pricing_type = request.POST.get("pricing_type", ServicePricing.PricingType.FIXED)
         service_price = request.POST.get("service_price", 0)
@@ -535,7 +535,7 @@ def service_create(request):
         min_fee = request.POST.get("min_fee")
         max_fee = request.POST.get("max_fee")
 
-        video_link = request.POST.get("video_link", "").strip() or None
+        video_link = (request.POST.get("video_link") or "").strip() or None
         is_default = request.POST.get("is_default") in ("true", "1", "on", True)
         gif_file = request.FILES.get("gif_file")
 
@@ -557,13 +557,13 @@ def service_create(request):
             max_fee_val = Decimal(str(max_fee)) if (max_fee and str(max_fee).strip()) else None
 
             # Fallback descriptions for base model from FR
-            short_desc_fr = request.POST.get("short_description_fr", "").strip() or request.POST.get("short_description", "").strip()
-            detailed_desc_fr = request.POST.get("detailed_description_fr", "").strip() or request.POST.get("detailed_description", "").strip()
-            included_fr = _parse_bullet_list(request.POST.get("included_items_fr") or request.POST.get("included_items", ""))
-            excluded_fr = _parse_bullet_list(request.POST.get("excluded_items_fr") or request.POST.get("excluded_items", ""))
-            deliverables_fr = _parse_bullet_list(request.POST.get("deliverables_fr") or request.POST.get("deliverables", ""))
-            revisions_fr = request.POST.get("included_revisions_fr", "").strip() or request.POST.get("included_revisions", "").strip()
-            delivery_time_fr = request.POST.get("estimated_delivery_time_fr", "").strip() or request.POST.get("estimated_delivery_time", "").strip()
+            short_desc_fr = (request.POST.get("short_description_fr") or request.POST.get("short_description") or "").strip()
+            detailed_desc_fr = (request.POST.get("detailed_description_fr") or request.POST.get("detailed_description") or "").strip()
+            included_fr = _parse_bullet_list(request.POST.get("included_items_fr") or request.POST.get("included_items") or "")
+            excluded_fr = _parse_bullet_list(request.POST.get("excluded_items_fr") or request.POST.get("excluded_items") or "")
+            deliverables_fr = _parse_bullet_list(request.POST.get("deliverables_fr") or request.POST.get("deliverables") or "")
+            revisions_fr = (request.POST.get("included_revisions_fr") or request.POST.get("included_revisions") or "").strip()
+            delivery_time_fr = (request.POST.get("estimated_delivery_time_fr") or request.POST.get("estimated_delivery_time") or "").strip()
 
             with transaction.atomic():
                 if is_default:
@@ -602,23 +602,23 @@ def service_create(request):
                     },
                     "en": {
                         "name": service_name_en or service_name_fr,
-                        "short_description": request.POST.get("short_description_en", "").strip(),
-                        "detailed_description": request.POST.get("detailed_description_en", "").strip(),
-                        "included_items": _parse_bullet_list(request.POST.get("included_items_en", "")),
-                        "excluded_items": _parse_bullet_list(request.POST.get("excluded_items_en", "")),
-                        "deliverables": _parse_bullet_list(request.POST.get("deliverables_en", "")),
-                        "included_revisions": request.POST.get("included_revisions_en", "").strip(),
-                        "estimated_delivery_time": request.POST.get("estimated_delivery_time_en", "").strip(),
+                        "short_description": (request.POST.get("short_description_en") or "").strip(),
+                        "detailed_description": (request.POST.get("detailed_description_en") or "").strip(),
+                        "included_items": _parse_bullet_list(request.POST.get("included_items_en") or ""),
+                        "excluded_items": _parse_bullet_list(request.POST.get("excluded_items_en") or ""),
+                        "deliverables": _parse_bullet_list(request.POST.get("deliverables_en") or ""),
+                        "included_revisions": (request.POST.get("included_revisions_en") or "").strip(),
+                        "estimated_delivery_time": (request.POST.get("estimated_delivery_time_en") or "").strip(),
                     },
                     "ar": {
                         "name": service_name_ar or service_name_fr,
-                        "short_description": request.POST.get("short_description_ar", "").strip(),
-                        "detailed_description": request.POST.get("detailed_description_ar", "").strip(),
-                        "included_items": _parse_bullet_list(request.POST.get("included_items_ar", "")),
-                        "excluded_items": _parse_bullet_list(request.POST.get("excluded_items_ar", "")),
-                        "deliverables": _parse_bullet_list(request.POST.get("deliverables_ar", "")),
-                        "included_revisions": request.POST.get("included_revisions_ar", "").strip(),
-                        "estimated_delivery_time": request.POST.get("estimated_delivery_time_ar", "").strip(),
+                        "short_description": (request.POST.get("short_description_ar") or "").strip(),
+                        "detailed_description": (request.POST.get("detailed_description_ar") or "").strip(),
+                        "included_items": _parse_bullet_list(request.POST.get("included_items_ar") or ""),
+                        "excluded_items": _parse_bullet_list(request.POST.get("excluded_items_ar") or ""),
+                        "deliverables": _parse_bullet_list(request.POST.get("deliverables_ar") or ""),
+                        "included_revisions": (request.POST.get("included_revisions_ar") or "").strip(),
+                        "estimated_delivery_time": (request.POST.get("estimated_delivery_time_ar") or "").strip(),
                     },
                 }
 
@@ -650,9 +650,9 @@ def service_create(request):
 def service_update(request, pk):
     obj = get_object_or_404(ServicePricing.objects.prefetch_related("translations"), pk=pk)
     if request.method == "POST":
-        service_name_fr = request.POST.get("service_name_fr", "").strip() or request.POST.get("service_name", "").strip() or obj.service_name
-        service_name_en = request.POST.get("service_name_en", "").strip()
-        service_name_ar = request.POST.get("service_name_ar", "").strip()
+        service_name_fr = (request.POST.get("service_name_fr") or request.POST.get("service_name") or "").strip() or obj.service_name
+        service_name_en = (request.POST.get("service_name_en") or "").strip()
+        service_name_ar = (request.POST.get("service_name_ar") or "").strip()
 
         pricing_type = request.POST.get("pricing_type", obj.pricing_type)
         service_price = request.POST.get("service_price", obj.service_price)
@@ -660,7 +660,7 @@ def service_update(request, pk):
         min_fee = request.POST.get("min_fee")
         max_fee = request.POST.get("max_fee")
 
-        video_link = request.POST.get("video_link", "").strip() or None
+        video_link = (request.POST.get("video_link") or "").strip() or None
         is_default = request.POST.get("is_default") in ("true", "1", "on", True)
         gif_file = request.FILES.get("gif_file")
 
@@ -681,13 +681,13 @@ def service_update(request, pk):
             min_fee_val = Decimal(str(min_fee)) if (min_fee and str(min_fee).strip()) else None
             max_fee_val = Decimal(str(max_fee)) if (max_fee and str(max_fee).strip()) else None
 
-            short_desc_fr = request.POST.get("short_description_fr", "").strip() or request.POST.get("short_description", "").strip()
-            detailed_desc_fr = request.POST.get("detailed_description_fr", "").strip() or request.POST.get("detailed_description", "").strip()
-            included_fr = _parse_bullet_list(request.POST.get("included_items_fr") or request.POST.get("included_items", ""))
-            excluded_fr = _parse_bullet_list(request.POST.get("excluded_items_fr") or request.POST.get("excluded_items", ""))
-            deliverables_fr = _parse_bullet_list(request.POST.get("deliverables_fr") or request.POST.get("deliverables", ""))
-            revisions_fr = request.POST.get("included_revisions_fr", "").strip() or request.POST.get("included_revisions", "").strip()
-            delivery_time_fr = request.POST.get("estimated_delivery_time_fr", "").strip() or request.POST.get("estimated_delivery_time", "").strip()
+            short_desc_fr = (request.POST.get("short_description_fr") or request.POST.get("short_description") or "").strip()
+            detailed_desc_fr = (request.POST.get("detailed_description_fr") or request.POST.get("detailed_description") or "").strip()
+            included_fr = _parse_bullet_list(request.POST.get("included_items_fr") or request.POST.get("included_items") or "")
+            excluded_fr = _parse_bullet_list(request.POST.get("excluded_items_fr") or request.POST.get("excluded_items") or "")
+            deliverables_fr = _parse_bullet_list(request.POST.get("deliverables_fr") or request.POST.get("deliverables") or "")
+            revisions_fr = (request.POST.get("included_revisions_fr") or request.POST.get("included_revisions") or "").strip()
+            delivery_time_fr = (request.POST.get("estimated_delivery_time_fr") or request.POST.get("estimated_delivery_time") or "").strip()
 
             with transaction.atomic():
                 if is_default and not obj.is_default:
@@ -725,23 +725,23 @@ def service_update(request, pk):
                     },
                     "en": {
                         "name": service_name_en or service_name_fr,
-                        "short_description": request.POST.get("short_description_en", "").strip(),
-                        "detailed_description": request.POST.get("detailed_description_en", "").strip(),
-                        "included_items": _parse_bullet_list(request.POST.get("included_items_en", "")),
-                        "excluded_items": _parse_bullet_list(request.POST.get("excluded_items_en", "")),
-                        "deliverables": _parse_bullet_list(request.POST.get("deliverables_en", "")),
-                        "included_revisions": request.POST.get("included_revisions_en", "").strip(),
-                        "estimated_delivery_time": request.POST.get("estimated_delivery_time_en", "").strip(),
+                        "short_description": (request.POST.get("short_description_en") or "").strip(),
+                        "detailed_description": (request.POST.get("detailed_description_en") or "").strip(),
+                        "included_items": _parse_bullet_list(request.POST.get("included_items_en") or ""),
+                        "excluded_items": _parse_bullet_list(request.POST.get("excluded_items_en") or ""),
+                        "deliverables": _parse_bullet_list(request.POST.get("deliverables_en") or ""),
+                        "included_revisions": (request.POST.get("included_revisions_en") or "").strip(),
+                        "estimated_delivery_time": (request.POST.get("estimated_delivery_time_en") or "").strip(),
                     },
                     "ar": {
                         "name": service_name_ar or service_name_fr,
-                        "short_description": request.POST.get("short_description_ar", "").strip(),
-                        "detailed_description": request.POST.get("detailed_description_ar", "").strip(),
-                        "included_items": _parse_bullet_list(request.POST.get("included_items_ar", "")),
-                        "excluded_items": _parse_bullet_list(request.POST.get("excluded_items_ar", "")),
-                        "deliverables": _parse_bullet_list(request.POST.get("deliverables_ar", "")),
-                        "included_revisions": request.POST.get("included_revisions_ar", "").strip(),
-                        "estimated_delivery_time": request.POST.get("estimated_delivery_time_ar", "").strip(),
+                        "short_description": (request.POST.get("short_description_ar") or "").strip(),
+                        "detailed_description": (request.POST.get("detailed_description_ar") or "").strip(),
+                        "included_items": _parse_bullet_list(request.POST.get("included_items_ar") or ""),
+                        "excluded_items": _parse_bullet_list(request.POST.get("excluded_items_ar") or ""),
+                        "deliverables": _parse_bullet_list(request.POST.get("deliverables_ar") or ""),
+                        "included_revisions": (request.POST.get("included_revisions_ar") or "").strip(),
+                        "estimated_delivery_time": (request.POST.get("estimated_delivery_time_ar") or "").strip(),
                     },
                 }
 
