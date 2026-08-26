@@ -1,4 +1,4 @@
-﻿import json
+import json
 import uuid
 from decimal import Decimal
 from django.http import JsonResponse, HttpResponse
@@ -474,12 +474,14 @@ def quote_send(request, pk):
             fact_data = {
                 "first_name": quote.first_name,
                 "last_name": quote.last_name,
+                "client_name": f"{quote.first_name} {quote.last_name}".strip() or quote.company_name or _("Client"),
                 "email": recipient_email,
                 "phone": quote.phone,
                 "company_name": quote.company_name,
                 "client_type": quote.client_type,
                 "project_name": quote.project_name,
-                "project_type_name": quote.project_type.name if quote.project_type else "Design",
+                "project_type": quote.project_type.name if quote.project_type else _("Architectural Design"),
+                "project_type_name": quote.project_type.name if quote.project_type else _("Architectural Design"),
                 "total_surface": float(quote.total_surface),
                 "estimated_total_project_cost": float(quote.estimated_total_project_cost),
                 "spaces": [{"name": s.space_name, "price": float(s.price_at_time)} for s in quote.spaces.all()],
@@ -503,8 +505,11 @@ def quote_send(request, pk):
                 "subtotal_after_discount": float(quote.subtotal_after_discount),
                 "tax_amount": float(quote.tax_amount),
                 "final_total": float(quote.final_total),
+                "total": float(quote.final_total),
                 "revision_number": quote.revision_number,
                 "quote_number": quote.quote_number,
+                "doc_number": f"{quote.quote_number}-Rev{quote.revision_number}",
+                "date": quote.created_at.strftime("%d/%m/%Y") if quote.created_at else "",
             }
 
             pdf_bytes = render_facturation_pdf_bytes(fact_data)
@@ -572,48 +577,61 @@ def quote_send(request, pk):
 
 @admin_required
 def quote_download_pdf(request, pk):
-    quote = get_object_or_404(Quote.objects.prefetch_related("items", "spaces"), pk=pk)
+    try:
+        quote = get_object_or_404(Quote.objects.prefetch_related("items", "spaces"), pk=pk)
 
-    fact_data = {
-        "first_name": quote.first_name,
-        "last_name": quote.last_name,
-        "email": quote.email,
-        "phone": quote.phone,
-        "company_name": quote.company_name,
-        "client_type": quote.client_type,
-        "project_name": quote.project_name,
-        "project_type_name": quote.project_type.name if quote.project_type else "Design",
-        "total_surface": float(quote.total_surface),
-        "estimated_total_project_cost": float(quote.estimated_total_project_cost),
-        "spaces": [{"name": s.space_name, "price": float(s.price_at_time)} for s in quote.spaces.all()],
-        "services": [
-            {
-                "name": item.service_name,
-                "pricing_type": item.pricing_model,
-                "price": float(item.unit_price),
-                "percentage_rate": float(item.percentage_rate or 0),
-                "line_total": float(item.line_total),
-                "qty": float(item.quantity),
-                "unit": item.unit,
-            }
-            for item in quote.items.all()
-        ],
-        "discount_type": quote.discount_type,
-        "discount_value": float(quote.discount_value),
-        "discount_amount": float(quote.discount_amount),
-        "client_discount_note": quote.client_discount_note,
-        "subtotal_before_discount": float(quote.subtotal_before_discount),
-        "subtotal_after_discount": float(quote.subtotal_after_discount),
-        "tax_amount": float(quote.tax_amount),
-        "final_total": float(quote.final_total),
-        "revision_number": quote.revision_number,
-        "quote_number": quote.quote_number,
-    }
+        fact_data = {
+            "first_name": quote.first_name,
+            "last_name": quote.last_name,
+            "client_name": f"{quote.first_name} {quote.last_name}".strip() or quote.company_name or _("Client"),
+            "email": quote.email,
+            "phone": quote.phone,
+            "company_name": quote.company_name,
+            "client_type": quote.client_type,
+            "project_name": quote.project_name,
+            "project_type": quote.project_type.name if quote.project_type else _("Architectural Design"),
+            "project_type_name": quote.project_type.name if quote.project_type else _("Architectural Design"),
+            "total_surface": float(quote.total_surface),
+            "estimated_total_project_cost": float(quote.estimated_total_project_cost),
+            "spaces": [{"name": s.space_name, "price": float(s.price_at_time)} for s in quote.spaces.all()],
+            "services": [
+                {
+                    "name": item.service_name,
+                    "pricing_type": item.pricing_model,
+                    "price": float(item.unit_price),
+                    "percentage_rate": float(item.percentage_rate or 0),
+                    "line_total": float(item.line_total),
+                    "qty": float(item.quantity),
+                    "unit": item.unit,
+                }
+                for item in quote.items.all()
+            ],
+            "discount_type": quote.discount_type,
+            "discount_value": float(quote.discount_value),
+            "discount_amount": float(quote.discount_amount),
+            "client_discount_note": quote.client_discount_note,
+            "subtotal_before_discount": float(quote.subtotal_before_discount),
+            "subtotal_after_discount": float(quote.subtotal_after_discount),
+            "tax_amount": float(quote.tax_amount),
+            "final_total": float(quote.final_total),
+            "total": float(quote.final_total),
+            "revision_number": quote.revision_number,
+            "quote_number": quote.quote_number,
+            "doc_number": f"{quote.quote_number}-Rev{quote.revision_number}",
+            "date": quote.created_at.strftime("%d/%m/%Y") if quote.created_at else "",
+        }
 
-    pdf_bytes = render_facturation_pdf_bytes(fact_data)
-    response = HttpResponse(pdf_bytes, content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="{quote.quote_number}_Rev{quote.revision_number}.pdf"'
-    return response
+        pdf_bytes = render_facturation_pdf_bytes(fact_data)
+        response = HttpResponse(pdf_bytes, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{quote.quote_number}_Rev{quote.revision_number}.pdf"'
+        return response
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error("Error downloading quote PDF: %s", e)
+        from django.contrib import messages
+        from django.shortcuts import redirect
+        messages.error(request, _("Unable to generate PDF: %(err)s") % {"err": humanize_error(e)[0] if humanize_error(e) else str(e)})
+        return redirect("dash:quote_detail", pk=pk)
 
 
 # ──────────────────────────────────────────────

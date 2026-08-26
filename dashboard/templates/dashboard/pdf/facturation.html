@@ -1,152 +1,199 @@
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE|default:'en' }}">
-    <head>
-        <meta charset="utf-8">
-        <title>{% trans "Proforma Invoice / Facture" %}</title>
-        <style>
+<html lang="{{ LANGUAGE_CODE|default:'fr' }}">
+<head>
+    <meta charset="utf-8">
+    <title>{{ doc_number|default:quote_number|default:"LOFT-QUO" }} — {{ studio_name|default:"LoftDesign" }}</title>
+    <style>
         @page {
             size: A4;
-            margin: 20mm 15mm 20mm 15mm;
-            @bottom-center {
-                content: "LoftDesign Studio — {{ studio_name }} | Page " counter(page) " / " counter(pages);
-                font-family: 'DejaVu Sans', sans-serif;
-                font-size: 8pt;
-                color: #888888;
+            margin: 14mm 14mm 16mm 14mm;
+            @bottom-left {
+                content: "LoftDesign Studio — {{ company_address }}";
+                font-family: 'DejaVu Sans', Arial, sans-serif;
+                font-size: 7.5pt;
+                color: #94a3b8;
+            }
+            @bottom-right {
+                content: "{% trans 'Page' %} " counter(page) " / " counter(pages);
+                font-family: 'DejaVu Sans', Arial, sans-serif;
+                font-size: 7.5pt;
+                font-weight: bold;
+                color: #64748b;
             }
         }
 
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'DejaVu Sans', sans-serif;
-            color: #1a1a1a;
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-size: 10pt;
-            line-height: 1.5;
-            background: #ffffff;
         }
 
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            color: #1e293b;
+            font-size: 9pt;
+            line-height: 1.45;
+            background: #ffffff;
+            padding: 0;
+        }
+
+        /* Top Header Grid */
         .header-table {
             width: 100%;
-            border-bottom: 3px solid #FFD65A;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
+            border-collapse: collapse;
+            margin-bottom: 18px;
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 12px;
         }
 
-        .studio-title {
-            font-size: 22pt;
-            font-weight: bold;
-            color: #111827;
-            margin: 0;
-            letter-spacing: -0.5px;
+        .header-table td {
+            vertical-align: middle;
         }
 
-        .studio-subtitle {
-            font-size: 9pt;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 3px;
-        }
-
-        .doc-meta {
-            text-align: right;
-        }
-
-        .doc-badge {
+        .logo-wrap {
             display: inline-block;
-            background: #111827;
-            color: #FFD65A;
-            font-size: 11pt;
-            font-weight: bold;
-            padding: 5px 12px;
+            vertical-align: middle;
+            margin-right: 12px;
+        }
+
+        .brand-title {
+            font-size: 20pt;
+            font-weight: 900;
+            color: #0f172a;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 1.1;
+        }
+
+        .brand-title span.accent {
+            color: #d97706;
+        }
+
+        .brand-subtitle {
+            font-size: 7.5pt;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #64748b;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .company-legal-strip {
+            font-size: 7pt;
+            color: #64748b;
+            line-height: 1.35;
+            margin-top: 4px;
+        }
+
+        .doc-badge-col {
+            text-align: right;
+            vertical-align: top;
+        }
+
+        .doc-type-badge {
+            display: inline-block;
+            background: #0f172a;
+            color: #f4b85f;
+            font-size: 9.5pt;
+            font-weight: 800;
+            padding: 6px 14px;
             border-radius: 4px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        .doc-number {
-            font-size: 10pt;
-            font-weight: bold;
-            color: #374151;
+        .doc-ref-number {
+            font-size: 11pt;
+            font-weight: 800;
+            color: #0f172a;
             margin-top: 6px;
+            font-family: monospace;
         }
 
-        .doc-date {
-            font-size: 9pt;
-            color: #6b7280;
-        }
-
-        .info-grid {
-            width: 100%;
-            margin-bottom: 25px;
-        }
-
-        .info-col {
-            vertical-align: top;
-            width: 50%;
-        }
-
-        .section-label {
+        .doc-meta-sub {
             font-size: 8pt;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #9ca3af;
-            margin-bottom: 6px;
+            color: #64748b;
+            margin-top: 3px;
         }
 
-        .info-card {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
+        /* Two Cards Grid: Client & Project */
+        .info-grid-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 18px;
+        }
+
+        .info-card-cell {
+            width: 50%;
+            vertical-align: top;
+        }
+
+        .info-card-left {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-left: 3.5px solid #d97706;
             border-radius: 6px;
-            padding: 12px 15px;
-            margin-right: 10px;
+            padding: 10px 14px;
+            margin-right: 8px;
+            min-height: 95px;
         }
 
         .info-card-right {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-left: 3.5px solid #0284c7;
             border-radius: 6px;
-            padding: 12px 15px;
-            margin-left: 10px;
+            padding: 10px 14px;
+            margin-left: 8px;
+            min-height: 95px;
         }
 
-        .client-name {
-            font-size: 12pt;
-            font-weight: bold;
-            color: #111827;
-            margin: 0 0 4px;
+        .card-header-title {
+            font-size: 7.5pt;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #475569;
+            margin-bottom: 6px;
+            border-bottom: 1px dashed #cbd5e1;
+            padding-bottom: 3px;
         }
 
-        .client-detail {
-            font-size: 9pt;
-            color: #4b5563;
+        .card-main-name {
+            font-size: 11pt;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .card-row {
+            font-size: 8.5pt;
+            color: #334155;
             margin: 2px 0;
         }
 
-        /* Items Table */
+        .card-row strong {
+            color: #0f172a;
+        }
+
+        /* Itemized Table */
         table.items-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 15px 0 20px;
+            margin: 14px 0 16px;
         }
 
-        table.items-table th {
-            background: #111827;
+        table.items-table thead th {
+            background: #0f172a;
             color: #ffffff;
-            font-size: 8.5pt;
-            font-weight: bold;
+            font-size: 8pt;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.8px;
-            padding: 10px 12px;
+            padding: 8px 10px;
             border: none;
-        }
-
-        table.items-table th.right,
-        table.items-table td.right {
-            text-align: right;
         }
 
         table.items-table th.center,
@@ -154,250 +201,443 @@
             text-align: center;
         }
 
-        table.items-table td {
-            padding: 10px 12px;
-            font-size: 9.5pt;
-            border-bottom: 1px solid #e5e7eb;
-            color: #1f2937;
+        table.items-table th.right,
+        table.items-table td.right {
+            text-align: right;
         }
 
-        table.items-table tr:nth-child(even) td {
-            background: #fafafa;
-        }
-
-        .category-header-row td {
-            background: #f3f4f6 !important;
-            font-weight: bold;
+        table.items-table tbody td {
+            padding: 8px 10px;
             font-size: 8.5pt;
+            border-bottom: 1px solid #e2e8f0;
+            color: #1e293b;
+            vertical-align: middle;
+        }
+
+        table.items-table tbody tr:nth-child(even) td {
+            background: #f8fafc;
+        }
+
+        .section-separator-row td {
+            background: #e2e8f0 !important;
+            font-weight: 800;
+            font-size: 7.5pt;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #4b5563;
-            padding: 6px 12px;
+            letter-spacing: 0.8px;
+            color: #334155;
+            padding: 5px 10px;
         }
 
-        /* Totals Box */
-        .totals-table {
+        .service-desc-sub {
+            font-size: 7.5pt;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        /* Bottom Section: Notes on left, Totals on right */
+        .totals-section-table {
             width: 100%;
-            margin-top: 10px;
+            border-collapse: collapse;
+            margin-top: 8px;
         }
 
-        .totals-col-left {
-            width: 55%;
+        .totals-section-table td.notes-cell {
+            width: 52%;
             vertical-align: top;
-            padding-right: 20px;
+            padding-right: 14px;
         }
 
-        .totals-col-right {
-            width: 45%;
+        .totals-section-table td.totals-cell {
+            width: 48%;
             vertical-align: top;
         }
 
-        .grand-total-box {
-            background: #111827;
+        .notice-box {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-left: 3px solid #f59e0b;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 8pt;
+            color: #78350f;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .payment-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 7.5pt;
+            color: #475569;
+            line-height: 1.35;
+        }
+
+        .payment-box strong {
+            color: #0f172a;
+        }
+
+        .grand-total-card {
+            background: #0f172a;
             border-radius: 8px;
-            padding: 14px 18px;
+            padding: 14px 16px;
             color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8.5pt;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+
+        .summary-row.discount {
+            color: #34d399;
+            font-weight: 700;
+        }
+
+        .summary-row.tax {
+            color: #cbd5e1;
+        }
+
+        .summary-divider {
+            border-top: 1px solid rgba(255,255,255,0.15);
+            margin: 8px 0;
         }
 
         .grand-total-label {
             font-size: 9pt;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #9ca3af;
+            letter-spacing: 1.2px;
+            color: #f4b85f;
+            margin-bottom: 2px;
         }
 
-        .grand-total-val {
+        .grand-total-amount {
             font-size: 18pt;
-            font-weight: bold;
-            color: #FFD65A;
-            margin-top: 4px;
+            font-weight: 900;
+            color: #ffffff;
+            font-family: monospace;
+            letter-spacing: -0.5px;
         }
 
-        .notice-box {
-            font-size: 8.5pt;
-            color: #6b7280;
-            line-height: 1.4;
-            background: #fefce8;
-            border: 1px solid #fef08a;
+        /* Signatures Area */
+        .signatures-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+            page-break-inside: avoid;
+        }
+
+        .sig-col {
+            width: 50%;
+            vertical-align: top;
+        }
+
+        .sig-box-left {
+            border: 1px dashed #cbd5e1;
             border-radius: 6px;
-            padding: 10px 12px;
+            padding: 10px 14px;
+            margin-right: 8px;
+            min-height: 75px;
         }
 
-        .footer-note {
-            margin-top: 30px;
+        .sig-box-right {
+            border: 1px dashed #cbd5e1;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-left: 8px;
+            min-height: 75px;
+        }
+
+        .sig-title {
+            font-size: 7.5pt;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .sig-sub {
+            font-size: 7pt;
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        .footer-closing {
             text-align: center;
-            font-size: 8.5pt;
-            color: #9ca3af;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 15px;
+            font-size: 7.5pt;
+            color: #94a3b8;
+            margin-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 8px;
         }
-        </style>
-    </head>
-    <body>
-        <!-- Header / Brand -->
-        <table class="header-table">
-            <tr>
-                <td>
-                    <div class="studio-title">LOFT<span style="color:#eab308;">DESIGN</span></div>
-                    <div class="studio-subtitle">{% trans "Haute Interior Architecture & Design Studio" %}</div>
-                </td>
-                <td class="doc-meta">
-                    <div class="doc-badge">{% trans "Proforma Invoice" %}</div>
-                    <div class="doc-number">{{ doc_number }}</div>
-                    <div class="doc-date">{% trans "Date:" %} {{ date }}</div>
-                </td>
-            </tr>
-        </table>
-        <!-- Info Grid: Client & Property -->
-        <table class="info-grid">
-            <tr>
-                <td class="info-col">
-                    <div class="section-label">{% trans "Client Information" %}</div>
-                    <div class="info-card">
-                        <div class="client-name">{{ client_name }}</div>
-                        {% if email %}<div class="client-detail"><strong>{% trans "Email:" %}</strong> {{ email }}</div>{% endif %}
-                        {% if phone %}<div class="client-detail"><strong>{% trans "Phone:" %}</strong> {{ phone }}</div>{% endif %}
-                    </div>
-                </td>
-                <td class="info-col">
-                    <div class="section-label">{% trans "Project Architecture" %}</div>
-                    <div class="info-card-right">
-                        <div class="client-name">{{ project_type }}</div>
-                        <div class="client-detail"><strong>{% trans "Project:" %}</strong> {{ project_name }}</div>
-                        <div class="client-detail"><strong>{% trans "Total Surface:" %}</strong> {{ total_surface }} m²</div>
-                    </div>
-                </td>
-            </tr>
-        </table>
-        <!-- Items & Services Breakdown Table -->
-        <table class="items-table">
-            <thead>
-                <tr>
-                    <th>{% trans "Description / Service" %}</th>
-                    <th class="center" style="width: 25%;">{% trans "Rate / Unit" %}</th>
-                    <th class="right" style="width: 25%;">{% trans "Amount (DA)" %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Spaces Section -->
-                {% if spaces %}
-                    <tr class="category-header-row">
-                        <td colspan="3">{% trans "Selected Spaces & Spatial Program" %}</td>
-                    </tr>
-                    {% for sp in spaces %}
-                        <tr>
-                            <td>{{ sp.name }}</td>
-                            <td class="center">{% trans "Space Base" %}</td>
-                            <td class="right" style="font-weight:bold;">{{ sp.price|floatformat:2 }} DA</td>
-                        </tr>
-                    {% endfor %}
-                {% endif %}
+    </style>
+</head>
+<body>
 
-                <!-- Floor Levels Section -->
-                {% if items %}
-                    <tr class="category-header-row">
-                        <td colspan="3">{% trans "Floor Dimensions & Spatial Levels" %}</td>
-                    </tr>
-                    {% for it in items %}
-                        <tr>
-                            <td>{{ it.description }}</td>
-                            <td class="center">{{ it.amount }}</td>
-                            <td class="right" style="color:#6b7280;">—</td>
-                        </tr>
-                    {% endfor %}
-                {% endif %}
-
-                <!-- Selected Services Section -->
-                {% if services_list %}
-                    <tr class="category-header-row">
-                        <td colspan="3">{% trans "Selected Architectural & Design Services" %}</td>
-                    </tr>
-                    {% for s in services_list %}
-                        <tr>
-                            <td>
-                                <strong>{{ s.name }}</strong>
-                                {% if s.formula %}<div style="font-size: 8pt; color: #6b7280;">{{ s.formula }}</div>{% endif %}
-                            </td>
-                            <td class="center">{{ s.rate }}</td>
-                            <td class="right" style="font-weight:bold;">{{ s.amount|floatformat:2 }} DA</td>
-                        </tr>
-                    {% endfor %}
-                {% elif services %}
-                    <tr class="category-header-row">
-                        <td colspan="3">{% trans "Selected Architectural & Design Services" %}</td>
-                    </tr>
-                    {% for s in services %}
-                        <tr>
-                            <td>
-                                <strong>{{ s.name }}</strong>
-                                {% if s.percentage_rate %}
-                                    <div style="font-size: 8pt; color: #6b7280;">{{ s.percentage_rate }}% {% trans "of estimated project cost" %}</div>
-                                {% endif %}
-                            </td>
-                            <td class="center">{% if s.percentage_rate %}{{ s.percentage_rate }}%{% else %}{{ s.price|floatformat:2 }} DA / {{ s.unit|default:"FORFAIT" }}{% endif %}</td>
-                            <td class="right" style="font-weight:bold;">{{ s.line_total|floatformat:2 }} DA</td>
-                        </tr>
-                    {% endfor %}
-                {% elif package_name %}
-                    <tr class="category-header-row">
-                        <td colspan="3">{% trans "Selected Design Package" %}</td>
-                    </tr>
+    <!-- Header / Brand & Document Meta -->
+    <table class="header-table">
+        <tr>
+            <td style="width: 60%;">
+                <table style="border-collapse: collapse;">
                     <tr>
-                        <td><strong>{{ package_name }}</strong></td>
-                        <td class="center">{{ unit_price }} DA</td>
-                        <td class="right" style="font-weight:bold;">{{ total }} DA</td>
+                        <td style="padding-right: 12px; vertical-align: top;">
+                            <!-- Embedded Crisp Vector SVG Logo -->
+                            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#f4b85f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="rgba(244,184,95,0.18)" />
+                                <path d="M2 17L12 22L22 17" stroke="#0284c7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M2 12L12 17L22 12" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </td>
+                        <td style="vertical-align: top;">
+                            <div class="brand-title">LOFT<span class="accent">DESIGN</span> STUDIO</div>
+                            <div class="brand-subtitle">{% trans "Haute Architecture d'Intérieur & Design d'Espaces" %}</div>
+                            <div class="company-legal-strip">
+                                <strong>NIF:</strong> {{ company_nif }} &bull; <strong>NIS:</strong> {{ company_nis }} &bull; <strong>RC:</strong> {{ company_rc }}<br>
+                                <strong>{% trans "Email" %}:</strong> {{ company_email }} &bull; <strong>{% trans "Tél" %}:</strong> {{ company_phone }}
+                            </div>
+                        </td>
                     </tr>
-                {% endif %}
-            </tbody>
-        </table>
+                </table>
+            </td>
+            <td class="doc-badge-col" style="width: 40%;">
+                <div class="doc-type-badge">{% trans "Devis Proforma" %}</div>
+                <div class="doc-ref-number">{{ doc_number|default:quote_number }}</div>
+                <div class="doc-meta-sub">
+                    <strong>{% trans "Date" %}:</strong> {{ date }} &bull; <strong>{% trans "Validité" %}:</strong> 30 {% trans "jours" %}
+                    {% if revision_number and revision_number > 1 %}<br><span style="color:#d97706; font-weight:bold;">{% trans "Révision N°" %} {{ revision_number }}</span>{% endif %}
+                </div>
+            </td>
+        </tr>
+    </table>
 
-        <!-- Totals & Notes -->
-        <table class="totals-table">
+    <!-- Two Information Cards: Client & Project -->
+    <table class="info-grid-table">
+        <tr>
+            <td class="info-card-cell">
+                <div class="info-card-left">
+                    <div class="card-header-title">{% trans "Client / Maître d'Ouvrage" %}</div>
+                    <div class="card-main-name">{{ client_name }}</div>
+                    {% if company_name %}<div class="card-row"><strong>{% trans "Société" %}:</strong> {{ company_name }}</div>{% endif %}
+                    <div class="card-row"><strong>{% trans "Type" %}:</strong> {% if client_type == 'professional' %}{% trans "Entreprise / Professionnel" %}{% else %}{% trans "Particulier" %}{% endif %}</div>
+                    {% if email %}<div class="card-row"><strong>{% trans "Email" %}:</strong> {{ email }}</div>{% endif %}
+                    {% if phone %}<div class="card-row"><strong>{% trans "Téléphone" %}:</strong> {{ phone }}</div>{% endif %}
+                </div>
+            </td>
+            <td class="info-card-cell">
+                <div class="info-card-right">
+                    <div class="card-header-title">{% trans "Projet & Programme Spatial" %}</div>
+                    <div class="card-main-name">{{ project_type|default:project_type_name }}</div>
+                    <div class="card-row"><strong>{% trans "Intitulé" %}:</strong> {{ project_name }}</div>
+                    {% if total_surface and total_surface > 0 %}<div class="card-row"><strong>{% trans "Surface Totale" %}:</strong> {{ total_surface|floatformat:1 }} m²</div>{% endif %}
+                    {% if estimated_total_project_cost and estimated_total_project_cost > 0 %}
+                        <div class="card-row"><strong>{% trans "Coût Estimatif Global" %}:</strong> {{ estimated_total_project_cost|floatformat:0 }} DA</div>
+                    {% endif %}
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Detailed Itemized Breakdown Table -->
+    <table class="items-table">
+        <thead>
             <tr>
-                <td class="totals-col-left">
-                    <div class="notice-box">
-                        <strong>{% trans "Proforma Quotation Notice:" %}</strong>
-                        <br>
-                        {% trans "This document serves as an official preliminary architectural estimate based on the configured floor levels and selected design services. Valid for 30 days." %}
-                        {% if client_discount_note %}
-                            <div style="margin-top: 6px; color: #166534; font-weight: bold;">
-                                ↳ {{ client_discount_note }}
-                            </div>
-                        {% endif %}
-                    </div>
-                </td>
-                <td class="totals-col-right">
-                    <div class="grand-total-box">
+                <th style="width: 42%;">{% trans "Désignation & Prestations" %}</th>
+                <th class="center" style="width: 22%;">{% trans "Mode de Tarification" %}</th>
+                <th class="center" style="width: 14%;">{% trans "Base / Qté" %}</th>
+                <th class="right" style="width: 22%;">{% trans "Montant HT (DA)" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Selected Spaces / Spatial Program -->
+            {% if spaces %}
+                <tr class="section-separator-row">
+                    <td colspan="4">{% trans "1. Programme Spatial & Pièces Configurées" %}</td>
+                </tr>
+                {% for sp in spaces %}
+                    <tr>
+                        <td>
+                            <strong>{{ sp.name }}</strong>
+                            <div class="service-desc-sub">{% trans "Configuration architecturale de la pièce" %}</div>
+                        </td>
+                        <td class="center">{% trans "Base Espace" %}</td>
+                        <td class="center">1 {% trans "pièce" %}</td>
+                        <td class="right" style="font-weight: bold;">{{ sp.price|default:0|floatformat:2 }} DA</td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Floor Levels & Dimensions (if present) -->
+            {% if items %}
+                <tr class="section-separator-row">
+                    <td colspan="4">{% trans "2. Niveaux & Surfaces Configurées" %}</td>
+                </tr>
+                {% for it in items %}
+                    <tr>
+                        <td><strong>{{ it.description }}</strong></td>
+                        <td class="center">{% trans "Métré / Surface" %}</td>
+                        <td class="center">{{ it.amount }}</td>
+                        <td class="right" style="color: #64748b;">—</td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Design Services -->
+            {% if services %}
+                <tr class="section-separator-row">
+                    <td colspan="4">{% trans "3. Prestations & Services de Design Sélectionnés" %}</td>
+                </tr>
+                {% for s in services %}
+                    <tr>
+                        <td>
+                            <strong>{{ s.name }}</strong>
+                            {% if s.percentage_rate and s.percentage_rate > 0 %}
+                                <div class="service-desc-sub">{{ s.percentage_rate }}% {% trans "du coût estimatif global du projet" %}</div>
+                            {% elif s.pricing_type == 'area' %}
+                                <div class="service-desc-sub">{% trans "Tarification calculée au mètre carré (m²)" %}</div>
+                            {% endif %}
+                        </td>
+                        <td class="center">
+                            {% if s.pricing_type == 'percent_project_cost' or s.percentage_rate > 0 %}
+                                {{ s.percentage_rate }}% ({% trans "Coût Projet" %})
+                            {% elif s.pricing_type == 'area' %}
+                                {{ s.price|default:0|floatformat:2 }} DA / m²
+                            {% else %}
+                                {% trans "Forfait Global" %}
+                            {% endif %}
+                        </td>
+                        <td class="center">
+                            {% if s.pricing_type == 'area' and total_surface > 0 %}
+                                {{ total_surface|floatformat:1 }} m²
+                            {% else %}
+                                {{ s.qty|default:1 }}
+                            {% endif %}
+                        </td>
+                        <td class="right" style="font-weight: bold;">{{ s.line_total|default:s.price|default:0|floatformat:2 }} DA</td>
+                    </tr>
+                {% endfor %}
+            {% elif services_list %}
+                <tr class="section-separator-row">
+                    <td colspan="4">{% trans "3. Prestations & Services de Design Sélectionnés" %}</td>
+                </tr>
+                {% for s in services_list %}
+                    <tr>
+                        <td>
+                            <strong>{{ s.name }}</strong>
+                            {% if s.formula %}<div class="service-desc-sub">{{ s.formula }}</div>{% endif %}
+                        </td>
+                        <td class="center">{{ s.rate|default:"Forfait" }}</td>
+                        <td class="center">1</td>
+                        <td class="right" style="font-weight: bold;">{{ s.amount|default:0 }}</td>
+                    </tr>
+                {% endfor %}
+            {% elif package_name %}
+                <tr class="section-separator-row">
+                    <td colspan="4">{% trans "3. Formule de Design Sélectionnée" %}</td>
+                </tr>
+                <tr>
+                    <td><strong>{{ package_name }}</strong></td>
+                    <td class="center">{% trans "Forfait" %}</td>
+                    <td class="center">1</td>
+                    <td class="right" style="font-weight: bold;">{{ unit_price|default:0|floatformat:2 }} DA</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    <!-- Totals & Notes Summary Section -->
+    <table class="totals-section-table">
+        <tr>
+            <td class="notes-cell">
+                <div class="notice-box">
+                    <strong>{% trans "Note d'information & Validité" %}:</strong><br>
+                    {% trans "Ce document constitue un devis estimatif officiel pour les prestations d'architecture d'intérieur. Valable pendant 30 jours à compter de la date d'émission." %}
+                    {% if client_discount_note %}
+                        <div style="margin-top: 5px; color: #166534; font-weight: bold;">
+                            &bull; {{ client_discount_note }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="payment-box">
+                    <strong>{% trans "Coordonnées Bancaires & Paiement" %}:</strong><br>
+                    <strong>{% trans "Banque" %}:</strong> BNA / BEA &bull; <strong>{% trans "RIB" %}:</strong> {{ company_rib }}<br>
+                    <strong>{% trans "Conditions" %}:</strong> 50% {% trans "acompte au démarrage" %}, 50% {% trans "à la livraison finale" %}.
+                </div>
+            </td>
+            <td class="totals-cell">
+                <div class="grand-total-card">
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
+                        <tr>
+                            <td style="color: #94a3b8; font-size: 8.5pt; padding: 2px 0;">{% trans "Sous-total Brut HT" %}:</td>
+                            <td style="text-align: right; color: #f1f5f9; font-size: 8.5pt; font-family: monospace;">{{ subtotal_before_discount|default:final_total|floatformat:2 }} DA</td>
+                        </tr>
+
                         {% if discount_amount and discount_amount > 0 %}
-                            <div style="display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 4px; color: #9ca3af;">
-                                <span>{% trans "Subtotal HT:" %}</span>
-                                <span>{{ subtotal_before_discount|floatformat:2 }} DA</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 4px; color: #4ade80;">
-                                <span>{% trans "Commercial Discount:" %}</span>
-                                <span>-{{ discount_amount|floatformat:2 }} DA</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 6px; color: #cbd5e1;">
-                                <span>{% trans "Subtotal Net HT:" %}</span>
-                                <span>{{ subtotal_after_discount|floatformat:2 }} DA</span>
-                            </div>
+                            <tr>
+                                <td style="color: #34d399; font-size: 8.5pt; padding: 2px 0;">{% trans "Remise Commerciale" %}:</td>
+                                <td style="text-align: right; color: #34d399; font-size: 8.5pt; font-family: monospace; font-weight: bold;">-{{ discount_amount|floatformat:2 }} DA</td>
+                            </tr>
+                            <tr>
+                                <td style="color: #cbd5e1; font-size: 8.5pt; padding: 2px 0;">{% trans "Sous-total Net HT" %}:</td>
+                                <td style="text-align: right; color: #cbd5e1; font-size: 8.5pt; font-family: monospace;">{{ subtotal_after_discount|floatformat:2 }} DA</td>
+                            </tr>
                         {% endif %}
 
                         {% if tax_amount and tax_amount > 0 %}
-                            <div style="display: flex; justify-content: space-between; font-size: 9pt; margin-bottom: 6px; color: #9ca3af;">
-                                <span>{% trans "TVA (19%):" %}</span>
-                                <span>{{ tax_amount|floatformat:2 }} DA</span>
-                            </div>
+                            <tr>
+                                <td style="color: #94a3b8; font-size: 8.5pt; padding: 2px 0;">{% trans "TVA (19%)" %}:</td>
+                                <td style="text-align: right; color: #f1f5f9; font-size: 8.5pt; font-family: monospace;">{{ tax_amount|floatformat:2 }} DA</td>
+                            </tr>
                         {% endif %}
+                    </table>
 
-                        <div class="grand-total-label">{% trans "Total TTC" %}</div>
-                        <div class="grand-total-val">{{ final_total|default:total|floatformat:2 }} DA</div>
-                    </div>
-                </td>
-            </tr>
-        </table>
-        <div class="footer-note">
-            <p>{{ thank_you_message|default:"LoftDesign Studio — Thank you for choosing our architectural services." }}</p>
-        </div>
-    </body>
+                    <div class="summary-divider"></div>
+
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="vertical-align: middle;">
+                                <div class="grand-total-label">{% trans "Total TTC Net" %}</div>
+                                <div style="font-size: 7pt; color: #94a3b8;">{% trans "Toutes Taxes Comprises" %}</div>
+                            </td>
+                            <td style="text-align: right; vertical-align: middle;">
+                                <div class="grand-total-amount">{{ final_total|default:total|floatformat:2 }} DA</div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Signature & Validation Area -->
+    <table class="signatures-table">
+        <tr>
+            <td class="sig-col">
+                <div class="sig-box-left">
+                    <div class="sig-title">{% trans "Pour le Client / Maître d'Ouvrage" %}</div>
+                    <div class="sig-sub">{% trans "Mention manuscrite « Bon pour accord » & Signature" %}</div>
+                </div>
+            </td>
+            <td class="sig-col">
+                <div class="sig-box-right">
+                    <div class="sig-title">{% trans "Pour LoftDesign Studio" %}</div>
+                    <div class="sig-sub">{% trans "Direction des Projets & Cachet Officiel" %}</div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Footer Closing -->
+    <div class="footer-closing">
+        <p>{{ thank_you_message|default:"LoftDesign Studio — Merci pour votre confiance dans la réalisation de votre projet d'exception." }}</p>
+    </div>
+
+</body>
 </html>

@@ -860,18 +860,107 @@ function renderSuccess(){
       </div>
     </div>
   `;
-  document.querySelector('#downloadQuote').onclick=downloadQuotePdf;
-  document.querySelector('#sendEmailFacture').onclick=async ()=>{
+  function buildFacturationPayload(targetEmail) {
+    const c = st.client || {};
+    const selectedProjType = projectTypes.find(x => x.id === st.projectType || x.slug === st.projectType);
+    const projTypeName = selectedProjType ? selectedProjType.name : (st.projectType || 'Projet');
+    const clientFullName = clientLabel(c);
+    const nameParts = clientFullName.split(' ');
+    const firstName = nameParts[0] || 'Client';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    const spacesData = (st.spaces || []).map(s => {
+      const spObj = spaces.find(x => x.id === s.spaceId || x.slug === s.spaceId);
+      return {
+        name: spObj ? spObj.name : s.spaceId,
+        price: s.price || (spObj ? spObj.price : 0)
+      };
+    });
+
+    const servicesData = (st.services || []).map(sId => {
+      const sObj = services.find(x => x.id === sId || x.slug === sId);
+      const lineTot = servicePrice(sId);
+      return {
+        name: sObj ? sObj.name : sId,
+        pricing_type: sObj ? sObj.pricing_type : 'fixed',
+        price: sObj ? (sObj.price || 0) : 0,
+        percentage_rate: sObj ? (sObj.percentage_rate || 0) : 0,
+        line_total: lineTot,
+        qty: (sObj && (sObj.pricing_type === 'per_sqm' || sObj.pricing_type === 'area') && totalSurface() > 0) ? totalSurface() : 1,
+        unit: (sObj && sObj.pricing_type === 'percent_project_cost') ? '%' : ((sObj && (sObj.pricing_type === 'per_sqm' || sObj.pricing_type === 'area')) ? 'm²' : 'Forfait')
+      };
+    });
+
+    return {
+      email: targetEmail || c.email || '',
+      first_name: firstName,
+      last_name: lastName,
+      phone: c.phone || '',
+      company_name: c.company || '',
+      client_type: st.clientType || 'particular',
+      project_type_name: projTypeName,
+      project_name: `${projTypeName} - ${clientFullName}`,
+      total_surface: totalSurface(),
+      estimated_total_project_cost: st.estimatedProjectCost || 10000000,
+      spaces: spacesData,
+      service_ids: st.services || [],
+      services: servicesData,
+      doc_number: st.ref || 'LOFT-DEV-001',
+      total: totalFinal(),
+      final_total: totalFinal(),
+      subtotal_before_discount: totalHT(),
+      subtotal_after_discount: totalHT(),
+      tax_amount: tva(),
+    };
+  }
+
+  function getCsrf() {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+      (document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/) || [])[1] || '';
+  }
+
+  document.querySelector('#downloadQuote').onclick = async () => {
+    try {
+      const payload = buildFacturationPayload();
+      const resp = await fetch('/request/facturation/download/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrf(),
+        },
+        body: JSON.stringify(payload)
+      });
+      if (resp.ok) {
+        const blob = await resp.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const refName = (st.ref || 'PROFORMA').replace(/[^a-zA-Z0-9_-]/g, '_');
+        a.download = `DEVIS_LOFT_DESIGN_${refName}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        return;
+      }
+    } catch (e) {
+      console.warn("Server PDF download fallback to client jsPDF:", e);
+    }
+    // Fallback to client-side jsPDF
+    downloadQuotePdf();
+  };
+
+  document.querySelector('#sendEmailFacture').onclick = async () => {
     const defaultEmail = (st.client && st.client.email) || '';
     if (window.Swal) {
       const { value: email } = await Swal.fire({
-        title: "Envoyer la facture",
-        text: `Recevez votre devis proforma pour le projet ${st.ref} directement par e-mail.`,
+        title: "Envoyer la facture par e-mail",
+        text: `Recevez votre devis proforma officiel pour le projet ${st.ref || ''} directement en pièce jointe PDF.`,
         input: "email",
         inputValue: defaultEmail,
         inputPlaceholder: "votre-email@domaine.com",
         showCancelButton: true,
-        confirmButtonText: "Envoyer la facture",
+        confirmButtonText: '<i class="fas fa-paper-plane me-1"></i> Envoyer la facture',
         cancelButtonText: "Annuler",
         customClass: {
           popup: "swal2-popup",
@@ -885,27 +974,77 @@ function renderSuccess(){
           }
         }
       });
+
       if (email) {
         Swal.fire({
-          icon: "success",
-          title: "Facture envoyée !",
-          text: `La facture du projet ${st.ref} a été envoyée avec succès à ${email}.`,
-          confirmButtonText: "Parfait",
-          customClass: {
-            popup: "swal2-popup",
-            confirmButton: "btn neonCyan"
+          title: "Envoi en cours...",
+          text: "Génération du PDF et envoi sécurisé à votre adresse e-mail...",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
           },
-          buttonsStyling: false
+          customClass: { popup: "swal2-popup" }
         });
+
+        try {
+          const payload = buildFacturationPayload(email);
+          const response = await fetch('/request/facturation/email/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCsrf(),
+            },
+            body: JSON.stringify(payload)
+          });
+          const result = await response.json();
+          if (result.success) {
+            Swal.fire({
+              icon: "success",
+              title: "Facture envoyée !",
+              text: result.message || `La facture du projet ${st.ref || ''} a été envoyée avec succès à ${email}.`,
+              confirmButtonText: "Parfait",
+              customClass: {
+                popup: "swal2-popup",
+                confirmButton: "btn neonCyan"
+              },
+              buttonsStyling: false
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Échec de l'envoi",
+              text: (result.errors && result.errors.join(', ')) || "Une erreur est survenue lors de l'envoi.",
+              confirmButtonText: "D'accord",
+              customClass: {
+                popup: "swal2-popup",
+                confirmButton: "btn neonCyan"
+              },
+              buttonsStyling: false
+            });
+          }
+        } catch (err) {
+          Swal.fire({
+            icon: "error",
+            title: "Erreur de connexion",
+            text: "Impossible de joindre le serveur. Veuillez réessayer.",
+            confirmButtonText: "D'accord",
+            customClass: {
+              popup: "swal2-popup",
+              confirmButton: "btn neonCyan"
+            },
+            buttonsStyling: false
+          });
+        }
       }
     }
   };
-  document.querySelector('#restart').onclick=()=>{
-    st.success=false;
-    st.step='project';
-    st.ref='';
-    st.client=null;
-    st.spaces=[];
+
+  document.querySelector('#restart').onclick = () => {
+    st.success = false;
+    st.step = 'project';
+    st.ref = '';
+    st.client = null;
+    st.spaces = [];
     renderComposer();
   };
 }

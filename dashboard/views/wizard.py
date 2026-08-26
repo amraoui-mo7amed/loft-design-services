@@ -390,6 +390,8 @@ def _build_facturation_context(data):
     last_name = data.get("last_name", "")
     email = data.get("email", "")
     phone = data.get("phone", "")
+    company_name = data.get("company_name", "")
+    client_type = data.get("client_type", "particular")
     project_type_name = data.get("project_type_name") or _("Custom Project")
     project_name = data.get("project_name") or (f"{project_type_name} - {first_name} {last_name}".strip() or "Design Request")
 
@@ -401,8 +403,24 @@ def _build_facturation_context(data):
             floors = []
 
     total_surface = float(data.get("total_surface", 0) or 0)
+    estimated_total_project_cost = float(data.get("estimated_total_project_cost", 0) or 0)
+
+    # Spaces list
+    spaces = data.get("spaces", [])
+    if isinstance(spaces, str):
+        try:
+            spaces = json.loads(spaces)
+        except Exception:
+            spaces = []
 
     # Handle multiple or single service selection
+    services = data.get("services", [])
+    if isinstance(services, str):
+        try:
+            services = json.loads(services)
+        except Exception:
+            services = []
+
     service_ids = data.get("service_ids") or []
     if isinstance(service_ids, str):
         try:
@@ -416,29 +434,33 @@ def _build_facturation_context(data):
     primary_service = None
     calculated_total = 0.0
 
-    for s_id in service_ids:
-        s_obj = Service.objects.filter(id=s_id).first()
-        if s_obj:
-            if not primary_service:
-                primary_service = s_obj
-            if s_obj.pricing_type == "area":
-                calc_val = total_surface * float(s_obj.service_price)
-                rate_str = f"{float(s_obj.service_price):,.0f} DA / m²"
-            elif s_obj.pricing_type == "hourly":
-                calc_val = 10 * float(s_obj.service_price)
-                rate_str = f"{float(s_obj.service_price):,.0f} DA / hr"
-            else:
-                calc_val = float(s_obj.service_price)
-                rate_str = f"{float(s_obj.service_price):,.0f} DA"
+    if not services:
+        for s_id in service_ids:
+            s_obj = Service.objects.filter(id=s_id).first()
+            if s_obj:
+                if not primary_service:
+                    primary_service = s_obj
+                if s_obj.pricing_type == "area":
+                    calc_val = total_surface * float(s_obj.service_price)
+                    rate_str = f"{float(s_obj.service_price):,.0f} DA / m²"
+                elif s_obj.pricing_type == "percent_project_cost":
+                    calc_val = (estimated_total_project_cost or 10000000) * (float(s_obj.percentage_rate or 5.0) / 100.0)
+                    rate_str = f"{float(s_obj.percentage_rate or 5):,.2f}% ({estimated_total_project_cost:,.0f} DA)"
+                elif s_obj.pricing_type == "hourly":
+                    calc_val = 10 * float(s_obj.service_price)
+                    rate_str = f"{float(s_obj.service_price):,.0f} DA / hr"
+                else:
+                    calc_val = float(s_obj.service_price)
+                    rate_str = f"{float(s_obj.service_price):,.0f} DA"
 
-            calculated_total += calc_val
-            services_list.append({
-                "name": s_obj.service_name,
-                "rate": rate_str,
-                "amount": f"{calc_val:,.0f} DA",
-            })
+                calculated_total += calc_val
+                services_list.append({
+                    "name": s_obj.service_name,
+                    "rate": rate_str,
+                    "amount": f"{calc_val:,.0f} DA",
+                })
 
-    total_val = float(data.get("total", 0) or 0)
+    total_val = float(data.get("total", 0) or data.get("final_total", 0) or 0)
     if total_val <= 0 and calculated_total > 0:
         total_val = calculated_total
 
@@ -461,29 +483,47 @@ def _build_facturation_context(data):
     except Exception:
         date_str = ""
 
-    from django.db.models import Max
-    last_pk = DesignRequest.objects.aggregate(m=Max("pk"))["m"] or 0
-    doc_number = f"LOFT-FAC-{last_pk + 1:04d}"
+    doc_number = data.get("doc_number")
+    if not doc_number:
+        from django.db.models import Max
+        last_pk = DesignRequest.objects.aggregate(m=Max("pk"))["m"] or 0
+        doc_number = f"LOFT-FAC-{last_pk + 1:04d}"
+
+    subtotal_before = float(data.get("subtotal_before_discount", 0) or total_val)
+    subtotal_after = float(data.get("subtotal_after_discount", 0) or total_val)
+    tax_amount = float(data.get("tax_amount", 0) or 0)
 
     return {
         "studio_name": getattr(settings, "SITE_NAME", "LoftDesign"),
         "tagline": _("Haute Interior Architecture & Design Studio"),
         "doc_number": doc_number,
         "date": date_str,
-        "client_name": f"{first_name} {last_name}".strip() or _("Client"),
+        "client_name": f"{first_name} {last_name}".strip() or company_name or _("Client"),
+        "first_name": first_name,
+        "last_name": last_name,
+        "company_name": company_name,
+        "client_type": client_type,
         "email": email,
         "phone": phone,
         "project_name": project_name,
         "project_type": project_type_name,
+        "project_type_name": project_type_name,
         "total_surface": total_surface,
+        "estimated_total_project_cost": estimated_total_project_cost,
+        "spaces": spaces,
         "items": items,
+        "services": services,
         "services_list": services_list,
         "package_name": service_name,
         "package_amount": f"{unit_price:,.0f} DA",
         "service_name": service_name,
         "service_pricing_type": service_pricing_type,
         "unit_price": unit_price,
-        "total": f"{total_val:,.0f}",
+        "subtotal_before_discount": subtotal_before,
+        "subtotal_after_discount": subtotal_after,
+        "tax_amount": tax_amount,
+        "final_total": total_val,
+        "total": total_val,
         "thank_you_message": _("Thank you for choosing LoftDesign! Our architectural team will contact you promptly."),
     }
 
