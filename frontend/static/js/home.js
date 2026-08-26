@@ -408,19 +408,19 @@ function openServiceDetailsModal(serviceId) {
 
     bodyEl.innerHTML = `
       <!-- Single Row Language Switcher -->
-      <ul class="nav nav-pills gap-2 flex-nowrap w-100 mb-4" id="svcDetailsLangTabs" role="tablist" style="background: rgba(255,255,255,0.03); padding: 4px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08);">
-        <li class="nav-item flex-fill text-center" role="presentation">
-          <button class="nav-link active w-100 py-2 px-2 rounded-pill fw-bold text-light text-nowrap d-flex align-items-center justify-content-center gap-1" id="svc-tab-btn-fr" data-bs-toggle="pill" data-bs-target="#svc-pane-fr" type="button" role="tab" style="font-size:0.84rem;">
+      <ul class="nav nav-pills gap-2 flex-nowrap w-100 mb-4 position-relative" id="svcDetailsLangTabs" role="tablist" style="background: rgba(255,255,255,0.03); padding: 5px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); position: relative; z-index: 5;">
+        <li class="nav-item flex-fill text-center position-relative" role="presentation" style="position: relative;">
+          <button class="nav-link active w-100 py-2 px-2 rounded-pill fw-bold text-light text-nowrap d-flex align-items-center justify-content-center gap-1 position-relative" id="svc-tab-btn-fr" data-bs-toggle="pill" data-bs-target="#svc-pane-fr" type="button" role="tab" style="font-size:0.84rem; position: relative;">
             <span>🇫🇷 Français</span>
           </button>
         </li>
-        <li class="nav-item flex-fill text-center" role="presentation">
-          <button class="nav-link w-100 py-2 px-2 rounded-pill fw-bold text-light text-nowrap d-flex align-items-center justify-content-center gap-1" id="svc-tab-btn-en" data-bs-toggle="pill" data-bs-target="#svc-pane-en" type="button" role="tab" style="font-size:0.84rem;">
+        <li class="nav-item flex-fill text-center position-relative" role="presentation" style="position: relative;">
+          <button class="nav-link w-100 py-2 px-2 rounded-pill fw-bold text-light text-nowrap d-flex align-items-center justify-content-center gap-1 position-relative" id="svc-tab-btn-en" data-bs-toggle="pill" data-bs-target="#svc-pane-en" type="button" role="tab" style="font-size:0.84rem; position: relative;">
             <span>🇬🇧 English</span>
           </button>
         </li>
-        <li class="nav-item flex-fill text-center" role="presentation">
-          <button class="nav-link w-100 py-2 px-2 rounded-pill fw-bold text-light text-nowrap d-flex align-items-center justify-content-center gap-1" id="svc-tab-btn-ar" data-bs-toggle="pill" data-bs-target="#svc-pane-ar" type="button" role="tab" style="font-size:0.84rem;">
+        <li class="nav-item flex-fill text-center position-relative" role="presentation" style="position: relative;">
+          <button class="nav-link w-100 py-2 px-2 rounded-pill fw-bold text-light text-nowrap d-flex align-items-center justify-content-center gap-1 position-relative" id="svc-tab-btn-ar" data-bs-toggle="pill" data-bs-target="#svc-pane-ar" type="button" role="tab" style="font-size:0.84rem; position: relative;">
             <span>🇩🇿 العربية</span>
           </button>
         </li>

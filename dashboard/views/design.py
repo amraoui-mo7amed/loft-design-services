@@ -746,7 +746,7 @@ def service_update(request, pk):
                 }
 
                 for loc, l_data in locales_data.items():
-                    t_obj, _ = ServiceTranslation.objects.get_or_create(
+                    t_obj, _created = ServiceTranslation.objects.get_or_create(
                         service=obj,
                         locale=loc,
                         defaults={"name": l_data["name"] or obj.service_name},
