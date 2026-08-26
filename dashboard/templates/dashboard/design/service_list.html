@@ -393,20 +393,20 @@
                                 <span class="text-muted small">{% trans "French is required; English & Arabic are optional." %}</span>
                             </div>
 
-                            <ul class="nav nav-pills mb-3 gap-2" id="serviceLangTabs" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active px-3 py-1 fw-bold rounded-pill text-light" id="tab-fr-btn" data-bs-toggle="pill" data-bs-target="#tab-fr" type="button" role="tab">
-                                        🇫🇷 Français <span class="badge bg-warning text-dark ms-1">{% trans "Default" %}</span>
+                            <ul class="nav nav-pills mb-3 gap-2 flex-nowrap w-100" id="serviceLangTabs" role="tablist" style="background: rgba(255,255,255,0.03); padding: 4px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08);">
+                                <li class="nav-item flex-fill text-center" role="presentation">
+                                    <button class="nav-link active w-100 py-2 px-2 fw-bold rounded-pill text-light text-nowrap d-flex align-items-center justify-content-center gap-1" id="tab-fr-btn" data-bs-toggle="pill" data-bs-target="#tab-fr" type="button" role="tab" style="font-size:0.84rem;">
+                                        <span>🇫🇷 Français</span> <span class="badge bg-warning-subtle text-light border border-warning border-opacity-25 ms-1" style="font-size:0.7rem;">{% trans "Default" %}</span>
                                     </button>
                                 </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link px-3 py-1 fw-bold rounded-pill text-light" id="tab-en-btn" data-bs-toggle="pill" data-bs-target="#tab-en" type="button" role="tab">
-                                        🇬🇧 English
+                                <li class="nav-item flex-fill text-center" role="presentation">
+                                    <button class="nav-link w-100 py-2 px-2 fw-bold rounded-pill text-light text-nowrap d-flex align-items-center justify-content-center gap-1" id="tab-en-btn" data-bs-toggle="pill" data-bs-target="#tab-en" type="button" role="tab" style="font-size:0.84rem;">
+                                        <span>🇬🇧 English</span>
                                     </button>
                                 </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link px-3 py-1 fw-bold rounded-pill text-light" id="tab-ar-btn" data-bs-toggle="pill" data-bs-target="#tab-ar" type="button" role="tab">
-                                        🇩🇿 العربية (RTL)
+                                <li class="nav-item flex-fill text-center" role="presentation">
+                                    <button class="nav-link w-100 py-2 px-2 fw-bold rounded-pill text-light text-nowrap d-flex align-items-center justify-content-center gap-1" id="tab-ar-btn" data-bs-toggle="pill" data-bs-target="#tab-ar" type="button" role="tab" style="font-size:0.84rem;">
+                                        <span>🇩🇿 العربية (RTL)</span>
                                     </button>
                                 </li>
                             </ul>
@@ -799,11 +799,16 @@ document.addEventListener("DOMContentLoaded", function () {
             if (submitBtn) submitBtn.disabled = true;
 
             const formData = new FormData(serviceForm);
+            const csrfInput = serviceForm.querySelector('[name=csrfmiddlewaretoken]');
+            const csrfToken = csrfInput ? csrfInput.value : '';
 
             fetch(serviceForm.action, {
                 method: "POST",
                 body: formData,
-                headers: { "X-Requested-With": "XMLHttpRequest" }
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": csrfToken
+                }
             })
             .then(r => r.json())
             .then(data => {
@@ -813,7 +818,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     Swal.fire({
                         icon: "success",
                         title: "{% trans 'Success' %}",
-                        text: data.message,
+                        text: data.message || "{% trans 'Operation successful.' %}",
                         timer: 1500,
                         showConfirmButton: false
                     }).then(() => {
@@ -821,14 +826,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     });
                 } else {
                     const errList = serviceForm.querySelector("#errorList");
-                    if (errList && data.errors) {
-                        const errs = Array.isArray(data.errors) ? data.errors : [data.errors];
+                    const errs = Array.isArray(data.errors) ? data.errors : (data.errors ? [data.errors] : [data.message || "{% trans 'An error occurred' %}"]);
+                    if (errList) {
                         errList.innerHTML = errs.map(err => `<li class="text-danger small">${err}</li>`).join("");
                     }
                     Swal.fire({
                         icon: "error",
-                        title: "{% trans 'Validation Error' %}",
-                        text: Array.isArray(data.errors) ? data.errors.join("\n") : (data.errors || "{% trans 'An error occurred' %}")
+                        title: "{% trans 'Error' %}",
+                        text: errs.join("\n")
                     });
                 }
             })

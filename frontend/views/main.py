@@ -72,6 +72,9 @@ def home_view(request):
         services_data = []
         for s in services_qs:
             t = s.get_translation(cur_lang)
+            t_fr = s.get_translation("fr")
+            t_en = s.get_translation("en")
+            t_ar = s.get_translation("ar")
             is_def = bool(s.is_default and not has_default)
             if is_def:
                 has_default = True
@@ -94,6 +97,11 @@ def home_view(request):
                 "video_link": s.video_link or "",
                 "gif_url": s.gif_file.url if s.gif_file else "",
                 "is_default": is_def,
+                "translations": {
+                    "fr": t_fr,
+                    "en": t_en,
+                    "ar": t_ar,
+                },
             })
         if not has_default and services_data:
             services_data[0]["is_default"] = True
@@ -118,6 +126,38 @@ def home_view(request):
                 "video_link": "",
                 "gif_url": "",
                 "is_default": True,
+                "translations": {
+                    "fr": {
+                        "name": "Conception & Modélisation 3D",
+                        "short_description": "Visualisation 3D photoréaliste et détaillée de votre projet.",
+                        "detailed_description": "Modélisation 3D complète et rendus photoréalistes adaptés à vos dimensions exactes.",
+                        "included_items": ["Agencement 3D", "Sélection textures et éclairage", "Rendus haute résolution"],
+                        "excluded_items": ["Suivi de chantier", "Achat mobilier"],
+                        "deliverables": ["Rendus 4K JPG", "Dossier de présentation PDF"],
+                        "included_revisions": "2 révisions",
+                        "estimated_delivery_time": "5 à 7 jours",
+                    },
+                    "en": {
+                        "name": "3D Modeling & Rendering",
+                        "short_description": "Detailed photorealistic 3D visualization of your project.",
+                        "detailed_description": "Full 3D modeling and photorealistic rendering adapted to your exact dimensions.",
+                        "included_items": ["3D layout", "Texture and lighting selection", "High-resolution renders"],
+                        "excluded_items": ["On-site supervision", "Furniture purchasing"],
+                        "deliverables": ["4K JPG Renders", "PDF Concept Presentation"],
+                        "included_revisions": "2 revisions",
+                        "estimated_delivery_time": "5 to 7 days",
+                    },
+                    "ar": {
+                        "name": "التصميم والنمذجة ثلاثية الأبعاد 3D",
+                        "short_description": "تصور ثلاثي الأبعاد واقعي ومفصل لمشروعك.",
+                        "detailed_description": "نمذجة 3D متكاملة ورندرات فائقة الواقعية مصممة خصيصاً لمقاسات مشروعك.",
+                        "included_items": ["تخطيط الفضاء 3D", "اختيار المواد والإضاءة", "صور عالية الدقة 4K"],
+                        "excluded_items": ["الإشراف الميداني", "شراء الأثاث"],
+                        "deliverables": ["رندرات 4K بدقة عالية", "ملف عرض تقديمي PDF"],
+                        "included_revisions": "تعديلان",
+                        "estimated_delivery_time": "5 إلى 7 أيام",
+                    },
+                },
             },
             {
                 "id": "360",
@@ -138,6 +178,38 @@ def home_view(request):
                 "video_link": "",
                 "gif_url": "",
                 "is_default": False,
+                "translations": {
+                    "fr": {
+                        "name": "Visite Virtuelle 360°",
+                        "short_description": "Visite panoramique 360° immersive pour une exploration interactive.",
+                        "detailed_description": "Visite virtuelle panoramique 360 degrés fluide et interactive, accessible sur smartphone, PC et casque VR.",
+                        "included_items": ["Visite 360° interactive", "Compatibilité mobile et navigateur"],
+                        "excluded_items": ["Exécution physique"],
+                        "deliverables": ["Lien web + Fichiers visite VR"],
+                        "included_revisions": "1 révision",
+                        "estimated_delivery_time": "3 à 5 jours",
+                    },
+                    "en": {
+                        "name": "360° Virtual Tour",
+                        "short_description": "Immersive panoramic 360 tour for interactive walkthroughs.",
+                        "detailed_description": "Interactive 360 degree panoramic walkthrough viewable on mobile and VR.",
+                        "included_items": ["Interactive 360 tour", "Mobile and browser compatibility"],
+                        "excluded_items": ["Physical execution"],
+                        "deliverables": ["Web link + VR tour files"],
+                        "included_revisions": "1 revision",
+                        "estimated_delivery_time": "3 to 5 days",
+                    },
+                    "ar": {
+                        "name": "الجولة الافتراضية 360 درجة",
+                        "short_description": "جولة بانورامية تفاعلية 360 درجة لاستكشاف كامل للمساحة.",
+                        "detailed_description": "جولة افتراضية تفاعلية بانورامية متوافقة مع الهواتف الذكية وأجهزة الكمبيوتر ونظارات الواقع الافتراضي VR.",
+                        "included_items": ["جولة 360° تفاعلية", "توافق مع الأجهزة والمتصفحات"],
+                        "excluded_items": ["التنفيذ الميداني"],
+                        "deliverables": ["رابط ويب + ملفات الجولة VR"],
+                        "included_revisions": "تعديل واحد",
+                        "estimated_delivery_time": "3 إلى 5 أيام",
+                    },
+                },
             },
         ]
 

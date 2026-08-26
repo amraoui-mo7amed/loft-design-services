@@ -1430,7 +1430,8 @@ header.nav,
   background: rgba(255, 255, 255, .05);
 }
 
-.serviceChoice i {
+.serviceChoice .svc-check-icon,
+.serviceChoice > i:first-child {
   width: 28px;
   height: 28px;
   border: 1px solid rgba(255, 255, 255, .2);
@@ -1438,7 +1439,7 @@ header.nav,
   display: grid;
   place-items: center;
   font-style: normal;
-  font-size: 14px;
+  font-size: 13px;
   flex-shrink: 0;
   color: #fff;
   transition: all .2s;
@@ -1476,10 +1477,40 @@ header.nav,
   box-shadow: 0 0 20px rgba(168, 85, 247, .15);
 }
 
-.serviceChoice.selected i {
+.serviceChoice.selected .svc-check-icon,
+.serviceChoice.selected > i:first-child {
   background: #a855f7 !important;
   color: #fff !important;
   border-color: #a855f7 !important;
+}
+
+.btn-service-details {
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #f8fafc !important;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-service-details:hover {
+  background: rgba(85, 220, 255, 0.15) !important;
+  border-color: var(--cyan, #55dcff) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(85, 220, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-service-details i {
+  width: auto !important;
+  height: auto !important;
+  border: none !important;
+  border-radius: 0 !important;
+  display: inline-block !important;
+  font-size: 0.85rem !important;
+  color: inherit !important;
 }
 
 .quote {

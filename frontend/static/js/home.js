@@ -276,74 +276,171 @@ function openServiceDetailsModal(serviceId) {
   if (badgesEl) {
     let pBadge = '';
     if (s.pricing_type === 'percent_project_cost') {
-      pBadge = `<span class="badge bg-warning text-dark font-monospace">${s.percentage_rate || 0}% du projet</span>`;
+      pBadge = `<span class="badge bg-warning-subtle text-light border border-warning border-opacity-25 font-monospace px-3 py-1 rounded-pill">${s.percentage_rate || 0}% du projet</span>`;
     } else if (s.pricing_type === 'per_sqm' || s.pricing_type === 'area') {
-      pBadge = `<span class="badge bg-info text-dark font-monospace">${money(s.price || 750)} / m²</span>`;
+      pBadge = `<span class="badge bg-info-subtle text-light border border-info border-opacity-25 font-monospace px-3 py-1 rounded-pill">${money(s.price || 750)} / m²</span>`;
     } else {
-      pBadge = `<span class="badge bg-secondary font-monospace">${money(s.price || 0)} / forfait</span>`;
+      pBadge = `<span class="badge bg-secondary text-light font-monospace px-3 py-1 rounded-pill">${money(s.price || 0)} / forfait</span>`;
     }
-    badgesEl.innerHTML = `
-      ${pBadge}
-      ${s.estimated_delivery_time ? `<span class="badge bg-dark border border-secondary text-light"><i class="fas fa-clock text-warning me-1"></i>${s.estimated_delivery_time}</span>` : ''}
-      ${s.included_revisions ? `<span class="badge bg-dark border border-secondary text-light"><i class="fas fa-redo text-info me-1"></i>${s.included_revisions}</span>` : ''}
-    `;
+    badgesEl.innerHTML = pBadge;
   }
 
   if (bodyEl) {
-    const includedList = Array.isArray(s.included_items) ? s.included_items : (s.included_items ? s.included_items.split('\n').filter(Boolean) : []);
-    const excludedList = Array.isArray(s.excluded_items) ? s.excluded_items : (s.excluded_items ? s.excluded_items.split('\n').filter(Boolean) : []);
-    const deliverablesList = Array.isArray(s.deliverables) ? s.deliverables : (s.deliverables ? s.deliverables.split('\n').filter(Boolean) : []);
+    const t = s.translations || {};
+    const tFr = t.fr || {
+      name: s.name,
+      short_description: s.short_description,
+      detailed_description: s.detailed_description,
+      included_items: s.included_items,
+      excluded_items: s.excluded_items,
+      deliverables: s.deliverables,
+      included_revisions: s.included_revisions,
+      estimated_delivery_time: s.estimated_delivery_time,
+    };
+    const tEn = t.en || {
+      name: s.name,
+      short_description: s.short_description,
+      detailed_description: s.detailed_description,
+      included_items: s.included_items,
+      excluded_items: s.excluded_items,
+      deliverables: s.deliverables,
+      included_revisions: s.included_revisions,
+      estimated_delivery_time: s.estimated_delivery_time,
+    };
+    const tAr = t.ar || {
+      name: s.name,
+      short_description: s.short_description,
+      detailed_description: s.detailed_description,
+      included_items: s.included_items,
+      excluded_items: s.excluded_items,
+      deliverables: s.deliverables,
+      included_revisions: s.included_revisions,
+      estimated_delivery_time: s.estimated_delivery_time,
+    };
+
+    function renderTabPane(langData, langCode, isActive) {
+      const isRtl = langCode === 'ar';
+      const name = langData.name || s.name || '';
+      const shortDesc = langData.short_description || '';
+      const detailedDesc = langData.detailed_description || '';
+      const inc = Array.isArray(langData.included_items) ? langData.included_items : (langData.included_items ? String(langData.included_items).split('\n').filter(Boolean) : []);
+      const exc = Array.isArray(langData.excluded_items) ? langData.excluded_items : (langData.excluded_items ? String(langData.excluded_items).split('\n').filter(Boolean) : []);
+      const deliv = Array.isArray(langData.deliverables) ? langData.deliverables : (langData.deliverables ? String(langData.deliverables).split('\n').filter(Boolean) : []);
+      const rev = langData.included_revisions || '';
+      const delTime = langData.estimated_delivery_time || '';
+
+      const labels = {
+        fr: {
+          inc: "Ce qui est inclus",
+          exc: "Ce qui n'est pas inclus",
+          deliv: "Livrables garantis",
+          rev: "Révisions",
+          delTime: "Délai estimé",
+        },
+        en: {
+          inc: "What is included",
+          exc: "What is excluded",
+          deliv: "Guaranteed deliverables",
+          rev: "Revisions",
+          delTime: "Estimated delivery",
+        },
+        ar: {
+          inc: "ما يشمله العرض",
+          exc: "ما لا يشمله العرض",
+          deliv: "المخرجات والتسليمات",
+          rev: "التعديلات",
+          delTime: "مدة التنفيذ",
+        }
+      }[langCode] || labels.fr;
+
+      return `
+        <div class="tab-pane fade ${isActive ? 'show active' : ''}" id="svc-pane-${langCode}" role="tabpanel" dir="${isRtl ? 'rtl' : 'ltr'}">
+          <div class="row g-3">
+            <div class="col-12">
+              <h5 class="fw-bold text-light mb-2">${name}</h5>
+              ${shortDesc ? `<p class="lead fs-6 text-light opacity-90 mb-2">${shortDesc}</p>` : ''}
+              ${detailedDesc ? `<div class="p-3 rounded-3 mb-3 text-light" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); font-size:0.88rem; line-height:1.6;">${detailedDesc.replace(/\n/g, '<br>')}</div>` : ''}
+            </div>
+
+            ${(delTime || rev) ? `
+              <div class="col-12 d-flex flex-wrap gap-2 mb-2">
+                ${delTime ? `<span class="badge bg-dark border border-secondary text-light px-3 py-2 rounded-3"><i class="fas fa-clock text-warning ${isRtl ? 'ms-1' : 'me-1'}"></i><strong>${labels.delTime}:</strong> ${delTime}</span>` : ''}
+                ${rev ? `<span class="badge bg-dark border border-secondary text-light px-3 py-2 rounded-3"><i class="fas fa-redo text-info ${isRtl ? 'ms-1' : 'me-1'}"></i><strong>${labels.rev}:</strong> ${rev}</span>` : ''}
+              </div>
+            ` : ''}
+
+            ${inc.length > 0 ? `
+              <div class="col-md-6">
+                <h6 class="text-success fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
+                  <i class="fas fa-check-circle"></i> ${labels.inc}
+                </h6>
+                <ul class="list-unstyled mb-0" style="font-size:0.85rem;">
+                  ${inc.map(item => `<li class="d-flex align-items-start gap-2 mb-1 text-light"><i class="fas fa-check text-success mt-1" style="font-size:0.75rem;"></i><span>${item}</span></li>`).join('')}
+                </ul>
+              </div>
+            ` : ''}
+
+            ${exc.length > 0 ? `
+              <div class="col-md-6">
+                <h6 class="text-danger fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
+                  <i class="fas fa-times-circle"></i> ${labels.exc}
+                </h6>
+                <ul class="list-unstyled mb-0" style="font-size:0.85rem;">
+                  ${exc.map(item => `<li class="d-flex align-items-start gap-2 mb-1 text-light opacity-75"><i class="fas fa-times text-danger mt-1" style="font-size:0.75rem;"></i><span>${item}</span></li>`).join('')}
+                </ul>
+              </div>
+            ` : ''}
+
+            ${deliv.length > 0 ? `
+              <div class="col-12 mt-2">
+                <h6 class="text-warning fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
+                  <i class="fas fa-box-open"></i> ${labels.deliv}
+                </h6>
+                <div class="d-flex flex-wrap gap-2">
+                  ${deliv.map(item => `<span class="badge bg-dark border border-warning border-opacity-25 text-light px-3 py-2 rounded-3" style="font-size:0.8rem;"><i class="fas fa-file-alt text-warning ${isRtl ? 'ms-1' : 'me-1'}"></i>${item}</span>`).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
 
     bodyEl.innerHTML = `
-      <div class="row g-4">
-        <div class="col-12">
-          ${s.short_description ? `<p class="lead fs-6 text-light opacity-90 mb-3">${s.short_description}</p>` : ''}
-          ${s.detailed_description ? `<div class="p-3 rounded-3 mb-3" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); font-size:0.88rem; color:#cbd5e1; line-height:1.6;">${s.detailed_description.replace(/\n/g, '<br>')}</div>` : ''}
-        </div>
+      <!-- Single Row Language Switcher -->
+      <ul class="nav nav-pills gap-2 flex-nowrap w-100 mb-4" id="svcDetailsLangTabs" role="tablist" style="background: rgba(255,255,255,0.03); padding: 4px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08);">
+        <li class="nav-item flex-fill text-center" role="presentation">
+          <button class="nav-link active w-100 py-2 px-2 rounded-pill fw-bold text-light text-nowrap d-flex align-items-center justify-content-center gap-1" id="svc-tab-btn-fr" data-bs-toggle="pill" data-bs-target="#svc-pane-fr" type="button" role="tab" style="font-size:0.84rem;">
+            <span>🇫🇷 Français</span>
+          </button>
+        </li>
+        <li class="nav-item flex-fill text-center" role="presentation">
+          <button class="nav-link w-100 py-2 px-2 rounded-pill fw-bold text-light text-nowrap d-flex align-items-center justify-content-center gap-1" id="svc-tab-btn-en" data-bs-toggle="pill" data-bs-target="#svc-pane-en" type="button" role="tab" style="font-size:0.84rem;">
+            <span>🇬🇧 English</span>
+          </button>
+        </li>
+        <li class="nav-item flex-fill text-center" role="presentation">
+          <button class="nav-link w-100 py-2 px-2 rounded-pill fw-bold text-light text-nowrap d-flex align-items-center justify-content-center gap-1" id="svc-tab-btn-ar" data-bs-toggle="pill" data-bs-target="#svc-pane-ar" type="button" role="tab" style="font-size:0.84rem;">
+            <span>🇩🇿 العربية</span>
+          </button>
+        </li>
+      </ul>
 
-        ${includedList.length > 0 ? `
-          <div class="col-md-6">
-            <h6 class="text-success fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
-              <i class="fas fa-check-circle"></i> Ce qui est inclus
-            </h6>
-            <ul class="list-unstyled mb-0" style="font-size:0.85rem;">
-              ${includedList.map(item => `<li class="d-flex align-items-start gap-2 mb-1 text-light"><i class="fas fa-check text-success mt-1" style="font-size:0.75rem;"></i><span>${item}</span></li>`).join('')}
-            </ul>
-          </div>
-        ` : ''}
-
-        ${excludedList.length > 0 ? `
-          <div class="col-md-6">
-            <h6 class="text-danger fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
-              <i class="fas fa-times-circle"></i> Ce qui n'est pas inclus
-            </h6>
-            <ul class="list-unstyled mb-0" style="font-size:0.85rem;">
-              ${excludedList.map(item => `<li class="d-flex align-items-start gap-2 mb-1 text-muted"><i class="fas fa-times text-danger mt-1" style="font-size:0.75rem;"></i><span>${item}</span></li>`).join('')}
-            </ul>
-          </div>
-        ` : ''}
-
-        ${deliverablesList.length > 0 ? `
-          <div class="col-12">
-            <h6 class="text-warning fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
-              <i class="fas fa-box-open"></i> Livrables garantis
-            </h6>
-            <div class="d-flex flex-wrap gap-2">
-              ${deliverablesList.map(item => `<span class="badge bg-dark border border-warning border-opacity-25 text-light px-3 py-2 rounded-3" style="font-size:0.8rem;"><i class="fas fa-file-alt text-warning me-1"></i>${item}</span>`).join('')}
-            </div>
-          </div>
-        ` : ''}
-
-        ${(s.video_url || s.video_preview_url || s.gif_preview_url) ? `
-          <div class="col-12 mt-3">
-            <h6 class="text-info fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
-              <i class="fas fa-play-circle"></i> Aperçu vidéo / Animation
-            </h6>
-            ${s.gif_preview_url ? `<img src="${s.gif_preview_url}" class="img-fluid rounded-3 border border-secondary border-opacity-25 mb-2" style="max-height:220px; object-fit:cover;" alt="Preview">` : ''}
-            ${s.video_url ? `<a href="${s.video_url}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill px-3 mt-1"><i class="fas fa-external-link-alt me-1"></i>Visionner la vidéo explicative</a>` : ''}
-          </div>
-        ` : ''}
+      <div class="tab-content" id="svcDetailsLangContent">
+        ${renderTabPane(tFr, 'fr', true)}
+        ${renderTabPane(tEn, 'en', false)}
+        ${renderTabPane(tAr, 'ar', false)}
       </div>
+
+      ${(s.video_link || s.gif_url) ? `
+        <div class="col-12 mt-4 pt-3 border-top border-secondary border-opacity-25">
+          <h6 class="text-info fw-bold small text-uppercase mb-2 d-flex align-items-center gap-1">
+            <i class="fas fa-play-circle"></i> Aperçu vidéo / Animation
+          </h6>
+          ${s.gif_url ? `<img src="${s.gif_url}" class="img-fluid rounded-3 border border-secondary border-opacity-25 mb-2" style="max-height:220px; object-fit:cover;" alt="Preview">` : ''}
+          ${s.video_link ? `<a href="${s.video_link}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info rounded-pill px-3 mt-1 text-light"><i class="fas fa-external-link-alt me-1"></i>Visionner la vidéo explicative</a>` : ''}
+        </div>
+      ` : ''}
     `;
   }
 
@@ -417,19 +514,19 @@ function renderServices() {
           return `
             <div class="serviceChoice ${isSelected ? 'selected' : ''}" data-service="${s.id}">
               <div class="d-flex align-items-center gap-3 flex-grow-1">
-                <i class="svc-check-icon">${isSelected ? '✓' : '+'}</i>
+                <i class="svc-check-icon fas ${isSelected ? 'fa-check' : 'fa-plus'}"></i>
                 <div class="svc-info">
                   <div class="d-flex align-items-center gap-2 flex-wrap">
                     <strong class="text-light">${s.name}</strong>
-                    ${s.is_default ? `<span class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 rounded-pill font-monospace" style="font-size:0.65rem;">Inclus par défaut</span>` : ''}
+                    ${s.is_default ? `<span class="badge bg-warning-subtle text-light border border-warning border-opacity-25 rounded-pill font-monospace" style="font-size:0.65rem;">Inclus par défaut</span>` : ''}
                   </div>
-                  ${s.short_description ? `<div class="svc-short-desc text-muted small mt-1" style="font-size:0.8rem; line-height:1.3; max-width:320px;">${s.short_description}</div>` : ''}
+                  ${s.short_description ? `<div class="svc-short-desc text-light opacity-75 small mt-1" style="font-size:0.8rem; line-height:1.3; max-width:320px;">${s.short_description}</div>` : ''}
                   <small class="text-info font-monospace d-block mt-1">${unitBadge}</small>
                 </div>
               </div>
               <div class="d-flex flex-column align-items-end gap-2 ms-2">
                 <b class="font-monospace text-warning">${money(servicePrice(s.id))}</b>
-                <button type="button" class="btn btn-sm btn-service-details px-2 py-1 rounded-pill btn-outline-light" data-service-details="${s.id}" title="Détails de la prestation" style="font-size:0.75rem;">
+                <button type="button" class="btn btn-sm btn-service-details px-2 py-1 rounded-pill text-light" data-service-details="${s.id}" title="Détails de la prestation" style="font-size:0.75rem;">
                   <i class="fas fa-info-circle me-1"></i>Détails
                 </button>
               </div>
