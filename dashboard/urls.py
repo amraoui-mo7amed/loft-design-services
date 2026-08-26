@@ -8,9 +8,11 @@ urlpatterns = [
     path("quotes/", quotes.quote_list, name="quote_list"),
     path("quotes/create/", quotes.quote_create, name="quote_create"),
     path("quotes/<int:pk>/", quotes.quote_detail, name="quote_detail"),
+    path("quotes/<int:pk>/status/", quotes.quote_update_status, name="quote_update_status"),
     path("quotes/<int:pk>/discount/", quotes.quote_apply_discount, name="quote_apply_discount"),
     path("quotes/<int:pk>/revision/", quotes.quote_create_revision, name="quote_create_revision"),
     path("quotes/<int:pk>/send/", quotes.quote_send, name="quote_send"),
+    path("quotes/<int:pk>/delete/", quotes.quote_delete, name="quote_delete"),
     path("quotes/<int:pk>/download-pdf/", quotes.quote_download_pdf, name="quote_download_pdf"),
     path("quote/<uuid:uuid>/", quotes.customer_quote_view, name="customer_quote_view"),
     # Dashboard

@@ -670,3 +670,68 @@ def customer_quote_view(request, uuid):
         "items": quote.items.all(),
         "spaces": quote.spaces.all(),
     })
+
+
+# ──────────────────────────────────────────────
+# AJAX Quote Status Update
+# ──────────────────────────────────────────────
+
+@admin_required
+def quote_update_status(request, pk):
+    if request.method == "POST":
+        quote = get_object_or_404(Quote, pk=pk)
+        new_status = request.POST.get("status")
+        if not new_status and request.body:
+            try:
+                body_data = json.loads(request.body.decode("utf-8"))
+                new_status = body_data.get("status")
+            except Exception:
+                pass
+
+        if new_status in dict(Quote.Status.choices):
+            old_status = quote.status
+            try:
+                with transaction.atomic():
+                    quote.status = new_status
+                    quote.save(update_fields=["status"])
+                    QuoteAuditEvent.objects.create(
+                        quote=quote,
+                        actor=request.user,
+                        action="status_updated",
+                        previous_value=old_status,
+                        new_value=new_status,
+                        reason=f"Status updated by {request.user.username}",
+                    )
+                return JsonResponse({
+                    "success": True,
+                    "message": _("Quote %(num)s status updated to %(status)s.") % {
+                        "num": quote.quote_number,
+                        "status": quote.get_status_display(),
+                    },
+                    "new_status": new_status,
+                    "new_status_display": str(quote.get_status_display()),
+                })
+            except Exception as e:
+                err = humanize_error(e)
+                return JsonResponse({"success": False, "errors": [err] if isinstance(err, str) else err})
+        return JsonResponse({"success": False, "errors": [_("Invalid status code.")]})
+    return JsonResponse({"success": False, "errors": [_("Invalid request method.")]})
+
+
+# ──────────────────────────────────────────────
+# AJAX Quote Delete
+# ──────────────────────────────────────────────
+
+@admin_required
+def quote_delete(request, pk):
+    quote = get_object_or_404(Quote, pk=pk)
+    if request.method == "POST":
+        num = quote.quote_number
+        quote.delete()
+        return JsonResponse({
+            "success": True,
+            "message": _("Quote %(num)s deleted successfully.") % {"num": num},
+            "redirect_url": reverse("dash:quote_list"),
+        })
+    return redirect("dash:quote_list")
+
