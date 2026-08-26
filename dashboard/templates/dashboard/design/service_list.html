@@ -294,7 +294,8 @@
                       action="{% url 'dash:service_create' %}"
                       enctype="multipart/form-data"
                       class="form"
-                      id="serviceForm">
+                      id="serviceForm"
+                      novalidate>
                     {% csrf_token %}
                     <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom border-secondary border-opacity-25">
                         <div class="d-flex align-items-center gap-2">
@@ -346,19 +347,19 @@
                                     <label class="form-label text-light fw-semibold small" for="servicePercentRateInput">
                                         {% trans "Percentage Rate (%)" %} <span class="text-danger">*</span>
                                     </label>
-                                    <input type="number" name="percentage_rate" id="servicePercentRateInput" class="form-control svc-input" min="0.01" max="100" step="0.01" placeholder="5.00">
+                                    <input type="number" name="percentage_rate" id="servicePercentRateInput" class="form-control svc-input" min="0" max="100" step="0.01" placeholder="5.00" disabled>
                                 </div>
                                 <div class="col-md-6 d-none" id="minFeeWrapper">
                                     <label class="form-label text-light fw-semibold small" for="serviceMinFeeInput">
                                         {% trans "Minimum Fee (DA)" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span>
                                     </label>
-                                    <input type="number" name="min_fee" id="serviceMinFeeInput" class="form-control svc-input" min="0" step="0.01" placeholder="0">
+                                    <input type="number" name="min_fee" id="serviceMinFeeInput" class="form-control svc-input" min="0" step="0.01" placeholder="0" disabled>
                                 </div>
                                 <div class="col-md-6 d-none" id="maxFeeWrapper">
                                     <label class="form-label text-light fw-semibold small" for="serviceMaxFeeInput">
                                         {% trans "Maximum Fee (DA)" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span>
                                     </label>
-                                    <input type="number" name="max_fee" id="serviceMaxFeeInput" class="form-control svc-input" min="0" step="0.01" placeholder="0">
+                                    <input type="number" name="max_fee" id="serviceMaxFeeInput" class="form-control svc-input" min="0" step="0.01" placeholder="0" disabled>
                                 </div>
 
                                 <div class="col-12 d-none" id="percentExplanationBox">
@@ -663,15 +664,39 @@ document.addEventListener("DOMContentLoaded", function () {
             minFeeWrapper?.classList.remove("d-none");
             maxFeeWrapper?.classList.remove("d-none");
             percentExplanationBox?.classList.remove("d-none");
-            if (percentRateInput) percentRateInput.required = true;
-            if (priceInput) priceInput.required = false;
+
+            if (percentRateInput) {
+                percentRateInput.disabled = false;
+                percentRateInput.required = true;
+                if (!percentRateInput.value || parseFloat(percentRateInput.value) <= 0) {
+                    percentRateInput.value = "5.00";
+                }
+            }
+            if (minFeeInput) minFeeInput.disabled = false;
+            if (maxFeeInput) maxFeeInput.disabled = false;
+
+            if (priceInput) {
+                priceInput.disabled = true;
+                priceInput.required = false;
+            }
         } else {
             standardPriceWrapper?.classList.remove("d-none");
             percentRateWrapper?.classList.add("d-none");
             minFeeWrapper?.classList.add("d-none");
             maxFeeWrapper?.classList.add("d-none");
             percentExplanationBox?.classList.add("d-none");
-            if (percentRateInput) percentRateInput.required = false;
+
+            if (percentRateInput) {
+                percentRateInput.disabled = true;
+                percentRateInput.required = false;
+            }
+            if (minFeeInput) minFeeInput.disabled = true;
+            if (maxFeeInput) maxFeeInput.disabled = true;
+
+            if (priceInput) {
+                priceInput.disabled = false;
+                priceInput.required = false;
+            }
 
             if (val === "area") {
                 if (priceLabelText) priceLabelText.textContent = "{% trans 'Price per Square Metre (DA/m²)' %}";
@@ -696,6 +721,7 @@ document.addEventListener("DOMContentLoaded", function () {
             serviceForm.action = "{% url 'dash:service_create' %}";
             modalTitle.textContent = "{% trans 'New Service' %}";
             submitBtnText.textContent = "{% trans 'Create Service' %}";
+            if (pricingTypeInput) pricingTypeInput.value = "fixed";
             updatePricingModelFields();
             const tabFrBtn = document.getElementById("tab-fr-btn");
             if (tabFrBtn && typeof bootstrap !== "undefined") {
@@ -716,7 +742,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Pricing & Config
             if (pricingTypeInput) pricingTypeInput.value = this.dataset.pricingType || "fixed";
             if (priceInput) priceInput.value = this.dataset.price || "0";
-            if (percentRateInput) percentRateInput.value = this.dataset.percentageRate || "0";
+            if (percentRateInput) percentRateInput.value = this.dataset.percentageRate || "5.00";
             if (minFeeInput) minFeeInput.value = this.dataset.minFee || "";
             if (maxFeeInput) maxFeeInput.value = this.dataset.maxFee || "";
             if (videoInput) videoInput.value = this.dataset.videoLink || "";
@@ -765,6 +791,57 @@ document.addEventListener("DOMContentLoaded", function () {
             if (serviceModal) serviceModal.show();
         });
     });
+
+    if (serviceForm) {
+        serviceForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById("serviceSubmitBtn");
+            if (submitBtn) submitBtn.disabled = true;
+
+            const formData = new FormData(serviceForm);
+
+            fetch(serviceForm.action, {
+                method: "POST",
+                body: formData,
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (submitBtn) submitBtn.disabled = false;
+                if (data.success) {
+                    if (serviceModal) serviceModal.hide();
+                    Swal.fire({
+                        icon: "success",
+                        title: "{% trans 'Success' %}",
+                        text: data.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = data.redirect_url || window.location.href;
+                    });
+                } else {
+                    const errList = serviceForm.querySelector("#errorList");
+                    if (errList && data.errors) {
+                        const errs = Array.isArray(data.errors) ? data.errors : [data.errors];
+                        errList.innerHTML = errs.map(err => `<li class="text-danger small">${err}</li>`).join("");
+                    }
+                    Swal.fire({
+                        icon: "error",
+                        title: "{% trans 'Validation Error' %}",
+                        text: Array.isArray(data.errors) ? data.errors.join("\n") : (data.errors || "{% trans 'An error occurred' %}")
+                    });
+                }
+            })
+            .catch(err => {
+                if (submitBtn) submitBtn.disabled = false;
+                Swal.fire({
+                    icon: "error",
+                    title: "{% trans 'Error' %}",
+                    text: err.message
+                });
+            });
+        });
+    }
 });
     </script>
 {% endblock extra_js %}
