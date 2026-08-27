@@ -26,6 +26,16 @@
             </div>
             <div class="d-flex align-items-center gap-2">
                 <button type="button"
+                        class="btn btn-outline-light rounded-3 px-3 py-2 d-inline-flex align-items-center gap-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#serviceFilterModal">
+                    <i class="fas fa-filter text-warning"></i>
+                    <span>{% trans "Filter & Search" %}</span>
+                    {% if search_query or pricing_type_filter or is_default_filter %}
+                        <span class="badge bg-warning text-dark rounded-pill ms-1 font-monospace">{% trans "Active" %}</span>
+                    {% endif %}
+                </button>
+                <button type="button"
                         class="btn-neon-cyan"
                         data-bs-toggle="modal"
                         data-bs-target="#serviceModal"
@@ -80,27 +90,33 @@
                 </div>
             </div>
         </div>
-        <!-- Search & Filter Toolbar -->
-        <div class="svc-toolbar">
-            <form method="get"
-                  action="{% url 'dash:service_list' %}"
-                  class="d-flex align-items-center gap-2 flex-wrap">
-                <div class="input-group flex-grow-1" style="max-width: 420px;">
-                    <span class="input-group-text bg-transparent border-secondary text-muted border-opacity-25"><i class="fas fa-search"></i></span>
-                    <input type="text"
-                           name="q"
-                           value="{{ search_query }}"
-                           class="form-control svc-input"
-                           placeholder="{% trans 'Search services by name...' %}">
-                </div>
-                <button type="submit"
-                        class="btn dash-btn-primary btn-sm rounded-3 px-3 py-2 fw-semibold">{% trans "Search" %}</button>
+        <!-- Active Filter Dismissible Pill Strip -->
+        {% if search_query or pricing_type_filter or is_default_filter %}
+            <div class="d-flex align-items-center gap-2 mb-4 flex-wrap">
+                <span class="text-muted small fw-semibold">{% trans "Active filters:" %}</span>
                 {% if search_query %}
-                    <a href="{% url 'dash:service_list' %}"
-                       class="btn btn-outline-light btn-sm rounded-3 px-3 py-2">{% trans "Reset" %}</a>
+                    <span class="svc-active-filter-pill">
+                        <i class="fas fa-search"></i> "{{ search_query }}"
+                        <a href="?{% if pricing_type_filter %}pricing_type={{ pricing_type_filter }}&{% endif %}{% if is_default_filter %}is_default={{ is_default_filter }}{% endif %}" title="{% trans 'Remove filter' %}"><i class="fas fa-times"></i></a>
+                    </span>
                 {% endif %}
-            </form>
-        </div>
+                {% if pricing_type_filter %}
+                    <span class="svc-active-filter-pill">
+                        <i class="fas fa-tag"></i> {{ pricing_type_filter }}
+                        <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if is_default_filter %}is_default={{ is_default_filter }}{% endif %}" title="{% trans 'Remove filter' %}"><i class="fas fa-times"></i></a>
+                    </span>
+                {% endif %}
+                {% if is_default_filter %}
+                    <span class="svc-active-filter-pill">
+                        <i class="fas fa-star"></i> {% if is_default_filter == "1" %}{% trans "Single Default" %}{% else %}{% trans "Optional Only" %}{% endif %}
+                        <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if pricing_type_filter %}pricing_type={{ pricing_type_filter }}{% endif %}" title="{% trans 'Remove filter' %}"><i class="fas fa-times"></i></a>
+                    </span>
+                {% endif %}
+                <a href="{% url 'dash:service_list' %}" class="btn btn-link text-warning text-decoration-none small p-0 ms-2">
+                    <i class="fas fa-trash-alt me-1"></i>{% trans "Clear all" %}
+                </a>
+            </div>
+        {% endif %}
         <!-- Services Cards Grid -->
         <div class="row g-4" id="servicesGrid">
             {% for s in page_obj %}
@@ -282,14 +298,75 @@
         {% endif %}
     </div>
 
-    <!-- Service Modal Form with Multilingual Tabs -->
+    <!-- Search & Filter Modal -->
+    <div class="modal fade"
+         id="serviceFilterModal"
+         tabindex="-1"
+         aria-labelledby="serviceFilterModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content svc-glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
+                <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-filter text-warning fa-lg"></i>
+                        <h5 class="modal-title fw-bold text-light mb-0" id="serviceFilterModalLabel">{% trans "Filter & Search Services" %}</h5>
+                    </div>
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <form method="get" action="{% url 'dash:service_list' %}">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small">{% trans "Search by Name or Keyword" %}</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-secondary text-muted border-opacity-25"><i class="fas fa-search"></i></span>
+                                <input type="text"
+                                       name="q"
+                                       value="{{ search_query }}"
+                                       class="form-control svc-input"
+                                       placeholder="{% trans 'e.g. 3D Conception, VR...' %}">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small">{% trans "Pricing Model" %}</label>
+                            <select name="pricing_type" class="form-select svc-input">
+                                <option value="">{% trans "All Pricing Models" %}</option>
+                                <option value="fixed" {% if pricing_type_filter == "fixed" %}selected{% endif %}>{% trans "Fixed Price" %}</option>
+                                <option value="area" {% if pricing_type_filter == "area" %}selected{% endif %}>{% trans "Price per Square Metre (m²)" %}</option>
+                                <option value="hourly" {% if pricing_type_filter == "hourly" %}selected{% endif %}>{% trans "Price per Hour" %}</option>
+                                <option value="percent_project_cost" {% if pricing_type_filter == "percent_project_cost" %}selected{% endif %}>{% trans "Percentage of Project Cost" %}</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-light fw-semibold small">{% trans "Default Selection Status" %}</label>
+                            <select name="is_default" class="form-select svc-input">
+                                <option value="">{% trans "All Statuses" %}</option>
+                                <option value="1" {% if is_default_filter == "1" %}selected{% endif %}>{% trans "Single Default Only" %}</option>
+                                <option value="0" {% if is_default_filter == "0" %}selected{% endif %}>{% trans "Optional Only" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
+                        <a href="{% url 'dash:service_list' %}" class="btn btn-outline-light rounded-3 px-3">{% trans "Reset" %}</a>
+                        <button type="submit" class="btn dash-btn-primary rounded-3 px-4 fw-bold">
+                            <i class="fas fa-check me-2"></i>{% trans "Apply Filters" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Modal Form with Redesigned Multilingual Tabs & Structured Content -->
     <div class="modal fade quote-modal"
          id="serviceModal"
          tabindex="-1"
          aria-labelledby="serviceModalTitle"
          aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0">
+            <div class="modal-content svc-glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
                 <form method="post"
                       action="{% url 'dash:service_create' %}"
                       enctype="multipart/form-data"
@@ -299,8 +376,8 @@
                     <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom border-secondary border-opacity-25">
                         <div class="d-flex align-items-center gap-2">
                             <div class="svc-card-icon"
-                                 style="width:34px;
-                                        height:34px;
+                                 style="width:36px;
+                                        height:36px;
                                         font-size:0.95rem">
                                 <i class="fas fa-cube"></i>
                             </div>
@@ -315,17 +392,17 @@
                     <div class="p-4">
                         {% include "partials/errorList.html" with form_id="serviceForm" %}
 
-                        <!-- Primary Main Tabs -->
-                        <ul class="nav nav-pills mb-4 gap-2 flex-nowrap w-100 position-relative" id="serviceMainTabs" role="tablist" style="position: relative; z-index: 5; background: rgba(255,255,255,0.03); padding: 5px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12);">
-                            <li class="nav-item flex-fill text-center position-relative" role="presentation" style="position: relative;">
-                                <button class="nav-link active w-100 py-2 px-3 fw-bold rounded-pill text-light text-nowrap d-flex align-items-center justify-content-center gap-2 position-relative" id="tab-main-pricing-btn" data-bs-toggle="pill" data-bs-target="#tab-main-pricing" type="button" role="tab" style="font-size:0.86rem; position: relative;">
-                                    <i class="fas fa-sliders-h text-warning"></i>
+                        <!-- Primary Main Tabs with Dark Liquid-Glass Pill Theme -->
+                        <ul class="nav nav-pills svc-modal-tabs mb-4 gap-2 flex-nowrap w-100 position-relative" id="serviceMainTabs" role="tablist">
+                            <li class="nav-item flex-fill text-center" role="presentation">
+                                <button class="nav-link svc-modal-tab-btn active w-100" id="tab-main-pricing-btn" data-bs-toggle="pill" data-bs-target="#tab-main-pricing" type="button" role="tab">
+                                    <i class="fas fa-sliders-h"></i>
                                     <span>{% trans "Tarification & Médias" %}</span>
                                 </button>
                             </li>
-                            <li class="nav-item flex-fill text-center position-relative" role="presentation" style="position: relative;">
-                                <button class="nav-link w-100 py-2 px-3 fw-bold rounded-pill text-light text-nowrap d-flex align-items-center justify-content-center gap-2 position-relative" id="tab-main-content-btn" data-bs-toggle="pill" data-bs-target="#tab-main-content" type="button" role="tab" style="font-size:0.86rem; position: relative;">
-                                    <i class="fas fa-language text-info"></i>
+                            <li class="nav-item flex-fill text-center" role="presentation">
+                                <button class="nav-link svc-modal-tab-btn w-100" id="tab-main-content-btn" data-bs-toggle="pill" data-bs-target="#tab-main-content" type="button" role="tab">
+                                    <i class="fas fa-language"></i>
                                     <span>{% trans "Contenu Multilingue" %}</span>
                                 </button>
                             </li>
@@ -334,10 +411,10 @@
                         <div class="tab-content" id="serviceMainTabsContent">
                             <!-- TAB 1: PRICING & MEDIA -->
                             <div class="tab-pane fade show active" id="tab-main-pricing" role="tabpanel">
-                                <div class="p-3 mb-4 rounded-3 border border-secondary border-opacity-25" style="background: rgba(0,0,0,0.25);">
-                                    <h6 class="text-warning fw-bold mb-3 d-flex align-items-center gap-2" style="font-size:0.9rem;">
+                                <div class="svc-content-section">
+                                    <div class="svc-content-section-title text-warning">
                                         <i class="fas fa-calculator"></i> {% trans "Pricing & Media Configuration" %}
-                                    </h6>
+                                    </div>
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <label class="form-label text-light fw-semibold small" for="servicePricingTypeInput">
@@ -402,7 +479,7 @@
                                 </div>
 
                                 <!-- Single Default Invariant Checkbox -->
-                                <div class="p-3 rounded-3 border border-secondary border-opacity-25" style="background: rgba(0,0,0,0.25);">
+                                <div class="svc-content-section mb-0">
                                     <label class="form-check d-flex align-items-center gap-2 m-0 cursor-pointer" for="serviceDefaultInput">
                                         <input type="checkbox" name="is_default" id="serviceDefaultInput" value="1" class="form-check-input">
                                         <div>
@@ -416,190 +493,256 @@
                             <!-- TAB 2: MULTILINGUAL CONTENT -->
                             <div class="tab-pane fade" id="tab-main-content" role="tabpanel">
                                 <div class="mb-3">
-                                    <div class="d-flex align-items-center justify-content-between mb-2">
-                                        <label class="form-label text-light fw-semibold small mb-0">
-                                            <i class="fas fa-language me-1 text-warning"></i> {% trans "Multilingual Descriptions" %}
-                                        </label>
-                                        <span class="text-muted small">{% trans "French is required; English & Arabic are optional." %}</span>
+                                    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                                        <div class="text-warning small fw-bold text-uppercase" style="letter-spacing: 0.5px;">
+                                            <i class="fas fa-language me-1"></i> {% trans "Localized Descriptions & Deliverables" %}
+                                        </div>
+                                        <span class="text-muted small">{% trans "French is required; English & Arabic are optional fallbacks." %}</span>
                                     </div>
 
-                                    <ul class="nav nav-pills mb-3 gap-2 flex-nowrap w-100" id="serviceLangTabs" role="tablist" style="background: rgba(255,255,255,0.03); padding: 4px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08);">
+                                    <ul class="nav nav-pills svc-lang-tabs mb-3 gap-2 flex-nowrap w-100" id="serviceLangTabs" role="tablist">
                                         <li class="nav-item flex-fill text-center" role="presentation">
-                                            <button class="nav-link active w-100 py-2 px-2 fw-bold rounded-pill text-light text-nowrap d-flex align-items-center justify-content-center gap-1" id="tab-fr-btn" data-bs-toggle="pill" data-bs-target="#tab-fr" type="button" role="tab" style="font-size:0.84rem;">
-                                                <span>🇫🇷 Français</span> <span class="badge bg-warning text-dark ms-1" style="font-size:0.7rem;">{% trans "Default" %}</span>
+                                            <button class="nav-link svc-lang-tab-btn active w-100" id="tab-fr-btn" data-bs-toggle="pill" data-bs-target="#tab-fr" type="button" role="tab">
+                                                <span>🇫🇷 Français</span> <span class="badge bg-warning text-dark ms-1" style="font-size:0.68rem;">{% trans "Default" %}</span>
                                             </button>
                                         </li>
                                         <li class="nav-item flex-fill text-center" role="presentation">
-                                            <button class="nav-link w-100 py-2 px-2 fw-bold rounded-pill text-light text-nowrap d-flex align-items-center justify-content-center gap-1" id="tab-en-btn" data-bs-toggle="pill" data-bs-target="#tab-en" type="button" role="tab" style="font-size:0.84rem;">
+                                            <button class="nav-link svc-lang-tab-btn w-100" id="tab-en-btn" data-bs-toggle="pill" data-bs-target="#tab-en" type="button" role="tab">
                                                 <span>🇬🇧 English</span>
                                             </button>
                                         </li>
                                         <li class="nav-item flex-fill text-center" role="presentation">
-                                            <button class="nav-link w-100 py-2 px-2 fw-bold rounded-pill text-light text-nowrap d-flex align-items-center justify-content-center gap-1" id="tab-ar-btn" data-bs-toggle="pill" data-bs-target="#tab-ar" type="button" role="tab" style="font-size:0.84rem;">
+                                            <button class="nav-link svc-lang-tab-btn w-100" id="tab-ar-btn" data-bs-toggle="pill" data-bs-target="#tab-ar" type="button" role="tab">
                                                 <span>🇩🇿 العربية (RTL)</span>
                                             </button>
                                         </li>
                                     </ul>
 
-                                    <div class="tab-content border border-secondary border-opacity-25 rounded-4 p-3" id="serviceLangTabsContent" style="background: rgba(255,255,255,0.02);">
+                                    <div class="tab-content" id="serviceLangTabsContent">
                                         <!-- French Tab (Default) -->
                                         <div class="tab-pane fade show active" id="tab-fr" role="tabpanel">
-                                            <div class="mb-3">
-                                                <label class="form-label text-light fw-semibold small" for="serviceNameFrInput">
-                                                    {% trans "Nom du service (FR)" %} <span class="text-danger">*</span>
-                                                </label>
-                                                <input type="text" name="service_name_fr" id="serviceNameFrInput" class="form-control svc-input" required placeholder="Ex: Conception 3D immersive" maxlength="150">
+                                            <!-- Basic Info Card -->
+                                            <div class="svc-content-section">
+                                                <div class="svc-content-section-title text-light">
+                                                    <i class="fas fa-info-circle text-warning"></i> {% trans "Informations Principales (FR)" %}
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label text-light fw-semibold small" for="serviceNameFrInput">
+                                                        {% trans "Nom du service (FR)" %} <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text" name="service_name_fr" id="serviceNameFrInput" class="form-control svc-input" required placeholder="Ex: Conception 3D immersive" maxlength="150">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label text-light fw-semibold small" for="shortDescFrInput">
+                                                        {% trans "Description courte (FR)" %} <span class="text-muted font-monospace small">(Max ~180 car.)</span>
+                                                    </label>
+                                                    <input type="text" name="short_description_fr" id="shortDescFrInput" class="form-control svc-input" maxlength="255" placeholder="Résumé visible sur la carte du compositeur...">
+                                                </div>
+                                                <div>
+                                                    <label class="form-label text-light fw-semibold small" for="detailedDescFrInput">
+                                                        {% trans "Description détaillée (FR)" %}
+                                                    </label>
+                                                    <textarea name="detailed_description_fr" id="detailedDescFrInput" rows="3" class="form-control svc-input" placeholder="Explication complète de la prestation..."></textarea>
+                                                </div>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label text-light fw-semibold small" for="shortDescFrInput">
-                                                    {% trans "Description courte (FR)" %} <span class="text-muted font-monospace small">(Max ~180 car.)</span>
-                                                </label>
-                                                <input type="text" name="short_description_fr" id="shortDescFrInput" class="form-control svc-input" maxlength="255" placeholder="Résumé visible sur la carte du compositeur...">
+
+                                            <!-- Inclusions & Scope Card -->
+                                            <div class="svc-content-section">
+                                                <div class="svc-content-section-title text-light">
+                                                    <i class="fas fa-list-check text-success"></i> {% trans "Périmètre & Inclusions (FR)" %}
+                                                </div>
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label text-light fw-semibold small" for="includedFrInput">
+                                                            <i class="fas fa-check-circle text-success me-1"></i> {% trans "Ce qui est inclus (FR)" %}
+                                                        </label>
+                                                        <textarea name="included_items_fr" id="includedFrInput" rows="3" class="form-control svc-input" placeholder="Un élément par ligne:&#10;• Aménagement 3D&#10;• Choix matériaux"></textarea>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label text-light fw-semibold small" for="excludedFrInput">
+                                                            <i class="fas fa-times-circle text-danger me-1"></i> {% trans "Ce qui n'est pas inclus (FR)" %}
+                                                        </label>
+                                                        <textarea name="excluded_items_fr" id="excludedFrInput" rows="3" class="form-control svc-input" placeholder="Un élément par ligne:&#10;• Suivi de chantier&#10;• Achat mobilier"></textarea>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label text-light fw-semibold small" for="detailedDescFrInput">
-                                                    {% trans "Description détaillée (FR)" %}
-                                                </label>
-                                                <textarea name="detailed_description_fr" id="detailedDescFrInput" rows="3" class="form-control svc-input" placeholder="Explication complète de la prestation..."></textarea>
-                                            </div>
-                                            <div class="row g-3">
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="includedFrInput">
-                                                        <i class="fas fa-check-circle text-success me-1"></i> {% trans "Ce qui est inclus (FR)" %}
-                                                    </label>
-                                                    <textarea name="included_items_fr" id="includedFrInput" rows="3" class="form-control svc-input" placeholder="Un élément par ligne:&#10;• Aménagement 3D&#10;• Choix matériaux"></textarea>
+
+                                            <!-- Deliverables & Timing Card -->
+                                            <div class="svc-content-section mb-0">
+                                                <div class="svc-content-section-title text-light">
+                                                    <i class="fas fa-box text-info"></i> {% trans "Livrables & Délais (FR)" %}
                                                 </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="excludedFrInput">
-                                                        <i class="fas fa-times-circle text-danger me-1"></i> {% trans "Ce qui n'est pas inclus (FR)" %}
-                                                    </label>
-                                                    <textarea name="excluded_items_fr" id="excludedFrInput" rows="3" class="form-control svc-input" placeholder="Un élément par ligne:&#10;• Suivi de chantier&#10;• Achat mobilier"></textarea>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="deliverablesFrInput">
-                                                        <i class="fas fa-box-open text-info me-1"></i> {% trans "Livrables (FR)" %}
-                                                    </label>
-                                                    <textarea name="deliverables_fr" id="deliverablesFrInput" rows="2" class="form-control svc-input" placeholder="Ex: Rendus 4K JPG, Dossier PDF"></textarea>
-                                                </div>
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="revisionsFrInput">
-                                                        {% trans "Révisions incluses (FR)" %}
-                                                    </label>
-                                                    <input type="text" name="included_revisions_fr" id="revisionsFrInput" class="form-control svc-input" placeholder="Ex: 2 révisions">
-                                                </div>
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="deliveryTimeFrInput">
-                                                        {% trans "Délai estimé (FR)" %}
-                                                    </label>
-                                                    <input type="text" name="estimated_delivery_time_fr" id="deliveryTimeFrInput" class="form-control svc-input" placeholder="Ex: 5 à 7 jours">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label text-light fw-semibold small" for="deliverablesFrInput">
+                                                            <i class="fas fa-box-open text-info me-1"></i> {% trans "Livrables (FR)" %}
+                                                        </label>
+                                                        <textarea name="deliverables_fr" id="deliverablesFrInput" rows="2" class="form-control svc-input" placeholder="Ex: Rendus 4K JPG, Dossier PDF"></textarea>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label text-light fw-semibold small" for="revisionsFrInput">
+                                                            <i class="fas fa-sync-alt text-warning me-1"></i> {% trans "Révisions (FR)" %}
+                                                        </label>
+                                                        <input type="text" name="included_revisions_fr" id="revisionsFrInput" class="form-control svc-input" placeholder="Ex: 2 révisions">
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label text-light fw-semibold small" for="deliveryTimeFrInput">
+                                                            <i class="fas fa-clock text-cyan me-1"></i> {% trans "Délai (FR)" %}
+                                                        </label>
+                                                        <input type="text" name="estimated_delivery_time_fr" id="deliveryTimeFrInput" class="form-control svc-input" placeholder="Ex: 5 à 7 jours">
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <!-- English Tab -->
                                         <div class="tab-pane fade" id="tab-en" role="tabpanel">
-                                            <div class="mb-3">
-                                                <label class="form-label text-light fw-semibold small" for="serviceNameEnInput">
-                                                    {% trans "Service Name (EN)" %}
-                                                </label>
-                                                <input type="text" name="service_name_en" id="serviceNameEnInput" class="form-control svc-input" placeholder="e.g. 3D Architectural Design" maxlength="150">
+                                            <!-- Basic Info Card -->
+                                            <div class="svc-content-section">
+                                                <div class="svc-content-section-title text-light">
+                                                    <i class="fas fa-info-circle text-warning"></i> {% trans "Main Information (EN)" %}
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label text-light fw-semibold small" for="serviceNameEnInput">
+                                                        {% trans "Service Name (EN)" %}
+                                                    </label>
+                                                    <input type="text" name="service_name_en" id="serviceNameEnInput" class="form-control svc-input" placeholder="e.g. 3D Architectural Design" maxlength="150">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label text-light fw-semibold small" for="shortDescEnInput">
+                                                        {% trans "Short Description (EN)" %}
+                                                    </label>
+                                                    <input type="text" name="short_description_en" id="shortDescEnInput" class="form-control svc-input" maxlength="255" placeholder="Short summary visible on composer card...">
+                                                </div>
+                                                <div>
+                                                    <label class="form-label text-light fw-semibold small" for="detailedDescEnInput">
+                                                        {% trans "Detailed Description (EN)" %}
+                                                    </label>
+                                                    <textarea name="detailed_description_en" id="detailedDescEnInput" rows="3" class="form-control svc-input" placeholder="Comprehensive explanation of the service..."></textarea>
+                                                </div>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label text-light fw-semibold small" for="shortDescEnInput">
-                                                    {% trans "Short Description (EN)" %}
-                                                </label>
-                                                <input type="text" name="short_description_en" id="shortDescEnInput" class="form-control svc-input" maxlength="255" placeholder="Short summary visible on composer card...">
+
+                                            <!-- Inclusions & Scope Card -->
+                                            <div class="svc-content-section">
+                                                <div class="svc-content-section-title text-light">
+                                                    <i class="fas fa-list-check text-success"></i> {% trans "Scope & Inclusions (EN)" %}
+                                                </div>
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label text-light fw-semibold small" for="includedEnInput">
+                                                            <i class="fas fa-check-circle text-success me-1"></i> {% trans "What is Included (EN)" %}
+                                                        </label>
+                                                        <textarea name="included_items_en" id="includedEnInput" rows="3" class="form-control svc-input" placeholder="One item per line..."></textarea>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label text-light fw-semibold small" for="excludedEnInput">
+                                                            <i class="fas fa-times-circle text-danger me-1"></i> {% trans "What is Not Included (EN)" %}
+                                                        </label>
+                                                        <textarea name="excluded_items_en" id="excludedEnInput" rows="3" class="form-control svc-input" placeholder="One item per line..."></textarea>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label text-light fw-semibold small" for="detailedDescEnInput">
-                                                    {% trans "Detailed Description (EN)" %}
-                                                </label>
-                                                <textarea name="detailed_description_en" id="detailedDescEnInput" rows="3" class="form-control svc-input" placeholder="Comprehensive explanation of the service..."></textarea>
-                                            </div>
-                                            <div class="row g-3">
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="includedEnInput">
-                                                        <i class="fas fa-check-circle text-success me-1"></i> {% trans "What is Included (EN)" %}
-                                                    </label>
-                                                    <textarea name="included_items_en" id="includedEnInput" rows="3" class="form-control svc-input" placeholder="One item per line..."></textarea>
+
+                                            <!-- Deliverables & Timing Card -->
+                                            <div class="svc-content-section mb-0">
+                                                <div class="svc-content-section-title text-light">
+                                                    <i class="fas fa-box text-info"></i> {% trans "Deliverables & Timing (EN)" %}
                                                 </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="excludedEnInput">
-                                                        <i class="fas fa-times-circle text-danger me-1"></i> {% trans "What is Not Included (EN)" %}
-                                                    </label>
-                                                    <textarea name="excluded_items_en" id="excludedEnInput" rows="3" class="form-control svc-input" placeholder="One item per line..."></textarea>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="deliverablesEnInput">
-                                                        <i class="fas fa-box-open text-info me-1"></i> {% trans "Deliverables (EN)" %}
-                                                    </label>
-                                                    <textarea name="deliverables_en" id="deliverablesEnInput" rows="2" class="form-control svc-input" placeholder="e.g. 4K JPG Renders, PDF Document"></textarea>
-                                                </div>
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="revisionsEnInput">
-                                                        {% trans "Included Revisions (EN)" %}
-                                                    </label>
-                                                    <input type="text" name="included_revisions_en" id="revisionsEnInput" class="form-control svc-input" placeholder="e.g. 2 revisions">
-                                                </div>
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="deliveryTimeEnInput">
-                                                        {% trans "Estimated Delivery (EN)" %}
-                                                    </label>
-                                                    <input type="text" name="estimated_delivery_time_en" id="deliveryTimeEnInput" class="form-control svc-input" placeholder="e.g. 5 to 7 days">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label text-light fw-semibold small" for="deliverablesEnInput">
+                                                            <i class="fas fa-box-open text-info me-1"></i> {% trans "Deliverables (EN)" %}
+                                                        </label>
+                                                        <textarea name="deliverables_en" id="deliverablesEnInput" rows="2" class="form-control svc-input" placeholder="e.g. 4K JPG Renders, PDF Document"></textarea>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label text-light fw-semibold small" for="revisionsEnInput">
+                                                            <i class="fas fa-sync-alt text-warning me-1"></i> {% trans "Revisions (EN)" %}
+                                                        </label>
+                                                        <input type="text" name="included_revisions_en" id="revisionsEnInput" class="form-control svc-input" placeholder="e.g. 2 revisions">
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label text-light fw-semibold small" for="deliveryTimeEnInput">
+                                                            <i class="fas fa-clock text-cyan me-1"></i> {% trans "Delivery (EN)" %}
+                                                        </label>
+                                                        <input type="text" name="estimated_delivery_time_en" id="deliveryTimeEnInput" class="form-control svc-input" placeholder="e.g. 5 to 7 days">
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <!-- Arabic Tab (RTL) -->
                                         <div class="tab-pane fade" id="tab-ar" role="tabpanel" dir="rtl">
-                                            <div class="mb-3 text-end">
-                                                <label class="form-label text-light fw-semibold small" for="serviceNameArInput">
-                                                    اسم الخدمة (AR)
-                                                </label>
-                                                <input type="text" name="service_name_ar" id="serviceNameArInput" class="form-control svc-input text-end" placeholder="مثال: تصميم معماري ثلاثي الأبعاد" maxlength="150">
+                                            <!-- Basic Info Card -->
+                                            <div class="svc-content-section text-end">
+                                                <div class="svc-content-section-title text-light justify-content-start">
+                                                    <i class="fas fa-info-circle text-warning"></i> المعلومات الأساسية (AR)
+                                                </div>
+                                                <div class="mb-3 text-end">
+                                                    <label class="form-label text-light fw-semibold small" for="serviceNameArInput">
+                                                        اسم الخدمة (AR)
+                                                    </label>
+                                                    <input type="text" name="service_name_ar" id="serviceNameArInput" class="form-control svc-input text-end" placeholder="مثال: تصميم معماري ثلاثي الأبعاد" maxlength="150">
+                                                </div>
+                                                <div class="mb-3 text-end">
+                                                    <label class="form-label text-light fw-semibold small" for="shortDescArInput">
+                                                        الوصف القصير (AR)
+                                                    </label>
+                                                    <input type="text" name="short_description_ar" id="shortDescArInput" class="form-control svc-input text-end" maxlength="255" placeholder="ملخص يظهر في بطاقة الخدمة...">
+                                                </div>
+                                                <div class="text-end">
+                                                    <label class="form-label text-light fw-semibold small" for="detailedDescArInput">
+                                                        الوصف التفصيلي (AR)
+                                                    </label>
+                                                    <textarea name="detailed_description_ar" id="detailedDescArInput" rows="3" class="form-control svc-input text-end" placeholder="شرح كامل ومفصل للخدمة المقدمة..."></textarea>
+                                                </div>
                                             </div>
-                                            <div class="mb-3 text-end">
-                                                <label class="form-label text-light fw-semibold small" for="shortDescArInput">
-                                                    الوصف القصير (AR)
-                                                </label>
-                                                <input type="text" name="short_description_ar" id="shortDescArInput" class="form-control svc-input text-end" maxlength="255" placeholder="ملخص يظهر في بطاقة الخدمة...">
+
+                                            <!-- Inclusions & Scope Card -->
+                                            <div class="svc-content-section text-end">
+                                                <div class="svc-content-section-title text-light justify-content-start">
+                                                    <i class="fas fa-list-check text-success"></i> نطاق العمل والمشتملات (AR)
+                                                </div>
+                                                <div class="row g-3 text-end">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label text-light fw-semibold small" for="includedArInput">
+                                                            <i class="fas fa-check-circle text-success me-1"></i> ما تشمله الخدمة (AR)
+                                                        </label>
+                                                        <textarea name="included_items_ar" id="includedArInput" rows="3" class="form-control svc-input text-end" placeholder="عنصر في كل سطر..."></textarea>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label text-light fw-semibold small" for="excludedArInput">
+                                                            <i class="fas fa-times-circle text-danger me-1"></i> ما لا تشمله الخدمة (AR)
+                                                        </label>
+                                                        <textarea name="excluded_items_ar" id="excludedArInput" rows="3" class="form-control svc-input text-end" placeholder="عنصر في كل سطر..."></textarea>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="mb-3 text-end">
-                                                <label class="form-label text-light fw-semibold small" for="detailedDescArInput">
-                                                    الوصف التفصيلي (AR)
-                                                </label>
-                                                <textarea name="detailed_description_ar" id="detailedDescArInput" rows="3" class="form-control svc-input text-end" placeholder="شرح كامل ومفصل للخدمة المقدمة..."></textarea>
-                                            </div>
-                                            <div class="row g-3 text-end">
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="includedArInput">
-                                                        <i class="fas fa-check-circle text-success me-1"></i> ما تشمله الخدمة (AR)
-                                                    </label>
-                                                    <textarea name="included_items_ar" id="includedArInput" rows="3" class="form-control svc-input text-end" placeholder="عنصر في كل سطر..."></textarea>
+
+                                            <!-- Deliverables & Timing Card -->
+                                            <div class="svc-content-section mb-0 text-end">
+                                                <div class="svc-content-section-title text-light justify-content-start">
+                                                    <i class="fas fa-box text-info"></i> المخرجات ومدة الإنجاز (AR)
                                                 </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="excludedArInput">
-                                                        <i class="fas fa-times-circle text-danger me-1"></i> ما لا تشمله الخدمة (AR)
-                                                    </label>
-                                                    <textarea name="excluded_items_ar" id="excludedArInput" rows="3" class="form-control svc-input text-end" placeholder="عنصر في كل سطر..."></textarea>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="deliverablesArInput">
-                                                        <i class="fas fa-box-open text-info me-1"></i> المخرجات والملفات المسلمة (AR)
-                                                    </label>
-                                                    <textarea name="deliverables_ar" id="deliverablesArInput" rows="2" class="form-control svc-input text-end" placeholder="مثال: صور بدقة 4K، ملف PDF"></textarea>
-                                                </div>
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="revisionsArInput">
-                                                        التعديلات المتضمنة (AR)
-                                                    </label>
-                                                    <input type="text" name="included_revisions_ar" id="revisionsArInput" class="form-control svc-input text-end" placeholder="مثال: تعديلين">
-                                                </div>
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label text-light fw-semibold small" for="deliveryTimeArInput">
-                                                        مدة الإنجاز التقديرية (AR)
-                                                    </label>
-                                                    <input type="text" name="estimated_delivery_time_ar" id="deliveryTimeArInput" class="form-control svc-input text-end" placeholder="مثال: 5 إلى 7 أيام">
+                                                <div class="row g-3 text-end">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label text-light fw-semibold small" for="deliverablesArInput">
+                                                            <i class="fas fa-box-open text-info me-1"></i> المخرجات والملفات المسلمة (AR)
+                                                        </label>
+                                                        <textarea name="deliverables_ar" id="deliverablesArInput" rows="2" class="form-control svc-input text-end" placeholder="مثال: صور بدقة 4K، ملف PDF"></textarea>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label text-light fw-semibold small" for="revisionsArInput">
+                                                            <i class="fas fa-sync-alt text-warning me-1"></i> التعديلات (AR)
+                                                        </label>
+                                                        <input type="text" name="included_revisions_ar" id="revisionsArInput" class="form-control svc-input text-end" placeholder="مثال: تعديلين">
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label text-light fw-semibold small" for="deliveryTimeArInput">
+                                                            <i class="fas fa-clock text-cyan me-1"></i> مدة الإنجاز (AR)
+                                                        </label>
+                                                        <input type="text" name="estimated_delivery_time_ar" id="deliveryTimeArInput" class="form-control svc-input text-end" placeholder="مثال: 5 إلى 7 أيام">
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -675,6 +818,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const revisionsAr = document.getElementById("revisionsArInput");
     const deliveryTimeAr = document.getElementById("deliveryTimeArInput");
 
+    function activateTab(tabId) {
+        const tabEl = document.getElementById(tabId);
+        if (tabEl && typeof bootstrap !== "undefined") {
+            new bootstrap.Tab(tabEl).show();
+        }
+    }
+
     function updatePricingModelFields() {
         if (!pricingTypeInput) return;
         const val = pricingTypeInput.value;
@@ -744,14 +894,8 @@ document.addEventListener("DOMContentLoaded", function () {
             submitBtnText.textContent = "{% trans 'Create Service' %}";
             if (pricingTypeInput) pricingTypeInput.value = "fixed";
             updatePricingModelFields();
-            const tabPricingBtn = document.getElementById("tab-main-pricing-btn");
-            if (tabPricingBtn && typeof bootstrap !== "undefined") {
-                new bootstrap.Tab(tabPricingBtn).show();
-            }
-            const tabFrBtn = document.getElementById("tab-fr-btn");
-            if (tabFrBtn && typeof bootstrap !== "undefined") {
-                new bootstrap.Tab(tabFrBtn).show();
-            }
+            activateTab("tab-main-pricing-btn");
+            activateTab("tab-fr-btn");
             const errList = serviceForm.querySelector("#errorList");
             if (errList) errList.innerHTML = "";
         });
@@ -775,14 +919,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             updatePricingModelFields();
 
-            const tabPricingBtn = document.getElementById("tab-main-pricing-btn");
-            if (tabPricingBtn && typeof bootstrap !== "undefined") {
-                new bootstrap.Tab(tabPricingBtn).show();
-            }
-            const tabFrBtn = document.getElementById("tab-fr-btn");
-            if (tabFrBtn && typeof bootstrap !== "undefined") {
-                new bootstrap.Tab(tabFrBtn).show();
-            }
+            activateTab("tab-main-pricing-btn");
+            activateTab("tab-fr-btn");
 
             // French inputs
             if (nameFr) nameFr.value = this.dataset.nameFr || this.dataset.name || "";
@@ -813,11 +951,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (deliverablesAr) deliverablesAr.value = (this.dataset.deliverablesAr || "").replace(/\\n/g, "\n");
             if (revisionsAr) revisionsAr.value = this.dataset.revisionsAr || "";
             if (deliveryTimeAr) deliveryTimeAr.value = this.dataset.deliveryTimeAr || "";
-
-            const tabFrBtn = document.getElementById("tab-fr-btn");
-            if (tabFrBtn && typeof bootstrap !== "undefined") {
-                new bootstrap.Tab(tabFrBtn).show();
-            }
 
             const errList = serviceForm.querySelector("#errorList");
             if (errList) errList.innerHTML = "";

@@ -21,8 +21,28 @@
     border: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 18px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-    overflow: hidden;
+    position: relative;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dashContent .sd-card:has(.custom-select-wrapper.active),
+.dashContent .sd-card:has(.custom-select-list.show) {
+    overflow: visible !important;
+    z-index: 1060 !important;
+}
+
+.dashContent .custom-select-wrapper {
+    position: relative;
+    z-index: 20;
+}
+
+.dashContent .custom-select-wrapper.active {
+    z-index: 1070 !important;
+}
+
+.dashContent .custom-select-wrapper.active .custom-select-list,
+.dashContent .custom-select-list.show {
+    z-index: 1080 !important;
 }
 
 .dashContent .sd-card:hover {

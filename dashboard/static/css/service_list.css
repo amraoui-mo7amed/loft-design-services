@@ -283,6 +283,134 @@
     background: rgba(255, 255, 255, 0.08) !important;
     border-color: var(--brand-primary, #FFD65A) !important;
     box-shadow: 0 0 0 4px rgba(255, 214, 90, 0.15) !important;
+    color: #ffffff !important;
+}
+
+/* ── Modal Tabs & Contrast Rules ── */
+.dashContent .svc-modal-tabs {
+    background: rgba(255, 255, 255, 0.04) !important;
+    padding: 6px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.dashContent .svc-modal-tab-btn {
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    font-size: 0.88rem !important;
+    color: #a8b2bd !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    padding: 0.6rem 1rem !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+}
+
+.dashContent .svc-modal-tab-btn:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.dashContent .svc-modal-tab-btn.active {
+    color: var(--brand-secondary, #212121) !important;
+    background: var(--brand-primary, #FFD65A) !important;
+    border-color: var(--brand-primary, #FFD65A) !important;
+    box-shadow: 0 4px 14px rgba(255, 214, 90, 0.28) !important;
+}
+
+.dashContent .svc-modal-tab-btn.active i,
+.dashContent .svc-modal-tab-btn.active span {
+    color: var(--brand-secondary, #212121) !important;
+}
+
+/* ── Language Sub-Tabs & Pill Buttons ── */
+.dashContent .svc-lang-tabs {
+    background: rgba(0, 0, 0, 0.25) !important;
+    padding: 5px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.dashContent .svc-lang-tab-btn {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.84rem !important;
+    color: #94a3b8 !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    padding: 0.5rem 0.85rem !important;
+    transition: all 0.2s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.35rem !important;
+}
+
+.dashContent .svc-lang-tab-btn:hover {
+    color: #f8fafc !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.dashContent .svc-lang-tab-btn.active {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(85, 220, 255, 0.25), rgba(85, 220, 255, 0.1)) !important;
+    border-color: var(--cyan, #55dcff) !important;
+    box-shadow: 0 0 12px rgba(85, 220, 255, 0.2) !important;
+}
+
+.dashContent .svc-lang-tab-btn.active .badge {
+    background: var(--brand-primary, #FFD65A) !important;
+    color: var(--brand-secondary, #212121) !important;
+}
+
+/* ── Multilingual Field Layout Sections ── */
+.dashContent .svc-content-section {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.dashContent .svc-content-section-title {
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ── Active Filter Pills Bar ── */
+.dashContent .svc-active-filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 214, 90, 0.12);
+    border: 1px solid rgba(255, 214, 90, 0.3);
+    color: var(--brand-primary, #FFD65A);
+    border-radius: 999px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.dashContent .svc-active-filter-pill a {
+    color: var(--brand-primary, #FFD65A);
+    opacity: 0.75;
+    transition: opacity 0.2s ease;
+    text-decoration: none;
+}
+
+.dashContent .svc-active-filter-pill a:hover {
+    opacity: 1;
 }
 
 [dir="rtl"] .svc-card-foot {

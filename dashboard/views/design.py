@@ -507,9 +507,19 @@ def _parse_bullet_list(raw_val):
 @with_pagination(per_page=12, template="dashboard/design/service_list", queryset_name="services")
 def service_list(request):
     q = request.GET.get("q", "").strip()
+    pricing_type_filter = request.GET.get("pricing_type", "").strip()
+    is_default_filter = request.GET.get("is_default", "").strip()
+
     queryset = Service.objects.prefetch_related("translations").all()
     if q:
         queryset = queryset.filter(service_name__icontains=q)
+    if pricing_type_filter:
+        queryset = queryset.filter(pricing_type=pricing_type_filter)
+    if is_default_filter == "1":
+        queryset = queryset.filter(is_default=True)
+    elif is_default_filter == "0":
+        queryset = queryset.filter(is_default=False)
+
     queryset = queryset.order_by("-is_default", "service_name")
 
     total_count = Service.objects.count()
@@ -519,6 +529,8 @@ def service_list(request):
         "total_count": total_count,
         "default_service": default_service,
         "search_query": q,
+        "pricing_type_filter": pricing_type_filter,
+        "is_default_filter": is_default_filter,
     }
 
 
