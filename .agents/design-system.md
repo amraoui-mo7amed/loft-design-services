@@ -1,154 +1,214 @@
-# LoftDesign — Design System
+# LoftDesign — Design System & Visual Architecture
 
-This is the single source of truth for visual styling. Everything the dashboard looks like
-flows from `frontend/static/css/index.css` (brand tokens) + `dashboard/static/css/dash_index.css`
-(dark liquid-glass dashboard theme). Reference the public `/` homepage as the design baseline.
+> **Single Source of Truth** for UI/UX styling, color tokens, layout hierarchy, and component design.
+> All public pages and dashboard interfaces flow from `frontend/static/css/home.css`, `frontend/static/css/index.css`, `dashboard/static/css/dash_index.css`, `dashboard/static/css/kanban.css`, and `dashboard/static/css/quotes.css`.
 
-## Brand tokens
+---
 
-CSS variables are injected per-request into `<html>` `:root` by
-`frontend/templates/index.html` from `site_config.branding`, with hard fallbacks in
-`frontend/static/css/index.css`.
+## 1. Brand Palette & Color Tokens
 
-```css
---brand-primary:   #FFD65A  (yellow – CTA / accent)
---brand-secondary: #212121  (near-black – text on yellow, dark surfaces)
---brand-accent:    #FFFFFF
---brand-success:   #28a745
---brand-danger:    #dc3545
---brand-dark:      #1a1a1a
---brand-light:     #f8f9fa
---bg-canvas, --white-accent, --text-main, --border-color
-```
+The visual identity is anchored on **Haute Architecture & Liquid Glass** aesthetics: deep architectural graphite night, crystal neon accents, and warm amber gold.
 
-**Rule:** always reference these variables or the dark-glass tokens below. Never invent ad-hoc
-brand colors in templates. Follow the color palette already defined in `index.css` only.
-
-## The dark liquid-glass dashboard theme
-
-The dashboard (`dash_index.html`) uses a dark, frosted-glass aesthetic. Shared styling lives
-in `dashboard/static/css/dash_index.css`, scoped under **`.dashContent`** so it never leaks
-into the public site.
-
-### Core recipe
+### Core Color Variables (`:root` in `frontend/static/css/home.css` & `index.css`)
 
 ```css
-/* glass surface */
-background: linear-gradient(150deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
-backdrop-filter: blur(18px) saturate(160%);
--webkit-backdrop-filter: blur(18px) saturate(160%);
-border: 1px solid rgba(255,255,255,0.10);
+:root {
+  /* Canvas & Base Layers */
+  --bg: #070b0d;                 /* Deep architectural graphite-night canvas */
+  --ink: #f4f1ea;                /* Warm off-white / ivory primary text */
+  --muted: #a6afac;              /* Soft slate-sage for subtitles, captions, secondary text */
+  --line: rgba(255, 255, 255, 0.16); /* Subtle crisp glass border */
+
+  /* Vibrant Neon & Architectural Accents */
+  --cyan: #55dcff;               /* Electric Cyan — Primary 360°, composer CTA, highlights */
+  --violet: #aa7cff;             /* Electric Violet — VR immersion, creative actions */
+  --amber: #f4b85f;              /* Warm Amber Gold — Haute design, quotes, pending status */
+  --green: #7de5ae;              /* Soft Emerald Mint — Bilnov Store, success, approved */
+  --danger: #ff7b73;             /* Coral Rose — Errors, declined, delete actions */
+
+  /* Layout Constraints */
+  --nav: 68px;                   /* Fixed glass navigation height */
+  --max: 1500px;                 /* Maximum layout container width */
+  --narrow: 1220px;              /* Focused / editorial reading width */
+}
 ```
+
+### Dynamic Site Branding Tokens (Mapped in `frontend/templates/index.html`)
 
 ```css
-/* deep dropdown/menu surface */
-background: linear-gradient(145deg, rgba(30,35,42,0.97), rgba(20,24,29,0.95));
-box-shadow: 0 18px 44px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.08);
+:root {
+  --brand-primary: var(--primary-color, #FFD65A);   /* Amber Yellow — Brand CTA */
+  --brand-secondary: var(--secondary-color, #212121); /* Near-black — Text on yellow */
+  --brand-accent: var(--accent-color, #FFFFFF);     /* Pure White Accent */
+  --brand-success: var(--success-color, #28a745);   /* Standard Success */
+  --brand-danger: var(--danger-color, #dc3545);     /* Standard Danger */
+  --brand-dark: var(--dark-color, #1a1a1a);         /* Deep Dark Surface */
+  --brand-light: var(--light-color, #f8f9fa);       /* Off-white Light Surface */
+
+  /* Legacy & Form Tokens */
+  --bg-canvas: var(--brand-light);
+  --white-accent: #FFFFFF;
+  --text-main: #1A1A1A;
+  --border-color: #e2e8f0;
+}
 ```
 
-### Text tiers (dark background)
+> [!IMPORTANT]
+> **Token Rule:** Always reference existing CSS variables (`var(--cyan)`, `var(--amber)`, `var(--ink)`, `var(--brand-primary)`). Never hardcode random hex colors or invent ad-hoc palettes in HTML templates.
 
-| Token | Usage |
-|-------|-------|
-| `#f2f5f8` | Primary text, titles, headings, strong values |
-| `#e6eaee` | Body text |
-| `#a8b2bd` | Secondary / muted labels, table headers |
-| `#8b95a1` | Tertiary / captions, placeholders |
-| `var(--brand-primary)` | Links, active states, highlights on dark |
+---
 
-**Contrast rules:** on the dark dashboard never use dark-on-dark text. Where a light page
-utility like `text-dark` (`!important` in Bootstrap) would fight the theme, override it at a
-more specific selector or remove it. Always write CSS for **both** `[dir="ltr"]` and
-`[dir="rtl"]` (box-shadows, padding sides, transforms must be mirrored).
+## 2. Typography
 
-### Buttons
+The platform utilizes a dual-font architecture tailored for internationalization (French, English, and Arabic/RTL):
 
-- `.dash-btn-primary` — yellow (`var(--brand-primary)`) background, **dark** text
-  (`var(--brand-secondary)`), with `!important` on color/bg so Bootstrap can't invert it.
-  Used for primary/CTAs (e.g. "New Project Type", "Add Space").
-- `.dash-btn-outline` — transparent, yellow border + yellow text.
-- `.dash-btn-secondary` — near-black background, white text.
-- Cancel/secondary-in-dashboard: `btn-outline-light`. Avoid `btn-primary`/`btn-light` on the
-  dashboard (light-on-light issues).
-- Icon-only controls (e.g. back button): small square `btn-outline-light rounded-3`, fixed
-  `36px` size, with an `aria-label`.
+| Font Family | Usage | Weights | Notes |
+|-------------|-------|---------|-------|
+| **Inter** | Primary Western Typography (EN / FR) | `300`, `400`, `500`, `600`, `700`, `800`, `900` | Clean modernist geometric sans-serif for public & dashboard |
+| **Cairo** | Arabic / RTL Typography (AR) | `300`, `400`, `600`, `700` | High-legibility Arabic glyphs loaded via Google Fonts |
+| **Font Awesome 5 Free / Brands** | Iconography | `900` (Solid), `400` (Brands) | Explicit font definitions to prevent font stripping (`.fa`, `.fas`, `.fab`) |
+| **Monospace** | Numbers, Prices, Quotes, Metres | `font-monospace` / `monospace` | Used for `LOFT-QUO-*` refs, DA currency tags, surfaces `m²`, financial totals |
 
-### Status & badges
+### Text Hierarchy on Dark Glass Surfaces
 
-- `.status-badge` pills: `status-pending` (amber), `status-approved` (green),
-  `status-declined` (red) — translucent `rgba(...)` backgrounds with bright text.
-- Catalog badge `.pt-badge`: glass pill (`rgba(255,255,255,0.12)` bg, `#f2f5f8` text).
+| Token / Color | Role |
+|---------------|------|
+| `var(--ink)` (`#f4f1ea` / `#ffffff`) | Primary headings (`h1`–`h6`), card titles, critical stats |
+| `var(--muted)` (`#a6afac` / `#94a3b8`) | Body copy, secondary metadata, table column headers |
+| `var(--cyan)` (`#55dcff`) | Interactive links, active tab indicator, 360° badges |
+| `var(--amber)` (`#f4b85f`) | Pricing highlights, prominent currency amounts, quotes |
+| `var(--green)` (`#7de5ae`) | Positive indicators, commercial discount amounts |
 
-### Tables
+> [!CAUTION]
+> **Contrast Rules:** On dark liquid glass surfaces, never use dark-on-dark text (`.text-dark` on dark background). When Bootstrap utilities clash, override with `.text-light` or scoped CSS rules. Always support both `[dir="ltr"]` and `[dir="rtl"]`.
 
-- `.dash-table` base; `.dash-recent-table` variant on the dashboard home: yellow glass
-  `<thead>` band (`rgba(255,214,90,0.88)`) with **dark** header text, zebra rows, glass
-  row hover, project icon chip (`.dash-table-icon`) and client initials avatar
-  (`.dash-avatar`).
+---
 
-### Cards
+## 3. Dark Liquid-Glass Design Recipes
 
-- `.dashboard-card` / `.dashContent .card` — glass panel; `.card-header` transparent with
-  `border-bottom: rgba(255,255,255,0.1)`; card titles use light text. Use `.text-light` in
-  card headers by default.
+The liquid-glass design language combines semi-translucent dark surfaces, multi-stop radial backdrops, backdrop blur, and luminous borders.
 
-### Modals, alerts, SweetAlert, dropdowns
+### Standard Glass Card Recipe (`.crm-glass-card`, `.quote-grid-card`, `.admin-glass-card`)
 
-- Global glass overrides in `dash_index.css` for `.dashContent .modal-content`, `.alert-*`,
-  SweetAlert (`body:has(.dashContent) .swal2-*`), and the shared `.custom-select-*`.
-- Bootstrap dropdowns get dark glass menus (see Kanban `.crm-status-menu`, notification
-  `.nt-menu`). Ensure `.dropdown-item` has no stray light background / bottom border and no
-  unwanted border-radius on the dashboard.
-- Notification items (`.nt-item`) have no border radius; hover = white lift + a yellow accent
-  bar (`inset 3px 0 0 var(--brand-primary)`, mirrored for RTL), no translateX.
+```css
+background: linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)) !important;
+backdrop-filter: blur(20px) saturate(180%) !important;
+-webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+border: 1px solid rgba(255, 255, 255, 0.12) !important;
+border-radius: 20px !important;
+box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+```
 
-## CSS organization and load order (important)
+### Detail Hero Header Recipe (`.admin-detail-hero`)
 
-In `frontend/templates/index.html` the load order is deliberate:
+```css
+background: linear-gradient(135deg, rgba(26, 32, 44, 0.98), rgba(15, 20, 30, 0.95));
+border: 1.5px solid rgba(255, 255, 255, 0.14);
+backdrop-filter: blur(24px);
+-webkit-backdrop-filter: blur(24px);
+border-radius: 20px;
+box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+```
 
-1. Bootstrap + Font Awesome + Cairo (CDN)
-2. `{% block css %}` (dashboard base injects `dash_index.css`, `notifications.css` here)
-3. Core: `css/index.css`, `css/three-sixty-bg.css`
-4. `{% block extra_css %}` — page-specific css (e.g. `kanban.css`, `dash_home.css`,
-   `project_type_list.css`)
+### Modal & Dropdown Surface Recipe (`.modal-content`, `.dropdown-menu`)
 
-Custom CSS always loads **after** Bootstrap so it wins the cascade; page-specific files load
-last so the dashboard base theme can be tuned per page. Follow this ordering — do not move
-core css after page css, and keep the `.dashContent` scope for dashboard-only rules.
-Cache-bust every stylesheet/script with `?v={{ ASSET_VERSION }}`.
+```css
+background: rgba(22, 27, 34, 0.96);
+border: 1.5px solid rgba(255, 255, 255, 0.14);
+backdrop-filter: blur(24px);
+-webkit-backdrop-filter: blur(24px);
+border-radius: 20px;
+box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+```
 
-## Components and partials (reuse, don't reinvent)
+### Multi-Layer Background System (`frontend/templates/home.html`)
 
-`dashboard/templates/components/`:
-- `custom_select.html` — **always use instead of a raw `<select>`**
-  (classes `custom-select-wrapper/display/list`, styled glass on the dashboard, light on public).
-- `pagination.html` — always used on list views (via `{% render_pagination page_obj %}` tag).
-- `notification_dropdown.html`, `stat_card.html`, `action_buttons.html`, `table_search.html`.
+- **`.bgLayer`**: Fixed full-viewport image layer with dynamic cross-fade transitions and visual enhancement filter (`filter: brightness(.44) saturate(.96) contrast(1.05)`).
+- **`.bgVeil`**: Non-blocking radial and linear gradient veil (`radial-gradient(circle at 50% 28%, rgba(7, 11, 13, .02), rgba(7, 11, 13, .36) 54%, rgba(7, 11, 13, .74)), linear-gradient(180deg, rgba(7, 11, 13, .18), rgba(7, 11, 13, .48))`).
 
-`partials/`: `errorList.html` (form errors), `language_switcher.html`, `sidebar_item.html`.
-Templatetags: `dashboard.templatetags.tags` (`render_pagination`, `get_item`, `split`,
-`humanize_number`) and `frontend.templatetags.frontend_tags` (`website_name`).
+---
 
-## JavaScript conventions
+## 4. Button & Control Hierarchy
 
-- Vanilla JS only. Wrap in `document.addEventListener("DOMContentLoaded", ...)`.
-- `const` / `let`; avoid `var`. No jQuery.
-- Object actions go through **AJAX + SweetAlert2** (no page reloads).
-- Keep JS in `dashboard/static/js/<feature>.js`, never inline in templates.
-- Chart.js usage: donut on `dash_home` renders via `dash_home.js`; keep legend/label colors
-  light (`#f2f5f8`) — set `Chart.defaults.color`, `labels.color` and item `color`/`fontColor`.
+### Primary Neon Buttons (Public & Composer)
 
-## i18n & RTL
+- **Neon Cyan Button (`.btn.neonCyan` / `.btn-neon-cyan`)**:
+  - Background: `var(--cyan)` (`#55dcff`), Text: `#03141a` (Dark navy), Radius: `999px`.
+  - Ambient glow: `box-shadow: 0 4px 18px rgba(85, 220, 255, 0.28)`.
+  - Hover: `transform: translateY(-2px); box-shadow: 0 6px 24px rgba(85, 220, 255, 0.42)`.
+- **Neon Violet Button (`.btn.neonViolet` / `.btn-neon-violet`)**:
+  - Background: `var(--violet)` (`#aa7cff`), Text: `#16062b`, Radius: `999px`.
+  - Ambient glow: `box-shadow: 0 4px 18px rgba(170, 124, 255, 0.28)`.
+  - Hover: `transform: translateY(-2px); box-shadow: 0 6px 24px rgba(170, 124, 255, 0.42)`.
+- **Store Bilnov Button (`.btn.storeTop`)**:
+  - Subtle dark glass pill with SVG cart icon badge and white text.
 
-- `LANGUAGE_CODE = "fr"`; registered `LANGUAGES = [en, fr]`; `locale/` ships ar/en/fr.
-- Always translate strings: `{% trans %}` / `gettext`/`gettext_lazy` in Python; never hardcode
-  English in user-facing UI.
-- `{% get_current_language_bidi as IS_RTL %}` and the `<html dir>` control layout direction.
-- RTL-aware CSS: prefix directional rules with `[dir="rtl"]`.
+### Dashboard Action Buttons
 
-## Accessibility / quality bars
+- **`.dash-btn-primary`**: Yellow/amber background (`var(--brand-primary)`), dark text (`var(--brand-secondary)`), font-weight: 700.
+- **`.btn-outline-primary`**: Glass outline button with primary accent border.
+- **`.quote-action-btn` / `.btn-text-pill`**: 34x34px square icon buttons with rounded corners (`10px`), glass border, and contextual hover glows (`.btn-cyan`, `.btn-gold`, `.btn-red`).
 
-- Sufficient contrast on dark glass (use the text tiers above).
-- Icons/icon-only buttons need `aria-label` or visible text.
-- Forms use Bootstrap form controls + the `.form` class + `partials/errorList.html`.
-- Be creative but stay within the brand palette and the liquid-glass recipe.
+---
+
+## 5. Stat Badge Chips & KPI Components
+
+Used across CRM Kanban, Quotes, and Project Details for glanceable metrics:
+
+```html
+<div class="stat-badge-chip">
+    <div class="stat-badge-icon gold">
+        <i class="fas fa-file-invoice-dollar"></i>
+    </div>
+    <div class="min-w-0">
+        <div class="text-muted small text-uppercase fw-bold">Total Quotes</div>
+        <div class="fs-4 fw-bold text-light font-monospace">42</div>
+    </div>
+</div>
+```
+
+- **Icon Glow Modifiers**:
+  - `.stat-badge-icon.gold`: Amber yellow background (`rgba(255, 214, 90, 0.18)`), border & icon `#FFD65A`.
+  - `.stat-badge-icon.blue`: Cyan/sky background (`rgba(56, 189, 248, 0.18)`), border & icon `#38bdf8`.
+  - `.stat-badge-icon.green`: Mint emerald background (`rgba(52, 211, 153, 0.18)`), border & icon `#34d399`.
+  - `.stat-badge-icon.purple`: Electric violet background (`rgba(168, 85, 247, 0.18)`), border & icon `#c084fc`.
+
+---
+
+## 6. Status Pills & Badges
+
+Status badges utilize translucent tinted backgrounds with luminous text and dots:
+
+| Status Code | Badge Class | Color | Meaning |
+|-------------|-------------|-------|---------|
+| `pending` / `draft` | `.crm-badge-pending` / `.quote-badge--draft` | Amber (`#FFD65A` / `#f4b85f`) | En attente / Brouillon |
+| `sent` / `in_progress` | `.crm-badge-sent` / `.quote-badge--sent` | Electric Cyan (`#55dcff` / `#38bdf8`) | Envoyé au client / En cours |
+| `viewed` | `.crm-badge-viewed` / `.quote-badge--viewed` | Electric Violet (`#aa7cff` / `#c084fc`) | Devis consulté par le client |
+| `approved` / `accepted` | `.crm-badge-approved` / `.quote-badge--accepted` | Soft Emerald (`#7de5ae` / `#34d399`) | Validé / Accepté |
+| `declined` / `cancelled`| `.crm-badge-declined` / `.quote-badge--declined` | Coral Rose (`#ff7b73` / `#f87171`) | Refusé / Annulé |
+| `superseded` | `.quote-badge--superseded` | Slate Gray (`#94a3b8`) | Révision précédente remplacée |
+
+---
+
+## 7. Component Guidelines & Reusability Rules
+
+### 1. Custom Selects
+- **Rule**: Never use unstyled raw `<select>` tags in public or dashboard views.
+- **Public & Dashboard Forms**: Use `dashboard/templates/components/custom_select.html` or `.form-select.svc-input` with `.custom-select-wrapper` classes.
+
+### 2. Forms & Error Handling
+- **Form Class**: Always add `class="form"` to forms expecting AJAX handling.
+- **Form Errors**: Always render errors with `partials/errorList.html`.
+- **Modals**: Style with dark liquid-glass backdrops (`.modal-content`), dismissible buttons (`btn-close btn-close-white`), and translatable SweetAlert2 responses.
+
+### 3. Pagination
+- **Rule**: List views must use `@with_pagination(per_page=..., ...)` in Python views and render via `{% render_pagination page_obj %}` in Django templates.
+
+### 4. Multilingual Language Switcher
+- Language tabs inside modals and forms must be presented in a single horizontal row (`.svc-lang-btn` / `.nav-pills`).
+- Switching language must isolate and display strictly the selected language content, hiding all others, and apply `dir="rtl"` when Arabic is chosen.
+
+### 5. Proforma PDF Facturation
+- Rendered via WeasyPrint using [`dashboard/templates/dashboard/pdf/facturation.html`](file:///C:/sites/loft-design-services/dashboard/templates/dashboard/pdf/facturation.html).
+- Embeds crisp vector SVG logo, structured client and project spatial cards, itemized services with pricing models, financial summary, and validation signature blocks.
