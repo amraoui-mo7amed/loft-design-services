@@ -522,8 +522,32 @@ def service_list(request):
 
     queryset = queryset.order_by("-is_default", "service_name")
 
+    pricing_type_choices = [
+        ("fixed", _("Fixed Price")),
+        ("area", _("Price per Square Metre (m²)")),
+        ("hourly", _("Price per Hour")),
+        ("percent_project_cost", _("Percentage of Estimated Total Project Cost")),
+    ]
+
+    filter_pricing_type_choices = [
+        ("", _("All Pricing Models")),
+        ("fixed", _("Fixed Price")),
+        ("area", _("Price per Square Metre (m²)")),
+        ("hourly", _("Price per Hour")),
+        ("percent_project_cost", _("Percentage of Project Cost")),
+    ]
+
+    filter_is_default_choices = [
+        ("", _("All Statuses")),
+        ("1", _("Single Default Only")),
+        ("0", _("Optional Only")),
+    ]
+
     total_count = Service.objects.count()
     default_service = Service.objects.filter(is_default=True).first()
+    pricing_type_filter_label = dict(filter_pricing_type_choices).get(pricing_type_filter, _("All Pricing Models"))
+    is_default_filter_label = dict(filter_is_default_choices).get(is_default_filter, _("All Statuses"))
+
     return {
         "services": queryset,
         "total_count": total_count,
@@ -531,6 +555,11 @@ def service_list(request):
         "search_query": q,
         "pricing_type_filter": pricing_type_filter,
         "is_default_filter": is_default_filter,
+        "pricing_type_choices": pricing_type_choices,
+        "filter_pricing_type_choices": filter_pricing_type_choices,
+        "filter_is_default_choices": filter_is_default_choices,
+        "pricing_type_filter_label": pricing_type_filter_label,
+        "is_default_filter_label": is_default_filter_label,
     }
 
 

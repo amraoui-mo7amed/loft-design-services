@@ -409,8 +409,31 @@
     text-decoration: none;
 }
 
-.dashContent .svc-active-filter-pill a:hover {
-    opacity: 1;
+/* ── Modal Custom Select rules ── */
+.dashContent .modal,
+.dashContent .modal-dialog,
+.dashContent .svc-glass-modal,
+.dashContent .svc-glass-modal .modal-body,
+.dashContent .svc-glass-modal .tab-content,
+.dashContent .svc-glass-modal .tab-pane,
+.dashContent .svc-content-section {
+    overflow: visible !important;
+}
+
+.dashContent .svc-glass-modal .custom-select-wrapper {
+    position: relative;
+    z-index: 1060;
+}
+
+.dashContent .svc-glass-modal .custom-select-wrapper.active {
+    z-index: 1090 !important;
+}
+
+.dashContent .svc-glass-modal .custom-select-list {
+    position: absolute;
+    z-index: 1100 !important;
+    max-height: 220px;
+    overflow-y: auto !important;
 }
 
 [dir="rtl"] .svc-card-foot {

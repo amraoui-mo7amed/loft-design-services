@@ -520,9 +520,62 @@ function openServiceDetailsModal(serviceId) {
   }
 }
 
+let isComposerInViewport = true;
+function updateFloatingBarVisibility() {
+  const bar = document.querySelector('#composerFloatingPriceBar');
+  if (!bar) return;
+  if (st.step === 'services' && isComposerInViewport) {
+    bar.classList.add('active-visible');
+  } else {
+    bar.classList.remove('active-visible');
+  }
+}
+
+// Observe #composer section to show floating price bar only when on viewport
+const composerSectionEl = document.querySelector('#composer');
+if (composerSectionEl && 'IntersectionObserver' in window) {
+  const composerObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      isComposerInViewport = entry.isIntersecting;
+      updateFloatingBarVisibility();
+    });
+  }, { threshold: 0.05 });
+  composerObserver.observe(composerSectionEl);
+} else {
+  window.addEventListener('scroll', () => {
+    if (!composerSectionEl) return;
+    const rect = composerSectionEl.getBoundingClientRect();
+    isComposerInViewport = (rect.top < window.innerHeight && rect.bottom > 0);
+    updateFloatingBarVisibility();
+  }, { passive: true });
+}
+
 function renderServices() {
   const b = document.querySelector('#composerBody');
+  const existingChoices = b.querySelector('.serviceChoices');
+  const savedScrollTop = existingChoices ? existingChoices.scrollTop : 0;
   const hasPercentageService = services.some(s => s.pricing_type === 'percent_project_cost');
+
+  // Minimalist floating Price & NextBtn bar fixed to top right under navbar
+  let floatingBar = document.querySelector('#composerFloatingPriceBar');
+  if (!floatingBar) {
+    floatingBar = document.createElement('div');
+    floatingBar.id = 'composerFloatingPriceBar';
+    floatingBar.className = 'composerFloatingPriceBar';
+    document.body.appendChild(floatingBar);
+  }
+  floatingBar.innerHTML = `
+    <div class="floatingPriceInfo grand">
+      <small>TOTAL ESTIMÉ HT</small>
+      <strong class="floatingPriceAmount">${money(totalHT())}</strong>
+    </div>
+    <button class="nextBtn floatingNextBtn" id="toContactFloating">
+      <span>Continuer</span>
+      <i class="fas fa-arrow-right ms-1"></i>
+    </button>
+  `;
+  floatingBar.querySelector('#toContactFloating').onclick = () => gotoStep('contact');
+  updateFloatingBarVisibility();
 
   b.innerHTML = `
     <div class="serviceStage">
@@ -576,23 +629,27 @@ function renderServices() {
           `;
         }).join('')}
       </div>
+
       <aside class="quote">
-        <h3>Votre estimation</h3>
-        ${services.filter(s => st.services.some(id => String(id) === String(s.id) || String(id) === s.slug)).map(s => `
+        <h3>Prestations sélectionnées</h3>
+        <p class="text-muted small mb-3">Récapitulatif de votre composition</p>
+        <div class="quoteRowsList">
+          ${services.filter(s => st.services.some(id => String(id) === String(s.id) || String(id) === s.slug)).map(s => `
+            <div class="quoteRow">
+              <span>✓ ${s.name}</span>
+              <b>${money(servicePrice(s.id))}</b>
+            </div>
+          `).join('')}
           <div class="quoteRow">
-            <span>✓ ${s.name}</span>
-            <b>${money(servicePrice(s.id))}</b>
+            <span>Base projet</span>
+            <b>${money(base())}</b>
           </div>
-        `).join('')}
-        <div class="quoteRow">
-          <span>Base projet</span>
-          <b>${money(base())}</b>
         </div>
-        <strong class="grand">
+        <strong class="grand d-none">
           <small>TOTAL ESTIMÉ HT</small>
           ${money(totalHT())}
         </strong>
-        <button class="nextBtn" style="width:100%;margin-top:16px" id="toContact">Continuer →</button>
+        <button class="nextBtn d-none" id="toContact">Continuer →</button>
       </aside>
     </div>
   `;
@@ -626,11 +683,57 @@ function renderServices() {
       const finalId = matching ? matching.id : id;
       const has = st.services.some(y => String(y) === String(finalId));
       st.services = has ? st.services.filter(y => String(y) !== String(finalId)) : [...st.services, finalId];
-      renderComposer();
+
+      const isNowSelected = !has;
+      card.classList.toggle('selected', isNowSelected);
+      const icon = card.querySelector('.svc-check-icon');
+      if (icon) {
+        icon.className = `svc-check-icon fas ${isNowSelected ? 'fa-check' : 'fa-plus'}`;
+      }
+
+      // Update right-side quote summary in-place without re-rendering or resetting scroll
+      const quoteList = b.querySelector('.quoteRowsList');
+      if (quoteList) {
+        const selectedSvcsHtml = services
+          .filter(s => st.services.some(sid => String(sid) === String(s.id) || String(sid) === s.slug))
+          .map(s => `
+            <div class="quoteRow">
+              <span>✓ ${s.name}</span>
+              <b>${money(servicePrice(s.id))}</b>
+            </div>
+          `).join('');
+        quoteList.innerHTML = `
+          ${selectedSvcsHtml}
+          <div class="quoteRow">
+            <span>Base projet</span>
+            <b>${money(base())}</b>
+          </div>
+        `;
+      }
+
+      // Update hidden grand in quote if present
+      const grandInQuote = b.querySelector('.quote .grand');
+      if (grandInQuote) {
+        grandInQuote.innerHTML = `<small>TOTAL ESTIMÉ HT</small>${money(totalHT())}`;
+      }
+
+      // Update floating price bar
+      const floatingAmount = document.querySelector('.floatingPriceAmount');
+      if (floatingAmount) {
+        floatingAmount.textContent = money(totalHT());
+      }
+      updateFloatingBarVisibility();
+      updateProgress();
     };
   });
 
-  document.querySelector('#toContact').onclick = () => gotoStep('contact');
+  const newChoices = b.querySelector('.serviceChoices');
+  if (newChoices && savedScrollTop > 0) {
+    newChoices.scrollTop = savedScrollTop;
+  }
+
+  const mainNextBtn = document.querySelector('#toContact');
+  if (mainNextBtn) mainNextBtn.onclick = () => gotoStep('contact');
 }
 
 /* Algeria 2026 dataset */
@@ -1092,9 +1195,14 @@ function downloadQuotePdf(){
 
 function renderComposer(){
   updateProgress();
+  const existingFloatingBar = document.querySelector('#composerFloatingPriceBar');
+  if (existingFloatingBar && st.step !== 'services') {
+    existingFloatingBar.remove();
+  }
   if(st.step==='project')renderProject();
   if(st.step==='services')renderServices();
   if(st.step==='contact')renderContactStep();
+  updateFloatingBarVisibility();
 }
 renderComposer();
 /* Quick contact */

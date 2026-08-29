@@ -1397,13 +1397,35 @@ header.nav,
   margin: auto;
 }
 
+@media (max-width: 991px) {
+  .serviceStage {
+    grid-template-columns: 1fr;
+  }
+}
+
 .serviceChoices,
 .quote {
   border: 1px solid rgba(255, 255, 255, .1);
   border-radius: 20px;
   background: rgba(6, 12, 16, .82);
   backdrop-filter: blur(16px);
-  padding: 24px;
+  padding: 20px;
+  height: 460px;
+  max-height: 460px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.serviceChoices::-webkit-scrollbar,
+.quote::-webkit-scrollbar {
+  width: 5px;
+}
+
+.serviceChoices::-webkit-scrollbar-thumb,
+.quote::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
 }
 
 .serviceChoices h3,
@@ -1418,6 +1440,10 @@ header.nav,
   font-size: 13px;
   color: #94a09c;
   margin: 0 0 16px;
+}
+
+.projectCostInputBox {
+  display: none !important;
 }
 
 .serviceChoice {
@@ -1445,17 +1471,40 @@ header.nav,
 
 .serviceChoice .svc-check-icon,
 .serviceChoice > i:first-child {
-  width: 28px;
-  height: 28px;
-  border: 1px solid rgba(255, 255, 255, .2);
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border: 1.5px solid rgba(255, 255, 255, .22);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .05);
+  backdrop-filter: blur(8px);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  line-height: 1 !important;
   font-style: normal;
-  font-size: 13px;
+  font-size: 11px;
   flex-shrink: 0;
+  color: rgba(255, 255, 255, .45);
+  transition: all .22s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+}
+
+.serviceChoice .svc-check-icon::before,
+.serviceChoice > i:first-child::before {
+  display: block;
+  line-height: 1;
+  margin: auto;
+}
+
+.serviceChoice:hover .svc-check-icon,
+.serviceChoice:hover > i:first-child {
+  border-color: rgba(85, 220, 255, 0.6);
   color: #fff;
-  transition: all .2s;
+  transform: scale(1.05);
 }
 
 .serviceChoice span {
@@ -1492,9 +1541,12 @@ header.nav,
 
 .serviceChoice.selected .svc-check-icon,
 .serviceChoice.selected > i:first-child {
-  background: #a855f7 !important;
-  color: #fff !important;
-  border-color: #a855f7 !important;
+  background: linear-gradient(135deg, #55dcff 0%, #00a8cc 100%) !important;
+  color: #041014 !important;
+  border-color: #55dcff !important;
+  font-weight: 900 !important;
+  box-shadow: 0 0 14px rgba(85, 220, 255, 0.45) !important;
+  transform: scale(1.06);
 }
 
 .btn-service-details {
@@ -1531,12 +1583,120 @@ header.nav,
   flex-direction: column;
 }
 
+/* Floating Price & NextBtn bar fixed to top right under navbar */
+.composerFloatingPriceBar {
+  position: fixed;
+  top: calc(var(--nav, 72px) + 14px);
+  right: 24px;
+  z-index: 1060;
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 10px 8px 18px;
+  background: rgba(6, 14, 20, 0.92);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(85, 220, 255, 0.35);
+  border-radius: 12px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), 0 0 24px rgba(85, 220, 255, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+}
+
+.composerFloatingPriceBar.active-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+[dir="rtl"] .composerFloatingPriceBar {
+  right: auto;
+  left: 24px;
+  padding: 8px 18px 8px 10px;
+}
+
+.floatingPriceInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.floatingPriceInfo small {
+  color: #8a9693;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.floatingPriceInfo strong {
+  color: var(--cyan, #55dcff);
+  font-size: 17px;
+  font-weight: 800;
+  font-family: monospace, sans-serif;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-top: 2px;
+  text-shadow: 0 0 12px rgba(85, 220, 255, 0.35);
+}
+
+.floatingNextBtn {
+  border: 1.5px solid #55dcff !important;
+  background: rgba(8, 22, 30, 0.95) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  font-size: 13px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  padding: 8px 18px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 14px rgba(85, 220, 255, 0.3) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.floatingNextBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 22px rgba(85, 220, 255, 0.5) !important;
+  background: rgba(85, 220, 255, 0.2) !important;
+}
+
+@media (max-width: 768px) {
+  .composerFloatingPriceBar {
+    top: auto;
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    justify-content: space-between;
+    border-radius: 16px;
+    padding: 10px 14px;
+  }
+  [dir="rtl"] .composerFloatingPriceBar {
+    right: 16px;
+    left: 16px;
+    padding: 10px 14px;
+  }
+}
+
+.quoteRowsList {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 .quoteRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 10px 0;
+  padding: 8px 0;
   border-bottom: 1px solid rgba(255, 255, 255, .08);
   font-size: 13px;
 }
@@ -1550,43 +1710,14 @@ header.nav,
   font-weight: 700;
 }
 
-.grand {
-  display: block;
-  margin-top: auto;
-  padding-top: 20px;
-  color: var(--cyan);
-  font-size: 32px;
-  font-weight: 800;
-}
-
-.grand small {
-  display: block;
-  color: #8a9693;
-  font-size: 11px;
-  letter-spacing: .1em;
-  margin-bottom: 4px;
-  font-weight: 600;
-}
-
-#toContact {
-  width: 100%;
-  margin-top: 16px;
-  border: 1.5px solid #55dcff !important;
-  background: rgba(8, 18, 24, .95) !important;
-  color: #fff !important;
-  font-weight: 800 !important;
-  text-transform: uppercase !important;
-  letter-spacing: .08em !important;
-  padding: 14px 20px !important;
-  border-radius: 999px !important;
-  box-shadow: 0 0 16px rgba(85, 220, 255, .2) !important;
-  transition: all .22s !important;
-  cursor: pointer;
-}
-
-#toContact:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 24px rgba(85, 220, 255, .4) !important;
+aside.quote .grand,
+aside.quote .nextBtn,
+.serviceStage .quote .grand,
+.serviceStage .quote .nextBtn,
+.quote .grand,
+.quote .nextBtn,
+.quote #toContact {
+  display: none !important;
 }
 
 .clientType {
@@ -7177,7 +7308,13 @@ body.galleryOpen {
    V23 — BARRE DES ESPACES : SCROLL HORIZONTAL ERGONOMIQUE
    ========================================================= */
 .gallerySpacesNav {
-  position: relative;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  background: rgba(6, 12, 16, 0.95) !important;
+  backdrop-filter: blur(16px);
+  padding: 10px 0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) 42px;
   align-items: center;
@@ -7250,9 +7387,13 @@ body.galleryOpen {
 /* Mobile: arrows remain compact and the rail fills the width */
 @media(max-width:840px) {
   .gallerySpacesNav {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
     grid-template-columns: 34px minmax(0, 1fr) 34px !important;
     gap: 4px !important;
     width: 100% !important;
+    padding: 6px 0 8px !important;
   }
 
   .gallerySpaceArrow {

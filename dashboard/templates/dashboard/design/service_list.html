@@ -305,7 +305,7 @@
          aria-labelledby="serviceFilterModalLabel"
          aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content svc-glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-content svc-glass-modal border-0 rounded-4 shadow-lg">
                 <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
                     <div class="d-flex align-items-center gap-2">
                         <i class="fas fa-filter text-warning fa-lg"></i>
@@ -331,21 +331,11 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label text-light fw-semibold small">{% trans "Pricing Model" %}</label>
-                            <select name="pricing_type" class="form-select svc-input">
-                                <option value="">{% trans "All Pricing Models" %}</option>
-                                <option value="fixed" {% if pricing_type_filter == "fixed" %}selected{% endif %}>{% trans "Fixed Price" %}</option>
-                                <option value="area" {% if pricing_type_filter == "area" %}selected{% endif %}>{% trans "Price per Square Metre (m²)" %}</option>
-                                <option value="hourly" {% if pricing_type_filter == "hourly" %}selected{% endif %}>{% trans "Price per Hour" %}</option>
-                                <option value="percent_project_cost" {% if pricing_type_filter == "percent_project_cost" %}selected{% endif %}>{% trans "Percentage of Project Cost" %}</option>
-                            </select>
+                            {% include "components/custom_select.html" with id="filterPricingTypeSelect" name="pricing_type" choices=filter_pricing_type_choices value=pricing_type_filter select_title=pricing_type_filter_label %}
                         </div>
                         <div class="mb-3">
                             <label class="form-label text-light fw-semibold small">{% trans "Default Selection Status" %}</label>
-                            <select name="is_default" class="form-select svc-input">
-                                <option value="">{% trans "All Statuses" %}</option>
-                                <option value="1" {% if is_default_filter == "1" %}selected{% endif %}>{% trans "Single Default Only" %}</option>
-                                <option value="0" {% if is_default_filter == "0" %}selected{% endif %}>{% trans "Optional Only" %}</option>
-                            </select>
+                            {% include "components/custom_select.html" with id="filterIsDefaultSelect" name="is_default" choices=filter_is_default_choices value=is_default_filter select_title=is_default_filter_label %}
                         </div>
                     </div>
                     <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
@@ -366,7 +356,7 @@
          aria-labelledby="serviceModalTitle"
          aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content svc-glass-modal border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-content svc-glass-modal border-0 rounded-4 shadow-lg">
                 <form method="post"
                       action="{% url 'dash:service_create' %}"
                       enctype="multipart/form-data"
@@ -417,15 +407,10 @@
                                     </div>
                                     <div class="row g-3">
                                         <div class="col-md-6">
-                                            <label class="form-label text-light fw-semibold small" for="servicePricingTypeInput">
+                                            <label class="form-label text-light fw-semibold small">
                                                 {% trans "Pricing Model" %} <span class="text-danger">*</span>
                                             </label>
-                                            <select name="pricing_type" id="servicePricingTypeInput" class="form-select svc-input">
-                                                <option value="fixed">{% trans "Fixed Price" %}</option>
-                                                <option value="area">{% trans "Price per Square Metre (m²)" %}</option>
-                                                <option value="hourly">{% trans "Price per Hour" %}</option>
-                                                <option value="percent_project_cost">{% trans "Percentage of Estimated Total Project Cost" %}</option>
-                                            </select>
+                                            {% include "components/custom_select.html" with id="servicePricingTypeSelect" name="pricing_type" choices=pricing_type_choices value="fixed" select_title=_("Fixed Price") %}
                                         </div>
 
                                         <!-- Standard Price Field -->
@@ -774,7 +759,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const serviceForm = document.getElementById("serviceForm");
     const modalTitle = document.getElementById("serviceModalTitle");
-    const pricingTypeInput = document.getElementById("servicePricingTypeInput");
+    const pricingTypeInput = document.getElementById("servicePricingTypeSelect_input");
     const priceInput = document.getElementById("servicePriceInput");
     const percentRateInput = document.getElementById("servicePercentRateInput");
     const minFeeInput = document.getElementById("serviceMinFeeInput");
@@ -818,6 +803,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const revisionsAr = document.getElementById("revisionsArInput");
     const deliveryTimeAr = document.getElementById("deliveryTimeArInput");
 
+    function setCustomSelect(wrapperId, val) {
+        const wrapper = document.getElementById(wrapperId);
+        if (!wrapper) return;
+        const hidden = wrapper.querySelector('input[type="hidden"]');
+        const display = wrapper.querySelector('.custom-select-display');
+        const targetLi = wrapper.querySelector(`.custom-select-list li[data-value="${val}"]`);
+        if (hidden) hidden.value = val;
+        if (display && targetLi) {
+            display.innerHTML = targetLi.textContent + '<span class="arrow"><i class="fas fa-caret-down"></i></span>';
+        }
+    }
+
     function activateTab(tabId) {
         const tabEl = document.getElementById(tabId);
         if (tabEl && typeof bootstrap !== "undefined") {
@@ -826,8 +823,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updatePricingModelFields() {
-        if (!pricingTypeInput) return;
-        const val = pricingTypeInput.value;
+        const pricingTypeHidden = document.getElementById("servicePricingTypeSelect_input");
+        if (!pricingTypeHidden) return;
+        const val = pricingTypeHidden.value;
 
         if (val === "percent_project_cost") {
             standardPriceWrapper?.classList.add("d-none");
@@ -882,8 +880,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    if (pricingTypeInput) {
-        pricingTypeInput.addEventListener("change", updatePricingModelFields);
+    const pricingTypeHiddenInput = document.getElementById("servicePricingTypeSelect_input");
+    if (pricingTypeHiddenInput) {
+        pricingTypeHiddenInput.addEventListener("change", updatePricingModelFields);
     }
 
     if (openNewBtn) {
@@ -892,12 +891,13 @@ document.addEventListener("DOMContentLoaded", function () {
             serviceForm.action = "{% url 'dash:service_create' %}";
             modalTitle.textContent = "{% trans 'New Service' %}";
             submitBtnText.textContent = "{% trans 'Create Service' %}";
-            if (pricingTypeInput) pricingTypeInput.value = "fixed";
+            setCustomSelect("servicePricingTypeSelect", "fixed");
             updatePricingModelFields();
             activateTab("tab-main-pricing-btn");
             activateTab("tab-fr-btn");
             const errList = serviceForm.querySelector("#errorList");
             if (errList) errList.innerHTML = "";
+            if (window.initCustomSelects) window.initCustomSelects();
         });
     }
 
@@ -909,7 +909,9 @@ document.addEventListener("DOMContentLoaded", function () {
             submitBtnText.textContent = "{% trans 'Save Changes' %}";
 
             // Pricing & Config
-            if (pricingTypeInput) pricingTypeInput.value = this.dataset.pricingType || "fixed";
+            const pricingType = this.dataset.pricingType || "fixed";
+            setCustomSelect("servicePricingTypeSelect", pricingType);
+
             if (priceInput) priceInput.value = this.dataset.price || "0";
             if (percentRateInput) percentRateInput.value = this.dataset.percentageRate || "5.00";
             if (minFeeInput) minFeeInput.value = this.dataset.minFee || "";
@@ -956,6 +958,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (errList) errList.innerHTML = "";
 
             if (serviceModal) serviceModal.show();
+            if (window.initCustomSelects) window.initCustomSelects();
         });
     });
 
