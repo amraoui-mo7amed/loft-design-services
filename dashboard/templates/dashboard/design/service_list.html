@@ -144,8 +144,13 @@
                                         <i class="fas fa-layer-group"></i>
                                     </div>
                                     <div class="flex-grow-1 min-w-0">
-                                        <h5 class="svc-card-title text-truncate" title="{{ s.service_name }}">{{ s.service_name }}</h5>
-                                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <h5 class="svc-card-title text-truncate mb-0" title="{{ s.service_name }}">{{ s.service_name }}</h5>
+                                            {% if s.order %}
+                                                <span class="badge bg-dark border border-info text-info rounded-pill font-monospace" style="font-size: 0.7rem">#{{ s.order }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2 flex-wrap mt-1">
                                             <span class="badge {% if s.is_default %}bg-warning text-dark{% else %}bg-secondary text-light opacity-75{% endif %} rounded-pill font-monospace"
                                                   style="font-size: 0.7rem">
                                                 {% if s.is_default %}
@@ -229,6 +234,7 @@
                                 <button type="button"
                                         class="btn-text-pill btn-text-edit edit-service-btn"
                                         data-id="{{ s.pk }}"
+                                        data-order="{{ s.order|default:'' }}"
                                         data-name="{{ s.service_name }}"
                                         data-pricing-type="{{ s.pricing_type }}"
                                         data-price="{{ s.service_price|unlocalize }}"
@@ -459,6 +465,12 @@
                                                 <i class="fas fa-image me-1 text-info"></i> {% trans "Preview File (GIF / Image / Video)" %} <span class="text-muted font-monospace small">({% trans "Optional" %})</span>
                                             </label>
                                             <input type="file" name="gif_file" id="serviceGifInput" accept="image/*,video/mp4" class="form-control svc-input">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-light fw-semibold small" for="serviceOrderInput">
+                                                <i class="fas fa-sort-numeric-down me-1 text-info"></i> {% trans "Display Order" %} <span class="text-muted font-monospace small">({% trans "Unique" %})</span>
+                                            </label>
+                                            <input type="number" name="order" id="serviceOrderInput" class="form-control svc-input" min="1" step="1" placeholder="{% trans 'Auto' %}">
                                         </div>
                                     </div>
                                 </div>
@@ -771,6 +783,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const percentExplanationBox = document.getElementById("percentExplanationBox");
     const priceLabelText = document.getElementById("priceLabelText");
     const videoInput = document.getElementById("serviceVideoInput");
+    const orderInput = document.getElementById("serviceOrderInput");
     const defaultInput = document.getElementById("serviceDefaultInput");
     const submitBtnText = document.getElementById("serviceSubmitBtnText");
     const openNewBtn = document.getElementById("openNewServiceModalBtn");
@@ -892,6 +905,7 @@ document.addEventListener("DOMContentLoaded", function () {
             modalTitle.textContent = "{% trans 'New Service' %}";
             submitBtnText.textContent = "{% trans 'Create Service' %}";
             setCustomSelect("servicePricingTypeSelect", "fixed");
+            if (orderInput) orderInput.value = "";
             updatePricingModelFields();
             activateTab("tab-main-pricing-btn");
             activateTab("tab-fr-btn");
@@ -913,6 +927,7 @@ document.addEventListener("DOMContentLoaded", function () {
             setCustomSelect("servicePricingTypeSelect", pricingType);
 
             if (priceInput) priceInput.value = this.dataset.price || "0";
+            if (orderInput) orderInput.value = this.dataset.order || "";
             if (percentRateInput) percentRateInput.value = this.dataset.percentageRate || "5.00";
             if (minFeeInput) minFeeInput.value = this.dataset.minFee || "";
             if (maxFeeInput) maxFeeInput.value = this.dataset.maxFee || "";

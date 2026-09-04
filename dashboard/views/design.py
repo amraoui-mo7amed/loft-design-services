@@ -520,7 +520,7 @@ def service_list(request):
     elif is_default_filter == "0":
         queryset = queryset.filter(is_default=False)
 
-    queryset = queryset.order_by("-is_default", "service_name")
+    queryset = queryset.order_by("order", "-is_default", "service_name")
 
     pricing_type_choices = [
         ("fixed", _("Fixed Price")),
@@ -580,6 +580,14 @@ def service_create(request):
         is_default = request.POST.get("is_default") in ("true", "1", "on", True)
         gif_file = request.FILES.get("gif_file")
 
+        order_val = request.POST.get("order")
+        if order_val and str(order_val).strip().isdigit():
+            order_num = int(str(order_val).strip())
+            if ServicePricing.objects.filter(order=order_num).exists():
+                return JsonResponse({"success": False, "errors": [_("A service with this display order already exists.")]})
+        else:
+            order_num = None
+
         if not service_name_fr:
             return JsonResponse({"success": False, "errors": [_("French service name is required as default.")]})
 
@@ -612,6 +620,7 @@ def service_create(request):
 
                 service = ServicePricing.objects.create(
                     service_name=service_name_fr,
+                    order=order_num,
                     pricing_type=pricing_type,
                     service_price=service_price,
                     percentage_rate=percentage_rate,
@@ -729,6 +738,13 @@ def service_update(request, pk):
             deliverables_fr = _parse_bullet_list(request.POST.get("deliverables_fr") or request.POST.get("deliverables") or "")
             revisions_fr = (request.POST.get("included_revisions_fr") or request.POST.get("included_revisions") or "").strip()
             delivery_time_fr = (request.POST.get("estimated_delivery_time_fr") or request.POST.get("estimated_delivery_time") or "").strip()
+
+            order_val = request.POST.get("order")
+            if order_val and str(order_val).strip().isdigit():
+                order_num = int(str(order_val).strip())
+                if ServicePricing.objects.filter(order=order_num).exclude(pk=obj.pk).exists():
+                    return JsonResponse({"success": False, "errors": [_("A service with this display order already exists.")]})
+                obj.order = order_num
 
             with transaction.atomic():
                 if is_default and not obj.is_default:

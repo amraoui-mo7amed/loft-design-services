@@ -86,6 +86,20 @@
                     </div>
                 </div>
                 <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm rounded-4 mb-4">
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold mb-3"><i class="fas fa-layer-group me-2" style="color:var(--brand-primary);"></i>{% trans "Placement & Role" %}</h6>
+                            <p class="small text-muted mb-3">{% trans "Choose where the video appears on the homepage and specify its exact card role." %}</p>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">{% trans "Placement on Homepage" %}</label>
+                                {% include "components/custom_select.html" with id="videoPlacementSelect" name="placement" choices=placement_choices value=video.placement|default:"videos" select_title=video.get_placement_display|default:_("Videos Section (#videos)") %}
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label fw-semibold">{% trans "Role / Target Card" %}</label>
+                                {% include "components/custom_select.html" with id="videoRoleSelect" name="role" choices=role_choices value=video.role|default:"videos_rail" select_title=video.get_role_display|default:_("Videos Rail Item") %}
+                            </div>
+                        </div>
+                    </div>
                     <div class="card border-0 shadow-sm rounded-4">
                         <div class="card-body p-4">
                             <h6 class="fw-bold mb-3"><i class="fas fa-cog me-2" style="color:var(--brand-primary);"></i>{% trans "Actions" %}</h6>
@@ -105,3 +119,56 @@
         </form>
     </div>
 {% endblock dashContent %}
+{% block extra_js %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var rolesByPlacement = {{ roles_by_placement_json|safe }};
+            var pWrapper = document.getElementById("videoPlacementSelect");
+            var rWrapper = document.getElementById("videoRoleSelect");
+            if (!pWrapper || !rWrapper) return;
+            var pInput = pWrapper.querySelector('input[type="hidden"]');
+            var rInput = rWrapper.querySelector('input[type="hidden"]');
+
+            function syncRoles(currentRole) {
+                var placement = pInput ? pInput.value : "videos";
+                var options = rolesByPlacement[placement] || [];
+                var rList = rWrapper.querySelector(".custom-select-list");
+                var rDisplay = rWrapper.querySelector(".custom-select-display");
+                if (!rList) return;
+                rList.innerHTML = "";
+                var matched = false;
+                var displayLabel = "";
+                options.forEach(function (opt) {
+                    var li = document.createElement("li");
+                    li.dataset.value = opt.value;
+                    li.textContent = opt.label;
+                    if (opt.value === currentRole) {
+                        matched = true;
+                        displayLabel = opt.label;
+                    }
+                    rList.appendChild(li);
+                });
+                if (!matched && options.length > 0) {
+                    rInput.value = options[0].value;
+                    displayLabel = options[0].label;
+                } else if (matched) {
+                    rInput.value = currentRole;
+                }
+                if (displayLabel && rDisplay) {
+                    rDisplay.innerHTML = displayLabel + '<span class="arrow"><i class="fas fa-caret-down"></i></span>';
+                }
+                delete rWrapper._customSelectInitialized;
+                if (window.initCustomSelects) {
+                    window.initCustomSelects(rWrapper);
+                }
+            }
+
+            if (pInput) {
+                pInput.addEventListener("change", function () {
+                    syncRoles(rInput ? rInput.value : "");
+                });
+            }
+            syncRoles(rInput ? rInput.value : "");
+        });
+    </script>
+{% endblock extra_js %}

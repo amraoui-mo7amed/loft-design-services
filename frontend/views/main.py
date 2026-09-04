@@ -66,7 +66,7 @@ def home_view(request):
 
     from django.utils.translation import get_language
     cur_lang = get_language() or "fr"
-    services_qs = Service.objects.prefetch_related("translations").all().order_by("-is_default", "service_name")
+    services_qs = Service.objects.prefetch_related("translations").all().order_by("order", "-is_default", "service_name")
     if services_qs.exists():
         has_default = False
         services_data = []
@@ -93,6 +93,7 @@ def home_view(request):
             )
             services_data.append({
                 "id": s.id,
+                "order": s.order if s.order is not None else 999,
                 "slug": s.id,
                 "name": t.get("name") or s.service_name,
                 "short_description": t.get("short_description") or s.short_description,
@@ -146,20 +147,7 @@ def home_view(request):
                 "estimated_delivery_time": "5-7 days",
                 "price": 750.0,
                 "pricing_type": "area",
-                "pricingType": "PRICE_PER_M2",
-                "unitRate": 750.0,
-                "fixedUnitPrice": 750.0,
-                "hourlyRate": 750.0,
-                "percentage": 0.0,
                 "percentage_rate": 0.0,
-                "allowInterior": True,
-                "allowExterior": False,
-                "defaultInteriorSelected": True,
-                "defaultExteriorSelected": False,
-                "unitName": "m²",
-                "defaultQuantity": 1,
-                "defaultHours": 10,
-                "defaultReferenceAmount": 100000.0,
                 "min_fee": None,
                 "max_fee": None,
                 "video_link": "",
@@ -211,20 +199,7 @@ def home_view(request):
                 "estimated_delivery_time": "3-5 days",
                 "price": 8000.0,
                 "pricing_type": "fixed",
-                "pricingType": "FIXED_UNIT",
-                "unitRate": 8000.0,
-                "fixedUnitPrice": 8000.0,
-                "hourlyRate": 8000.0,
-                "percentage": 0.0,
                 "percentage_rate": 0.0,
-                "allowInterior": False,
-                "allowExterior": False,
-                "defaultInteriorSelected": False,
-                "defaultExteriorSelected": False,
-                "unitName": "forfait",
-                "defaultQuantity": 1,
-                "defaultHours": 1,
-                "defaultReferenceAmount": 100000.0,
                 "min_fee": None,
                 "max_fee": None,
                 "video_link": "",
@@ -305,23 +280,32 @@ def home_view(request):
 
     videos_qs = Video.objects.all().order_by("-created_at")
     video_data = []
+    videos_by_role = {}
     for v in videos_qs:
         yt_id = "66qSJ4EIIdM"
         if v.play_link:
             match = re.search(r"(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})", v.play_link)
             if match:
                 yt_id = match.group(1)
-        video_data.append({
+        item = {
             "id": v.id,
             "title": v.title,
             "youtube_id": yt_id,
             "thumbnail": v.thumbnail_url or f"https://img.youtube.com/vi/{yt_id}/hqdefault.jpg",
-        })
-    if not video_data:
-        video_data = [
-            {"id": "v1", "title": "LOFT DESIGN · immersion & projet", "youtube_id": "66qSJ4EIIdM", "thumbnail": "https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg"},
-            {"id": "v2", "title": "Conception · matières · expérience", "youtube_id": "66qSJ4EIIdM", "thumbnail": "https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-07-07-23-27-11.png"},
-            {"id": "v3", "title": "Projet résidentiel · détails & lumière", "youtube_id": "66qSJ4EIIdM", "thumbnail": "https://loftdesign.bilnov.com/media/portfolio/thumbnails/SEJOUR_4.png"},
+            "play_link": v.play_link or (f"https://www.youtube.com/watch?v={yt_id}" if yt_id else ""),
+            "placement": v.placement,
+            "role": v.role,
+        }
+        video_data.append(item)
+        if v.role and v.role not in videos_by_role:
+            videos_by_role[v.role] = item
+
+    rail_videos = [v for v in video_data if v.get("placement") == Video.Placement.VIDEOS or v.get("role") == Video.Role.VIDEOS_RAIL]
+    if not rail_videos:
+        rail_videos = [
+            {"id": "v1", "title": "LOFT DESIGN · immersion & projet", "youtube_id": "66qSJ4EIIdM", "thumbnail": "https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg", "play_link": "https://www.youtube.com/watch?v=66qSJ4EIIdM"},
+            {"id": "v2", "title": "Conception · matières · expérience", "youtube_id": "66qSJ4EIIdM", "thumbnail": "https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-07-07-23-27-11.png", "play_link": "https://www.youtube.com/watch?v=66qSJ4EIIdM"},
+            {"id": "v3", "title": "Projet résidentiel · détails & lumière", "youtube_id": "66qSJ4EIIdM", "thumbnail": "https://loftdesign.bilnov.com/media/portfolio/thumbnails/SEJOUR_4.png", "play_link": "https://www.youtube.com/watch?v=66qSJ4EIIdM"},
         ]
 
     project_types_qs = ProjectType.objects.all().order_by("-featured_on_home", "name")
@@ -355,8 +339,9 @@ def home_view(request):
         "portfolio_list": portfolio_data,
         "portfolio_data_json": json.dumps(portfolio_data),
         "videos": videos_qs,
-        "video_list": video_data,
-        "video_data_json": json.dumps(video_data),
+        "video_list": rail_videos,
+        "video_data_json": json.dumps(rail_videos),
+        "videos_by_role": videos_by_role,
         "gallery_data_json": json.dumps(gallery_data),
     })
 

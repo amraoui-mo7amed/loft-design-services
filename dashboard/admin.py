@@ -77,7 +77,7 @@ class ProjectTypeSpaceAdmin(admin.ModelAdmin):
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ["service_name", "service_price", "is_default", "created_at"]
+    list_display = ["order", "service_name", "service_price", "is_default", "created_at"]
     list_filter = ["is_default"]
     search_fields = ["service_name"]
 

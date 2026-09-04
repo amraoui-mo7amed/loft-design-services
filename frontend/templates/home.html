@@ -98,38 +98,54 @@
           <div class="serviceInfo amber">
             <b>{% trans "Design" %}</b>
             <span>{% trans "Usage & optimisation" %}</span>
+            {% with v=videos_by_role.service_design %}
             <div class="pop">
-              <img src="https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg" alt="{% trans 'Vidéo Design' %}">
-              <a href="#" class="videoInsideBtn" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="▶ {% trans 'Voir la vidéo explicative' %}">▶ {% trans "Voir la vidéo explicative" %}</a>
+              <img src="{{ v.thumbnail|default:'https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg' }}" alt="{{ v.title|default:_('Vidéo Design') }}">
+              <a href="#" class="videoInsideBtn" data-video-url="{{ v.play_link|default:'https://www.youtube.com/watch?v=66qSJ4EIIdM' }}" data-video-title="▶ {{ v.title|default:_('Voir la vidéo explicative') }}">▶ {{ v.title|default:_("Voir la vidéo explicative") }}</a>
             </div>
+            {% endwith %}
           </div>
           <div class="serviceInfo cyan">
             <b>{% trans "360°" %}</b>
             <span>{% trans "Visite immersive" %}</span>
+            {% with v=videos_by_role.service_360 %}
             <div class="pop">
-              <img src="https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg" alt="{% trans 'Démo 360°' %}">
-              <a href="#" class="videoInsideBtn" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="▶ {% trans 'Voir la démo 360°' %}">▶ {% trans "Voir la démo 360°" %}</a>
+              <img src="{{ v.thumbnail|default:'https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg' }}" alt="{{ v.title|default:_('Démo 360°') }}">
+              <a href="#" class="videoInsideBtn" data-video-url="{{ v.play_link|default:'https://www.youtube.com/watch?v=66qSJ4EIIdM' }}" data-video-title="▶ {{ v.title|default:_('Voir la démo 360°') }}">▶ {{ v.title|default:_("Voir la démo 360°") }}</a>
             </div>
+            {% endwith %}
           </div>
           <div class="serviceInfo violet">
             <b>{% trans "VR" %}</b>
             <span>{% trans "Immersion à l’échelle" %}</span>
+            {% with v=videos_by_role.service_vr %}
             <div class="pop">
-              <img src="https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg" alt="{% trans 'Comprendre la VR' %}">
-              <a href="#" class="videoInsideBtn" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="▶ {% trans 'Comprendre la VR' %}">▶ {% trans "Comprendre la VR" %}</a>
+              <img src="{{ v.thumbnail|default:'https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg' }}" alt="{{ v.title|default:_('Comprendre la VR') }}">
+              <a href="#" class="videoInsideBtn" data-video-url="{{ v.play_link|default:'https://www.youtube.com/watch?v=66qSJ4EIIdM' }}" data-video-title="▶ {{ v.title|default:_('Comprendre la VR') }}">▶ {{ v.title|default:_("Comprendre la VR") }}</a>
             </div>
+            {% endwith %}
           </div>
           <div class="serviceInfo green">
             <b>{% trans "Bilnov" %}</b>
             <span>{% trans "Projet collaboratif" %}</span>
+            {% with v=videos_by_role.service_bilnov %}
             <div class="pop">
-              <img src="https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg" alt="{% trans 'Bilnov en action' %}">
-              <a href="#" class="videoInsideBtn" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="▶ {% trans 'Voir Bilnov en action' %}">▶ {% trans "Voir Bilnov en action" %}</a>
+              <img src="{{ v.thumbnail|default:'https://img.youtube.com/vi/66qSJ4EIIdM/hqdefault.jpg' }}" alt="{{ v.title|default:_('Bilnov en action') }}">
+              <a href="#" class="videoInsideBtn" data-video-url="{{ v.play_link|default:'https://www.youtube.com/watch?v=66qSJ4EIIdM' }}" data-video-title="▶ {{ v.title|default:_('Voir Bilnov en action') }}">▶ {{ v.title|default:_("Voir Bilnov en action") }}</a>
             </div>
+            {% endwith %}
           </div>
           <div class="serviceInfo green">
             <b>{% trans "Store Bilnov" %}</b>
             <span>{% trans "Produits · 3D · AR · budget" %}</span>
+            {% with v=videos_by_role.service_store %}
+            {% if v %}
+            <div class="pop">
+              <img src="{{ v.thumbnail }}" alt="{{ v.title }}">
+              <a href="#" class="videoInsideBtn" data-video-url="{{ v.play_link }}" data-video-title="▶ {{ v.title }}">▶ {{ v.title }}</a>
+            </div>
+            {% endif %}
+            {% endwith %}
           </div>
         </div>
         <div class="cloud">{% trans "Mobile · PC · VR Box · cloud 24/7 · marché réel & disponibilité" %}</div>
@@ -166,22 +182,30 @@
           </div>
         </div>
         <div class="aboutInfo">
-          <article class="infoCard" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="{% trans 'Usage réel' %}" data-explain-video="66qSJ4EIIdM" data-explain-title="{% trans 'Usage réel' %}">
+          {% with v=videos_by_role.info_usage %}
+          <article class="infoCard" data-video-url="{{ v.play_link|default:'https://www.youtube.com/watch?v=66qSJ4EIIdM' }}" data-video-title="{{ v.title|default:_('Usage réel') }}" data-explain-video="{{ v.youtube_id|default:'66qSJ4EIIdM' }}" data-explain-title="{{ v.title|default:_('Usage réel') }}">
             <h3>{% trans "Usage réel" %}</h3>
             <p>{% trans "Des espaces dessinés autour des gestes et habitudes quotidiennes." %}</p>
           </article>
-          <article class="infoCard" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="{% trans 'Optimisation' %}" data-explain-video="66qSJ4EIIdM" data-explain-title="{% trans 'Optimisation' %}">
+          {% endwith %}
+          {% with v=videos_by_role.info_optimization %}
+          <article class="infoCard" data-video-url="{{ v.play_link|default:'https://www.youtube.com/watch?v=66qSJ4EIIdM' }}" data-video-title="{{ v.title|default:_('Optimisation') }}" data-explain-video="{{ v.youtube_id|default:'66qSJ4EIIdM' }}" data-explain-title="{{ v.title|default:_('Optimisation') }}">
             <h3>{% trans "Optimisation" %}</h3>
             <p>{% trans "Circulation, rangement et fonction : chaque mètre carré doit servir." %}</p>
           </article>
-          <article class="infoCard" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="{% trans 'Smart living' %}" data-explain-video="66qSJ4EIIdM" data-explain-title="{% trans 'Smart living' %}">
+          {% endwith %}
+          {% with v=videos_by_role.info_smart_living %}
+          <article class="infoCard" data-video-url="{{ v.play_link|default:'https://www.youtube.com/watch?v=66qSJ4EIIdM' }}" data-video-title="{{ v.title|default:_('Smart living') }}" data-explain-video="{{ v.youtube_id|default:'66qSJ4EIIdM' }}" data-explain-title="{{ v.title|default:_('Smart living') }}">
             <h3>{% trans "Smart living" %}</h3>
             <p>{% trans "Éclairage et automatismes intégrés sans compliquer la vie." %}</p>
           </article>
-          <article class="infoCard" data-video-url="https://www.youtube.com/watch?v=66qSJ4EIIdM" data-video-title="{% trans 'Immersion' %}" data-explain-video="66qSJ4EIIdM" data-explain-title="{% trans 'Immersion' %}">
+          {% endwith %}
+          {% with v=videos_by_role.info_immersion %}
+          <article class="infoCard" data-video-url="{{ v.play_link|default:'https://www.youtube.com/watch?v=66qSJ4EIIdM' }}" data-video-title="{{ v.title|default:_('Immersion') }}" data-explain-video="{{ v.youtube_id|default:'66qSJ4EIIdM' }}" data-explain-title="{{ v.title|default:_('Immersion') }}">
             <h3>{% trans "Immersion" %}</h3>
             <p>{% trans "Vous ne validez plus un projet abstrait : vous entrez dedans." %}</p>
           </article>
+          {% endwith %}
         </div>
       </div>
       <div class="bilnow">
@@ -221,7 +245,7 @@
       <div class="videoRail" id="videoRail">
         {% if video_list %}
           {% for v in video_list %}
-            <article class="videoCard" data-video-url="https://www.youtube.com/watch?v={{ v.youtube_id|default:'66qSJ4EIIdM' }}" data-video-title="{{ v.title }}" data-youtube-id="{{ v.youtube_id|default:'66qSJ4EIIdM' }}">
+            <article class="videoCard" data-video-url="{{ v.play_link|default:'https://www.youtube.com/watch?v=66qSJ4EIIdM' }}" data-video-title="{{ v.title }}" data-youtube-id="{{ v.youtube_id|default:'66qSJ4EIIdM' }}">
               <img src="{{ v.thumbnail }}" alt="{{ v.title }}">
               <span class="play">▶</span>
               <span class="videoLabel">{{ v.title }}</span>
@@ -306,74 +330,112 @@
 <!-- GALLERY OVERLAY APP -->
 <section class="galleryApp" id="galleryApp" aria-hidden="true">
   <div class="galleryAppBg"></div>
+
   <header class="galleryAppHeader">
-    <div class="galleryBrand" style="cursor:pointer;">
+    <button class="galleryBrand" id="galleryBrandHome" type="button" title="{% trans 'Retour à l’accueil' %}" style="border:0;background:none;color:inherit;padding:0;text-align:left">
       <img src="{% static 'img/icon.jpeg' %}" alt="LOFT DESIGN">
       <div><b>LOFT DESIGN</b><small>{% trans "Galerie d’inspirations" %}</small></div>
-    </div>
+    </button>
+
+    <label class="gallerySearchShell" aria-label="{% trans 'Rechercher dans la galerie' %}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+      <input id="gallerySearch" type="search" autocomplete="off" placeholder="{% trans 'Rechercher…' %}" />
+    </label>
+
+    <div class="galleryHeaderInlineFilters" id="galleryHeaderInlineFilters" aria-label="{% trans 'Filtres rapides' %}"></div>
+
     <div class="galleryHeaderActions">
+      <button id="galleryFilterTop" type="button">{% trans "Filtres" %}</button>
       <button class="galleryCartTop" id="galleryCartTop" type="button">
-        {% trans "Panier" %} <span id="galleryCartCount">0</span>
+        <span class="gallerySelectionLabel">{% trans "Ma sélection" %}</span> <span id="galleryCartCount">0</span>
       </button>
-      <button class="galleryCloseTop" id="galleryCloseTop" type="button">✕</button>
+      <button class="galleryHomeTop" id="galleryHomeTop" type="button">{% trans "Accueil" %}</button>
+      <button class="galleryCloseTop" id="galleryCloseTop" type="button" aria-label="{% trans 'Fermer' %}">✕</button>
     </div>
   </header>
+
   <div class="galleryAppBody">
-    <div class="gallerySpacesNav">
-      <button class="gallerySpaceArrow prev" id="gallerySpacePrev" type="button" aria-label="{% trans 'Espace précédent' %}">‹</button>
-      <div class="gallerySpaces" id="gallerySpaces"></div>
-      <button class="gallerySpaceArrow next" id="gallerySpaceNext" type="button" aria-label="{% trans 'Espace suivant' %}">›</button>
+    <div class="galleryBrowseHead">
+      <div>
+        <small>{% trans "INSPIRATIONS LOFT DESIGN" %}</small>
+        <h2>{% trans "Trouvez, enregistrez, composez." %}</h2>
+        <p>{% trans "Cliquez sur une image pour explorer sa galerie. Enregistrez vos inspirations dans votre tableau." %}</p>
+      </div>
+      <div class="galleryResultsMeta" id="galleryResultsMeta"></div>
     </div>
+
+    <div class="galleryFilterPanel" id="galleryFilterPanel">
+      <div class="galleryFilterHead">
+        <strong>{% trans "Filtrer par espaces" %}</strong>
+        <small>{% trans "Vous pouvez sélectionner un ou plusieurs espaces." %}</small>
+      </div>
+      <div class="galleryFilterChips" id="galleryFilterChips"></div>
+    </div>
+
     <div class="galleryCategoryGrid" id="galleryCategoryGrid"></div>
   </div>
+
   <button class="galleryMobileCart" id="galleryMobileCart" type="button">
-    <span>{% trans "Panier" %} <b id="galleryMobileCount">0</b></span>
+    <span>{% trans "Ma sélection" %} <b id="galleryMobileCount">0</b></span>
     <strong>{% trans "Voir & envoyer" %}</strong>
-  </button>
-  <button class="galleryFloatingCartBtn" id="galleryFloatingCartBtn" type="button">
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-      <circle cx="8.5" cy="8.5" r="1.5"></circle>
-      <polyline points="21 15 16 10 5 21"></polyline>
-    </svg>
-    <span>{% trans "Ma sélection" %}</span>
-    <span class="cartBadge">0</span>
   </button>
 </section>
 
 <!-- GALLERY CART DRAWER -->
 <aside class="galleryCartDrawer" id="galleryCartDrawer" aria-hidden="true">
   <div class="galleryCartHead">
-    <div>
-      <small>{% trans "VOTRE SÉLECTION" %}</small>
-      <h3>{% trans "Panier inspirations" %}</h3>
-    </div>
+    <div><small>{% trans "VOTRE TABLEAU" %}</small><h3>{% trans "Ma sélection" %}</h3></div>
     <button id="galleryCartClose" type="button">✕</button>
   </div>
+
+  <div class="galleryBoardTools">
+    <div class="galleryBoardSelectRow">
+      <select class="galleryBoardSelect" id="galleryBoardSelect" aria-label="{% trans 'Choisir un tableau' %}"></select>
+      <button class="galleryBoardIconBtn" id="galleryBoardNew" type="button" title="{% trans 'Nouveau tableau' %}">＋</button>
+      <button class="galleryBoardIconBtn" id="galleryBoardUpload" type="button" title="{% trans 'Ajouter mes images' %}">⇧</button>
+    </div>
+    <div class="galleryBoardSecondary">
+      <button class="rename" id="galleryBoardRename" type="button">{% trans "Renommer" %}</button>
+      <button class="upload" id="galleryBoardUploadText" type="button">{% trans "Ajouter mes images" %}</button>
+      <button class="delete" id="galleryBoardDelete" type="button">{% trans "Supprimer" %}</button>
+    </div>
+    <input id="galleryBoardFile" type="file" accept="image/*" multiple hidden />
+  </div>
+
   <div class="galleryCartItems" id="galleryCartItems"></div>
+
   <div class="galleryCartActions">
-    <button id="gallerySubmitSelection" type="button" class="gallerySubmitBtn w-100">{% trans "Envoyer ma sélection" %}</button>
+    <button class="sendMain" id="galleryShareWa" type="button">{% trans "Envoyer sur WhatsApp" %}</button>
+    <button id="galleryShareMail" type="button">{% trans "Envoyer par e-mail" %}</button>
+    <button class="copyMain" id="galleryCopyLink" type="button">{% trans "Copier le lien de la sélection" %}</button>
   </div>
 </aside>
 
 <!-- GALLERY DETAIL MODAL -->
 <section class="galleryDetail" id="galleryDetail" aria-hidden="true">
-  <button class="galleryDetailClose" id="galleryDetailClose" type="button">✕</button>
+  <button class="galleryDetailClose" id="galleryDetailClose" type="button" aria-label="{% trans 'Fermer' %}">✕</button>
   <div class="galleryDetailPanel" id="galleryDetailPanel"></div>
 </section>
 
 <!-- GALLERY LIGHTBOX -->
 <section class="galleryLightbox" id="galleryLightbox" aria-hidden="true">
-  <button class="galleryLightboxClose" id="galleryLightboxClose" type="button">✕</button>
+  <div class="galleryLightboxTopActions">
+    <button class="galleryLightboxAction send" id="galleryLightboxSend" type="button">{% trans "Envoyer" %}</button>
+    <button class="galleryLightboxAction save" id="galleryLightboxSave" type="button">{% trans "Enregistrer" %}</button>
+    <button class="galleryLightboxClose" id="galleryLightboxClose" type="button" aria-label="{% trans 'Fermer' %}">✕</button>
+  </div>
+
   <button class="galleryLightboxNav prev" id="galleryLightboxPrev" type="button" aria-label="{% trans 'Image précédente' %}">‹</button>
+
   <div class="galleryLightboxStage">
     <img id="galleryLightboxImg" src="" alt="">
+    <div class="galleryLightboxThumbs" id="galleryLightboxThumbs"></div>
   </div>
+
   <button class="galleryLightboxNav next" id="galleryLightboxNext" type="button" aria-label="{% trans 'Image suivante' %}">›</button>
-  <div class="galleryLightboxThumbs" id="galleryLightboxThumbs"></div>
 </section>
 
-<div class="galleryToast" id="galleryToast">{% trans "Lien copié" %}</div>
+<div class="galleryToast" id="galleryToast">{% trans "Enregistré" %}</div>
 
 <!-- FOOTER -->
 <footer>

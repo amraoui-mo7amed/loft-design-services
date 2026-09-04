@@ -11,6 +11,13 @@ class ServicePricing(models.Model):
         PERCENTAGE_PROJECT_COST = "percent_project_cost", _("Percentage of Estimated Total Project Cost")
 
     service_name = models.CharField(max_length=150, verbose_name=_("Service Name"))
+    order = models.PositiveIntegerField(
+        unique=True,
+        null=True,
+        blank=True,
+        verbose_name=_("Order"),
+        help_text=_("Determines the sequence in which services appear in the catalog and composer"),
+    )
     pricing_type = models.CharField(
         max_length=30,
         choices=PricingType.choices,
@@ -134,7 +141,7 @@ class ServicePricing(models.Model):
     class Meta:
         verbose_name = _("Service Pricing")
         verbose_name_plural = _("Service Pricings")
-        ordering = ["-is_default", "service_name"]
+        ordering = ["order", "-is_default", "service_name"]
 
     def __str__(self):
         return self.service_name
@@ -144,6 +151,9 @@ class ServicePricing(models.Model):
         return self.service_name
 
     def save(self, *args, **kwargs):
+        if self.order is None:
+            max_order = ServicePricing.objects.aggregate(models.Max("order"))["order__max"]
+            self.order = (max_order or 0) + 1
         if self.is_default:
             with transaction.atomic():
                 if self.pk:

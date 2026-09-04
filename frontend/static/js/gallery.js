@@ -72,370 +72,871 @@ const GALLERY_DATA = (window.GALLERY_DATA && window.GALLERY_DATA.length > 0) ? w
     });
   });
 })();
+/* =========================================================
+   V75 — PINTREST MASONRY EXPLORATION + CLIENT BOARDS
+   (ported from LOFT_DESIGN_V75_PORTFOLIO_9_CARD_EDGE_TO_EDGE.html;
+    multi-select space chips + search + masonry pins + saved
+    boards + fullscreen viewer + share/selection)
+   ========================================================= */
 
-const initialSpace = window.INITIAL_SPACE_ID || GALLERY_DATA[0]?.id || '';
-const galleryState = { space: initialSpace, cart: new Set(), detail: null, sub: 0, image: 0 };
 const galleryApp = document.getElementById('galleryApp');
 const galleryDrawer = document.getElementById('galleryCartDrawer');
 const galleryDetail = document.getElementById('galleryDetail');
+const galleryDetailPanel = document.getElementById('galleryDetailPanel');
+const galleryLightbox = document.getElementById('galleryLightbox');
+const galleryFilterPanel = document.getElementById('galleryFilterPanel');
+const galleryFilterTopBtn = document.getElementById('galleryFilterTop');
+const gallerySearchShell = document.querySelector('.gallerySearchShell');
 
-function galleryAllCategories(){
-  return GALLERY_DATA.flatMap(s=>s.categories.map(c=>({...c,spaceId:s.id,spaceName:s.name})));
+const initialSpace = window.INITIAL_SPACE_ID || GALLERY_DATA[0]?.id || '';
+const galleryState = {
+  space: initialSpace,
+  cart: new Set(),
+  detail: null,
+  detailPin: null,
+  sub: 0,
+  image: 0,
+  search: '',
+  filters: new Set(GALLERY_DATA.map(s => s.id))
+};
+
+function galleryAllCategories() {
+  return GALLERY_DATA.flatMap(s => s.categories.map(c => ({ ...c, spaceId: s.id, spaceName: s.name })));
 }
-function galleryGetSpace(id){
+function galleryGetSpace(id) {
   if (id == null) return null;
   const target = String(id).trim().toLowerCase();
-  return GALLERY_DATA.find(s => 
+  return GALLERY_DATA.find(s =>
     String(s.id).trim().toLowerCase() === target ||
     (s.slug && String(s.slug).trim().toLowerCase() === target) ||
     (s.name && String(s.name).trim().toLowerCase() === target)
   ) || GALLERY_DATA[0];
 }
-function galleryGetCategory(id){
+function galleryGetCategory(id) {
   if (id == null) return null;
   const target = String(id).trim().toLowerCase();
-  return galleryAllCategories().find(c => 
+  return galleryAllCategories().find(c =>
     String(c.id).trim().toLowerCase() === target ||
-    (c.slug && String(c.slug).trim().toLowerCase() === target) ||
     (c.name && String(c.name).trim().toLowerCase() === target)
-  );
+  ) || null;
 }
-function gallerySelectionUrl(){
-  const u=new URL(location.href);
-  u.hash='gallery';
-  u.searchParams.set('selection',[...galleryState.cart].join(','));
+function galleryEscape(v) {
+  return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function galleryShowToast(msg) {
+  const t = document.getElementById('galleryToast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window.__galleryToastTimer);
+  window.__galleryToastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ---------- Pinterest pins (V29) ---------- */
+const ratioCycle = ['4/5', '1/1', '3/4', '5/7', '16/11', '2/3', '6/7', '4/3'];
+function galleryCategoryImages(c) {
+  if (!c) return [];
+  const list = [c.cover];
+  (c.subs || []).forEach(s => (s.images || []).forEach(x => list.push(x)));
+  return [...new Set(list.filter(Boolean))];
+}
+function galleryPins() {
+  const out = [];
+  GALLERY_DATA.forEach(space => {
+    (space.categories || []).forEach(cat => {
+      const images = galleryCategoryImages(cat);
+      images.forEach((url, index) => {
+        const sub = (cat.subs || []).find(s => (s.images || []).includes(url));
+        out.push({
+          id: `${cat.id}--${index}`,
+          categoryId: cat.id,
+          categoryName: cat.name,
+          spaceId: space.id,
+          spaceName: space.name,
+          title: index === 0 ? cat.name : (sub?.name || cat.name),
+          image: url,
+          imageIndex: index,
+          ratio: ratioCycle[(out.length + index) % ratioCycle.length]
+        });
+      });
+    });
+  });
+  return out;
+}
+function galleryGetPin(id) {
+  if (id == null) return null;
+  const s = String(id).trim().toLowerCase();
+  const direct = galleryPins().find(p => String(p.id).trim().toLowerCase() === s);
+  if (direct) return direct;
+  const c = galleryGetCategory(s);
+  if (c) return galleryPins().find(p => p.categoryId === c.id) || null;
+  return null;
+}
+function galleryPinFromCategoryImage(categoryId, url) {
+  return galleryPins().find(p => p.categoryId === categoryId && p.image === url) || null;
+}
+function galleryCurrentImages() {
+  return galleryCategoryImages(galleryGetCategory(galleryState.detail));
+}
+
+/* ---------- Boards (V29 persistence) ---------- */
+const BOARD_KEY = 'loftDesignGalleryBoardsV29';
+let boardStore = null;
+function galleryActiveBoard() {
+  if (!boardStore) boardStore = galleryLoadBoards();
+  return boardStore.sort((a, b) => (a.boardSort ?? 0) - (b.boardSort ?? 0))[0] || null;
+}
+function galleryLoadBoards() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(BOARD_KEY) || '[]');
+    return Array.isArray(raw) && raw.length ? raw : galleryDefaultStore();
+  } catch (err) {
+    return galleryDefaultStore();
+  }
+}
+function galleryDefaultStore() {
+  return [{
+    name: 'Mes inspirations',
+    boardSort: 1,
+    pins: [],
+    uploads: []
+  }];
+}
+function galleryPersistBoards() {
+  try { localStorage.setItem(BOARD_KEY, JSON.stringify(boardStore || [])); } catch (err) {}
+}
+function gallerySyncCartFromBoard() {
+  const b = galleryActiveBoard();
+  galleryState.cart = new Set(b?.pins || []);
+  document.querySelectorAll('[data-pin-card]').forEach(card => {
+    card.classList.toggle('saved', galleryState.cart.has(card.dataset.pinCard));
+  });
+}
+
+/* ---------- URL shares (V29) ---------- */
+function gallerySelectionUrl() {
+  const u = new URL(location.href);
+  u.hash = 'gallery';
+  u.searchParams.set('selection', [...galleryState.cart].join(','));
+  u.searchParams.delete('pin');
+  const b = galleryActiveBoard();
+  if (b?.name) u.searchParams.set('board', b.name);
   return u.toString();
 }
-function galleryShowToast(msg='Lien copié'){
-  const t=document.getElementById('galleryToast');
-  if(!t) return;
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(galleryShowToast.t);galleryShowToast.t=setTimeout(()=>t.classList.remove('show'),1700);
+function galleryPinUrl(id) {
+  const u = new URL(location.href);
+  u.hash = 'gallery';
+  u.searchParams.set('pin', id);
+  return u.toString();
 }
-function openGalleryApp(){
-  if(!galleryApp) return;
-  galleryApp.classList.add('open');galleryApp.setAttribute('aria-hidden','false');document.body.classList.add('galleryOpen');
-  if(location.hash!=='#gallery' && !document.querySelector('.gallery-standalone'))history.pushState({gallery:true},'',location.pathname+location.search+'#gallery');
-  galleryRenderSpaces();galleryRenderCategories();galleryRenderCart();
+function gallerySummary() {
+  const b = galleryActiveBoard();
+  const pins = [...galleryState.cart].map(galleryGetPin).filter(Boolean);
+  const lines = pins.map((p, i) => `${i + 1}. ${p.spaceName} — ${p.categoryName} — ${p.title}`);
+  if (b?.uploads?.length) lines.push(`${b.uploads.length} image(s) personnelle(s) ajoutée(s) au tableau.`);
+  return lines.join('\n');
 }
-function closeGalleryApp(fromPop=false){
-  if(!galleryApp) return;
-  galleryApp.classList.remove('open');galleryApp.setAttribute('aria-hidden','true');document.body.classList.remove('galleryOpen');
-  galleryDrawer?.classList.remove('open');galleryDetail?.classList.remove('open');
-  if(!fromPop && location.hash==='#gallery'){
-    history.replaceState(null, '', location.pathname + location.search);
+
+/* ---------- App open / close ---------- */
+function openGalleryApp() {
+  if (!galleryApp) return;
+  galleryApp.classList.add('open');
+  galleryApp.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('galleryOpen');
+  if (location.hash !== '#gallery' && !document.querySelector('.gallery-standalone')) {
+    window.history?.pushState({ gallery: true }, '', location.pathname + location.search + '#gallery');
+  }
+  galleryRenderFilters();
+  galleryRenderCategories();
+  galleryRenderCart();
+  const search = document.getElementById('gallerySearch');
+  if (search) search.value = galleryState.search || '';
+}
+function closeGalleryApp(fromPop) {
+  if (!galleryApp) return;
+  galleryApp.classList.remove('open');
+  galleryApp.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('galleryOpen');
+  galleryFilterPanel?.classList.remove('open');
+  syncFilterButton();
+  if (!fromPop && !document.querySelector('.gallery-standalone')) {
+    try { window.history?.replaceState(null, '', location.pathname + location.search); } catch (err) {}
   }
 }
 window.openGalleryApp = openGalleryApp;
 window.closeGalleryApp = closeGalleryApp;
 
-document.getElementById('desktopGalleryBtn')?.addEventListener('click',openGalleryApp);
-document.getElementById('mobileGalleryBtn')?.addEventListener('click',openGalleryApp);
-document.getElementById('galleryHeroBtn')?.addEventListener('click',openGalleryApp);
-document.getElementById('galleryCloseTop')?.addEventListener('click',()=>closeGalleryApp(false));
-document.querySelector('.galleryBrand')?.addEventListener('click',()=>{
+function galleryGoHome() {
+  galleryCloseLightbox();
+  galleryDetail?.classList.remove('open');
+  galleryDetail?.setAttribute('aria-hidden', 'true');
+  galleryDrawer?.classList.remove('open');
+  galleryDrawer?.setAttribute('aria-hidden', 'true');
   closeGalleryApp(false);
-  document.querySelector('#accueil')?.scrollIntoView({behavior:'smooth',block:'start'});
-});
-window.addEventListener('popstate',()=>{
-  if(!galleryApp) return;
-  if(location.hash==='#gallery')openGalleryApp();
-  else if(galleryApp.classList.contains('open') && !document.querySelector('.gallery-standalone'))closeGalleryApp(true);
-});
-
-function gallerySelectSpace(spaceId){
-  if (!spaceId) return;
-  galleryState.space = spaceId;
-  const s = galleryGetSpace(spaceId);
-  if (s) {
-    galleryRenderSpaces();
-    galleryRenderCategories();
-    if (galleryDetail && galleryDetail.classList.contains('open')) {
-      if (s.categories && s.categories.length > 0) {
-        galleryOpenDetail(s.categories[0].id);
-      } else {
-        galleryDetail.classList.remove('open');
-        galleryDetail.setAttribute('aria-hidden', 'true');
-      }
-    }
-    requestAnimationFrame(()=>{
-      document.querySelector('.gallerySpaceBtn.active')?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-      galleryUpdateSpaceArrows();
-    });
-  }
+  setTimeout(() => document.getElementById('accueil')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
 }
-window.gallerySelectSpace = gallerySelectSpace;
 
-function galleryRenderSpaces(){
-  const host=document.getElementById('gallerySpaces');
-  if(!host) return;
-  if(!galleryGetSpace(galleryState.space) && GALLERY_DATA.length > 0) {
-    galleryState.space = GALLERY_DATA[0].id;
-  }
-  host.innerHTML=GALLERY_DATA.map(s=>{
-    const isActive = String(s.id) === String(galleryState.space) || 
-                     (s.slug && String(s.slug) === String(galleryState.space)) ||
-                     (s.name && String(s.name).toLowerCase() === String(galleryState.space).toLowerCase());
-    return `<button type="button" class="gallerySpaceBtn ${isActive?'active':''}" data-gspace="${s.id}">
-      <img src="${s.cover}" alt="${s.name}">
-      <b>${s.name}</b>
-    </button>`;
-  }).join('');
-  
-  host.querySelectorAll('[data-gspace]').forEach(b=>b.addEventListener('click',(e)=>{
-    e.stopPropagation();
-    gallerySelectSpace(b.dataset.gspace);
-  }));
-  requestAnimationFrame(()=>{
-    document.querySelector('.gallerySpaceBtn.active')?.scrollIntoView({behavior:'auto',block:'nearest',inline:'center'});
-    galleryUpdateSpaceArrows();
+/* ---------- Filters (V34 on-demand chips) ---------- */
+function galleryRenderFilters() {
+  const host = document.getElementById('galleryFilterChips');
+  if (!host) return;
+  const allActive = galleryState.filters.size >= GALLERY_DATA.length;
+  host.innerHTML = [
+    `<button type="button" class="galleryFilterChip all ${allActive ? 'active' : ''}" data-gfilter="all">Tous les espaces</button>`,
+    ...GALLERY_DATA.map(s =>
+      `<button type="button" class="galleryFilterChip ${galleryState.filters.has(s.id) ? 'active' : ''}" data-gfilter="${galleryEscape(s.id)}">${galleryEscape(s.name)}</button>`
+    )
+  ].join('');
+  host.querySelectorAll('[data-gfilter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.gfilter;
+      if (id === 'all') {
+        galleryState.filters = new Set(GALLERY_DATA.map(s => s.id));
+      } else {
+        const allWasSelected = galleryState.filters.size >= GALLERY_DATA.length;
+        if (allWasSelected) {
+          galleryState.filters = new Set([id]);
+        } else if (galleryState.filters.has(id)) {
+          galleryState.filters.delete(id);
+          if (galleryState.filters.size === 0) galleryState.filters = new Set(GALLERY_DATA.map(s => s.id));
+        } else {
+          galleryState.filters.add(id);
+        }
+      }
+      galleryRenderFilters();
+      galleryRenderCategories();
+    });
   });
 }
-function galleryRenderCategories(){
-  let s=galleryGetSpace(galleryState.space);
-  if(!s && GALLERY_DATA.length > 0){
-    galleryState.space = GALLERY_DATA[0].id;
-    s = GALLERY_DATA[0];
+function syncFilterButton() {
+  const open = galleryFilterPanel?.classList.contains('open');
+  galleryFilterTopBtn?.classList.toggle('active', !!open);
+  if (galleryFilterTopBtn) {
+    const badge = GALLERY_DATA.length - galleryState.filters.size;
+    galleryFilterTopBtn.textContent = open ? 'Fermer filtres' : (badge > 0 ? `Filtres (${badge})` : 'Filtres');
   }
-  const host=document.getElementById('galleryCategoryGrid');
-  if(!host || !s) return;
+}
+function closeFilterPanel() {
+  galleryFilterPanel?.classList.remove('open');
+  syncFilterButton();
+}
+galleryFilterTopBtn?.addEventListener('click', (e) => {
+  e.preventDefault();
+  galleryFilterPanel?.classList.toggle('open');
+  syncFilterButton();
+});
+document.addEventListener('pointerdown', (e) => {
+  if (!galleryFilterPanel?.classList.contains('open')) return;
+  if (galleryFilterPanel.contains(e.target) || galleryFilterTopBtn?.contains(e.target)) return;
+  closeFilterPanel();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && galleryFilterPanel?.classList.contains('open')) closeFilterPanel();
+});
 
-  const categories=Array.isArray(s.categories)?s.categories:[];
-  if (categories.length === 0) {
-    host.innerHTML = `<div class="text-center text-muted py-5 col-12 w-100" style="grid-column: 1 / -1;">
-      <p class="mb-0">Aucune inspiration disponible pour cet espace.</p>
-    </div>`;
+/* ---------- Masonry pins (V29 + V35 selection visibility) ---------- */
+function galleryRenderCategories() {
+  const host = document.getElementById('galleryCategoryGrid');
+  if (!host) return;
+  const q = (galleryState.search || '').trim().toLowerCase();
+  let pins = galleryPins().filter(p => galleryState.filters.has(p.spaceId));
+  if (q) {
+    pins = pins.filter(p => {
+      const c = galleryGetCategory(p.categoryId);
+      const keywords = [p.title, p.categoryName, p.spaceName, ...((c?.subs || []).map(s => s.name))].join(' ').toLowerCase();
+      return keywords.includes(q);
+    });
+  }
+  const meta = document.getElementById('galleryResultsMeta');
+  if (meta) meta.textContent = `${pins.length} inspiration${pins.length > 1 ? 's' : ''}`;
+  if (!pins.length) {
+    host.innerHTML = `<div class="galleryNoResults"><div><strong>Aucune inspiration trouvée</strong><span>Essayez un autre mot-clé ou élargissez vos filtres.</span></div></div>`;
     return;
   }
-
-  host.innerHTML=categories.map(c=>`<article class="galleryCategoryCard ${galleryState.cart.has(c.id)?'selected':''}" data-cat-card="${c.id}">
-    <img src="${c.cover||s.cover}" alt="${c.name}">
-    ${galleryState.cart.has(c.id)?'<span class="gallerySelectedBadge">✓</span>':''}
-    <div class="galleryCategoryCopy">
-      <h4>${c.name}</h4>
-      <div class="galleryCardActions">
-        <button type="button" class="galleryMiniBtn" data-gview="${c.id}">Voir</button>
-        <button type="button" class="galleryMiniBtn add" data-gadd="${c.id}">
-          ${galleryState.cart.has(c.id)?'Retirer':'＋ Ajouter'}
+  host.innerHTML = pins.map(p => {
+    const saved = galleryState.cart.has(p.id);
+    return `<article class="galleryPin ${saved ? 'saved v75Saved' : ''}" data-pin-card="${galleryEscape(p.id)}">
+      <div class="galleryPinMedia" data-gview="${galleryEscape(p.id)}" style="--pin-ratio:${p.ratio}">
+        <img src="${p.image}" alt="${galleryEscape(p.title)}" loading="lazy" referrerpolicy="no-referrer">
+        <span class="galleryPinOverlay"></span>
+        <button type="button" class="galleryPinSave ${saved ? 'saved' : ''}" data-psave="${galleryEscape(p.id)}">${saved ? 'Enregistré' : 'Enregistrer'}</button>
+        <button type="button" class="galleryPinShare" data-pshare="${galleryEscape(p.id)}" aria-label="Envoyer">
+          <svg viewBox="0 0 24 24"><path d="M12 16V4"></path><path d="m7 9 5-5 5 5"></path><path d="M5 14v5h14v-5"></path></svg>
         </button>
+        <span class="galleryPinOpenLabel">Ouvrir la galerie</span>
       </div>
-    </div>
-  </article>`).join('');
+      <div class="galleryPinMeta">
+        <b>${galleryEscape(p.title)}</b>
+        <small>${galleryEscape(p.spaceName)} · ${galleryEscape(p.categoryName)}</small>
+      </div>
+    </article>`;
+  }).join('');
+  host.querySelectorAll('[data-gview]').forEach(el => el.addEventListener('click', (e) => {
+    if (e.target.closest('[data-psave],[data-pshare]')) return;
+    v75OpenPinFullscreen(el.dataset.gview);
+  }));
+  host.querySelectorAll('[data-psave]').forEach(b => b.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    galleryToggleCart(b.dataset.psave);
+    return false;
+  }));
+  host.querySelectorAll('[data-pshare]').forEach(b => b.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    gallerySharePin(b.dataset.pshare);
+    return false;
+  }));
+}
+const galleryRenderSpaces = galleryRenderFilters;
 
-  host.querySelectorAll('.galleryCategoryCard').forEach(card => {
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('[data-gadd]')) return;
-      const catId = card.dataset.catCard || card.querySelector('[data-gview]')?.dataset.gview;
-      if (catId) galleryOpenDetail(catId);
-    });
+/* ---------- Save / selection (V32 + V35) ---------- */
+function galleryToggleCart(id) {
+  const pin = galleryGetPin(id);
+  if (!pin) {
+    galleryShowToast('Inspiration introuvable');
+    return;
+  }
+  const wasAdded = !galleryState.cart.has(pin.id);
+  if (wasAdded) galleryState.cart.add(pin.id);
+  else galleryState.cart.delete(pin.id);
+  const board = galleryActiveBoard();
+  if (board) {
+    if (wasAdded) {
+      if (!board.pins.includes(pin.id)) board.pins.push(pin.id);
+    } else {
+      board.pins = (board.pins || []).filter(x => x !== pin.id);
+    }
+    galleryPersistBoards();
+  }
+  galleryRenderCategories();
+  galleryRenderCart();
+  galleryPulseSelection(pin.id, wasAdded);
+  galleryShowToast(wasAdded ? 'Ajouté à votre tableau' : 'Retiré de votre tableau');
+}
+window.galleryToggleCart = galleryToggleCart;
+
+function galleryPulseSelection(id, wasAdded) {
+  if (!wasAdded || !window.matchMedia('(max-width:840px)').matches) return;
+  const mobileCart = document.getElementById('galleryMobileCart');
+  const topCart = document.getElementById('galleryCartTop');
+  const card = document.querySelector(`[data-pin-card="${CSS.escape(id)}"]`);
+  [mobileCart, topCart].forEach(el => {
+    if (!el) return;
+    el.classList.remove('v32CartPulse', 'selectionPulse');
+    void el.offsetWidth;
+    el.classList.add('v32CartPulse');
+    if (el === mobileCart) el.classList.add('selectionPulse');
+    setTimeout(() => el.classList.remove('v32CartPulse', 'selectionPulse'), 760);
   });
-
-  host.querySelectorAll('[data-gview]').forEach(b=>
-    b.addEventListener('click',(e)=>{
-      e.stopPropagation();
-      galleryOpenDetail(b.dataset.gview);
-    })
-  );
-  host.querySelectorAll('[data-gadd]').forEach(b=>
-    b.addEventListener('click',(e)=>{
-      e.stopPropagation();
-      galleryToggleCart(b.dataset.gadd);
-    })
-  );
-}
-function galleryToggleCart(id){
-  galleryState.cart.has(id)?galleryState.cart.delete(id):galleryState.cart.add(id);
-  galleryRenderCategories();galleryRenderCart();
-}
-function galleryOpenDetail(id){
-  galleryState.detail=id;galleryState.sub=0;galleryState.image=0;
-  galleryRenderDetail();
-  galleryDetail.classList.add('open');
-  galleryDetail.setAttribute('aria-hidden','false');
-}
-function galleryCurrentImages(){
-  const c=galleryGetCategory(galleryState.detail);
-  const sub=c?.subs?.[galleryState.sub];
-  return sub?.images||[];
-}
-function gallerySetImage(index){
-  const images=galleryCurrentImages();
-  if(!images.length)return;
-  galleryState.image=(index+images.length)%images.length;
-  const main=document.getElementById('galleryViewerMain');
-  const caption=document.getElementById('galleryViewerCaption');
-  if(main)main.src=images[galleryState.image];
-  if(caption)caption.textContent=`${galleryState.image+1} / ${images.length}`;
-  document.querySelectorAll('[data-gthumb]').forEach((b,i)=>b.classList.toggle('active',i===galleryState.image));
-}
-function galleryRenderDetail(){
-  const c=galleryGetCategory(galleryState.detail);if(!c)return;
-  const sub=c.subs[galleryState.sub]||c.subs[0];
-  const images=sub?.images||[];
-  if(galleryState.image>=images.length)galleryState.image=0;
-  const panel=document.getElementById('galleryDetailPanel');
-
-  panel.innerHTML=`<div class="galleryDetailTop">
-    <div class="galleryDetailHero"><img src="${c.cover}" alt="${c.name}"></div>
-    <div class="galleryDetailInfo">
-      <h3>${c.name}</h3>
-      <button type="button" class="galleryDetailAdd" id="galleryDetailAdd">${galleryState.cart.has(c.id)?'✓ Retirer':'＋ Ajouter'}</button>
-    </div>
-  </div>
-  <div class="galleryDetailBody">
-    <div class="gallerySubGallery">
-      ${c.subs.map((s,i)=>`<button type="button" class="gallerySubCard ${i===galleryState.sub?'active':''}" data-gsub="${i}">
-        <img src="${s.images?.[0]||c.cover}" alt="${s.name}">
-        <b>${s.name}</b>
-      </button>`).join('')}
-    </div>
-
-    <div class="galleryImageViewer" id="galleryImageViewer">
-      <img id="galleryViewerMain" src="${images[galleryState.image]||c.cover}" alt="${sub?.name||c.name}">
-      <button type="button" class="galleryViewerFull" id="galleryViewerFull">⛶ Plein écran</button>
-      <span class="galleryViewerCaption" id="galleryViewerCaption">${images.length?`${galleryState.image+1} / ${images.length}`:''}</span>
-    </div>
-
-    <div class="galleryViewerThumbs">
-      ${images.map((x,i)=>`<button type="button" class="galleryViewerThumb ${i===galleryState.image?'active':''}" data-gthumb="${i}">
-        <img src="${x}" alt="">
-      </button>`).join('')}
-    </div>
-  </div>`;
-
-  panel.querySelectorAll('[data-gsub]').forEach(b=>b.addEventListener('click',()=>{
-    galleryState.sub=+b.dataset.gsub;
-    galleryState.image=0;
-    galleryRenderDetail();
-  }));
-  panel.querySelectorAll('[data-gthumb]').forEach(b=>b.addEventListener('click',()=>gallerySetImage(+b.dataset.gthumb)));
-  document.getElementById('galleryDetailAdd')?.addEventListener('click',()=>{galleryToggleCart(c.id);galleryRenderDetail()});
-  document.getElementById('galleryViewerMain')?.addEventListener('click',galleryOpenLightbox);
-  document.getElementById('galleryViewerFull')?.addEventListener('click',galleryOpenLightbox);
-}
-
-document.getElementById('galleryDetailClose')?.addEventListener('click',()=>{
-  if (document.activeElement && typeof document.activeElement.blur === 'function') {
-    document.activeElement.blur();
+  if (card) {
+    card.classList.remove('v32Added');
+    void card.offsetWidth;
+    card.classList.add('v32Added');
+    setTimeout(() => card.classList.remove('v32Added'), 700);
   }
-  galleryCloseLightbox();
-  galleryDetail.classList.remove('open');
-  galleryDetail.setAttribute('aria-hidden','true');
-});
-
-
-const galleryLightbox=document.getElementById('galleryLightbox');
-let galleryLightboxTouchX=null;
-
-function galleryOpenLightbox(){
-  const images=galleryCurrentImages();
-  if(!images.length)return;
-  galleryRenderLightbox();
-  galleryLightbox.classList.add('open');
-  galleryLightbox.setAttribute('aria-hidden','false');
 }
-function galleryCloseLightbox(){
-  if (document.activeElement && typeof document.activeElement.blur === 'function') {
-    document.activeElement.blur();
-  }
-  galleryLightbox.classList.remove('open');
-  galleryLightbox.setAttribute('aria-hidden','true');
-}
-function galleryRenderLightbox(){
-  const images=galleryCurrentImages();
-  if(!images.length)return;
-  const img=document.getElementById('galleryLightboxImg');
-  img.src=images[galleryState.image];
-  document.getElementById('galleryLightboxThumbs').innerHTML=images.map((x,i)=>`
-    <button type="button" class="galleryLightboxThumb ${i===galleryState.image?'active':''}" data-glbthumb="${i}">
-      <img src="${x}" alt="">
-    </button>`).join('');
-  document.querySelectorAll('[data-glbthumb]').forEach(b=>b.addEventListener('click',()=>{
-    galleryState.image=+b.dataset.glbthumb;
-    galleryRenderLightbox();
-    gallerySetImage(galleryState.image);
-  }));
-  requestAnimationFrame(()=>{
-    document.querySelector('.galleryLightboxThumb.active')?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+function galleryApplySelectionState(animate = false) {
+  const topCart = document.getElementById('galleryCartTop');
+  const mobileCart = document.getElementById('galleryMobileCart');
+  const topCount = document.getElementById('galleryCartCount');
+  const mobileCount = document.getElementById('galleryMobileCount');
+  const a = parseInt(topCount?.textContent || '0', 10);
+  const b = parseInt(mobileCount?.textContent || '0', 10);
+  const total = Number.isFinite(a) ? a : (Number.isFinite(b) ? b : 0);
+  const has = total > 0;
+  [topCart, mobileCart].forEach(el => {
+    if (!el) return;
+    el.classList.toggle('hasSelection', has);
+    el.setAttribute('aria-label', has ? `Ma sélection — ${total} élément${total > 1 ? 's' : ''}` : 'Ma sélection — vide');
+    if (animate) {
+      el.classList.remove('selectionFlash');
+      void el.offsetWidth;
+      el.classList.add('selectionFlash');
+      setTimeout(() => el.classList.remove('selectionFlash'), 760);
+    }
   });
 }
-function galleryLightboxMove(delta){
-  const images=galleryCurrentImages();
-  if(!images.length)return;
-  galleryState.image=(galleryState.image+delta+images.length)%images.length;
-  galleryRenderLightbox();
-  gallerySetImage(galleryState.image);
+
+/* V35 — observe rendered counters → keep the selection beacon coherent */
+(function () {
+  const topCount = document.getElementById('galleryCartCount');
+  const mobileCount = document.getElementById('galleryMobileCount');
+  let previousTotal = null;
+  function getTotal() {
+    const a = parseInt(topCount?.textContent || '0', 10);
+    const b = parseInt(mobileCount?.textContent || '0', 10);
+    return Number.isFinite(a) ? a : (Number.isFinite(b) ? b : 0);
+  }
+  const observer = new MutationObserver(() => {
+    const total = getTotal();
+    const changed = previousTotal !== null && total !== previousTotal;
+    galleryApplySelectionState(changed);
+    previousTotal = total;
+  });
+  if (topCount) observer.observe(topCount, { childList: true, characterData: true, subtree: true });
+  if (mobileCount) observer.observe(mobileCount, { childList: true, characterData: true, subtree: true });
+  galleryApplySelectionState(false);
+  let resizeTimer = 0;
+  addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      document.documentElement.style.setProperty('--gallery-vw', `${innerWidth}px`);
+      galleryApplySelectionState(false);
+    }, 90);
+  }, { passive: true });
+  addEventListener('orientationchange', () => setTimeout(() => galleryApplySelectionState(false), 180));
+})();
+
+/* ---------- Share (WA / mail / copy) ---------- */
+function gallerySharePin(id) {
+  const p = galleryGetPin(id);
+  if (!p) return;
+  const msg = `Bonjour LOFT DESIGN,\nJe partage cette inspiration : ${p.title} — ${p.spaceName} (${p.categoryName})\n\nLien : ${galleryPinUrl(p.id)}`;
+  window.open(`https://wa.me/213776139475?text=${encodeURIComponent(msg)}`, '_blank');
 }
-document.getElementById('galleryLightboxClose')?.addEventListener('click',galleryCloseLightbox);
-document.getElementById('galleryLightboxPrev')?.addEventListener('click',()=>galleryLightboxMove(-1));
-document.getElementById('galleryLightboxNext')?.addEventListener('click',()=>galleryLightboxMove(1));
-
-galleryLightbox?.addEventListener('pointerdown',e=>{
-  if(e.pointerType==='touch'||e.pointerType==='pen')galleryLightboxTouchX=e.clientX;
+document.getElementById('galleryShareWa')?.addEventListener('click', () => {
+  const msg = `Bonjour LOFT DESIGN,\nVoici ma sélection d'inspirations :\n\n${gallerySummary()}\n\nLien : ${gallerySelectionUrl()}`;
+  window.open(`https://wa.me/213776139475?text=${encodeURIComponent(msg)}`, '_blank');
 });
-galleryLightbox?.addEventListener('pointerup',e=>{
-  if(galleryLightboxTouchX==null)return;
-  const dx=e.clientX-galleryLightboxTouchX;
-  galleryLightboxTouchX=null;
-  if(Math.abs(dx)>45)galleryLightboxMove(dx<0?1:-1);
+document.getElementById('galleryShareMail')?.addEventListener('click', () => {
+  const body = `Bonjour,\n\nVoici ma sélection Galerie LOFT DESIGN :\n\n${gallerySummary()}\n\nLien : ${gallerySelectionUrl()}`;
+  location.href = `mailto:loftdesign@live.fr?subject=${encodeURIComponent('Sélection Galerie LOFT DESIGN')}&body=${encodeURIComponent(body)}`;
 });
-document.addEventListener('keydown',e=>{
-  if(!galleryLightbox?.classList.contains('open'))return;
-  if(e.key==='Escape')galleryCloseLightbox();
-  if(e.key==='ArrowRight')galleryLightboxMove(1);
-  if(e.key==='ArrowLeft')galleryLightboxMove(-1);
+document.getElementById('galleryCopyLink')?.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(gallerySelectionUrl());
+    galleryShowToast('Lien de sélection copié');
+  } catch (err) {
+    window.prompt('Copiez ce lien :', gallerySelectionUrl());
+  }
 });
 
-function galleryRenderCart(){
-  const items=[...galleryState.cart].map(galleryGetCategory).filter(Boolean);
-  const cartTop = document.getElementById('galleryCartCount');
-  if (cartTop) cartTop.textContent = items.length;
+/* ---------- Cart drawer + boards manager ---------- */
+function galleryRenderBoardSelect() {
+  const sel = document.getElementById('galleryBoardSelect');
+  if (!sel) return;
+  const boards = (boardStore || []).sort((a, b) => (a.boardSort ?? 0) - (b.boardSort ?? 0));
+  sel.innerHTML = boards.map(b => {
+    const n = (b.pins || []).length + (b.uploads || []).length;
+    return `<option value="${galleryEscape(b.name)}">${galleryEscape(b.name)} (${n})</option>`;
+  }).join('');
+  const active = galleryActiveBoard();
+  if (active) sel.value = active.name;
+  document.querySelectorAll('.galleryBoardMeta .galleryBoardCount').forEach(el => {
+    el.textContent = active ? ((active.pins || []).length + (active.uploads || []).length) : 0;
+  });
+  const btn = document.getElementById('galleryBoardDelete');
+  if (btn) btn.classList.toggle('disabled', !active);
+}
+function galleryRefreshBoardMeta() {
+  document.querySelectorAll('.galleryBoardMeta .galleryBoardCount').forEach(el => {
+    const b = galleryActiveBoard();
+    el.textContent = b ? ((b.pins || []).length + (b.uploads || []).length) : 0;
+  });
+}
+function galleryRenderCart() {
+  const b = galleryActiveBoard();
+  const pins = [...galleryState.cart].map(galleryGetPin).filter(Boolean);
+  const uploads = b?.uploads || [];
+  const total = pins.length + uploads.length;
+  const countTop = document.getElementById('galleryCartCount');
+  if (countTop) countTop.textContent = total;
   const mobileTop = document.getElementById('galleryMobileCount');
-  if (mobileTop) mobileTop.textContent = items.length;
-  document.querySelectorAll('.cartBadge').forEach(el => {
-    el.textContent = items.length;
+  if (mobileTop) mobileTop.textContent = total;
+  document.querySelectorAll('.cartBadge').forEach(el => { el.textContent = total; });
+  galleryRenderBoardSelect();
+  const host = document.getElementById('galleryCartItems');
+  if (!host) return;
+  const pinRows = pins.map(p => `<div class="galleryCartItem">
+    <button type="button" class="preview" data-cartview="${galleryEscape(p.id)}" aria-label="Voir"><img src="${p.image}" alt="" referrerpolicy="no-referrer"></button>
+    <div><b>${galleryEscape(p.title)}</b><small>${galleryEscape(p.spaceName)} · ${galleryEscape(p.categoryName)}</small></div>
+    <button type="button" class="galleryRemove" data-gremove="${galleryEscape(p.id)}" aria-label="Retirer">×</button>
+  </div>`);
+  const uploadRows = uploads.map(u => `<div class="galleryCartItem galleryUploadRow">
+    <button type="button" class="preview" data-upview="${galleryEscape(u.id)}" aria-label="Voir"><img src="${u.data}" alt="" referrerpolicy="no-referrer"></button>
+    <div><b>${galleryEscape(u.name || 'Image personnelle')}</b><small>Ajoutée par vous · <span class="galleryUploadTag">IMAGE</span></small></div>
+    <button type="button" class="galleryRemove" data-upremove="${galleryEscape(u.id)}" aria-label="Retirer">×</button>
+  </div>`);
+  host.innerHTML = (pinRows.length || uploadRows.length)
+    ? [...pinRows, ...uploadRows].join('')
+    : '<div class="galleryCartEmpty">Votre tableau est vide.<br>Enregistrez des inspirations ou ajoutez vos propres images.</div>';
+  host.querySelectorAll('[data-gremove]').forEach(btn => btn.addEventListener('click', () => {
+    galleryToggleCart(btn.dataset.gremove);
+  }));
+  host.querySelectorAll('[data-cartview]').forEach(btn => btn.addEventListener('click', () => {
+    galleryCloseCart();
+    v75OpenPinFullscreen(btn.dataset.cartview);
+  }));
+  host.querySelectorAll('[data-upremove]').forEach(btn => btn.addEventListener('click', () => {
+    const board = galleryActiveBoard();
+    if (!board) return;
+    board.uploads = (board.uploads || []).filter(x => x.id !== btn.dataset.upremove);
+    galleryPersistBoards();
+    galleryRenderCart();
+    galleryShowToast('Image retirée');
+  }));
+  host.querySelectorAll('[data-upview]').forEach(btn => {
+    const u = (galleryActiveBoard()?.uploads || []).find(x => x.id === btn.dataset.upview);
+    if (u) window.open(u.data, '_blank');
   });
-  const host=document.getElementById('galleryCartItems');
-  if (host) {
-    host.innerHTML=items.length?items.map(c=>`<div class="galleryCartItem"><img src="${c.cover}" alt=""><div><b>${c.name}</b><small>${c.spaceName}</small></div><button type="button" class="galleryRemove" data-gremove="${c.id}">×</button></div>`).join(''):'<div class="galleryCartEmpty">Votre panier est vide.<br>Ajoutez une ou plusieurs inspirations.</div>';
-    host.querySelectorAll('[data-gremove]').forEach(b=>b.addEventListener('click',()=>galleryToggleCart(b.dataset.gremove)));
-  }
 }
-function galleryOpenCart(){
+function galleryOpenCart() {
+  if (!galleryDrawer) return;
   galleryDrawer.classList.add('open');
-  galleryDrawer.setAttribute('aria-hidden','false');
+  galleryDrawer.setAttribute('aria-hidden', 'false');
 }
-function galleryCloseCart(){
+function galleryCloseCart() {
+  if (!galleryDrawer) return;
   if (document.activeElement && typeof document.activeElement.blur === 'function') {
     document.activeElement.blur();
   }
   galleryDrawer.classList.remove('open');
-  galleryDrawer.setAttribute('aria-hidden','true');
+  galleryDrawer.setAttribute('aria-hidden', 'true');
 }
-document.getElementById('galleryCartTop')?.addEventListener('click',galleryOpenCart);
-document.getElementById('galleryMobileCart')?.addEventListener('click',galleryOpenCart);
-document.getElementById('galleryFloatingCartBtn')?.addEventListener('click',galleryOpenCart);
-document.querySelectorAll('.galleryFloatingCartBtn').forEach(b=>b.addEventListener('click',galleryOpenCart));
-document.getElementById('galleryCartClose')?.addEventListener('click',galleryCloseCart);
+document.getElementById('galleryCartTop')?.addEventListener('click', galleryOpenCart);
+document.getElementById('galleryMobileCart')?.addEventListener('click', galleryOpenCart);
+document.getElementById('galleryCartClose')?.addEventListener('click', galleryCloseCart);
 
-function gallerySummary(){
-  const items=[...galleryState.cart].map(galleryGetCategory).filter(Boolean);
-  return items.map((c,i)=>`${i+1}. ${c.spaceName} — ${c.name}`).join('\n');
+function galleryNewBoard() {
+  const boards = boardStore || galleryDefaultStore();
+  boardStore = boards;
+  const name = (window.prompt('Nom du nouveau tableau :', '') || '').trim();
+  if (!name) return;
+  if (boards.some(b => b.name.toLowerCase() === name.toLowerCase())) {
+    galleryShowToast('Ce tableau existe déjà');
+    return;
+  }
+  boards.push({ name, boardSort: boards.length + 1, pins: [], uploads: [] });
+  galleryPersistBoards();
+  galleryRenderCart();
+  galleryShowToast(`Tableau « ${name} » créé`);
 }
-document.getElementById('galleryShareWa')?.addEventListener('click',()=>{
-  const msg=`Bonjour LOFT DESIGN,\nVoici ma sélection d'inspirations :\n\n${gallerySummary()}\n\nLien : ${gallerySelectionUrl()}`;
-  window.open(`https://wa.me/213776139475?text=${encodeURIComponent(msg)}`,'_blank');
+function galleryRenameBoard() {
+  const b = galleryActiveBoard();
+  if (!b) return;
+  const name = (window.prompt('Renommer le tableau :', b.name) || '').trim();
+  if (!name || name.toLowerCase() === b.name.toLowerCase()) return;
+  boardStore.forEach(x => { if (x === b) x.name = name; });
+  galleryPersistBoards();
+  galleryRenderCart();
+  galleryShowToast('Tableau renommé');
+}
+function galleryDeleteBoard() {
+  const b = galleryActiveBoard();
+  if (!b) return;
+  if (!window.confirm(`Supprimer le tableau « ${b.name} » ?`)) return;
+  boardStore = boardStore.filter(x => x !== b);
+  if (!boardStore.length) boardStore = galleryDefaultStore();
+  galleryPersistBoards();
+  gallerySyncCartFromBoard();
+  galleryRenderCategories();
+  galleryRenderCart();
+  galleryShowToast('Tableau supprimé');
+}
+function galleryResizeImage(file, max = 1280, quality = 0.78) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error);
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('image'));
+      img.onload = () => {
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve({ image: canvas.toDataURL('image/jpeg', quality), width: w, height: h });
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+async function galleryUploadFiles(files) {
+  const b = galleryActiveBoard();
+  if (!b || !files?.length) return;
+  const ok = [...files].filter(f => f.type?.startsWith('image/'));
+  if (!ok.length) {
+    galleryShowToast('Seules les images sont acceptées');
+    return;
+  }
+  for (const f of ok) {
+    try {
+      const { image, width } = await galleryResizeImage(f, 1280, 0.78);
+      b.uploads = b.uploads || [];
+      b.uploads.push({ id: `up-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, data: image, name: f.name, width });
+      galleryShowToast('Image ajoutée au tableau');
+    } catch (err) {
+      galleryShowToast('Image illisible, ignorée');
+    }
+  }
+  galleryPersistBoards();
+  galleryRenderCart();
+}
+document.getElementById('galleryBoardSelect')?.addEventListener('change', (e) => {
+  const boards = (boardStore || []).sort((a, b) => (a.boardSort ?? 0) - (b.boardSort ?? 0));
+  const next = boards.find(b => b.name === e.target.value) || boards[0];
+  if (!next) return;
+  boards.forEach((b, i) => { b.boardSort = i + 1; });
+  next.boardSort = 0;
+  galleryPersistBoards();
+  gallerySyncCartFromBoard();
+  galleryRenderCategories();
+  galleryRenderCart();
 });
-document.getElementById('galleryShareMail')?.addEventListener('click',()=>{
-  const body=`Bonjour,\n\nVoici ma sélection Galerie LOFT DESIGN :\n\n${gallerySummary()}\n\nLien : ${gallerySelectionUrl()}`;
-  location.href=`mailto:loftdesign@live.fr?subject=${encodeURIComponent('Sélection Galerie LOFT DESIGN')}&body=${encodeURIComponent(body)}`;
-});
-document.getElementById('galleryCopyLink')?.addEventListener('click',async()=>{
-  try{await navigator.clipboard.writeText(gallerySelectionUrl());galleryShowToast('Lien de sélection copié')}catch(e){prompt('Copiez ce lien',gallerySelectionUrl())}
+document.getElementById('galleryBoardNew')?.addEventListener('click', galleryNewBoard);
+document.getElementById('galleryBoardRename')?.addEventListener('click', galleryRenameBoard);
+document.getElementById('galleryBoardDelete')?.addEventListener('click', galleryDeleteBoard);
+document.getElementById('galleryBoardUpload')?.addEventListener('click', () => document.getElementById('galleryBoardFile')?.click());
+document.getElementById('galleryBoardUploadText')?.addEventListener('click', () => document.getElementById('galleryBoardFile')?.click());
+document.getElementById('galleryBoardFile')?.addEventListener('change', (e) => {
+  galleryUploadFiles(e.target.files);
+  e.target.value = '';
 });
 
+/* ---------- Detail (V29; V30 promotes clicks to full-screen viewer) ---------- */
+function galleryRenderDetail() {
+  const c = galleryGetCategory(galleryState.detail);
+  if (!c) return;
+  const images = galleryCategoryImages(c);
+  if (!images.length) return;
+  if (galleryState.image >= images.length) galleryState.image = 0;
+  const current = images[galleryState.image] || images[0];
+  const currentPin = galleryPinFromCategoryImage(c.id, current) || galleryGetPin(galleryState.detailPin);
+  if (currentPin) galleryState.detailPin = currentPin.id;
+  if (!galleryDetailPanel) return;
+  const saved = currentPin && galleryState.cart.has(currentPin.id);
+  galleryDetailPanel.innerHTML = `<div class="galleryDetailPinterest">
+    <div class="galleryDetailVisual">
+      <img id="galleryViewerMain" src="${current}" alt="${galleryEscape(c.name)}" referrerpolicy="no-referrer">
+      <button type="button" class="galleryDetailFullscreen" id="galleryViewerFull">Plein écran</button>
+    </div>
+    <aside class="galleryDetailSide">
+      <div class="galleryDetailTopActions">
+        <button type="button" class="galleryDetailSend" id="galleryDetailSend">Envoyer</button>
+        <button type="button" class="galleryDetailSave ${saved ? 'saved' : ''}" id="galleryDetailSave" data-pin="${currentPin ? galleryEscape(currentPin.id) : ''}">${saved ? 'Enregistré' : 'Enregistrer'}</button>
+      </div>
+      <div class="galleryDetailBreadcrumb">${galleryEscape(galleryGetSpace(currentPin?.spaceId)?.name || c.spaceName || 'LOFT DESIGN')}</div>
+      <h3>${galleryEscape(c.name)}</h3>
+      <p>Explorez les autres vues de cette inspiration, enregistrez celles qui vous plaisent et composez votre tableau.</p>
+      <div class="galleryRelatedTitle"><strong>Images de cette galerie</strong><small>${images.length} image${images.length > 1 ? 's' : ''}</small></div>
+      <div class="galleryRelatedStrip">
+        ${images.map((url, i) => `<button type="button" class="galleryRelatedPin ${i === galleryState.image ? 'active' : ''}" data-v75related="${i}"><img src="${url}" alt="" referrerpolicy="no-referrer"><span>${i + 1}</span></button>`).join('')}
+      </div>
+    </aside>
+  </div>`;
+  galleryDetailPanel.querySelectorAll('[data-v75related]').forEach(b => b.addEventListener('click', () => gallerySetImage(+b.dataset.v75related)));
+  document.getElementById('galleryDetailSave')?.addEventListener('click', (e) => {
+    const id = e.currentTarget.dataset.pin;
+    if (id) galleryToggleCart(id);
+  });
+  document.getElementById('galleryDetailSend')?.addEventListener('click', () => {
+    const p = galleryCurrentPin();
+    if (p) gallerySharePin(p.id);
+  });
+  document.getElementById('galleryViewerMain')?.addEventListener('click', galleryOpenLightbox);
+  document.getElementById('galleryViewerFull')?.addEventListener('click', galleryOpenLightbox);
+}
+function gallerySetImage(index) {
+  const c = galleryGetCategory(galleryState.detail);
+  const images = galleryCategoryImages(c);
+  if (!images.length) return;
+  galleryState.image = (index + images.length) % images.length;
+  const url = images[galleryState.image];
+  const p = galleryPinFromCategoryImage(c.id, url);
+  if (p) galleryState.detailPin = p.id;
+  if (galleryDetailPanel) {
+    const main = document.getElementById('galleryViewerMain');
+    if (main) main.src = url;
+    galleryDetailPanel.querySelectorAll('[data-v75related]').forEach((b, i) => b.classList.toggle('active', i === galleryState.image));
+    const save = document.getElementById('galleryDetailSave');
+    if (save && p) {
+      const saved = galleryState.cart.has(p.id);
+      save.classList.toggle('saved', saved);
+      save.textContent = saved ? 'Enregistré' : 'Enregistrer';
+      save.dataset.pin = p.id;
+    }
+  }
+}
+function galleryOpenDetail(id) {
+  const p = galleryGetPin(id);
+  if (!p) return;
+  v75OpenPinFullscreen(p.id);
+}
+document.getElementById('galleryDetailClose')?.addEventListener('click', () => {
+  galleryDetail?.classList.remove('open');
+  galleryDetail?.setAttribute('aria-hidden', 'true');
+});
+
+/* ---------- Fullscreen viewer (V30) ---------- */
+function galleryCurrentPin() {
+  const c = galleryGetCategory(galleryState.detail);
+  if (!c) return null;
+  const images = galleryCategoryImages(c);
+  const url = images[galleryState.image] || images[0];
+  return galleryPinFromCategoryImage(c.id, url) || galleryGetPin(galleryState.detailPin);
+}
+function galleryRenderLightbox() {
+  const images = galleryCurrentImages();
+  if (!images.length) return;
+  const img = document.getElementById('galleryLightboxImg');
+  if (img) img.src = images[galleryState.image] || images[0];
+  const thumbs = document.getElementById('galleryLightboxThumbs');
+  if (thumbs) {
+    thumbs.innerHTML = images.map((x, i) => `
+      <button type="button" class="galleryLightboxThumb ${i === galleryState.image ? 'active' : ''}" data-glbthumb="${i}">
+        <img src="${x}" alt="" referrerpolicy="no-referrer">
+      </button>`).join('');
+    thumbs.querySelectorAll('[data-glbthumb]').forEach(b => b.addEventListener('click', () => {
+      galleryState.image = +b.dataset.glbthumb;
+      galleryRenderLightbox();
+    }));
+  }
+  galleryRefreshLightboxActions();
+  requestAnimationFrame(() => {
+    document.querySelector('.galleryLightboxThumb.active')?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  });
+}
+function galleryRefreshLightboxActions() {
+  const send = document.getElementById('galleryLightboxSend');
+  const save = document.getElementById('galleryLightboxSave');
+  if (!save && !send) return;
+  const p = galleryCurrentPin();
+  const saved = !!(p && galleryState.cart.has(p.id));
+  if (save) {
+    save.classList.toggle('saved', saved);
+    save.textContent = saved ? 'Enregistré' : 'Enregistrer';
+    save.dataset.pin = p?.id || '';
+  }
+  if (send) send.dataset.pin = p?.id || '';
+}
+function galleryLightboxMove(delta) {
+  const images = galleryCurrentImages();
+  if (!images.length) return;
+  galleryState.image = (galleryState.image + delta + images.length) % images.length;
+  galleryRenderLightbox();
+}
+function v75OpenPinFullscreen(id) {
+  const p = galleryGetPin(id);
+  if (!p) {
+    console.warn('[LOFT] gallery pin not found:', id);
+    return;
+  }
+  galleryState.detail = p.categoryId;
+  galleryState.detailPin = p.id;
+  const c = galleryGetCategory(p.categoryId);
+  const images = galleryCategoryImages(c);
+  galleryState.image = Math.max(0, images.indexOf(p.image));
+  galleryDetail?.classList.remove('open');
+  galleryDrawer?.classList.remove('open');
+  galleryOpenLightbox();
+}
+function galleryOpenLightbox() {
+  if (!galleryLightbox) return;
+  if (!galleryCurrentImages().length) return;
+  galleryRenderLightbox();
+  galleryLightbox.classList.add('open');
+  galleryLightbox.setAttribute('aria-hidden', 'false');
+}
+function galleryCloseLightbox() {
+  if (!galleryLightbox) return;
+  galleryLightbox.classList.remove('open');
+  galleryLightbox.setAttribute('aria-hidden', 'true');
+}
+window.galleryOpenDetail = galleryOpenDetail;
+
+document.getElementById('galleryLightboxSave')?.addEventListener('click', (e) => {
+  const id = e.currentTarget.dataset.pin;
+  if (id) {
+    galleryToggleCart(id);
+    galleryRefreshLightboxActions();
+  }
+});
+document.getElementById('galleryLightboxSend')?.addEventListener('click', (e) => {
+  const id = e.currentTarget.dataset.pin;
+  const p = id ? galleryGetPin(id) : galleryCurrentPin();
+  if (p) gallerySharePin(p.id);
+});
+document.getElementById('galleryLightboxClose')?.addEventListener('click', galleryCloseLightbox);
+document.getElementById('galleryLightboxPrev')?.addEventListener('click', () => galleryLightboxMove(-1));
+document.getElementById('galleryLightboxNext')?.addEventListener('click', () => galleryLightboxMove(1));
+let galleryLightboxTouchX = null;
+galleryLightbox?.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'touch' || e.pointerType === 'pen') galleryLightboxTouchX = e.clientX;
+});
+galleryLightbox?.addEventListener('pointerup', e => {
+  if (galleryLightboxTouchX == null) return;
+  const dx = e.clientX - galleryLightboxTouchX;
+  galleryLightboxTouchX = null;
+  if (Math.abs(dx) > 45) galleryLightboxMove(dx < 0 ? 1 : -1);
+});
+document.addEventListener('keydown', e => {
+  if (!galleryLightbox?.classList.contains('open')) return;
+  if (e.key === 'Escape') galleryCloseLightbox();
+  if (e.key === 'ArrowRight' && !e.metaKey && !e.ctrlKey) galleryLightboxMove(1);
+  if (e.key === 'ArrowLeft' && !e.metaKey && !e.ctrlKey) galleryLightboxMove(-1);
+});
+if (galleryLightbox) {
+  galleryLightbox.addEventListener('dblclick', (e) => {
+    if (e.target.closest('button')) return;
+    const img = document.getElementById('galleryLightboxImg');
+    if (!img) return;
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else img.requestFullscreen?.().catch(() => {});
+  });
+}
+
+/* ---------- Search (V32 mobile shell is handled in CSS) ---------- */
+const gallerySearchInput = document.getElementById('gallerySearch');
+gallerySearchInput?.addEventListener('input', () => {
+  galleryState.search = gallerySearchInput.value;
+  galleryRenderCategories();
+});
+gallerySearchShell?.addEventListener('click', (e) => {
+  if (!window.matchMedia('(max-width:840px)').matches) return;
+  if (!gallerySearchShell.classList.contains('mobileOpen')) {
+    e.preventDefault();
+    gallerySearchShell.classList.add('mobileOpen');
+    setTimeout(() => gallerySearchInput?.focus(), 60);
+  }
+});
+gallerySearchInput?.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    gallerySearchShell?.classList.remove('mobileOpen');
+    gallerySearchInput.blur();
+  }
+});
+document.addEventListener('pointerdown', (e) => {
+  if (!window.matchMedia('(max-width:840px)').matches) return;
+  if (gallerySearchShell?.classList.contains('mobileOpen') && !gallerySearchShell.contains(e.target)) {
+    gallerySearchShell.classList.remove('mobileOpen');
+  }
+});
+
+/* ---------- Open triggers (home buttons) ---------- */
+document.getElementById('desktopGalleryBtn')?.addEventListener('click', openGalleryApp);
+document.getElementById('mobileGalleryBtn')?.addEventListener('click', openGalleryApp);
+document.getElementById('galleryHeroBtn')?.addEventListener('click', openGalleryApp);
+document.getElementById('galleryCloseTop')?.addEventListener('click', () => closeGalleryApp(false));
+document.getElementById('galleryBrandHome')?.addEventListener('click', galleryGoHome);
+document.getElementById('galleryHomeTop')?.addEventListener('click', galleryGoHome);
+window.addEventListener('popstate', () => {
+  if (location.hash === '#gallery') openGalleryApp();
+  else closeGalleryApp(true);
+});
+
+/* ---------- Submit selection (AJAX to /gallery/submit-selection/) ---------- */
 document.getElementById('gallerySubmitSelection')?.addEventListener('click', async () => {
-  const items = [...galleryState.cart].map(galleryGetCategory).filter(Boolean);
+  const items = [...galleryState.cart].map(galleryGetPin).filter(Boolean).map(p => ({
+    id: p.categoryId,
+    name: p.categoryName,
+    spaceId: p.spaceId,
+    spaceName: p.spaceName,
+    cover: p.image
+  }));
   if (!items.length) {
     if (window.Swal) {
       Swal.fire({
@@ -505,7 +1006,7 @@ document.getElementById('gallerySubmitSelection')?.addEventListener('click', asy
 
     if (formValues) {
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ||
-        document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+        document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
         (document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/) || [])[1] || '';
 
       try {
@@ -520,6 +1021,8 @@ document.getElementById('gallerySubmitSelection')?.addEventListener('click', asy
         });
         const data = await res.json();
         if (data.success) {
+          const board = galleryActiveBoard();
+          if (board) { board.pins = []; galleryPersistBoards(); }
           galleryState.cart.clear();
           galleryRenderCategories();
           galleryRenderCart();
@@ -556,92 +1059,41 @@ document.getElementById('gallerySubmitSelection')?.addEventListener('click', asy
   }
 });
 
-// Restore a shared selection
-const galleryParams=new URLSearchParams(location.search);
-const sharedSelection=(galleryParams.get('selection')||'').split(',').filter(Boolean);
-sharedSelection.forEach(id=>galleryState.cart.add(id));
-galleryRenderCart();
-if(location.hash==='#gallery' || document.querySelector('.gallery-standalone'))setTimeout(openGalleryApp,50);
-
-
-/* V23 — controls for horizontal space selector */
-const gallerySpacesRail=document.getElementById('gallerySpaces');
-const gallerySpacePrev=document.getElementById('gallerySpacePrev');
-const gallerySpaceNext=document.getElementById('gallerySpaceNext');
-
-function gallerySpaceStep(){
-  const first=gallerySpacesRail?.querySelector('.gallerySpaceBtn');
-  if(!first)return 140;
-  const gap=parseFloat(getComputedStyle(gallerySpacesRail).gap||8);
-  return first.getBoundingClientRect().width+gap;
+/* ---------- Restore shared selection + deep links ---------- */
+const galleryParams = new URLSearchParams(location.search);
+const sharedSelection = (galleryParams.get('selection') || '').split(',').filter(Boolean);
+if (window.INITIAL_SPACE_ID && galleryGetSpace(window.INITIAL_SPACE_ID)) {
+  galleryState.filters = new Set([window.INITIAL_SPACE_ID]);
 }
-function galleryUpdateSpaceArrows(){
-  if(!gallerySpacesRail)return;
-  const max=Math.max(0,gallerySpacesRail.scrollWidth-gallerySpacesRail.clientWidth);
-  const x=gallerySpacesRail.scrollLeft;
-  if(gallerySpacePrev)gallerySpacePrev.disabled=x<=2;
-  if(gallerySpaceNext)gallerySpaceNext.disabled=x>=max-2;
+boardStore = galleryLoadBoards();
+if (sharedSelection.length) {
+  const board = galleryActiveBoard();
+  if (board) {
+    sharedSelection.forEach(id => {
+      const pin = galleryGetPin(id);
+      const realId = pin?.id || id;
+      if (!board.pins.includes(realId)) board.pins.push(realId);
+    });
+    galleryPersistBoards();
+  }
 }
-gallerySpacePrev?.addEventListener('click',()=>{
-  gallerySpacesRail?.scrollBy({left:-gallerySpaceStep(),behavior:'smooth'});
-});
-gallerySpaceNext?.addEventListener('click',()=>{
-  gallerySpacesRail?.scrollBy({left:gallerySpaceStep(),behavior:'smooth'});
-});
-gallerySpacesRail?.addEventListener('scroll',galleryUpdateSpaceArrows,{passive:true});
-window.addEventListener('resize',galleryUpdateSpaceArrows);
+gallerySyncCartFromBoard();
 
-/* Drag with mouse/pen; native swipe remains active on touch */
-if(gallerySpacesRail){
-  let dragging=false,startX=0,startScroll=0,moved=false;
-  gallerySpacesRail.addEventListener('pointerdown',e=>{
-    if(e.pointerType==='touch')return;
-    if(e.button!==0)return;
-    dragging=true;moved=false;startX=e.clientX;startScroll=gallerySpacesRail.scrollLeft;
-    gallerySpacesRail.classList.add('dragging');
-  });
-  gallerySpacesRail.addEventListener('pointermove',e=>{
-    if(!dragging)return;
-    const dx=e.clientX-startX;
-    if(Math.abs(dx)>6){
-      moved=true;
-      try{gallerySpacesRail.setPointerCapture(e.pointerId)}catch(_){}
-    }
-    if(moved){
-      gallerySpacesRail.scrollLeft=startScroll-dx;
-      e.preventDefault();
-    }
-  });
-  const stopDrag=e=>{
-    if(!dragging)return;
-    dragging=false;
-    gallerySpacesRail.classList.remove('dragging');
-    try{gallerySpacesRail.releasePointerCapture(e.pointerId)}catch(_){}
-    setTimeout(()=>galleryUpdateSpaceArrows(),30);
-  };
-  gallerySpacesRail.addEventListener('pointerup',stopDrag);
-  gallerySpacesRail.addEventListener('pointercancel',stopDrag);
-
-  // Delegated click on rail
-  gallerySpacesRail.addEventListener('click',e=>{
-    if(moved){
-      e.preventDefault();
-      e.stopPropagation();
-      moved=false;
-      return;
-    }
-    const btn=e.target.closest('.gallerySpaceBtn');
-    if(btn&&btn.dataset.gspace){
-      gallerySelectSpace(btn.dataset.gspace);
-    }
-  });
-
-  /* Mouse wheel over the rail scrolls horizontally */
-  gallerySpacesRail.addEventListener('wheel',e=>{
-    const delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
-    if(Math.abs(delta)<2)return;
-    if(gallerySpacesRail.scrollWidth<=gallerySpacesRail.clientWidth)return;
-    e.preventDefault();
-    gallerySpacesRail.scrollBy({left:delta*1.25,behavior:'auto'});
-  },{passive:false});
+function galleryInit() {
+  galleryRenderFilters();
+  galleryRenderCategories();
+  galleryRenderCart();
+  syncFilterButton();
+  const pinParam = galleryParams.get('pin');
+  if (pinParam && galleryGetPin(pinParam)) {
+    requestAnimationFrame(() => {
+      openGalleryApp();
+      v75OpenPinFullscreen(pinParam);
+    });
+    return;
+  }
+  if (location.hash === '#gallery' || document.querySelector('.gallery-standalone')) {
+    setTimeout(openGalleryApp, 60);
+  }
 }
+galleryInit();

@@ -10,7 +10,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from user_auth.models import UserProfile
 from dashboard.models import (
     ProjectType, Space, SpaceCategory, SpaceCategoryImages, ProjectTypeSpace,
-    Service, DesignRequest
+    Service, DesignRequest, Video, Notification
 )
 
 
@@ -460,3 +460,89 @@ class ProjectGalleryInvitationAndSelectionTests(TestCase):
         confirm_res = anon_client.get(select_url)
         self.assertEqual(confirm_res.status_code, 200)
         self.assertTemplateUsed(confirm_res, "gallery_client_submitted.html")
+
+
+class VideoPlacementAndRoleTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.admin = User.objects.create_superuser("admin_vid", "admin_vid@test.com", "pass123")
+        self.profile = UserProfile.objects.create(
+            user=self.admin, role=UserProfile.Role.ADMIN, is_approved=True
+        )
+        self.client.force_login(self.admin)
+
+    def test_video_model_creation_and_properties(self):
+        v = Video.objects.create(
+            title="Design Showcase",
+            link="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            placement=Video.Placement.SERVICE_INFO,
+            role=Video.Role.SERVICE_DESIGN,
+        )
+        self.assertEqual(v.placement, Video.Placement.SERVICE_INFO)
+        self.assertEqual(v.role, Video.Role.SERVICE_DESIGN)
+        self.assertEqual(v.youtube_id, "dQw4w9WgXcQ")
+        self.assertEqual(v.thumbnail_url, "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg")
+
+    def test_video_create_and_update_views(self):
+        # Create
+        create_url = reverse("dash:video_create")
+        post_data = {
+            "title": "New VR Experience",
+            "link": "https://www.youtube.com/watch?v=66qSJ4EIIdM",
+            "placement": "service_info",
+            "role": "service_vr",
+            "description": "Virtual Reality Tour",
+        }
+        res = self.client.post(create_url, post_data, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["success"])
+
+        video = Video.objects.get(title="New VR Experience")
+        self.assertEqual(video.placement, Video.Placement.SERVICE_INFO)
+        self.assertEqual(video.role, Video.Role.SERVICE_VR)
+
+        # Update
+        update_url = reverse("dash:video_update", args=[video.pk])
+        update_data = {
+            "title": "Updated VR Experience",
+            "link": "https://www.youtube.com/watch?v=66qSJ4EIIdM",
+            "placement": "info_card",
+            "role": "info_immersion",
+            "description": "Updated description",
+        }
+        res_update = self.client.post(update_url, update_data, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(res_update.status_code, 200)
+        self.assertTrue(res_update.json()["success"])
+
+        video.refresh_from_db()
+        self.assertEqual(video.placement, Video.Placement.INFO_CARD)
+        self.assertEqual(video.role, Video.Role.INFO_IMMERSION)
+
+    def test_home_page_renders_video_roles(self):
+        Video.objects.create(
+            title="Custom Design Video",
+            link="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            placement=Video.Placement.SERVICE_INFO,
+            role=Video.Role.SERVICE_DESIGN,
+        )
+        Video.objects.create(
+            title="Custom Usage Video",
+            link="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            placement=Video.Placement.INFO_CARD,
+            role=Video.Role.INFO_USAGE,
+        )
+        Video.objects.create(
+            title="Rail Video 1",
+            link="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            placement=Video.Placement.VIDEOS,
+            role=Video.Role.VIDEOS_RAIL,
+        )
+        res = self.client.get(reverse("frontend:home"))
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("videos_by_role", res.context)
+        self.assertIn("service_design", res.context["videos_by_role"])
+        self.assertIn("info_usage", res.context["videos_by_role"])
+        self.assertEqual(res.context["videos_by_role"]["service_design"]["title"], "Custom Design Video")
+        self.assertEqual(res.context["videos_by_role"]["info_usage"]["title"], "Custom Usage Video")
+        self.assertEqual(res.context["video_list"][0]["title"], "Rail Video 1")

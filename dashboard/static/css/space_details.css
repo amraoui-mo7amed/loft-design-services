@@ -23,6 +23,25 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     position: relative;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: calc(100dvh - var(--header-height, 64px) - 120px);
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 214, 90, 0.45) transparent;
+}
+
+.dashContent .sd-card::-webkit-scrollbar {
+    width: 7px;
+}
+
+.dashContent .sd-card::-webkit-scrollbar-thumb {
+    background: rgba(255, 214, 90, 0.45);
+    border-radius: 99px;
+}
+
+.dashContent .sd-card::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 .dashContent .sd-card:has(.custom-select-wrapper.active),

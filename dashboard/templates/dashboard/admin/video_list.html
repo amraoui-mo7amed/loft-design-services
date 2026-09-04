@@ -14,15 +14,23 @@
         <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
             <div>
                 <h5 class="fw-bold mb-0">{% trans "Videos" %}</h5>
-                <p class="text-muted small mb-0">{% trans "Videos shown in the homepage slider" %}</p>
+                <p class="text-muted small mb-0">{% trans "Manage videos and their placement across the homepage" %}</p>
             </div>
-            <button class="btn dash-btn-primary rounded-3 px-4 fw-bold shadow-sm catalog-create-btn"
-                    data-bs-target="#videoModal"
-                    data-create-url="{% url 'dash:video_create' %}"
-                    data-modal-title="{% trans 'New Video' %}"
-                    data-submit-text="{% trans 'Create' %}">
-                <i class="fas fa-plus me-2"></i>{% trans "New Video" %}
-            </button>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <div class="btn-group btn-group-sm" role="group">
+                    <a href="{% url 'dash:video_list' %}" class="btn btn-outline-light {% if not placement_filter %}active{% endif %}">{% trans "All" %}</a>
+                    <a href="{% url 'dash:video_list' %}?placement=videos" class="btn btn-outline-light {% if placement_filter == 'videos' %}active{% endif %}">#videos</a>
+                    <a href="{% url 'dash:video_list' %}?placement=service_info" class="btn btn-outline-light {% if placement_filter == 'service_info' %}active{% endif %}">.serviceInfo</a>
+                    <a href="{% url 'dash:video_list' %}?placement=info_card" class="btn btn-outline-light {% if placement_filter == 'info_card' %}active{% endif %}">.infoCard</a>
+                </div>
+                <button class="btn dash-btn-primary rounded-3 px-4 fw-bold shadow-sm catalog-create-btn"
+                        data-bs-target="#videoModal"
+                        data-create-url="{% url 'dash:video_create' %}"
+                        data-modal-title="{% trans 'New Video' %}"
+                        data-submit-text="{% trans 'Create' %}">
+                    <i class="fas fa-plus me-2"></i>{% trans "New Video" %}
+                </button>
+            </div>
         </div>
         <div class="row g-4">
             {% for video in page_obj %}
@@ -61,6 +69,14 @@
                             </div>
                         </div>
                         <div class="video-card-content">
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                <span class="badge bg-secondary bg-opacity-25 text-light" style="font-size:0.75rem;">
+                                    <i class="fas fa-map-marker-alt me-1 text-warning"></i>{{ video.get_placement_display }}
+                                </span>
+                                <span class="badge bg-info bg-opacity-10 text-info" style="font-size:0.75rem;">
+                                    <i class="fas fa-tag me-1"></i>{{ video.get_role_display }}
+                                </span>
+                            </div>
                             <h6 class="video-title text-truncate mb-2" title="{{ video.title }}">{{ video.title }}</h6>
                             <p class="video-desc mb-3">
                                 {% if video.description %}
@@ -103,6 +119,8 @@
                                         data-modal-title="{% trans 'Edit Video' %}"
                                         data-submit-text="{% trans 'Save Changes' %}"
                                         data-title="{{ video.title }}"
+                                        data-placement="{{ video.placement }}"
+                                        data-role="{{ video.role }}"
                                         data-link="{{ video.link }}"
                                         data-url="{{ video.url }}"
                                         data-description="{{ video.description }}">
@@ -154,7 +172,7 @@
                 <div class="pt-modal-header d-flex align-items-center justify-content-between">
                     <div>
                         <h5 class="modal-title fw-bold mb-1"></h5>
-                        <p class="pt-modal-subtitle">{% trans "Add a video to the homepage slider" %}</p>
+                        <p class="pt-modal-subtitle">{% trans "Set video details and placement on the homepage" %}</p>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -173,6 +191,22 @@
                                    data-field="title"
                                    required
                                    placeholder="{% trans 'e.g. Living Room Transformation' %}">
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                    <i class="fas fa-layer-group text-primary" style="font-size:0.8rem;"></i>
+                                    {% trans "Placement on Homepage" %}
+                                </label>
+                                {% include "components/custom_select.html" with id="modalVideoPlacementSelect" name="placement" choices=placement_choices value="videos" select_title=_("Videos Section (#videos)") extra_attrs='data-field="placement"' %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold d-flex align-items-center gap-2">
+                                    <i class="fas fa-tag text-primary" style="font-size:0.8rem;"></i>
+                                    {% trans "Role / Target Card" %}
+                                </label>
+                                {% include "components/custom_select.html" with id="modalVideoRoleSelect" name="role" choices=role_choices value="videos_rail" select_title=_("Videos Rail Item") extra_attrs='data-field="role"' %}
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold d-flex align-items-center gap-2">
@@ -225,4 +259,78 @@
 {% endblock dashContent %}
 {% block extra_js %}
     <script src="{% static 'js/catalog_modal.js' %}?v={{ ASSET_VERSION }}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var rolesByPlacement = {{ roles_by_placement_json|safe }};
+            var pWrapper = document.getElementById("modalVideoPlacementSelect");
+            var rWrapper = document.getElementById("modalVideoRoleSelect");
+            if (!pWrapper || !rWrapper) return;
+            var pInput = pWrapper.querySelector('input[type="hidden"]');
+            var rInput = rWrapper.querySelector('input[type="hidden"]');
+
+            function syncModalRoles(selectedRole) {
+                var placement = (pInput && pInput.value) ? pInput.value : "videos";
+                var options = rolesByPlacement[placement] || [];
+                var rList = rWrapper.querySelector(".custom-select-list");
+                var rDisplay = rWrapper.querySelector(".custom-select-display");
+                if (!rList) return;
+                rList.innerHTML = "";
+                var matched = false;
+                var displayLabel = "";
+                options.forEach(function (opt) {
+                    var li = document.createElement("li");
+                    li.dataset.value = opt.value;
+                    li.textContent = opt.label;
+                    if (opt.value === selectedRole) {
+                        matched = true;
+                        displayLabel = opt.label;
+                    }
+                    rList.appendChild(li);
+                });
+                if (!matched && options.length > 0) {
+                    rInput.value = options[0].value;
+                    displayLabel = options[0].label;
+                } else if (matched) {
+                    rInput.value = selectedRole;
+                }
+                if (displayLabel && rDisplay) {
+                    rDisplay.innerHTML = displayLabel + '<span class="arrow"><i class="fas fa-caret-down"></i></span>';
+                }
+                delete rWrapper._customSelectInitialized;
+                if (window.initCustomSelects) {
+                    window.initCustomSelects(rWrapper);
+                }
+            }
+
+            if (pInput) {
+                pInput.addEventListener("change", function () {
+                    syncModalRoles(rInput ? rInput.value : "");
+                });
+            }
+
+            // When edit button is clicked, catalog_modal.js sets data-field values, then sync roles:
+            document.querySelectorAll(".catalog-edit-btn").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    var targetRole = btn.dataset.role || "";
+                    setTimeout(function () {
+                        syncModalRoles(targetRole);
+                    }, 50);
+                });
+            });
+
+            // When create button is clicked, reset to default placement & role
+            document.querySelectorAll(".catalog-create-btn").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    setTimeout(function () {
+                        if (pInput) pInput.value = "videos";
+                        syncModalRoles("videos_rail");
+                        if (window.syncCustomSelectDisplay) {
+                            var form = document.getElementById("videoForm");
+                            if (form) window.syncCustomSelectDisplay(form);
+                        }
+                    }, 50);
+                });
+            });
+        });
+    </script>
 {% endblock extra_js %}
