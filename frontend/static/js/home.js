@@ -148,19 +148,27 @@ let st = {
   clientType: 'particular',
   success: false,
   ref: '',
-  client: null
+  client: null,
+  mobileServiceStage: 1
 };
 
 function ensureLevelState() {
   if (typeof st.basementCount !== 'number' || isNaN(st.basementCount)) st.basementCount = 0;
   if (typeof st.upperCount !== 'number' || isNaN(st.upperCount)) st.upperCount = 0;
   if (typeof st.structureChosen !== 'boolean') st.structureChosen = false;
-  if (!st.levelAreas || typeof st.levelAreas !== 'object') st.levelAreas = { RDC: 0 };
-  if (!('RDC' in st.levelAreas)) st.levelAreas.RDC = 0;
+  if (!st.levelAreas || typeof st.levelAreas !== 'object') st.levelAreas = {};
+  const isApp = (st.projectType === 'Appartement' || st.projectType === 'appartement' || st.projectType === 'Apartment');
+  if (isApp) {
+    if (!('APP' in st.levelAreas)) st.levelAreas.APP = 0;
+  } else {
+    if (!('RDC' in st.levelAreas)) st.levelAreas.RDC = 0;
+  }
 }
 
 function projectLevelCodes() {
   ensureLevelState();
+  const isApp = (st.projectType === 'Appartement' || st.projectType === 'appartement' || st.projectType === 'Apartment');
+  if (isApp) return ['APP'];
   const codes = [];
   for (let i = st.upperCount; i >= 1; i--) codes.push(`R+${i}`);
   codes.push('RDC');
@@ -169,6 +177,7 @@ function projectLevelCodes() {
 }
 
 function levelDisplayName(code) {
+  if (code === 'APP') return 'Appartement';
   if (code === 'RDC') return 'RDC · niveau principal';
   if (code.startsWith('R+')) {
     const n = +code.slice(2);
@@ -408,15 +417,92 @@ const totalHT = () => base() + servTotal();
 const tva = () => st.clientType === 'professional' ? totalHT() * 0.19 : 0;
 const totalFinal = () => totalHT() + tva();
 
+function v47Attention(el) {
+  if (!el) return;
+  el.classList.remove('v47NeedsAttention');
+  void el.offsetWidth;
+  el.classList.add('v47NeedsAttention');
+  el.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => el.classList.remove('v47NeedsAttention'), 1100);
+}
+
+function v47ProjectMissing() {
+  if (!st.projectType) return { type: 'project' };
+  st.levelAreas = st.levelAreas || {};
+
+  const isApp = (st.projectType === 'Appartement' || st.projectType === 'appartement' || st.projectType === 'Apartment');
+  if (isApp) {
+    if (!('APP' in st.levelAreas) || !(+st.levelAreas.APP > 0)) return { type: 'surface', codes: ['APP'] };
+    return null;
+  }
+
+  const codes = projectLevelCodes();
+  const missing = codes.filter(c => !(+st.levelAreas[c] > 0));
+  if (missing.length) return { type: 'surface', codes: missing };
+  return null;
+}
+
+function v47ProjectComplete() {
+  return !v47ProjectMissing();
+}
+
+function v47ShowProjectMissing() {
+  const missing = v47ProjectMissing();
+  if (!missing) return true;
+
+  if (missing.type === 'project') {
+    const el = document.querySelector('.v86TypeBlock') || document.querySelector('.v47TypeRow');
+    v47Attention(el);
+    document.querySelector('.v86ProjectTypes button')?.focus();
+    return false;
+  }
+  if (missing.type === 'surface') {
+    missing.codes.forEach(code => {
+      const input = document.querySelector(`[data-level-area="${CSS.escape(code)}"]`);
+      v47Attention(input?.closest('.v86SurfaceCard, .v47LevelChip, .v47SurfaceCard'));
+    });
+    const first = document.querySelector(`[data-level-area="${CSS.escape(missing.codes[0])}"]`);
+    first?.focus();
+    return false;
+  }
+  return false;
+}
+
+function drawTypeAttention() {
+  v47ShowProjectMissing();
+}
+
+function validateSurfaces() {
+  return v47ShowProjectMissing();
+}
+
 function gotoStep(step) {
+  if (step === 'services' && !v47ProjectComplete()) {
+    st.step = 'project';
+    st.success = false;
+    renderComposer();
+    setTimeout(v47ShowProjectMissing, 80);
+    return;
+  }
+  if (step === 'contact') {
+    if (!v47ProjectComplete()) {
+      st.step = 'project';
+      st.success = false;
+      renderComposer();
+      setTimeout(v47ShowProjectMissing, 80);
+      return;
+    }
+  }
+  const enteringServices = step === 'services' && st.step !== 'services';
+  if (enteringServices) st.mobileServiceStage = 1;
   st.step = step;
   st.success = false;
   renderComposer();
-  document.querySelector('#composer').scrollIntoView({behavior: 'smooth', block: 'start'});
+  document.querySelector('#composer')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function updateProgress() {
-  const order = {project: 0, services: 1, contact: 2};
+  const order = { project: 0, services: 1, contact: 2 };
   document.querySelectorAll('.progress button').forEach(b => {
     const s = b.dataset.step;
     b.classList.toggle('active', s === st.step);
@@ -426,221 +512,308 @@ function updateProgress() {
   });
 }
 
-function drawTypeAttention() {
-  st.typeAttention = true;
-  const row = document.querySelector('.v46TypeRow');
-  row?.animate([
-    { transform: 'translateX(-5px)' },
-    { transform: 'translateX(5px)' },
-    { transform: 'none' }
-  ], { duration: 300, iterations: 2 });
-  setTimeout(() => {
-    document.querySelector('.v46ProjectTypes button')?.focus();
-  }, 80);
-}
-
-function validateSurfaces() {
-  ensureLevelState();
-
-  if (!st.projectType) {
-    drawTypeAttention();
-    return false;
-  }
-
-  const missing = projectLevelCodes().filter(code => !(+st.levelAreas[code] > 0));
-  if (missing.length) {
-    document.querySelectorAll('.v46LevelChip, .v46BaseSurface').forEach(el => {
-      const input = el.querySelector('[data-level-area]');
-      if (input && missing.includes(input.dataset.levelArea)) {
-        el.classList.add('error');
-      }
-    });
-    const firstMissing = document.querySelector(`[data-level-area="${missing[0]}"]`);
-    if (firstMissing) firstMissing.focus();
-    return false;
-  }
-
-  syncInteriorFromLevels();
-  return st.surfaceInterior > 0;
-}
-
 function renderProject() {
   ensureLevelState();
+  const isApartment = (st.projectType === 'Appartement' || st.projectType === 'appartement' || st.projectType === 'Apartment');
+  if (isApartment) {
+    if (!('APP' in st.levelAreas)) st.levelAreas.APP = 0;
+  } else {
+    if (!('RDC' in st.levelAreas)) st.levelAreas.RDC = 0;
+  }
   syncInteriorFromLevels();
 
   st.mode = 'custom';
   const body = document.querySelector('#composerBody');
-  const COLOR_TONES = [
-    '64,205,255',   // Cyan
-    '180,138,255',  // Violet
-    '103,233,166',  // Emerald / Mint
-    '244,189,99',   // Amber / Gold
-    '255,135,164',  // Rose / Coral
-    '111,159,255',  // Neon Blue
-    '255,179,71',   // Orange
-    '78,205,196',   // Teal
-  ];
-  const projectTypesList = (projectTypes && projectTypes.length > 0 ? projectTypes : [
-    { id: 'residence', slug: 'residence', name: 'Résidence' },
-    { id: 'villa', slug: 'villa', name: 'Villa' },
-    { id: 'appartement', slug: 'appartement', name: 'Appartement' },
-    { id: 'commercial', slug: 'commercial', name: 'Commercial' },
-    { id: 'bureau', slug: 'bureau', name: 'Bureau' },
-    { id: 'hotel', slug: 'hotel', name: 'Hôtel' }
-  ]).map((pt, idx) => ({
-    id: pt.id || pt.slug,
-    slug: pt.slug || String(pt.id),
-    name: pt.name,
-    tone: COLOR_TONES[idx % COLOR_TONES.length],
-  }));
   const nf = new Intl.NumberFormat('fr-DZ');
 
-  const basementCodes = Array.from({ length: st.basementCount || 0 }, (_, i) => `R-${i + 1}`);
-  const upperCodes = Array.from({ length: st.upperCount || 0 }, (_, i) => `R+${i + 1}`);
-  const extraCodes = [...basementCodes, ...upperCodes];
+  const v86Visuals = {
+    'villa': {
+      name: 'Villa',
+      img: 'https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-07-07-23-27-11.png',
+      sub: 'Maison individuelle',
+      icon: '⌂'
+    },
+    'appartement': {
+      name: 'Appartement',
+      img: 'https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-02-05-20-45-23_Enscape_scene_8.jpg',
+      sub: 'Logement collectif',
+      icon: '▦'
+    },
+    'apartment': {
+      name: 'Appartement',
+      img: 'https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-02-05-20-45-23_Enscape_scene_8.jpg',
+      sub: 'Logement collectif',
+      icon: '▦'
+    },
+    'residence': {
+      name: 'Résidence',
+      img: 'https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2024-10-27-23-48-12.png',
+      sub: 'Résidence privée',
+      icon: '⌂'
+    },
+    'residential': {
+      name: 'Résidence',
+      img: 'https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2024-10-27-23-48-12.png',
+      sub: 'Résidence privée',
+      icon: '⌂'
+    },
+    'commercial': {
+      name: 'Commercial',
+      img: 'https://loftdesign.bilnov.com/media/spaces/gallery/kitchen-interior/11154/image_1.jpg',
+      sub: 'Local commercial',
+      icon: '▤'
+    },
+    'bureau': {
+      name: 'Bureau',
+      img: 'https://loftdesign.bilnov.com/media/portfolio/thumbnails/SEJOUR_4.png',
+      sub: 'Espace professionnel',
+      icon: '▣'
+    },
+    'office': {
+      name: 'Bureau',
+      img: 'https://loftdesign.bilnov.com/media/portfolio/thumbnails/SEJOUR_4.png',
+      sub: 'Espace professionnel',
+      icon: '▣'
+    },
+    'hotel': {
+      name: 'Hôtel',
+      img: 'https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-01-02-19-38-33_Enscape_scene_14.png',
+      sub: 'Hôtellerie & hébergement',
+      icon: '⌘'
+    }
+  };
 
-  const extraLevelInputs = extraCodes.map(code => {
-    const tone = code.startsWith('R-') ? 'basement' : 'upper';
-    return `<label class="v46LevelChip ${tone} ${+st.levelAreas?.[code] > 0 ? 'filled' : ''}" data-level-code="${code}">
-      <b>${code}</b>
-      <span>
-        <input type="number" min="1" step="1" inputmode="decimal"
-          data-level-area="${code}" value="${st.levelAreas?.[code] || ''}" placeholder="0">
-        <em>m²</em>
-      </span>
-    </label>`;
-  }).join('');
+  const defaultTypes = [
+    { slug: 'villa', name: 'Villa' },
+    { slug: 'appartement', name: 'Appartement' },
+    { slug: 'residence', name: 'Résidence' },
+    { slug: 'commercial', name: 'Commercial' },
+    { slug: 'bureau', name: 'Bureau' },
+    { slug: 'hotel', name: 'Hôtel' }
+  ];
 
-  const missingInterior = st.projectType && (
-    !(+st.levelAreas?.RDC > 0) ||
-    extraCodes.some(code => !(+st.levelAreas?.[code] > 0))
-  );
+  let rawTypes = (typeof projectTypes !== 'undefined' && projectTypes && projectTypes.length > 0)
+    ? projectTypes
+    : defaultTypes;
+
+  const typesList = rawTypes.map(pt => {
+    const name = typeof pt === 'string' ? pt : (pt.name || pt.slug || '');
+    const slug = (typeof pt === 'string' ? pt : (pt.slug || pt.name || '')).toLowerCase();
+    const cleanKey = slug.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const meta = v86Visuals[cleanKey] || v86Visuals[slug] || {
+      name: name,
+      img: 'https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-07-07-23-27-11.png',
+      sub: 'Projet sur mesure',
+      icon: '⌂'
+    };
+    return {
+      name: name,
+      slug: slug,
+      id: pt.id || slug,
+      img: meta.img,
+      sub: meta.sub,
+      icon: meta.icon
+    };
+  });
+
+  const basements = isApartment ? [] : Array.from({ length: st.basementCount || 0 }, (_, i) => `R-${i + 1}`);
+  const uppers = isApartment ? [] : Array.from({ length: st.upperCount || 0 }, (_, i) => `R+${i + 1}`);
+  const extra = [...basements, ...uppers];
+
+  const extraHtml = extra.length
+    ? extra.map(code => `<label class="v47LevelChip ${code.startsWith('R-') ? 'basement' : 'upper'}">
+        <b>${code}</b>
+        <span class="v47InputShell">
+          <input type="number" min="1" step="1" inputmode="decimal"
+            data-level-area="${code}" value="${st.levelAreas[code] || ''}" placeholder="0">
+          <em>m²</em>
+        </span>
+      </label>`).join('')
+    : `<span class="v47NoExtra">Aucun niveau supplémentaire</span>`;
+
+  const interiorCode = isApartment ? 'APP' : 'RDC';
+  const interiorTitle = isApartment ? 'Surface intérieure' : 'Surface RDC';
+  const interiorSub = isApartment ? 'Surface habitable / utile' : 'Niveau principal traité';
+
+  const isSelected = (item) => {
+    return st.projectType && (
+      st.projectType === item.name ||
+      st.projectType === item.slug ||
+      String(st.projectType).toLowerCase() === item.slug ||
+      String(st.projectType).toLowerCase() === item.name.toLowerCase()
+    );
+  };
 
   body.innerHTML = `
-    <div class="v46ProjectScreen">
+    <div class="v47ProjectScreen v86ProjectScreen">
+
+      <aside class="v86ProjectDecor v86ProjectDecorLeft" aria-hidden="true">
+        <strong>01</strong>
+        <span>VOTRE<br>PROJET<br>COMMENCE<br>ICI</span>
+        <i></i>
+      </aside>
+
+      <aside class="v86ProjectDecor v86ProjectDecorRight" aria-hidden="true">
+        <span>DES LIEUX<br>QUI VOUS<br>RESSEMBLENT</span>
+        <i></i>
+      </aside>
+
       <!-- 1. TYPE DE PROJET -->
-      <section class="v46ProjectRow v46TypeRow">
-        <div class="v46RowLabel">Projet</div>
-        <div class="v46ProjectTypes" id="projectTypeContainer">
-          ${projectTypesList.map(x => {
-            const isSel = (
-              st.projectType && (
-                st.projectType === x.name ||
-                st.projectType === x.slug ||
-                String(st.projectType) === String(x.id)
-              )
-            );
+      <section class="v86ProjectBlock v86TypeBlock">
+        <div class="v86BlockHead">
+          <div>
+            <h3><b>1.</b> Type de projet</h3>
+            <p>Choisissez la catégorie qui correspond à votre projet</p>
+          </div>
+        </div>
+
+        <div class="v47ProjectTypes v86ProjectTypes">
+          ${typesList.map(item => {
+            const sel = isSelected(item);
             return `<button type="button"
-              class="${isSel ? 'selected' : ''}"
-              data-project-type="${x.name}"
-              data-type="${x.slug || x.id}"
-              data-id="${x.id}"
-              title="${x.name}"
-              style="--v60c:${x.tone};"
-              aria-pressed="${isSel}">
-              ${x.name}${isSel ? '<i>✓</i>' : ''}
+              class="${sel ? 'selected' : ''}"
+              data-v47-project="${item.name}"
+              data-project-type="${item.name}"
+              data-project-slug="${item.slug}"
+              aria-pressed="${sel}">
+              <span class="v86ProjectImage">
+                <img src="${item.img}" alt="" loading="lazy">
+                ${sel ? '<i class="v86SelectedCheck">✓</i>' : ''}
+              </span>
+              <span class="v86ProjectCardFoot">
+                <em>${item.icon}</em>
+                <span>
+                  <b>${item.name}</b>
+                  <small>${item.sub}</small>
+                </span>
+              </span>
             </button>`;
           }).join('')}
         </div>
       </section>
 
-      <!-- 2. CALCULATEURS SOUS-SOLS / ETAGES -->
-      <section class="v46ProjectRow v46CounterRow ${st.projectType ? '' : 'disabled'}">
-        <div class="v46RowLabel">Niveaux</div>
-        <div class="v46Counters">
-          <div class="v46Counter basement">
+      <!-- 2. NIVEAUX DU PROJET (if not apartment) -->
+      ${!isApartment ? `
+      <section class="v86ProjectBlock v86LevelsBlock ${st.projectType ? '' : 'disabled'}">
+        <div class="v86BlockHead compact">
+          <div>
+            <h3><b>2.</b> Niveaux du projet</h3>
+            <p>Indiquez uniquement les niveaux concernés par notre intervention</p>
+          </div>
+        </div>
+
+        <div class="v47LevelControls v86LevelControls">
+          <div class="v47LevelCounter basement">
             <span>Sous-sols</span>
-            <div>
+            <div class="v47Counter">
               <button type="button" id="basementMinus" ${!st.projectType ? 'disabled' : ''}>−</button>
               <b>${st.basementCount || 0}</b>
               <button type="button" id="basementPlus" ${!st.projectType ? 'disabled' : ''}>+</button>
             </div>
           </div>
-          <div class="v46Counter upper">
+          <div class="v47LevelCounter upper">
             <span>Étages</span>
-            <div>
+            <div class="v47Counter">
               <button type="button" id="upperMinus" ${!st.projectType ? 'disabled' : ''}>−</button>
               <b>${st.upperCount || 0}</b>
               <button type="button" id="upperPlus" ${!st.projectType ? 'disabled' : ''}>+</button>
             </div>
           </div>
         </div>
-      </section>
 
-      <!-- 3. RDC + EXTERIEUR -->
-      <section class="v46ProjectRow v46BaseSurfaceRow ${st.projectType ? '' : 'disabled'}">
-        <div class="v46RowLabel">Surfaces</div>
-        <div class="v46BaseSurfaces">
-          <label class="v46BaseSurface rdc ${+st.levelAreas?.RDC > 0 ? 'filled' : ''}">
-            <b>RDC</b>
-            <span>
+        ${extra.length ? `
+          <div class="v47ExtraLevels v86ExtraLevels">${extraHtml}</div>
+        ` : ''}
+      </section>
+      ` : ''}
+
+      <!-- 3. SURFACES -->
+      <section class="v86ProjectBlock v86SurfaceBlock ${st.projectType ? '' : 'disabled'}">
+        <div class="v86BlockHead">
+          <div>
+            <h3><b>${isApartment ? '2' : '3'}.</b> Surfaces</h3>
+            <p>Renseignez les surfaces de votre projet</p>
+          </div>
+        </div>
+
+        <div class="v86SurfaceGrid">
+          <label class="v47SurfaceCard v86SurfaceCard interior">
+            <span class="v86SurfaceIcon">▧</span>
+            <span class="v86SurfaceCopy">
+              <b>${interiorTitle}</b>
+              <small>${interiorSub}</small>
+            </span>
+            <span class="v47InputShell">
               <input type="number" min="1" step="1" inputmode="decimal"
-                id="rdcSurface" data-level-area="RDC"
-                value="${st.levelAreas?.RDC || ''}" placeholder="Surface">
+                id="interiorSurfaceInput"
+                data-level-area="${interiorCode}"
+                value="${st.levelAreas[interiorCode] || ''}" placeholder="0">
               <em>m²</em>
             </span>
           </label>
 
-          <label class="v46BaseSurface exterior ${+st.surfaceExterior > 0 ? 'filled' : ''}">
-            <b>Extérieur <small>optionnel</small></b>
-            <span>
+          <label class="v47SurfaceCard v86SurfaceCard exterior">
+            <span class="v86SurfaceIcon exterior">♧</span>
+            <span class="v86SurfaceCopy">
+              <b>Surface extérieure</b>
+              <small>Jardin / terrasse / piscine (optionnel)</small>
+            </span>
+            <span class="v47InputShell">
               <input type="number" min="0" step="1" inputmode="decimal"
-                id="surfaceExteriorInput"
-                value="${st.surfaceExterior || ''}" placeholder="0">
+                id="surfaceExterior" value="${st.surfaceExterior || ''}" placeholder="0">
               <em>m²</em>
             </span>
           </label>
+
+          <aside class="v86TotalCard">
+            <span class="v86TotalIcon">◇</span>
+            <div>
+              <small>Surface totale</small>
+              <b id="v86TotalValue">${nf.format((st.surfaceInterior || 0) + (st.surfaceExterior || 0))} m²</b>
+              <p><strong id="v86InteriorValue">${nf.format(st.surfaceInterior || 0)} m²</strong> intérieur<br>
+              + <span id="v86ExteriorValue">${nf.format(st.surfaceExterior || 0)} m²</span> extérieur</p>
+            </div>
+          </aside>
         </div>
       </section>
 
-      <!-- 4. ETAGES / SOUS-SOLS SELECTIONNES -->
-      <section class="v46ProjectRow v46ExtraRow ${extraCodes.length ? 'hasLevels' : 'empty'}">
-        <div class="v46RowLabel">Sélection</div>
-        <div class="v46ExtraLevels">
-          ${extraCodes.length
-            ? extraLevelInputs
-            : `<span class="v46NoExtra">Aucun autre niveau sélectionné</span>`}
-        </div>
-      </section>
+      <!-- FOOTER -->
+      <section class="v86ProjectFooter">
+        <button type="button" class="v86Reset" id="v86ResetProject">
+          <span>↻</span> Réinitialiser
+        </button>
 
-      <!-- 5. TOTAL + SUIVANT -->
-      <section class="v46ProjectRow v46ActionRow">
-        <div class="v46CompactTotal">
-          <small>Total intérieur</small>
-          <b id="levelInteriorTotal">${nf.format(st.surfaceInterior || 0)} m²</b>
-          ${+st.surfaceExterior > 0 ? `<span>+ ${nf.format(st.surfaceExterior)} m² ext.</span>` : ''}
-        </div>
-        <button class="nextBtn v46NextBtn" id="toServices"
-          ${(!st.projectType || missingInterior) ? 'disabled' : ''}>
-          Choisir mes prestations
+        <button class="nextBtn v47Next v86Next" id="v47ToServices">
+          ${isApartment ? 'SUIVANT' : 'CHOISIR MES PRESTATIONS'}
         </button>
       </section>
-    </div>`;
+    </div>
+  `;
 
-  body.querySelectorAll('[data-project-type]').forEach(btn => {
+  // Project type click handlers
+  body.querySelectorAll('[data-v47-project]').forEach(btn => {
     btn.onclick = () => {
-      const next = btn.dataset.projectType;
-      const changed = st.projectType && st.projectType !== next;
+      const next = btn.dataset.v47Project;
+      const changed = st.projectType !== next;
       st.projectType = next;
-      st.typeAttention = false;
       st.structureChosen = true;
 
       if (changed) {
         st.basementCount = 0;
         st.upperCount = 0;
-        st.levelAreas = { RDC: 0 };
         st.surfaceInterior = 0;
         st.surfaceExterior = 0;
-      } else if (!st.levelAreas || !('RDC' in st.levelAreas)) {
-        st.levelAreas = { ...(st.levelAreas || {}), RDC: 0 };
+        st.apartmentFloor = '';
+        const nextIsApp = (next === 'Appartement' || next === 'appartement' || next === 'Apartment');
+        st.levelAreas = nextIsApp ? { APP: 0 } : { RDC: 0 };
       }
-
       syncInteriorFromLevels();
       renderComposer();
-      setTimeout(() => document.querySelector('#rdcSurface')?.focus(), 60);
+      setTimeout(() => document.querySelector('#interiorSurfaceInput')?.focus(), 60);
     };
   });
 
+  // Level counter buttons
   document.querySelector('#basementMinus')?.addEventListener('click', () => {
     setBuildingStructure(Math.max(0, (st.basementCount || 0) - 1), st.upperCount || 0, true);
     renderComposer();
@@ -648,7 +821,7 @@ function renderProject() {
   document.querySelector('#basementPlus')?.addEventListener('click', () => {
     setBuildingStructure(Math.min(4, (st.basementCount || 0) + 1), st.upperCount || 0, true);
     renderComposer();
-    setTimeout(() => document.querySelector(`[data-level-area="R-${st.basementCount}"]`)?.focus(), 60);
+    setTimeout(() => document.querySelector(`[data-level-area="R-${st.basementCount}"]`)?.focus(), 50);
   });
   document.querySelector('#upperMinus')?.addEventListener('click', () => {
     setBuildingStructure(st.basementCount || 0, Math.max(0, (st.upperCount || 0) - 1), true);
@@ -657,44 +830,46 @@ function renderProject() {
   document.querySelector('#upperPlus')?.addEventListener('click', () => {
     setBuildingStructure(st.basementCount || 0, Math.min(8, (st.upperCount || 0) + 1), true);
     renderComposer();
-    setTimeout(() => document.querySelector(`[data-level-area="R+${st.upperCount}"]`)?.focus(), 60);
+    setTimeout(() => document.querySelector(`[data-level-area="R+${st.upperCount}"]`)?.focus(), 50);
   });
 
+  // Surface inputs
   body.querySelectorAll('[data-level-area]').forEach(input => {
     input.addEventListener('input', e => {
-      const code = e.target.dataset.levelArea;
       st.levelAreas = st.levelAreas || {};
-      st.levelAreas[code] = Math.max(0, +e.target.value || 0);
+      st.levelAreas[e.target.dataset.levelArea] = Math.max(0, +e.target.value || 0);
       syncInteriorFromLevels();
-
-      e.target.closest('.v46LevelChip, .v46BaseSurface')?.classList.toggle('filled', +e.target.value > 0);
-
-      const totalEl = document.querySelector('#levelInteriorTotal');
-      if (totalEl) totalEl.textContent = `${nf.format(st.surfaceInterior || 0)} m²`;
-
-      const missing = !(+st.levelAreas.RDC > 0) ||
-        [...basementCodes, ...upperCodes].some(c => !(+st.levelAreas[c] > 0));
-      const nextBtn = document.querySelector('#toServices');
-      if (nextBtn) nextBtn.disabled = !st.projectType || missing;
+      const totalEl = document.querySelector('#v86TotalValue');
+      if (totalEl) totalEl.textContent = `${nf.format((st.surfaceInterior || 0) + (st.surfaceExterior || 0))} m²`;
+      const intEl = document.querySelector('#v86InteriorValue');
+      if (intEl) intEl.textContent = `${nf.format(st.surfaceInterior || 0)} m²`;
     });
   });
 
-  document.querySelector('#surfaceExteriorInput')?.addEventListener('input', e => {
+  document.querySelector('#surfaceExterior')?.addEventListener('input', e => {
     st.surfaceExterior = Math.max(0, +e.target.value || 0);
-    e.target.closest('.v46BaseSurface')?.classList.toggle('filled', st.surfaceExterior > 0);
-    syncInteriorFromLevels();
-    const totalEl = document.querySelector('#levelInteriorTotal');
-    if (totalEl) {
-      totalEl.parentElement.innerHTML = `
-        <small>Total intérieur</small>
-        <b id="levelInteriorTotal">${nf.format(st.surfaceInterior || 0)} m²</b>
-        ${+st.surfaceExterior > 0 ? `<span>+ ${nf.format(st.surfaceExterior)} m² ext.</span>` : ''}
-      `;
-    }
+    const totalEl = document.querySelector('#v86TotalValue');
+    if (totalEl) totalEl.textContent = `${nf.format((st.surfaceInterior || 0) + (st.surfaceExterior || 0))} m²`;
+    const extEl = document.querySelector('#v86ExteriorValue');
+    if (extEl) extEl.textContent = `${nf.format(st.surfaceExterior || 0)} m²`;
   });
 
-  document.querySelector('#toServices')?.addEventListener('click', () => {
-    if (validateSurfaces()) gotoStep('services');
+  // Reset button
+  document.querySelector('#v86ResetProject')?.addEventListener('click', () => {
+    st.basementCount = 0;
+    st.upperCount = 0;
+    st.surfaceInterior = 0;
+    st.surfaceExterior = 0;
+    st.apartmentFloor = '';
+    st.levelAreas = isApartment ? { APP: 0 } : { RDC: 0 };
+    syncInteriorFromLevels();
+    renderComposer();
+  });
+
+  // Continue button
+  document.querySelector('#v47ToServices')?.addEventListener('click', () => {
+    if (!v47ShowProjectMissing()) return;
+    gotoStep('services');
   });
 }
 
@@ -1090,6 +1265,8 @@ function validateServices() {
   return true;
 }
 
+const isMobile = () => window.matchMedia('(max-width: 840px)').matches;
+
 function renderServices() {
   ensureSelectedServicesState();
   syncInteriorFromLevels();
@@ -1127,58 +1304,55 @@ function renderServices() {
           pricingLabel = `${s.percentage || s.percentage_rate || 10}% du montant`;
         }
 
-        return `<article class="v46SelectedService" data-service-card="${s.id}">
-          <div class="v46SelectedServiceTop">
+        let controlsHtml = '';
+        if (pType === 'PRICE_PER_M2' && (s.allowInterior !== false || s.allowExterior === true)) {
+          controlsHtml = `<div class="v76ScopePick" aria-label="Périmètre de ${s.name}">
+            ${s.allowInterior !== false ? `
+              <label class="${sel.useInterior ? 'on' : ''}">
+                <input type="checkbox" data-scope-int="${s.id}" ${sel.useInterior ? 'checked' : ''}>
+                <span>Intérieur (${surfaceInterior()} m²)</span>
+              </label>
+            ` : ''}
+            ${s.allowExterior === true ? `
+              <label class="${sel.useExterior ? 'on' : ''}">
+                <input type="checkbox" data-scope-ext="${s.id}" ${sel.useExterior ? 'checked' : ''}>
+                <span>Extérieur (${surfaceExterior()} m²)</span>
+              </label>
+            ` : ''}
+          </div>`;
+        } else if (pType === 'HOURLY') {
+          controlsHtml = `<label class="v76NumberField" title="Nombre d’heures">
+            <span>Heures</span>
+            <input type="number" min="1" step="1" inputmode="numeric" data-svc-hours="${s.id}" value="${sel.hours || 20}">
+          </label>`;
+        } else if (pType === 'FIXED_UNIT' && (s.allowQuantity !== false)) {
+          controlsHtml = `<label class="v76NumberField" title="Quantité">
+            <span>Qté</span>
+            <input type="number" min="1" step="1" inputmode="numeric" data-svc-qty="${s.id}" value="${sel.quantity || 1}">
+          </label>`;
+        } else if (pType === 'PERCENTAGE') {
+          controlsHtml = `<label class="v76ReferenceField" title="Montant de référence">
+            <span>Montant de référence</span>
+            <div>
+              <input type="number" min="1" step="50000" inputmode="numeric" data-svc-ref="${s.id}" value="${sel.referenceAmount || 100000}" placeholder="100 000">
+              <b>DA</b>
+            </div>
+          </label>`;
+        }
+
+        return `<article class="v46SelectedService v76ServiceRow v91ServiceCard" data-service-card="${s.id}">
+          <div class="v46SelectedServiceTop v91ServiceHeader">
             <span>
               <b>${s.name}</b>
               <small>${pricingLabel}</small>
             </span>
-            <strong>${money(linePrice)}</strong>
           </div>
 
-          <!-- Scope checkboxes for 2D plans -->
-          ${pType === 'PRICE_PER_M2' && (s.allowInterior !== false || s.allowExterior === true) ? `
-            <div class="v46ScopeChecks">
-              ${s.allowInterior !== false ? `
-                <label>
-                  <input type="checkbox" data-scope-int="${s.id}" ${sel.useInterior ? 'checked' : ''}>
-                  <span>Intérieur (<strong>${surfaceInterior()} m²</strong>)</span>
-                </label>
-              ` : ''}
-              ${s.allowExterior === true ? `
-                <label>
-                  <input type="checkbox" data-scope-ext="${s.id}" ${sel.useExterior ? 'checked' : ''}>
-                  <span>Extérieur (<strong>${surfaceExterior()} m²</strong>)</span>
-                </label>
-              ` : ''}
-            </div>
-          ` : ''}
+          ${controlsHtml ? `<div class="v91ServiceControls">${controlsHtml}</div>` : ''}
 
-          <div class="v46SelectedCalc">
-            <span>${calcDetail}</span>
-
-            ${pType === 'HOURLY' ? `
-              <label class="v74QtyField" title="Nombre d’heures">
-                <span>Heures</span>
-                <input type="number" min="1" step="1" inputmode="numeric" data-svc-hours="${s.id}" value="${sel.hours || 20}">
-              </label>
-            ` : ''}
-
-            ${pType === 'FIXED_UNIT' && (s.allowQuantity !== false) ? `
-              <label class="v74QtyField" title="Quantité">
-                <span>Qté</span>
-                <input type="number" min="1" step="1" inputmode="numeric" data-svc-qty="${s.id}" value="${sel.quantity || 1}">
-              </label>
-            ` : ''}
-
-            ${pType === 'PERCENTAGE' ? `
-              <label class="v74QtyField" title="Montant de référence">
-                <span>Ref.</span>
-                <input type="number" min="1" step="50000" inputmode="numeric" data-svc-ref="${s.id}" value="${sel.referenceAmount || 100000}" style="width:78px;">
-              </label>
-            ` : ''}
-
-            <div class="v46Actions">
+          <div class="v46SelectedCalc v91ServiceFooter">
+            <strong class="v91ServicePrice">${money(linePrice)}</strong>
+            <div class="v91ServiceActions">
               <button type="button" data-service-details="${s.id}">Détails</button>
               <button type="button" class="remove" data-service-remove="${s.id}" aria-label="Retirer">×</button>
             </div>
@@ -1401,21 +1575,162 @@ function renderServices() {
     selected.forEach(s => {
       const card = b.querySelector(`[data-service-card="${s.id}"]`);
       if (card) {
-        const strong = card.querySelector('.v46SelectedServiceTop > strong');
+        const strong = card.querySelector('.v91ServicePrice') || card.querySelector('.v46SelectedServiceTop > strong');
         if (strong) strong.textContent = money(getServiceLinePrice(s.id));
-        const calcSpan = card.querySelector('.v46SelectedCalc > span');
-        if (calcSpan) calcSpan.textContent = getServiceCalculationDetail(s.id);
       }
       const availCard = b.querySelector(`.v46AvailableService:has([data-service="${s.id}"]) .v46ServiceAdd > strong`);
       if (availCard) availCard.textContent = money(getServiceLinePrice(s.id));
     });
+    const mobileNextCount = document.querySelector('#v48MobileServiceNextCount');
+    if (mobileNextCount) {
+      const count = st.services.length;
+      mobileNextCount.textContent = `${count} prestation${count > 1 ? 's' : ''}`;
+    }
   }
 
   // Next button to contact step
   document.querySelector('#toContact')?.addEventListener('click', () => {
     if (validateServices()) gotoStep('contact');
   });
+
+  setupMobileServiceStages();
+  fitMobileServiceScroll();
 }
+
+function setupMobileServiceStages() {
+  const screen = document.querySelector('.v46ServicesScreen');
+  if (!screen) return;
+
+  // If on desktop (> 840px), keep two-column layout
+  if (!isMobile()) {
+    screen.classList.remove('v48StageAvailable', 'v48StageSelected');
+    document.querySelector('.v48MobileServiceProgress')?.remove();
+    document.querySelector('.v48MobileServiceNext')?.remove();
+    document.querySelector('.v48MobileServiceBack')?.remove();
+    return;
+  }
+
+  if (st.mobileServiceStage !== 2) st.mobileServiceStage = 1;
+  const stage = st.mobileServiceStage;
+
+  screen.classList.toggle('v48StageAvailable', stage === 1);
+  screen.classList.toggle('v48StageSelected', stage === 2);
+
+  // Clean old elements
+  document.querySelector('.v48MobileServiceProgress')?.remove();
+  document.querySelector('.v48MobileServiceNext')?.remove();
+  document.querySelector('.v48MobileServiceBack')?.remove();
+
+  // Progress indicator: 1 Choisir / 2 Vérifier
+  const progress = document.createElement('div');
+  progress.className = 'v48MobileServiceProgress';
+  progress.innerHTML = `
+    <span class="${stage === 1 ? 'active' : 'done'}"><b>${stage === 1 ? '1' : '✓'}</b>Choisir</span>
+    <span class="${stage === 2 ? 'active' : ''}"><b>2</b>Vérifier</span>
+  `;
+  screen.before(progress);
+
+  const available = document.querySelector('.v46AvailableColumn');
+  const selected = document.querySelector('.v46SelectedColumn');
+
+  if (stage === 1) {
+    const head = available?.querySelector('.v46ColumnHead h3');
+    const eyebrow = available?.querySelector('.v46ColumnHead small');
+    if (head) head.textContent = 'Choisissez vos prestations';
+    if (eyebrow) eyebrow.textContent = '1 / 2 · SÉLECTION';
+
+    const count = st.services?.length || 0;
+    const bar = document.createElement('div');
+    bar.className = 'v48MobileServiceNext';
+    bar.innerHTML = `
+      <span>
+        <small>Votre sélection</small>
+        <strong id="v48MobileServiceNextCount">${count} prestation${count > 1 ? 's' : ''}</strong>
+      </span>
+      <button type="button" id="v48ServicesNext" ${count === 0 ? 'disabled' : ''}>Suivant</button>
+    `;
+    document.querySelector('#composerBody')?.appendChild(bar);
+
+    document.querySelector('#v48ServicesNext')?.addEventListener('click', () => {
+      if (!(st.services?.length > 0)) return;
+      st.mobileServiceStage = 2;
+      renderServices();
+      document.querySelector('#composer')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  if (stage === 2) {
+    const back = document.createElement('button');
+    back.type = 'button';
+    back.className = 'v48MobileServiceBack';
+    back.id = 'v48ServicesBack';
+    back.textContent = '← Modifier les prestations';
+    selected?.before(back);
+
+    const head = selected?.querySelector('.v46ColumnHead h3');
+    const eyebrow = selected?.querySelector('.v46ColumnHead small');
+    if (head) head.textContent = 'Vérifiez votre sélection';
+    if (eyebrow) eyebrow.textContent = '2 / 2 · VALIDATION';
+
+    const continueBtn = document.querySelector('#toContact');
+    if (continueBtn) continueBtn.textContent = 'Valider';
+
+    back.addEventListener('click', () => {
+      st.mobileServiceStage = 1;
+      renderServices();
+      document.querySelector('#composer')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+}
+
+function fitMobileServiceScroll() {
+  if (!isMobile() || st?.step !== 'services') return;
+
+  requestAnimationFrame(() => {
+    const screen = document.querySelector('#composer .v46ServicesScreen');
+    if (!screen) return;
+
+    const stageAvailable = screen.classList.contains('v48StageAvailable');
+    const scroll = stageAvailable
+      ? document.querySelector('#composer .v46AvailableScroll')
+      : document.querySelector('#composer .v46SelectedScroll');
+
+    if (!scroll) return;
+
+    const bottomBar = stageAvailable
+      ? document.querySelector('#composer .v48MobileServiceNext')
+      : document.querySelector('#composer .v46TotalDock');
+
+    const top = scroll.getBoundingClientRect().top;
+    const bottom = bottomBar
+      ? bottomBar.getBoundingClientRect().top - 8
+      : window.innerHeight - 90;
+
+    const available = Math.max(180, Math.floor(bottom - top));
+
+    scroll.style.setProperty('height', `${available}px`, 'important');
+    scroll.style.setProperty('max-height', `${available}px`, 'important');
+    scroll.style.setProperty('overflow-y', 'auto', 'important');
+    scroll.style.setProperty('overflow-x', 'hidden', 'important');
+    scroll.style.setProperty('touch-action', 'pan-y', 'important');
+  });
+}
+
+window.addEventListener('resize', () => {
+  if (st?.step === 'services') {
+    setupMobileServiceStages();
+    fitMobileServiceScroll();
+  }
+}, { passive: true });
+
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => {
+    if (st?.step === 'services') {
+      setupMobileServiceStages();
+      fitMobileServiceScroll();
+    }
+  }, 120);
+}, { passive: true });
 
 /* Algeria 2026 dataset */
 let geo={wilayas:[],communes:[]};const fallbackWilayas=['Adrar','Chlef','Laghouat','Oum El Bouaghi','Batna','Béjaïa','Biskra','Béchar','Blida','Bouira','Tamanrasset','Tébessa','Tlemcen','Tiaret','Tizi Ouzou','Alger','Djelfa','Jijel','Sétif','Saïda','Skikda','Sidi Bel Abbès','Annaba','Guelma','Constantine','Médéa','Mostaganem','M’Sila','Mascara','Ouargla','Oran','El Bayadh','Illizi','Bordj Bou Arréridj','Boumerdès','El Tarf','Tindouf','Tissemsilt','El Oued','Khenchela','Souk Ahras','Tipaza','Mila','Aïn Defla','Naâma','Aïn Témouchent','Ghardaïa','Relizane','Timimoun','Bordj Badji Mokhtar','Ouled Djellal','Béni Abbès','In Salah','In Guezzam','Touggourt','Djanet','El M’Ghair','El Meniaa','Aflou','El Abiodh Sidi Cheikh','El Aricha','El Kantara','Barika','Bou Saâda','Bir El Ater','Ksar El Boukhari','Ksar Chellala','Aïn Oussera','Messaad'];

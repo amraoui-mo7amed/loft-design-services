@@ -3295,157 +3295,7 @@ footer .footLinks a:hover {
     font-size: 8.5px !important
   }
 
-  /* Composer behaves like a native app page */
-  #composer {
-    align-items: stretch !important
-  }
 
-  .composerShell {
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 0 !important;
-    padding: 0 9px !important;
-    display: grid !important;
-    grid-template-rows: auto auto minmax(0, 1fr) !important
-  }
-
-  .composerShell .sectionHead {
-    margin-bottom: 4px !important
-  }
-
-  .progress {
-    margin: 0 auto 5px !important;
-    min-height: 30px !important
-  }
-
-  .progress button {
-    padding: 0 4px !important;
-    font-size: 9px !important
-  }
-
-  .progress button i {
-    width: 25px !important;
-    height: 25px !important;
-    font-size: 8px !important
-  }
-
-  .progress>span {
-    display: block !important;
-    width: 24px !important;
-    margin: 0 3px !important
-  }
-
-  .progress button span {
-    display: inline !important;
-    font-size: 9px !important
-  }
-
-  .composerViewport {
-    min-height: 0 !important;
-    max-height: none !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    overscroll-behavior: contain;
-    padding-bottom: 4px !important
-  }
-
-  .modeTabs {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 6px !important;
-    margin-bottom: 7px !important
-  }
-
-  .modeTabs button {
-    padding: 9px !important
-  }
-
-  .modeTabs b {
-    font-size: 12px !important
-  }
-
-  .modeTabs small {
-    font-size: 9px !important
-  }
-
-  .spaceGrid {
-    display: flex !important;
-    gap: 7px !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    scrollbar-width: none;
-    scroll-snap-type: x proximity;
-    padding-bottom: 3px
-  }
-
-  .spaceGrid::-webkit-scrollbar {
-    display: none
-  }
-
-  .spaceCard {
-    flex: 0 0 58vw !important;
-    height: 190px !important;
-    scroll-snap-align: start
-  }
-
-  .levels {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 5px !important;
-    max-width: 100% !important
-  }
-
-  .levelRow {
-    min-height: 42px !important;
-    padding: 6px 8px !important
-  }
-
-  .levelRow>button {
-    font-size: 11px !important
-  }
-
-  .surface input {
-    width: 76px !important;
-    padding: 7px !important;
-    font-size: 10px !important
-  }
-
-  .serviceStage {
-    grid-template-columns: 1fr !important;
-    gap: 7px !important
-  }
-
-  .serviceChoices,
-  .quote {
-    padding: 11px !important
-  }
-
-  .serviceChoice {
-    padding: 8px !important
-  }
-
-  .contactForm {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 7px !important
-  }
-
-  .contactForm input,
-  .contactForm select,
-  .contactForm textarea {
-    padding: 9px !important;
-    font-size: 11px !important
-  }
-
-  .contactForm textarea {
-    min-height: 62px !important
-  }
-
-  .clientType {
-    gap: 7px !important;
-    padding: 8px !important
-  }
-
-  .clientType button {
-    min-height: 38px !important
-  }
 
   /* Videos = full-width horizontal app rail */
   #videos>div {
@@ -4189,285 +4039,7 @@ iframe {
     font-size: 7.8px !important;
   }
 
-  /* COMPOSER — compact top zone + selectors that cannot collide
-     with the progress bar or space cards. */
-  #composer .composerShell {
-    grid-template-rows: auto 30px minmax(0, 1fr) !important;
-    padding: 0 8px !important;
-  }
 
-  #composer .composerShell .sectionHead {
-    margin-bottom: 1px !important;
-  }
-
-  #composer .composerShell .sectionHead .ey {
-    font-size: 7px !important
-  }
-
-  #composer .composerShell .sectionHead h2 {
-    font-size: clamp(23px, 6.8vw, 32px) !important;
-    line-height: .94 !important;
-  }
-
-  #composer .progress {
-    height: 30px !important;
-    min-height: 30px !important;
-    margin: 0 auto 2px !important;
-  }
-
-  #composer .progress button {
-    height: 28px !important;
-    min-height: 28px !important;
-    padding: 0 3px !important;
-    gap: 4px !important;
-  }
-
-  #composer .progress button i {
-    width: 23px !important;
-    height: 23px !important;
-    font-size: 7px !important;
-  }
-
-  #composer .progress button span {
-    font-size: 8px !important;
-    line-height: 1 !important;
-  }
-
-  #composer .progress>span {
-    width: 18px !important;
-    margin: 0 2px !important;
-  }
-
-  #composer .composerViewport {
-    min-height: 0 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    padding: 3px 1px max(5px, env(safe-area-inset-bottom)) !important;
-  }
-
-  #composer .modeTabs {
-    height: 46px !important;
-    min-height: 46px !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 5px !important;
-    margin: 0 0 6px !important;
-  }
-
-  #composer .modeTabs button {
-    height: 46px !important;
-    min-height: 46px !important;
-    padding: 6px 9px !important;
-    border-radius: 12px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    overflow: hidden !important;
-  }
-
-  #composer .modeTabs b {
-    font-size: 11px !important;
-    line-height: 1.05 !important;
-  }
-
-  #composer .modeTabs small {
-    margin-top: 2px !important;
-    font-size: 8px !important;
-    line-height: 1 !important;
-  }
-
-  #composer .spaceGrid {
-    gap: 6px !important;
-  }
-
-  #composer .spaceCard {
-    flex: 0 0 calc(50vw - 12px) !important;
-    height: 160px !important;
-    border-radius: 13px !important;
-  }
-
-  #composer .spaceCard .copy strong {
-    font-size: 13px !important
-  }
-
-  #composer .spaceCard .copy small {
-    font-size: 8px !important
-  }
-
-  #composer .composerBottom {
-    min-height: 54px !important;
-    margin-top: 6px !important;
-    padding: 8px 10px !important;
-    border-radius: 12px !important;
-  }
-
-  #composer .composerBottom small {
-    font-size: 9px !important
-  }
-
-  #composer .composerBottom b {
-    font-size: 13px !important
-  }
-
-  #composer .nextBtn {
-    min-height: 38px !important;
-    padding: 0 14px !important;
-    font-size: 10px !important;
-    white-space: nowrap !important;
-  }
-
-  /* Custom project levels: two columns but no content collision */
-  #composer .typeBox {
-    padding: 10px !important;
-    border-radius: 12px !important;
-  }
-
-  #composer .typeBox select {
-    padding: 9px 10px !important;
-    font-size: 10px !important;
-  }
-
-  #composer .typeHint {
-    font-size: 8.5px !important
-  }
-
-  #composer .levels {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 5px !important;
-  }
-
-  #composer .levelRow {
-    min-height: 41px !important;
-    padding: 5px 7px !important;
-    gap: 4px !important;
-  }
-
-  #composer .levelRow>button {
-    min-width: 0 !important;
-    gap: 5px !important;
-    font-size: 10px !important;
-  }
-
-  #composer .surface {
-    gap: 3px !important
-  }
-
-  #composer .surface input {
-    width: 64px !important;
-    padding: 6px !important;
-    font-size: 9px !important;
-  }
-
-  #composer .surface span {
-    font-size: 9px !important
-  }
-
-  /* Services */
-  #composer .serviceStage {
-    grid-template-columns: 1fr !important;
-    gap: 6px !important;
-  }
-
-  #composer .serviceChoices,
-  .quote {
-    padding: 9px !important;
-    border-radius: 13px !important;
-  }
-
-  #composer .serviceChoices h3,
-  .quote h3 {
-    font-size: 15px !important
-  }
-
-  #composer .serviceChoices>p {
-    font-size: 9px !important;
-    margin-bottom: 5px !important
-  }
-
-  #composer .serviceChoice {
-    min-height: 44px !important;
-    padding: 7px !important;
-    margin-top: 5px !important;
-  }
-
-  #composer .serviceChoice strong {
-    font-size: 10px !important
-  }
-
-  #composer .serviceChoice small {
-    font-size: 8px !important
-  }
-
-  #composer .quoteRow {
-    padding: 6px 0 !important;
-    font-size: 9px !important
-  }
-
-  #composer .grand {
-    font-size: 21px !important;
-    padding-top: 9px !important
-  }
-
-  /* Composer contact step */
-  #composer .clientType {
-    flex-direction: row !important;
-    padding: 5px !important;
-    gap: 5px !important;
-  }
-
-  #composer .clientType button {
-    width: 50% !important;
-    min-height: 34px !important;
-    height: 34px !important;
-    padding: 0 8px !important;
-    font-size: 9px !important;
-  }
-
-  #composer .contactForm {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 6px !important;
-  }
-
-  #composer .contactForm label {
-    min-width: 0 !important;
-    font-size: 8px !important;
-  }
-
-  #composer .contactForm input,
-  #composer .contactForm select {
-    height: 37px !important;
-    padding: 7px 8px !important;
-    font-size: 10px !important;
-  }
-
-  #composer .contactForm textarea {
-    min-height: 58px !important;
-    max-height: 72px !important;
-    padding: 8px !important;
-    font-size: 10px !important;
-  }
-
-  #composer .contactTotal {
-    padding: 8px !important;
-  }
-
-  #composer .contactTotal strong {
-    font-size: 10px !important
-  }
-
-  #composer .contactTotal b {
-    font-size: 17px !important
-  }
-
-  #composer .tax {
-    font-size: 8px !important
-  }
-
-  #composer .submitRow .btn {
-    min-height: 36px !important;
-    height: 36px !important;
-    padding: 0 14px !important;
-    font-size: 8px !important;
-  }
 
   /* VIDEOS */
   #videos .videoRail {
@@ -7903,1197 +7475,2202 @@ body.galleryOpen {
 }
 
 /* ==========================================================================
-   V75 COMPOSER DESIGN SYSTEM (LOFT_DESIGN_V75_PORTFOLIO_9_CARD_EDGE_TO_EDGE)
+   COMPOSER DESIGN SYSTEM — LOFT DESIGN V93 MOBILE SERVICES FIXED SCROLL
+   Harmonized V82 Solid UI, V86 Studio, V88 White Frames, V89 Responsive Mobile,
+   V91 Service Cards, and V93 Exact 2-Line Article Layout + Fixed Scroll.
    ========================================================================== */
 
-#composer .v60ComposerHead {
-  width: min(1080px, calc(100vw - 28px)) !important;
-  margin: 0 auto 18px !important;
-  padding: 0 !important;
-  min-height: 0 !important;
-  display: block !important;
+#composer {
+  --v82-accent: #42d7ee;
+  --v82-accent-strong: #14afc8;
+  --v82-dark: #0f1618;
+  --v82-dark-2: #172024;
+  --v82-paper: #f4f6f4;
+  --v82-white: #ffffff;
+  --v82-ink: #1b2522;
+  --v82-muted: #6f7b77;
+  --v82-line: #d7dfdc;
+  --v82-soft: #e9eeeb;
+
+  --v86-bg: #071012;
+  --v86-panel: #ffffff;
+  --v86-panel-2: #f7f9f8;
+  --v86-line: #d5dfdb;
+  --v86-line-soft: #e2ebe7;
+  --v86-text: #17201e;
+  --v86-muted: #76827e;
+  --v86-cyan: #3bd4ea;
+  --v86-cyan-deep: #087d91;
+  --v86-green: #23845f;
+  --v86-gold: #c49b51;
+
+  background: transparent !important;
+  color: #fff;
+  align-items: stretch !important;
 }
 
-#composer .v60ComposerHead h2 {
+#composer * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-sizing: border-box;
+}
+
+#composer.viewport,
+#composer .composerShell,
+#composer .composerViewport {
+  background: transparent !important;
+}
+
+/* ---------- Header area & Stepper container ---------- */
+#composer .composerShell {
+  width: min(1180px, calc(100% - 34px)) !important;
+  margin: 0 auto !important;
+  padding: 34px 0 24px !important;
+}
+
+#composer .composerShell .sectionHead {
+  width: min(1050px, 100%) !important;
+  margin: 0 auto 14px !important;
+  color: #fff !important;
+  position: relative;
+  padding-left: 2px;
+}
+
+[dir="rtl"] #composer .composerShell .sectionHead {
+  padding-left: 0;
+  padding-right: 2px;
+}
+
+#composer .composerShell .sectionHead::before {
+  content: 'COMPOSITEUR DE PROJET';
+  display: block;
+  margin-bottom: 7px;
+  color: var(--v86-cyan, #3bd4ea);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .16em;
+}
+
+[dir="rtl"] #composer .composerShell .sectionHead::before {
+  content: 'منشئ المشروع';
+}
+
+#composer .composerShell .sectionHead::after {
+  content: 'Configurez votre projet, choisissez vos prestations et obtenez un devis clair.';
+  display: block;
+  margin-top: 7px;
+  color: #b5c0bc;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+[dir="rtl"] #composer .composerShell .sectionHead::after {
+  content: 'قم بتهيئة مشروعك، واختر خدماتك واحصل على تقدير تكلفة فوري وواضح.';
+}
+
+#composer .composerShell .sectionHead h2 {
   margin: 0 !important;
-  color: #f6f8f7 !important;
-  font-size: clamp(34px, 3.4vw, 54px) !important;
-  line-height: 1 !important;
-  letter-spacing: -0.035em !important;
-  font-weight: 850 !important;
-  text-align: left !important;
-  text-wrap: balance !important;
-  display: block !important;
+  color: #f7faf9 !important;
+  font-size: clamp(34px, 4vw, 54px) !important;
+  line-height: .98 !important;
+  letter-spacing: -.04em !important;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, .25) !important;
 }
 
-[dir="rtl"] #composer .v60ComposerHead h2 {
-  text-align: right !important;
-}
-
-#composer .v60ComposerHead .ey,
-#composer .v60ComposerHead .eyebrow,
-#composer .v60ComposerHead p,
-#composer .v60ComposerHead em {
+#composer .composerShell .sectionHead .ey,
+#composer .composerShell .sectionHead .eyebrow,
+#composer .composerShell .sectionHead p,
+#composer .composerShell .sectionHead em {
   display: none !important;
 }
 
-/* Progress bar V75 */
+/* ---------- Stepper : Solid, Clean White Floating Card (2-Line) ---------- */
 #composer .progress {
-  width: min(760px, calc(100vw - 32px)) !important;
-  margin: 0 auto 18px !important;
-  gap: 10px !important;
+  width: min(1050px, 100%) !important;
+  margin: 0 auto 14px !important;
+  min-height: 58px !important;
+  padding: 6px !important;
+  border: 1px solid #d7e0dd !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .14) !important;
+  display: grid !important;
+  grid-template-columns: 1fr 22px 1fr 22px 1fr !important;
   align-items: center !important;
-  display: flex !important;
-  justify-content: center !important;
-  background: none !important;
-  border: none !important;
-  box-shadow: none !important;
+  gap: 0 !important;
 }
 
 #composer .progress > span {
-  min-width: 22px !important;
+  width: 100% !important;
   height: 1px !important;
-  background: rgba(255, 255, 255, 0.14) !important;
+  margin: 0 !important;
+  background: #d8e0dd !important;
   display: block !important;
 }
 
 #composer .progress button {
-  min-width: 0 !important;
-  min-height: 46px !important;
-  padding: 0 10px !important;
-  gap: 8px !important;
-  border-radius: 14px !important;
-  font-size: 14px !important;
-  line-height: 1 !important;
-  white-space: nowrap !important;
-  background: none !important;
-  border: none !important;
-  color: #818a87 !important;
-  display: inline-flex !important;
+  min-height: 44px !important;
+  padding: 6px 10px !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  background: transparent !important;
+  color: #66736e !important;
+  display: grid !important;
+  grid-template-columns: 32px minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
   align-items: center !important;
+  gap: 0 8px !important;
+  text-align: left !important;
+  transition: .16s ease !important;
   cursor: pointer;
-  transition: all 0.2s ease;
+}
+
+[dir="rtl"] #composer .progress button {
+  text-align: right !important;
 }
 
 #composer .progress button i {
+  grid-row: 1 / 3 !important;
   width: 30px !important;
-  min-width: 30px !important;
   height: 30px !important;
-  font-size: 11px !important;
-  border-radius: 50% !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   display: grid !important;
   place-items: center !important;
-  font-style: normal;
-}
-
-#composer .progress button.active {
-  color: #fff !important;
-}
-
-#composer .progress button.active i {
-  background: var(--cyan, #55dcff) !important;
-  color: #041014 !important;
-  border-color: var(--cyan, #55dcff) !important;
-  box-shadow: 0 0 18px rgba(85, 220, 255, 0.25) !important;
-}
-
-#composer .progress button.done {
-  color: var(--cyan, #55dcff) !important;
-}
-
-#composer .progress button.done i {
-  border-color: var(--cyan, #55dcff) !important;
-  color: var(--cyan, #55dcff) !important;
+  border: 1px solid #ccd6d2 !important;
+  border-radius: 8px !important;
+  background: #f8faf9 !important;
+  color: #66736e !important;
+  font-size: 9px !important;
+  font-style: normal !important;
+  font-weight: 900 !important;
 }
 
 #composer .progress button span {
-  min-width: 0 !important;
-  font-size: 14px !important;
-  font-weight: 750 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  color: inherit !important;
+  line-height: 1.2 !important;
 }
 
-/* Step 1: Project Screen */
-#composer .v46ProjectScreen {
-  width: min(1080px, calc(100vw - 28px)) !important;
-  margin: 0 auto !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 20px !important;
-  overflow: hidden !important;
-  background: rgba(5, 10, 12, 0.86) !important;
-  backdrop-filter: blur(16px) !important;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34) !important;
-}
-
-#composer .v46ProjectRow {
-  min-height: 72px;
-  display: grid;
-  grid-template-columns: 92px minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
-  padding: 10px 13px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.075);
-}
-
-#composer .v46ProjectRow:last-child {
-  border-bottom: 0;
-}
-
-[dir="rtl"] #composer .v46ProjectRow {
-  text-align: right;
-}
-
-#composer .v46RowLabel {
-  color: #74807c;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-/* Row 1: Project Types */
-#composer .v46ProjectRow.v46TypeRow {
-  align-items: flex-start;
-  padding-top: 14px;
-}
-
-#composer .v46ProjectTypes {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 8px;
-  max-height: 180px;
-  overflow-y: auto;
-  padding-right: 4px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-}
-
-#composer .v46ProjectTypes::-webkit-scrollbar {
-  width: 5px;
-}
-
-#composer .v46ProjectTypes::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-#composer .v46ProjectTypes::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-[dir="rtl"] #composer .v46ProjectTypes {
-  padding-right: 0;
-  padding-left: 4px;
-}
-
-#composer .v46ProjectTypes button {
-  --v60c: 85, 220, 255;
-  min-width: 0;
-  height: 52px;
-  padding: 0 30px 0 14px;
-  border: 1px solid rgba(var(--v60c), 0.30);
-  border-radius: 14px;
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v60c), 0.095),
-    rgba(var(--v60c), 0.025)
-  );
-  color: #ecf3f1;
-  font-size: 14px;
-  line-height: 1.08;
-  font-weight: 850;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
-  cursor: pointer;
-  position: relative;
-  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
-  text-align: left;
-}
-
-[dir="rtl"] #composer .v46ProjectTypes button {
-  text-align: right;
-  padding: 0 14px 0 30px;
-}
-
-#composer .v46ProjectTypes button:nth-child(1),
-#composer .v46ProjectTypes button[data-type="villa"] { --v60c: 64, 205, 255; }   /* Villa */
-#composer .v46ProjectTypes button:nth-child(2),
-#composer .v46ProjectTypes button[data-type="appartement"] { --v60c: 180, 138, 255; } /* Appartement */
-#composer .v46ProjectTypes button:nth-child(3),
-#composer .v46ProjectTypes button[data-type="residence"] { --v60c: 103, 233, 166; } /* Résidence */
-#composer .v46ProjectTypes button:nth-child(4),
-#composer .v46ProjectTypes button[data-type="commercial"] { --v60c: 244, 189, 99; }  /* Commercial */
-#composer .v46ProjectTypes button:nth-child(5),
-#composer .v46ProjectTypes button[data-type="bureau"] { --v60c: 255, 135, 164; }  /* Bureau */
-#composer .v46ProjectTypes button:nth-child(6),
-#composer .v46ProjectTypes button[data-type="hotel"] { --v60c: 111, 159, 255; }   /* Hôtel */
-
-#composer .v46ProjectTypes button:hover {
-  transform: translateY(-1px);
-  border-color: rgba(var(--v60c), 0.65);
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v60c), 0.15),
-    rgba(var(--v60c), 0.05)
-  );
-}
-
-#composer .v46ProjectTypes button.selected {
-  border-color: rgba(var(--v60c), 0.92);
-  background: linear-gradient(
-    135deg,
-    rgba(var(--v60c), 0.25),
-    rgba(var(--v60c), 0.09)
-  );
-  color: #fff;
-  box-shadow: 0 0 0 1px rgba(var(--v60c), 0.10), 0 7px 22px rgba(var(--v60c), 0.10);
-}
-
-#composer .v46ProjectTypes button i {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 22px;
-  min-width: 22px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: rgb(var(--v60c));
-  color: #061014;
-  font-size: 9px;
-  font-weight: 950;
-  font-style: normal;
-}
-
-[dir="rtl"] #composer .v46ProjectTypes button i {
-  right: auto;
-  left: 8px;
-}
-
-/* Row 2: Counters */
-#composer .v46Counters {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-#composer .v46Counter {
-  min-height: 54px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 5px 7px 5px 13px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 12px;
-  background: #0b1214;
-}
-
-#composer .v46Counter > span {
-  color: #dfe6e4;
-  font-size: 14px;
-  font-weight: 850;
-}
-
-#composer .v46Counter > div {
-  height: 38px;
-  display: grid;
-  grid-template-columns: 36px 42px 36px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 10px;
-}
-
-#composer .v46Counter button {
-  border: 0;
-  background: #10181a;
-  color: #fff;
-  font-size: 18px;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  transition: background 0.15s, color 0.15s;
-}
-
-#composer .v46Counter button:hover:not(:disabled) {
-  color: var(--cyan, #55dcff);
-  background: rgba(85, 220, 255, 0.08);
-}
-
-#composer .v46Counter button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-#composer .v46Counter b {
-  display: grid;
-  place-items: center;
-  border-inline: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--cyan, #55dcff);
-  font-size: 16px;
-}
-
-#composer .v46Counter.basement {
-  border-left: 3px solid rgba(172, 132, 255, 0.6);
-}
-
-#composer .v46Counter.upper {
-  border-left: 3px solid rgba(85, 220, 255, 0.6);
-}
-
-[dir="rtl"] #composer .v46Counter.basement {
-  border-left: 1px solid rgba(255, 255, 255, 0.10);
-  border-right: 3px solid rgba(172, 132, 255, 0.6);
-}
-
-[dir="rtl"] #composer .v46Counter.upper {
-  border-left: 1px solid rgba(255, 255, 255, 0.10);
-  border-right: 3px solid rgba(85, 220, 255, 0.6);
-}
-
-/* Row 3: Base Surfaces (RDC + Extérieur) */
-#composer .v46BaseSurfaces {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-#composer .v46BaseSurface {
-  min-height: 52px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 150px;
-  align-items: center;
-  gap: 9px;
-  padding: 6px 8px 6px 13px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 12px;
-  background: #0b1214;
-  cursor: text;
-}
-
-#composer .v46BaseSurface.rdc {
-  border-left: 3px solid rgba(125, 229, 174, 0.6);
-}
-
-#composer .v46BaseSurface.exterior {
-  border-left: 3px solid rgba(244, 184, 95, 0.6);
-}
-
-[dir="rtl"] #composer .v46BaseSurface.rdc {
-  border-left: 1px solid rgba(255, 255, 255, 0.10);
-  border-right: 3px solid rgba(125, 229, 174, 0.6);
-}
-
-[dir="rtl"] #composer .v46BaseSurface.exterior {
-  border-left: 1px solid rgba(255, 255, 255, 0.10);
-  border-right: 3px solid rgba(244, 184, 95, 0.6);
-}
-
-#composer .v46BaseSurface.filled {
-  background: rgba(125, 229, 174, 0.035);
-  border-color: rgba(125, 229, 174, 0.3);
-}
-
-#composer .v46BaseSurface > b {
-  font-size: 14px;
-  color: #f0f4f2;
-  font-weight: 800;
+#composer .progress button::after {
+  grid-column: 2 !important;
+  display: block !important;
+  margin-top: 1px;
+  color: #7b8783;
+  font-size: 7.5px;
+  font-weight: 650;
   line-height: 1.2;
 }
 
-#composer .v46BaseSurface b small {
-  color: #697570;
-  font-size: 9px;
-  font-weight: 600;
-  display: block;
+#composer .progress button[data-step="project"]::after { content: 'Type et surfaces'; }
+#composer .progress button[data-step="services"]::after { content: 'Options et calcul'; }
+#composer .progress button[data-step="contact"]::after { content: 'Client et validation'; }
+
+[dir="rtl"] #composer .progress button[data-step="project"]::after { content: 'النوع والمساحات'; }
+[dir="rtl"] #composer .progress button[data-step="services"]::after { content: 'الخيارات والحساب'; }
+[dir="rtl"] #composer .progress button[data-step="contact"]::after { content: 'العميل والتأكيد'; }
+
+#composer .progress button.active {
+  background: #f5f7f6 !important;
+  color: #17201e !important;
+  box-shadow: inset 0 0 0 1px #d9e1de !important;
 }
 
-#composer .v46BaseSurface > span,
-#composer .v46LevelChip > span {
-  height: 38px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 4px;
-  padding: 0 8px;
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 10px;
-  background: #101719;
+#composer .progress button.active i {
+  background: var(--v86-cyan, #3bd4ea) !important;
+  border-color: var(--v86-cyan, #3bd4ea) !important;
+  color: #062027 !important;
 }
 
-#composer .v46BaseSurface input,
-#composer .v46LevelChip input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: #fff;
-  text-align: right;
-  font-size: 17px;
-  font-weight: 850;
-  font-family: monospace, sans-serif;
+#composer .progress button.active::after {
+  color: #697572 !important;
 }
 
-[dir="rtl"] #composer .v46BaseSurface input,
-[dir="rtl"] #composer .v46LevelChip input {
-  text-align: left;
+#composer .progress button.done {
+  color: #177653 !important;
 }
 
-#composer .v46BaseSurface em,
-#composer .v46LevelChip em {
-  color: #8d9995;
-  font-size: 9px;
-  font-style: normal;
-  font-weight: 800;
+#composer .progress button.done i {
+  background: #e5f7ef !important;
+  border-color: #78c9aa !important;
+  color: #177653 !important;
 }
 
-/* Row 4: Extra Levels chips */
-#composer .v46ExtraRow {
-  min-height: 64px;
-}
-
-#composer .v46ExtraLevels {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  padding: 2px 0;
-}
-
-#composer .v46ExtraLevels::-webkit-scrollbar {
-  display: none;
-}
-
-#composer .v46NoExtra {
-  color: #64716d;
-  font-size: 12px;
-  font-style: italic;
-}
-
-#composer .v46LevelChip {
-  flex: 0 0 170px;
-  height: 48px;
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  align-items: center;
-  gap: 6px;
-  padding: 5px 6px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 11px;
-  background: #0b1214;
-}
-
-#composer .v46LevelChip > b {
-  display: grid;
-  place-items: center;
-  height: 36px;
-  border-radius: 8px;
-  color: var(--cyan, #55dcff);
-  background: rgba(85, 220, 255, 0.07);
-  font-size: 11px;
-  font-weight: 850;
-}
-
-#composer .v46LevelChip.basement > b {
-  color: var(--violet, #ac84ff);
-  background: rgba(172, 132, 255, 0.08);
-}
-
-#composer .v46LevelChip.filled {
-  border-color: rgba(125, 229, 174, 0.35);
-  background: rgba(125, 229, 174, 0.03);
-}
-
-/* Row 5: Action Row */
-#composer .v46ActionRow {
-  grid-template-columns: minmax(0, 1fr) auto;
-  min-height: 68px;
-  background: rgba(0, 0, 0, 0.14);
-}
-
-#composer .v46ActionRow .v46RowLabel {
-  display: none;
-}
-
-#composer .v46CompactTotal {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-#composer .v46CompactTotal small {
-  color: #75817d;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-#composer .v46CompactTotal b {
-  color: var(--cyan, #55dcff);
-  font-size: 22px;
-  font-family: monospace, sans-serif;
-  font-weight: 850;
-}
-
-#composer .v46CompactTotal span {
-  color: #78837f;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-#composer .v46NextBtn {
-  min-width: 140px !important;
-  min-height: 48px !important;
-  padding: 0 24px !important;
-  border-radius: 999px !important;
-  font-size: 13px !important;
-  font-weight: 950 !important;
-  white-space: nowrap !important;
-  background: linear-gradient(135deg, #55dcff, #0099cc) !important;
-  color: #041014 !important;
-  border: none !important;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-#composer .v46NextBtn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 0 20px rgba(85, 220, 255, 0.4);
-}
-
-#composer .v46NextBtn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+/* ---------- Viewport / Step Host ---------- */
+#composer .composerViewport {
+  width: min(1050px, 100%) !important;
+  margin: 0 auto !important;
+  min-height: 0 !important;
+  border-radius: 22px !important;
 }
 
 /* ==========================================================================
-   Step 2: Services Screen (Two Fixed Columns)
+   STEP 1: PROJECT SCREEN (V86 Studio + V88 White Frames)
    ========================================================================== */
-#composer .v46ServicesScreen {
-  width: min(1080px, calc(100vw - 28px)) !important;
-  height: calc(100dvh - var(--nav, 72px) - 205px);
-  min-height: 480px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(340px, 0.88fr);
-  gap: 12px;
+
+#composer .v86ProjectScreen {
+  position: relative !important;
+  width: min(1220px, 100%) !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--v86-text, #17201e) !important;
+}
+
+/* Desktop architectural side notes */
+#composer .v86ProjectDecor {
+  position: absolute;
+  top: 10px;
+  color: #536167;
+  font-size: 10px;
+  letter-spacing: .28em;
+  line-height: 1.65;
+  pointer-events: none;
+}
+
+#composer .v86ProjectDecor strong {
+  display: block;
+  font-size: 92px;
+  line-height: .85;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.12);
+  letter-spacing: -.06em;
+}
+
+#composer .v86ProjectDecor span {
+  display: block;
+  margin-top: 24px;
+}
+
+#composer .v86ProjectDecor i {
+  display: block;
+  width: 32px;
+  height: 2px;
+  margin-top: 10px;
+  background: var(--v86-gold, #c49b51);
+}
+
+#composer .v86ProjectDecorLeft {
+  right: calc(100% + 46px);
+  width: 110px;
+}
+
+#composer .v86ProjectDecorRight {
+  left: calc(100% + 42px);
+  width: 130px;
+  top: -58px;
+  padding-left: 26px;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+[dir="rtl"] #composer .v86ProjectDecorLeft {
+  right: auto;
+  left: calc(100% + 46px);
+}
+
+[dir="rtl"] #composer .v86ProjectDecorRight {
+  left: auto;
+  right: calc(100% + 42px);
+  padding-left: 0;
+  padding-right: 26px;
+  border-left: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* 1 / 2 / 3 White Main Functional Cards */
+#composer .v86TypeBlock,
+#composer .v86LevelsBlock,
+#composer .v86SurfaceBlock {
+  width: 100% !important;
+  margin: 0 0 12px !important;
+  padding: 16px 18px !important;
+  border-radius: 18px !important;
+  background: #ffffff !important;
+  color: #17201e !important;
+  border: 1px solid rgba(198, 211, 206, .95) !important;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, .12) !important;
+}
+
+#composer .v86BlockHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 13px;
+}
+
+#composer .v86BlockHead h3 {
+  margin: 0 !important;
+  color: #17201e !important;
+  font-size: 18px !important;
+  line-height: 1.2 !important;
+  font-weight: 850 !important;
+}
+
+#composer .v86BlockHead h3 b {
+  color: #17201e;
+  font-weight: 900;
+}
+
+#composer .v86BlockHead p {
+  margin: 3px 0 0 !important;
+  color: #76827e !important;
+  font-size: 10px !important;
+  line-height: 1.45 !important;
+}
+
+#composer .v86BlockHead.compact {
+  margin-bottom: 10px;
+}
+
+/* 1. Project types: visual image cards */
+#composer .v86ProjectTypes {
+  display: grid !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+#composer .v86ProjectTypes button {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  height: 124px !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid #d5dfdb !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  color: #17201e !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  box-shadow: 0 5px 16px rgba(31, 53, 47, .06) !important;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease !important;
+}
+
+[dir="rtl"] #composer .v86ProjectTypes button {
+  text-align: right !important;
+}
+
+#composer .v86ProjectTypes button:hover {
+  background: #fbfcfb !important;
+  border-color: #98aaa4 !important;
+  transform: translateY(-2px) !important;
+}
+
+#composer .v86ProjectTypes button.selected {
+  background: #ffffff !important;
+  border: 2px solid #28c6dd !important;
+  box-shadow: 0 0 0 3px rgba(40, 198, 221, .10), 0 8px 20px rgba(31, 53, 47, .08) !important;
+}
+
+#composer .v86ProjectImage {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 67px;
   overflow: hidden;
+  background: #eef2f0;
+}
+
+#composer .v86ProjectImage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(10, 20, 22, .10));
+}
+
+#composer .v86ProjectImage img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  filter: saturate(.82) brightness(.95);
+  transition: .2s ease;
+}
+
+#composer .v86ProjectTypes button:hover img,
+#composer .v86ProjectTypes button.selected img {
+  filter: saturate(.95) brightness(1);
+  transform: scale(1.025);
+}
+
+#composer .v86SelectedCheck {
+  position: absolute !important;
+  z-index: 3 !important;
+  top: 8px !important;
+  right: 8px !important;
+  width: 26px !important;
+  height: 26px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 50% !important;
+  background: var(--v86-cyan, #3bd4ea) !important;
+  color: #062027 !important;
+  font-size: 12px !important;
+  font-style: normal !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .25) !important;
+}
+
+[dir="rtl"] #composer .v86SelectedCheck {
+  right: auto !important;
+  left: 8px !important;
+}
+
+#composer .v86ProjectCardFoot {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 7px;
+  align-items: center;
+  height: 57px;
+  padding: 8px 10px;
+  background: #ffffff !important;
+}
+
+#composer .v86ProjectCardFoot > em {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  border: 1px solid #d2dcd8;
+  background: #f4f7f6;
+  color: #31403b;
+  font-size: 16px;
+  font-style: normal;
+}
+
+#composer .v86ProjectTypes button.selected .v86ProjectCardFoot > em {
+  background: #e7fafd !important;
+  border-color: #4acde0 !important;
+  color: #087f92 !important;
+}
+
+#composer .v86ProjectCardFoot b {
+  display: block;
+  color: #1d2925 !important;
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+  font-weight: 800;
+}
+
+#composer .v86ProjectCardFoot small {
+  display: block;
+  margin-top: 3px;
+  color: #7b8783 !important;
+  font-size: 7.5px !important;
+  line-height: 1.1 !important;
+}
+
+/* 2. Levels Block */
+#composer .v86LevelsBlock {
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
+}
+
+#composer .v86LevelControls {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+}
+
+#composer .v86LevelControls .v47LevelCounter {
+  min-height: 52px !important;
+  padding: 7px 8px 7px 13px !important;
+  border: 1px solid #d5dfdb !important;
+  border-radius: 12px !important;
+  background: #f7f9f8 !important;
+  color: #1f2c28 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+#composer .v86LevelControls .v47LevelCounter > span {
+  color: #34423d !important;
+  font-size: 10px !important;
+  font-weight: 850;
+}
+
+#composer .v86LevelControls .v47Counter {
+  background: #ffffff !important;
+  border: 1px solid #cfd9d5 !important;
+  border-radius: 9px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 2px !important;
+  gap: 4px !important;
+}
+
+#composer .v86LevelControls .v47Counter button {
+  width: 32px !important;
+  height: 32px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 7px !important;
+  border: 0 !important;
+  background: #f7f9f8 !important;
+  color: #3e4b46 !important;
+  font-size: 15px !important;
+  cursor: pointer;
+}
+
+#composer .v86LevelControls .v47Counter b {
+  min-width: 30px !important;
+  text-align: center !important;
+  color: #07859a !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+}
+
+#composer .v86ExtraLevels {
+  margin-top: 10px !important;
+  padding-top: 10px !important;
+  border-top: 1px solid #e3ebe7 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+#composer .v86ExtraLevels .v47LevelChip {
+  background: #f7f9f8 !important;
+  border: 1px solid #d5dfdb !important;
+  border-radius: 9px !important;
+  padding: 6px 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+#composer .v86ExtraLevels .v47LevelChip label {
+  color: #34423d !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  margin: 0 !important;
+}
+
+#composer .v86ExtraLevels .v47InputShell {
+  background: #ffffff !important;
+  border: 1px solid #cfd9d5 !important;
+  border-radius: 7px !important;
+  padding: 2px 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+#composer .v86ExtraLevels .v47InputShell input {
+  width: 58px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #17201e !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+  text-align: right !important;
+}
+
+#composer .v86ExtraLevels .v47InputShell em {
+  font-size: 9px !important;
+  color: #7a8682 !important;
+  font-style: normal;
+}
+
+/* 3. Surface Block */
+#composer .v86SurfaceBlock {
+  padding-bottom: 12px !important;
+}
+
+#composer .v86SurfaceGrid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 250px !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+}
+
+#composer .v86SurfaceCard {
+  min-height: 76px !important;
+  display: grid !important;
+  grid-template-columns: 44px minmax(0, 1fr) 146px !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 12px !important;
+  border: 1px solid #d4ded9 !important;
+  border-radius: 13px !important;
+  background: #f7f9f8 !important;
+  color: #17201e !important;
+}
+
+#composer .v86SurfaceIcon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #e9efed;
+  color: #50615b;
+  font-size: 21px;
+}
+
+#composer .v86SurfaceIcon.exterior {
+  background: #e6f6ef;
+  color: #23845f;
+}
+
+#composer .v86SurfaceCopy b {
+  display: block;
+  color: #1f2c28 !important;
+  font-size: 11px !important;
+  font-weight: 850;
+}
+
+#composer .v86SurfaceCopy small {
+  display: block;
+  margin-top: 4px;
+  color: #76827e !important;
+  font-size: 8px !important;
+  line-height: 1.3 !important;
+}
+
+#composer .v86SurfaceCard .v47InputShell {
+  min-width: 0 !important;
+  height: 44px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  border: 1px solid #cfd9d5 !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  padding: 0 8px !important;
+}
+
+#composer .v86SurfaceCard .v47InputShell input {
+  color: #17201e !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  text-align: right !important;
+  border: 0 !important;
+  background: transparent !important;
+  width: 100% !important;
+}
+
+[dir="rtl"] #composer .v86SurfaceCard .v47InputShell input {
+  text-align: left !important;
+}
+
+#composer .v86SurfaceCard .v47InputShell em {
+  color: #6f7c77 !important;
+  font-size: 10px !important;
+  font-style: normal;
+  margin-left: 4px;
+}
+
+/* Surface total card: light cyan highlight */
+#composer .v86TotalCard {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 12px 14px;
+  border: 1px solid #28c6dd !important;
+  border-radius: 13px;
+  background: #edfafd !important;
+  box-shadow: none !important;
+}
+
+#composer .v86TotalIcon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #d9f6fa !important;
+  color: #07859a !important;
+  font-size: 18px;
+}
+
+#composer .v86TotalCard small {
+  display: block;
+  color: #087f92 !important;
+  font-size: 8px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+#composer .v86TotalCard b {
+  display: block;
+  margin-top: 3px;
+  color: #17201e !important;
+  font-size: 24px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+#composer .v86TotalCard p {
+  margin: 6px 0 0;
+  padding-top: 6px;
+  border-top: 1px solid rgba(40, 198, 221, .22) !important;
+  color: #6a7974 !important;
+  font-size: 8.5px;
+  line-height: 1.35;
+}
+
+#composer .v86TotalCard p strong {
+  color: #087f92 !important;
+}
+
+/* Footer row: transparent zone */
+#composer .v86ProjectFooter {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  margin-top: 14px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#composer .v86Reset {
+  min-height: 44px !important;
+  padding: 0 16px !important;
+  border: 1px solid #cfd9d5 !important;
+  border-radius: 9px !important;
+  background: #ffffff !important;
+  color: #34413d !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .08) !important;
+  transition: all .16s ease;
+}
+
+#composer .v86Reset:hover {
+  background: #f7f9f8 !important;
+  border-color: #b7c4bf !important;
+}
+
+#composer .v86Next {
+  min-height: 44px !important;
+  padding: 0 24px !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  background: var(--v86-cyan, #3bd4ea) !important;
+  color: #062027 !important;
+  font-size: 11px !important;
+  font-weight: 950 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0 !important;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(59, 212, 234, .20) !important;
+  transition: all .16s ease;
+}
+
+#composer .v86Next:hover {
+  background: #6ce4f5 !important;
+}
+
+#composer .v86Next > span,
+#composer .v47Next > span,
+#composer .nextBtn > span.arrow,
+#composer .nextBtn > i.arrow {
+  display: none !important;
+}
+
+/* ==========================================================================
+   STEP 2: SERVICES SCREEN (V82 Solid + V91 Cards + V93 Layout)
+   ========================================================================== */
+
+#composer .v46ServicesScreen {
+  width: 100% !important;
+  margin: 0 auto !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.12fr) minmax(390px, .88fr) !important;
+  gap: 14px !important;
+  height: auto;
+  min-height: 520px;
 }
 
 #composer .v46AvailableColumn,
 #composer .v46SelectedColumn {
-  min-height: 0;
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 18px;
-  background: rgba(5, 10, 12, 0.88);
-  backdrop-filter: blur(16px);
-  overflow: hidden;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .22) !important;
 }
 
+/* Left Column: Light Paper Card */
 #composer .v46AvailableColumn {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  border: 1px solid var(--v82-line, #d7dfdc) !important;
+  background: var(--v82-paper, #f4f6f4) !important;
+  color: var(--v82-ink, #1b2522) !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
 }
 
-#composer .v46SelectedColumn {
-  display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+#composer .v46AvailableColumn .v46ColumnHead {
+  border-bottom: 1px solid var(--v82-line, #d7dfdc) !important;
+  background: #ffffff !important;
+  min-height: 64px !important;
+  padding: 11px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
 }
 
-#composer .v46ColumnHead {
-  min-height: 58px;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.075);
-}
-
-#composer .v46ColumnHead small {
-  display: block;
-  color: #65716d;
-  font-size: 8px;
-  font-weight: 900;
-  letter-spacing: 0.09em;
+#composer .v46AvailableColumn .v46ColumnHead small {
+  color: #82908b !important;
+  font-size: 8px !important;
+  font-weight: 850 !important;
+  letter-spacing: .08em;
   text-transform: uppercase;
 }
 
-#composer .v46ColumnHead h3 {
-  margin: 2px 0 0;
-  font-size: 15px;
-  font-weight: 800;
-  color: #fff;
+#composer .v46AvailableColumn .v46ColumnHead h3 {
+  margin: 2px 0 0 !important;
+  color: #1a2421 !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
 }
 
-#composer .v46ColumnHead > span {
-  min-width: 26px;
-  height: 26px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: rgba(85, 220, 255, 0.08);
-  color: var(--cyan, #55dcff);
-  font-size: 9px;
-  font-weight: 900;
+#composer .v46AvailableColumn .v46ColumnHead > span {
+  border-radius: 7px !important;
+  background: #e5f7fa !important;
+  color: #0b7183 !important;
+  min-width: 26px !important;
+  height: 26px !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
 }
 
-#composer .v46AvailableScroll,
-#composer .v46SelectedScroll {
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  padding: 8px;
+#composer .v46AvailableScroll {
+  padding: 9px !important;
+  background: var(--v82-paper, #f4f6f4) !important;
+  overflow-y: auto !important;
+  max-height: 620px;
 }
 
-/* Left Column: Available Service Card */
 #composer .v46AvailableService {
-  min-height: 64px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 62px;
-  align-items: stretch;
-  gap: 6px;
-  margin-bottom: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 13px;
-  background: #091012;
-  transition: border-color 0.15s, background 0.15s;
+  min-height: 66px !important;
+  margin-bottom: 7px !important;
+  border: 1px solid #d7dfdc !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 66px !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+  transition: border-color .15s ease, background .15s ease;
 }
 
 #composer .v46AvailableService:hover {
-  border-color: rgba(85, 220, 255, 0.28);
+  border-color: #aab6b2 !important;
 }
 
 #composer .v46AvailableService.selected {
-  border-color: rgba(85, 220, 255, 0.45);
-  background: rgba(85, 220, 255, 0.05);
+  border-color: #41bfd4 !important;
+  background: #edfafd !important;
+  box-shadow: inset 3px 0 0 var(--v82-accent, #42d7ee) !important;
+}
+
+[dir="rtl"] #composer .v46AvailableService.selected {
+  box-shadow: inset -3px 0 0 var(--v82-accent, #42d7ee) !important;
 }
 
 #composer .v46ServiceAdd {
-  min-width: 0;
-  border: 0;
-  background: transparent;
-  color: #fff;
-  display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  text-align: left;
-  padding: 8px 10px;
+  min-width: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #1f2a27 !important;
+  display: grid !important;
+  grid-template-columns: 28px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 12px !important;
+  text-align: left !important;
   cursor: pointer;
 }
 
 [dir="rtl"] #composer .v46ServiceAdd {
-  text-align: right;
+  text-align: right !important;
 }
 
 #composer .v46ServiceAdd > i {
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  width: 24px !important;
+  height: 24px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 1px solid #c9d3cf !important;
+  border-radius: 7px !important;
+  background: #f4f6f4 !important;
+  color: #62706b !important;
+  font-size: 12px !important;
   font-style: normal;
-  color: #a8b2ae;
-  font-size: 11px;
 }
 
 #composer .v46AvailableService.selected .v46ServiceAdd > i {
-  background: var(--cyan, #55dcff);
-  border-color: var(--cyan, #55dcff);
-  color: #041014;
-  font-weight: 900;
-}
-
-#composer .v46ServiceAdd span {
-  min-width: 0;
+  background: var(--v82-accent, #42d7ee) !important;
+  border-color: var(--v82-accent, #42d7ee) !important;
+  color: #062127 !important;
 }
 
 #composer .v46ServiceAdd span b {
   display: block;
-  font-size: 13px;
-  font-weight: 750;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #fff;
+  color: #26322e !important;
+  font-size: 11px !important;
+  font-weight: 850;
+  line-height: 1.25;
 }
 
 #composer .v46ServiceAdd span small {
   display: block;
   margin-top: 2px;
-  color: #72807b;
-  font-size: 10px;
+  color: #7c8984 !important;
+  font-size: 8px !important;
 }
 
 #composer .v46ServiceAdd > strong {
-  color: var(--cyan, #55dcff);
-  font-size: 13px;
-  font-family: monospace, sans-serif;
+  color: #0a859b !important;
+  font-size: 12px !important;
+  font-weight: 900;
   white-space: nowrap;
 }
 
 #composer .v46ServiceInfo {
-  border: 0;
-  border-left: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.02);
-  color: #aeb8b4;
-  font-size: 10px;
-  font-weight: 800;
+  border: 0 !important;
+  border-left: 1px solid #dde4e2 !important;
+  background: #f7f9f7 !important;
+  color: #65736e !important;
+  font-size: 9px !important;
+  font-weight: 850;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: all .15s ease;
 }
 
 [dir="rtl"] #composer .v46ServiceInfo {
-  border-left: 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  border-left: 0 !important;
+  border-right: 1px solid #dde4e2 !important;
 }
 
 #composer .v46ServiceInfo:hover {
-  background: rgba(85, 220, 255, 0.08);
-  color: var(--cyan, #55dcff);
+  background: #eef2ef !important;
+  color: #26322e !important;
 }
 
-/* Right Column: Total Dock & Selected Services */
+/* Right Column: Dark Solid Card */
+#composer .v46SelectedColumn {
+  border: 1px solid #293438 !important;
+  background: var(--v82-dark, #0f1618) !important;
+  color: #ffffff !important;
+  min-width: 390px !important;
+  display: grid !important;
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+}
+
 #composer .v46TotalDock {
-  min-height: 72px;
-  padding: 10px 14px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid rgba(85, 220, 255, 0.16);
-  background: linear-gradient(135deg, rgba(85, 220, 255, 0.085), rgba(5, 10, 12, 0.96));
-  box-shadow: 0 9px 25px rgba(0, 0, 0, 0.16);
-  z-index: 4;
+  min-height: 76px !important;
+  padding: 11px 13px !important;
+  border-bottom: 1px solid #2a3639 !important;
+  background: #10191b !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
 }
 
 #composer .v46TotalDock small {
   display: block;
-  color: #71807b;
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: #7d8a86 !important;
+  font-size: 8px !important;
+  font-weight: 850;
+  letter-spacing: .08em;
 }
 
 #composer .v46TotalDock strong {
   display: block;
   margin-top: 2px;
-  color: var(--cyan, #55dcff);
-  font-size: 22px;
-  font-family: monospace, sans-serif;
-  font-weight: 850;
+  color: var(--v82-accent, #42d7ee) !important;
+  font-size: 22px !important;
+  font-weight: 950 !important;
+  line-height: 1;
 }
 
 #composer .v46TotalDock .nextBtn {
-  min-height: 42px !important;
+  min-height: 44px !important;
   padding: 0 18px !important;
-  font-size: 11px !important;
-  border-radius: 999px !important;
-  background: linear-gradient(135deg, #55dcff, #0099cc) !important;
-  color: #041014 !important;
-  font-weight: 900 !important;
-  border: none !important;
+  border: 1px solid var(--v82-accent, #42d7ee) !important;
+  border-radius: 9px !important;
+  background: var(--v82-accent, #42d7ee) !important;
+  color: #072027 !important;
+  font-size: 10px !important;
+  font-weight: 950 !important;
   cursor: pointer;
-  white-space: nowrap;
+  transition: all .16s ease;
 }
 
-#composer .v46SelectedService {
-  margin-bottom: 8px;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 12px;
-  background: #091012;
+#composer .v46TotalDock .nextBtn:hover {
+  background: #6ce4f5 !important;
 }
 
-#composer .v46SelectedServiceTop {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 9px;
+#composer .v46SelectedColumn .v46ColumnHead {
+  border-bottom: 1px solid #2b3639 !important;
+  background: #121b1e !important;
+  min-height: 54px !important;
+  padding: 9px 13px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
 }
 
-#composer .v46SelectedServiceTop span {
-  min-width: 0;
+#composer .v46SelectedColumn .v46ColumnHead small {
+  color: #6f7e7a !important;
+  font-size: 8px !important;
+  font-weight: 850;
+  text-transform: uppercase;
 }
 
-#composer .v46SelectedServiceTop b {
-  display: block;
-  font-size: 13px;
-  font-weight: 750;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-#composer .v46SelectedServiceTop small {
-  display: block;
-  margin-top: 2px;
-  color: #6f7c78;
-  font-size: 10px;
-}
-
-#composer .v46SelectedServiceTop > strong {
-  flex: 0 0 auto;
-  color: var(--cyan, #55dcff);
-  font-size: 13px;
-  font-family: monospace, sans-serif;
-  white-space: nowrap;
-}
-
-#composer .v46SelectedCalc {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.065);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-#composer .v46SelectedCalc > span {
-  color: #8a9893;
-  font-size: 11px;
-  font-family: monospace, sans-serif;
-  flex: 1 1 auto;
-}
-
-#composer .v46SelectedCalc .v46Actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-#composer .v46SelectedCalc button {
-  min-height: 28px;
-  padding: 0 8px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(255, 255, 255, 0.025);
-  color: #aeb8b4;
-  font-size: 10px;
-  font-weight: 750;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-#composer .v46SelectedCalc button:hover {
-  border-color: rgba(85, 220, 255, 0.3);
-  color: #fff;
-}
-
-#composer .v46SelectedCalc button.remove {
-  color: #ff9d98;
-  font-size: 15px;
-  line-height: 1;
-  padding: 0 8px;
-}
-
-#composer .v46SelectedCalc button.remove:hover {
-  background: rgba(255, 100, 100, 0.12);
-  border-color: #ff9d98;
-}
-
-#composer .v46SelectionEmpty {
-  min-height: 160px;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  color: #697570;
-  font-size: 12px;
-  font-style: italic;
-}
-
-/* Quantity / Hours Stepper and Fields */
-.v74QtyField {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 32px;
-  padding: 2px 6px;
-  border: 1px solid rgba(244, 184, 95, 0.30);
-  border-radius: 8px;
-  background: rgba(244, 184, 95, 0.05);
-}
-
-.v74QtyField span {
-  font-size: 10px;
-  color: #e8c987;
+#composer .v46SelectedColumn .v46ColumnHead h3 {
+  margin: 2px 0 0 !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
   font-weight: 850;
 }
 
-.v74QtyField input {
-  width: 52px;
-  height: 26px;
-  min-width: 0;
-  padding: 0 4px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 6px;
-  background: #0c1315;
-  color: #fff;
-  font-size: 11px;
+#composer .v46SelectedColumn .v46ColumnHead > span {
+  border-radius: 7px !important;
+  background: #1d3035 !important;
+  color: #68e0f3 !important;
+  min-width: 26px !important;
+  height: 26px !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+}
+
+#composer .v46SelectedScroll {
+  padding: 9px !important;
+  background: var(--v82-dark, #0f1618) !important;
+  overflow-y: auto !important;
+  max-height: 540px;
+}
+
+/* Selected Service Card — V91 Clean White Card */
+#composer .v91ServiceCard {
+  width: calc(100% - 16px) !important;
+  max-width: calc(100% - 16px) !important;
+  margin: 8px !important;
+  padding: 13px !important;
+  display: block !important;
+  border: 1px solid #d4ddda !important;
+  border-radius: 12px !important;
+  background: #ffffff !important;
+  color: #17201e !important;
+  overflow: hidden !important;
+}
+
+#composer .v91ServiceHeader {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 0 10px !important;
+  border-bottom: 1px solid #e1e7e5 !important;
+}
+
+#composer .v91ServiceHeader > span {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+#composer .v91ServiceHeader b {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  color: #17201e !important;
+  -webkit-text-fill-color: #17201e !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  line-height: 1.3 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+#composer .v91ServiceHeader small {
+  display: block !important;
+  margin-top: 4px !important;
+  color: #75817d !important;
+  -webkit-text-fill-color: #75817d !important;
+  font-size: 10px !important;
+  line-height: 1.35 !important;
+}
+
+#composer .v91ServiceControls {
+  width: 100% !important;
+  margin: 10px 0 0 !important;
+  padding: 0 !important;
+}
+
+#composer .v91ServiceControls .v76ScopePick {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 7px !important;
+  width: 100% !important;
+}
+
+#composer .v91ServiceControls .v76ScopePick label {
+  min-height: 36px !important;
+  padding: 0 10px !important;
+  border: 1px solid #cbd6d2 !important;
+  border-radius: 8px !important;
+  background: #ffffff !important;
+  color: #5b6863 !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  cursor: pointer;
+}
+
+#composer .v91ServiceControls .v76ScopePick label.on {
+  border-color: #2fc4dc !important;
+  background: #e9fafd !important;
+  color: #087b8e !important;
+}
+
+#composer .v91ServiceControls .v76ScopePick input {
+  margin: 0 !important;
+  accent-color: #087b8e !important;
+}
+
+#composer .v91ServiceControls .v76NumberField,
+#composer .v91ServiceControls .v76ReferenceField {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 8px 10px !important;
+  border: 1px solid #d1dbd7 !important;
+  border-radius: 9px !important;
+  background: #f7f9f8 !important;
+  color: #26322e !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+#composer .v91ServiceControls .v76NumberField input,
+#composer .v91ServiceControls .v76ReferenceField input {
+  width: 80px !important;
+  padding: 4px 6px !important;
+  border: 1px solid #cfd8d5 !important;
+  border-radius: 6px !important;
+  background: #ffffff !important;
+  color: #17201e !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+}
+
+#composer .v91ServiceFooter {
+  width: 100% !important;
+  margin: 10px 0 0 !important;
+  padding: 10px 0 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  border-top: 1px solid #e1e7e5 !important;
+}
+
+#composer .v91ServiceFooter .v91ServicePrice {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: #08a0b9 !important;
+  -webkit-text-fill-color: #08a0b9 !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+#composer .v91ServiceActions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+  flex: 0 0 auto !important;
+}
+
+#composer .v91ServiceActions button {
+  width: auto !important;
+  min-width: 64px !important;
+  height: 37px !important;
+  min-height: 37px !important;
+  padding: 0 11px !important;
+  margin: 0 !important;
+  border: 1px solid #cbd6d2 !important;
+  border-radius: 8px !important;
+  background: #f7f9f8 !important;
+  color: #34413d !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  white-space: nowrap !important;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+#composer .v91ServiceActions button:hover {
+  background: #eef2ef !important;
+  border-color: #aab6b2 !important;
+}
+
+#composer .v91ServiceActions button.remove {
+  width: 37px !important;
+  min-width: 37px !important;
+  padding: 0 !important;
+  border-color: #efcaca !important;
+  background: #fff4f4 !important;
+  color: #c64242 !important;
+  font-size: 14px !important;
+}
+
+#composer .v91ServiceActions button.remove:hover {
+  background: #ffe8e8 !important;
+  border-color: #e59999 !important;
+}
+
+#composer .v91ServiceCard .v46SelectedCalc > span {
+  display: none !important;
+}
+
+#composer .v46SelectionEmpty {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
   text-align: center;
-  font-family: monospace, sans-serif;
-  font-weight: 700;
+  color: #798682;
+  font-size: 12px;
+  font-style: italic;
+  padding: 20px;
 }
 
-/* Interactive Scope Checkboxes for 2D Services */
-.v46ScopeChecks {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.08);
-}
-
-.v46ScopeChecks label {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  color: #cfd8d5;
-  cursor: pointer;
-  margin: 0;
-}
-
-.v46ScopeChecks input[type="checkbox"] {
-  width: 15px;
-  height: 15px;
-  accent-color: var(--cyan, #55dcff);
-  cursor: pointer;
-}
-
-.v46ScopeChecks strong {
-  color: var(--cyan, #55dcff);
-  font-family: monospace, sans-serif;
-}
-
-/* Budget field for percentage services */
+/* Budget field */
 #composer .v46BudgetField {
-  margin: 8px 8px 0;
-  padding: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 11px;
-  background: #0c1315;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  margin: 8px 8px 0 !important;
+  padding: 8px 12px !important;
+  border: 1px solid #2b3639 !important;
+  border-radius: 10px !important;
+  background: #111a1c !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
 }
 
 #composer .v46BudgetField > span {
-  font-size: 11px;
-  color: #cfd8d5;
-  font-weight: 750;
+  font-size: 11px !important;
+  color: #8fa09b !important;
+  font-weight: 800 !important;
 }
 
 #composer .v46BudgetField > div {
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 8px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  background: #101719;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  background: #091012 !important;
+  border: 1px solid #304044 !important;
+  border-radius: 7px !important;
+  padding: 3px 8px !important;
 }
 
 #composer .v46BudgetField input {
-  width: 110px;
-  background: transparent;
-  border: 0;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 800;
-  font-family: monospace, sans-serif;
-  text-align: right;
+  width: 100px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  text-align: right !important;
 }
 
 #composer .v46BudgetField b {
-  color: var(--cyan, #55dcff);
-  font-size: 10px;
+  color: var(--v86-cyan, #3bd4ea) !important;
+  font-size: 10px !important;
 }
 
-/* Responsive Rules for V75 Composer */
-@media (max-width: 1050px) and (min-width: 841px) {
-  #composer .v46ProjectScreen,
-  #composer .v46ServicesScreen {
-    width: 100% !important;
+/* ==========================================================================
+   STEP 3: CONTACT SCREEN (V82 Solid Paper Card)
+   ========================================================================== */
+
+#composerBody:has(.contactForm) {
+  width: 100% !important;
+  max-width: 880px !important;
+  margin: 0 auto !important;
+  padding: 14px !important;
+  border-radius: 20px !important;
+  background: var(--v82-paper, #f4f6f4) !important;
+  box-shadow: 0 22px 55px rgba(0, 0, 0, .28) !important;
+}
+
+#composer .clientType {
+  width: 100% !important;
+  margin: 0 0 10px !important;
+  padding: 4px !important;
+  border: 1px solid var(--v82-line, #d7dfdc) !important;
+  border-radius: 11px !important;
+  background: #e9eeeb !important;
+  display: flex !important;
+  gap: 6px !important;
+}
+
+#composer .clientType button {
+  flex: 1 1 0 !important;
+  min-height: 42px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: #64716c !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  cursor: pointer;
+  transition: all .16s ease;
+}
+
+#composer .clientType button.active {
+  background: #11191b !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+#composer .contactForm {
+  padding: 15px !important;
+  border: 1px solid var(--v82-line, #d7dfdc) !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  color: var(--v82-ink, #1b2522) !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+}
+
+#composer .contactForm .full {
+  grid-column: 1 / -1 !important;
+}
+
+#composer .contactForm label {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  color: #53605b !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+}
+
+#composer .contactForm input,
+#composer .contactForm select,
+#composer .contactForm textarea {
+  width: 100% !important;
+  border: 1px solid #cfd8d5 !important;
+  border-radius: 8px !important;
+  background: #f7f9f7 !important;
+  color: #1f2a27 !important;
+  padding: 9px 11px !important;
+  font-size: 12px !important;
+  box-shadow: none !important;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+#composer .contactForm input:focus,
+#composer .contactForm select:focus,
+#composer .contactForm textarea:focus {
+  outline: 0 !important;
+  border-color: #36b8cf !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(66, 215, 238, .12) !important;
+}
+
+#composer .contactForm textarea {
+  min-height: 70px !important;
+  resize: vertical;
+}
+
+#composer .contactTotal {
+  grid-column: 1 / -1 !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: #11191b !important;
+  color: #ffffff !important;
+  padding: 12px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+#composer .contactTotal strong {
+  display: block;
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 850;
+}
+
+#composer .contactTotal .tax {
+  display: block;
+  margin-top: 2px;
+  color: #7f8d88 !important;
+  font-size: 10px !important;
+}
+
+#composer .contactTotal > b {
+  color: var(--v82-accent, #42d7ee) !important;
+  font-size: 22px !important;
+  font-weight: 950 !important;
+}
+
+#composer .submitRow {
+  grid-column: 1 / -1 !important;
+  margin-top: 4px;
+}
+
+#composer .submitRow .btn {
+  width: 100% !important;
+  min-height: 46px !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  background: var(--v82-accent, #42d7ee) !important;
+  color: #062027 !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+
+#composer .submitRow .btn:hover {
+  background: #6ce4f5 !important;
+}
+
+/* ==========================================================================
+   STEP 4: DEVIS / SUCCESS SCREEN
+   ========================================================================== */
+
+#composer .success {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+#composer .facture-summary-box {
+  background: #ffffff !important;
+  border: 1px solid #d7dfdc !important;
+  border-radius: 16px !important;
+  color: #17201e !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .14) !important;
+}
+
+#composer .facture-summary-box strong {
+  color: #17201e !important;
+}
+
+#composer .facture-summary-box strong.cyan {
+  color: #08a0b9 !important;
+}
+
+/* ==========================================================================
+   RESPONSIVE: TABLET & SMALL DESKTOP (841px to 1180px)
+   ========================================================================== */
+
+@media (min-width: 841px) and (max-width: 1180px) {
+  #composer .composerShell {
+    width: calc(100% - 24px) !important;
+  }
+  #composer .v86ProjectTypes {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
   #composer .v46ServicesScreen {
-    grid-template-columns: minmax(0, 1fr) 340px !important;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, .86fr) !important;
+    gap: 10px !important;
+  }
+  #composer .v46SelectedColumn {
+    min-width: 0 !important;
   }
 }
+
+/* ==========================================================================
+   RESPONSIVE: MOBILE APP (max-width: 840px)
+   V89 + V91 + V93 Exact 2-Line Article Layout + Fixed Scroll Area
+   ========================================================================== */
 
 @media (max-width: 840px) {
-  #composer .v60ComposerHead {
-    width: calc(100vw - 28px) !important;
-    margin-bottom: 14px !important;
+  /* Screen behaves as native app viewport */
+  #composer.viewport {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    max-height: 100dvh !important;
+    padding-top: calc(56px + 6px) !important;
+    padding-bottom: calc(66px + max(8px, env(safe-area-inset-bottom)) + 6px) !important;
+    overflow: hidden !important;
   }
-  #composer .v60ComposerHead h2 {
-    font-size: clamp(28px, 7.5vw, 38px) !important;
-    text-align: left !important;
+
+  #composer .composerShell {
+    height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding-inline: 8px !important;
+    width: 100% !important;
   }
-  [dir="rtl"] #composer .v60ComposerHead h2 {
-    text-align: right !important;
+
+  /* Compact header */
+  #composer .composerShell .sectionHead {
+    flex: 0 0 auto !important;
+    margin: 0 0 6px !important;
+    padding-inline: 2px !important;
   }
-  #composer .progress {
-    width: calc(100vw - 26px) !important;
-    margin-bottom: 12px !important;
-    gap: 5px !important;
+
+  #composer .composerShell .sectionHead h2 {
+    font-size: 26px !important;
+    line-height: 1 !important;
+    margin: 1px 0 3px !important;
   }
-  #composer .progress > span {
-    min-width: 10px !important;
-    flex: 1 1 16px !important;
-  }
-  #composer .progress button {
-    flex: 0 1 auto !important;
-    min-height: 42px !important;
-    padding: 0 6px !important;
-    gap: 5px !important;
-  }
-  #composer .progress button i {
-    width: 27px !important;
-    min-width: 27px !important;
-    height: 27px !important;
+
+  #composer .composerShell .sectionHead::before {
     font-size: 9px !important;
   }
+
+  #composer .composerShell .sectionHead p,
+  #composer .composerShell .sectionHead::after {
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+  }
+
+  /* Compact stepper */
+  #composer .progress {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    margin: 0 0 6px !important;
+    padding: 4px !important;
+    min-height: 46px !important;
+    grid-template-columns: 1fr 14px 1fr 14px 1fr !important;
+  }
+
+  #composer .progress button {
+    min-height: 38px !important;
+    grid-template-columns: 26px 1fr !important;
+    padding: 4px 5px !important;
+    gap: 0 5px !important;
+  }
+
+  #composer .progress button i {
+    width: 25px !important;
+    height: 25px !important;
+    font-size: 8px !important;
+  }
+
   #composer .progress button span {
-    font-size: 12px !important;
+    font-size: 9px !important;
   }
-  #composer .v46ProjectScreen {
-    width: calc(100vw - 12px) !important;
-    border-radius: 17px !important;
+
+  #composer .progress button::after {
+    display: none !important;
   }
-  #composer .v46ProjectRow {
+
+  /* Main scrollable viewport */
+  #composer .composerViewport {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 0 0 88px !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  #composer .composerViewport::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* ---------- MOBILE STEP 1: PROJECT ---------- */
+  #composer .v86ProjectBlock {
+    margin: 0 0 7px !important;
+    padding: 9px !important;
+    border-radius: 13px !important;
+  }
+
+  #composer .v86ProjectTypes {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  #composer .v86ProjectTypes button {
+    width: 100% !important;
+    height: 106px !important;
+  }
+
+  #composer .v86ProjectImage {
+    height: 56px !important;
+  }
+
+  #composer .v86ProjectCardFoot {
+    height: 50px !important;
+    padding: 6px 7px !important;
+  }
+
+  #composer .v86LevelControls {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+  }
+
+  #composer .v86LevelControls .v47LevelCounter {
+    min-height: 48px !important;
+    padding: 5px 6px 5px 9px !important;
+  }
+
+  #composer .v86SurfaceGrid {
     grid-template-columns: 1fr !important;
     gap: 6px !important;
-    padding: 8px !important;
   }
-  #composer .v46RowLabel {
+
+  #composer .v86SurfaceCard {
+    min-height: 62px !important;
+    padding: 7px !important;
+    grid-template-columns: 34px minmax(0, 1fr) 108px !important;
+    gap: 7px !important;
+  }
+
+  #composer .v86SurfaceIcon {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 16px !important;
+  }
+
+  #composer .v86SurfaceCard .v47InputShell {
+    height: 40px !important;
+  }
+
+  #composer .v86TotalCard {
+    padding: 9px !important;
+    min-height: 72px !important;
+  }
+
+  #composer .v86TotalCard b {
+    font-size: 20px !important;
+  }
+
+  #composer .v86ProjectFooter {
+    position: sticky !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 80 !important;
+    width: 100% !important;
+    min-height: 64px !important;
+    margin: 8px 0 0 !important;
+    padding: 8px !important;
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    gap: 8px !important;
+    align-items: center !important;
+    background: #ffffff !important;
+    border: 1px solid #d4ded9 !important;
+    border-radius: 13px !important;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, .12) !important;
+  }
+
+  #composer .v86Reset {
+    min-width: 44px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border-radius: 10px !important;
+    font-size: 0 !important;
+  }
+
+  #composer .v86Reset span {
+    font-size: 19px !important;
+  }
+
+  #composer .v86Next {
+    width: 100% !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    padding: 0 14px !important;
+    border-radius: 10px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+    justify-content: center !important;
+  }
+
+  /* ---------- MOBILE STEP 2: V93 SERVICES SCREEN ---------- */
+  #composer .composerViewport:has(.v46ServicesScreen) {
+    overflow: hidden !important;
+    padding-bottom: 0 !important;
+    touch-action: none !important;
+  }
+
+  #composer .v46ServicesScreen {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    display: block !important;
+  }
+
+  #composer .v46ServicesScreen.v48StageAvailable .v46SelectedColumn {
     display: none !important;
   }
-  #composer .v46ProjectTypes {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)) !important;
-    max-height: 200px !important;
-    overflow-y: auto !important;
-    gap: 7px !important;
-    padding-right: 4px !important;
+
+  #composer .v46ServicesScreen.v48StageSelected .v46AvailableColumn {
+    display: none !important;
   }
-  [dir="rtl"] #composer .v46ProjectTypes {
-    padding-right: 0 !important;
-    padding-left: 4px !important;
-  }
-  #composer .v46ProjectTypes button {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    flex: none !important;
-    height: 50px !important;
-    padding: 0 28px 0 9px !important;
-    font-size: 12.5px !important;
-  }
-  [dir="rtl"] #composer .v46ProjectTypes button {
-    padding: 0 9px 0 28px !important;
-  }
-  #composer .v46ProjectTypes button i {
-    right: 6px !important;
-    width: 20px !important;
-    min-width: 20px !important;
-    height: 20px !important;
-  }
-  [dir="rtl"] #composer .v46ProjectTypes button i {
-    right: auto !important;
-    left: 6px !important;
-  }
-  #composer .v46Counters,
-  #composer .v46BaseSurfaces {
-    grid-template-columns: 1fr 1fr !important;
-  }
-  #composer .v46BaseSurface {
-    grid-template-columns: 1fr !important;
-    height: auto !important;
-  }
-  #composer .v46BaseSurface > span {
-    height: 38px !important;
-  }
-  #composer .v46ActionRow {
-    grid-template-columns: 1fr auto !important;
-  }
-  #composer .v46ServicesScreen {
-    height: auto !important;
-    display: block !important;
-    overflow: visible !important;
-  }
+
   #composer .v46AvailableColumn,
   #composer .v46SelectedColumn {
-    margin-bottom: 9px !important;
-    overflow: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: hidden !important;
+    margin: 0 !important;
   }
+
+  #composer .v48MobileServiceProgress {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    margin: 0 0 8px !important;
+    padding: 4px !important;
+    border: 1px solid #d6dfdc !important;
+    border-radius: 13px !important;
+    background: #ffffff !important;
+    box-shadow: 0 7px 18px rgba(0, 0, 0, .08) !important;
+  }
+
+  #composer .v48MobileServiceProgress span {
+    min-height: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    border-radius: 10px !important;
+    color: #66736e !important;
+    font-size: 10px !important;
+    font-weight: 850 !important;
+  }
+
+  #composer .v48MobileServiceProgress span b {
+    width: 22px !important;
+    height: 22px !important;
+    display: grid !important;
+    place-items: center !important;
+    border-radius: 50% !important;
+    background: #eef2f0 !important;
+    color: #66736e !important;
+    font-size: 9px !important;
+  }
+
+  #composer .v48MobileServiceProgress span.active {
+    color: #087b8e !important;
+    background: #e8fafd !important;
+    box-shadow: inset 0 0 0 1px #b8eaf2 !important;
+  }
+
+  #composer .v48MobileServiceProgress span.active b {
+    background: var(--v86-cyan, #3bd4ea) !important;
+    color: #062027 !important;
+  }
+
+  #composer .v48MobileServiceProgress span.done {
+    color: #347b60 !important;
+  }
+
+  #composer .v48MobileServiceProgress span.done b {
+    background: #e5f7ef !important;
+    color: #177653 !important;
+  }
+
+  #composer .v48MobileServiceBack {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: auto !important;
+    min-height: 38px !important;
+    margin: 0 0 8px !important;
+    padding: 0 12px !important;
+    border: 1px solid rgba(255, 255, 255, .20) !important;
+    border-radius: 10px !important;
+    background: rgba(6, 14, 16, .82) !important;
+    color: #f2f6f4 !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    cursor: pointer;
+  }
+
   #composer .v46AvailableScroll,
   #composer .v46SelectedScroll {
-    max-height: none !important;
-    overflow: visible !important;
-  }
-  #composer .v46TotalDock {
-    position: fixed !important;
-    left: 8px !important;
-    right: 8px !important;
-    bottom: max(7px, env(safe-area-inset-bottom)) !important;
-    z-index: 90 !important;
-    border: 1px solid rgba(85, 220, 255, 0.35) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.46) !important;
-  }
-  #composer .v46SelectedColumn {
-    padding-bottom: 82px !important;
-  }
-}
-
-@media (max-width: 520px) {
-  #composer .v46Counters,
-  #composer .v46BaseSurfaces {
-    grid-template-columns: 1fr !important;
-  }
-  #composer .v46ActionRow {
-    grid-template-columns: 1fr !important;
-  }
-  #composer .v46NextBtn {
     width: 100% !important;
+    max-width: 100% !important;
+    min-height: 180px !important;
+    height: auto;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+    scrollbar-width: thin !important;
+    padding: 6px !important;
   }
-  #composer .v46LevelChip {
-    flex-basis: 155px !important;
-  }
-}
 
-@media (max-width: 410px) {
-  #composer .v46ProjectTypes {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  #composer .v46AvailableScroll::-webkit-scrollbar,
+  #composer .v46SelectedScroll::-webkit-scrollbar {
+    width: 4px !important;
   }
-  #composer .v46ProjectTypes button {
-    height: 48px !important;
-    font-size: 12px !important;
+
+  /* V93 EXACT 2-LINE ARTICLE LAYOUT FOR SELECTED CARDS */
+  #composer .v91ServiceCard {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 0 7px !important;
+    padding: 9px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto auto auto !important;
+    grid-template-rows: auto auto !important;
+    column-gap: 6px !important;
+    row-gap: 8px !important;
+    align-items: center !important;
+    border: 1px solid #d3ddda !important;
+    border-radius: 11px !important;
+    background: #ffffff !important;
+    overflow: hidden !important;
   }
-  #composer .progress button span {
+
+  #composer .v91ServiceHeader,
+  #composer .v91ServiceFooter,
+  #composer .v91ServiceActions {
+    display: contents !important;
+  }
+
+  /* ROW 1 : designation */
+  #composer .v91ServiceHeader > span {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 0 8px !important;
+    border-bottom: 1px solid #e1e7e5 !important;
+  }
+
+  #composer .v91ServiceHeader b {
+    display: block !important;
+    width: 100% !important;
+    color: #17201e !important;
+    -webkit-text-fill-color: #17201e !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  #composer .v91ServiceHeader small {
     display: none !important;
   }
-}
+
+  /* ROW 2 : CONTROLS */
+  #composer .v91ServiceControls {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    display: block !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #composer .v91ServiceControls .v76ScopePick {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 4px !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  #composer .v91ServiceControls .v76ScopePick label {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    padding: 0 7px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    border: 1px solid #cbd6d2 !important;
+    border-radius: 7px !important;
+    background: #ffffff !important;
+    color: #596761 !important;
+    font-size: 8px !important;
+    font-weight: 850 !important;
+    white-space: nowrap !important;
+  }
+
+  #composer .v91ServiceControls .v76ScopePick label.on {
+    border-color: #25c3dc !important;
+    background: #e8fafd !important;
+    color: #07798d !important;
+  }
+
+  #composer .v91ServiceControls .v76ScopePick input {
+    width: 13px !important;
+    height: 13px !important;
+    margin: 0 !important;
+    flex: 0 0 13px !important;
+  }
+
+  #composer .v91ServiceControls .v76NumberField,
+  #composer .v91ServiceControls .v76ReferenceField {
+    width: auto !important;
+    max-width: 150px !important;
+    min-height: 34px !important;
+    margin: 0 !important;
+    padding: 4px 6px !important;
+    border-radius: 7px !important;
+  }
+
+  /* ROW 2 : PRICE */
+  #composer .v91ServicePrice {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    align-self: center !important;
+    justify-self: end !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #069eb8 !important;
+    -webkit-text-fill-color: #069eb8 !important;
+    font-size: 13px !important;
+    font-weight: 950 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  #composer .v91ServiceCard:not(:has(.v91ServiceControls)) .v91ServicePrice {
+    grid-column: 1 / 3 !important;
+    justify-self: start !important;
+  }
+
+  /* ROW 2 : DETAILS */
+  #composer .v91ServiceActions button[data-service-details] {
+    grid-column: 3 !important;
+    grid-row: 2 !important;
+    align-self: center !important;
+    justify-self: end !important;
+    width: 58px !important;
+    min-width: 58px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 6px !important;
+    border: 1px solid #cbd6d2 !important;
+    border-radius: 7px !important;
+    background: #f7f9f8 !important;
+    color: #34413d !important;
+    font-size: 8px !important;
+    font-weight: 850 !important;
+    white-space: nowrap !important;
+  }
+
+  /* ROW 2 : REMOVE (X) */
+  #composer .v91ServiceActions button.remove {
+    grid-column: 4 !important;
+    grid-row: 2 !important;
+    align-self: center !important;
+    justify-self: end !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 !important;
+    border: 1px solid #efc7c7 !important;
+    border-radius: 7px !important;
+    background: #fff3f3 !important;
+    color: #c74444 !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+  }
+
+  /* STAGE 1 BOTTOM DOCK: count + Suivant */
+  #composer .v48MobileServiceNext {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 116px !important;
+    align-items: center !important;
+    gap: 10px !important;
+    position: fixed !important;
+    z-index: 700 !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: calc(var(--dock-h, 66px) + max(8px, env(safe-area-inset-bottom))) !important;
+    min-height: 64px !important;
+    padding: 8px 9px 8px 13px !important;
+    border: 1px solid rgba(52, 202, 224, .48) !important;
+    border-radius: 14px !important;
+    background: #071214 !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, .30) !important;
+    backdrop-filter: none !important;
+  }
+
+  #composer .v48MobileServiceNext small {
+    display: block !important;
+    color: #899691 !important;
+    font-size: 8px !important;
+    font-weight: 800 !important;
+  }
+
+  #composer .v48MobileServiceNext strong {
+    display: block !important;
+    margin-top: 2px !important;
+    color: #f3f7f5 !important;
+    font-size: 12px !important;
+    line-height: 1.1 !important;
+  }
+
+  #composer .v48MobileServiceNext button {
+    width: 116px !important;
+    min-width: 116px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    padding: 0 10px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    background: #3ccce2 !important;
+    color: #062027 !important;
+    font-size: 10px !important;
+    font-weight: 950 !important;
+    cursor: pointer;
+  }
+
+  /* STAGE 2 BOTTOM DOCK: total + Continuer/Valider */
+  #composer .v46TotalDock {
+    position: fixed !important;
+    z-index: 700 !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: calc(var(--dock-h, 66px) + max(8px, env(safe-area-inset-bottom))) !important;
+    width: auto !important;
+    min-height: 64px !important;
+    padding: 8px 9px 8px 13px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 116px !important;
+    align-items: center !important;
+    gap: 10px !important;
+    border: 1px solid rgba(52, 202, 224, .48) !important;
+    border-radius: 14px !important;
+    background: #071214 !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, .30) !important;
+    backdrop-filter: none !important;
+  }
+
+  #composer .v46TotalDock .nextBtn {
+    width: 116px !important;
+    min-width: 116px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    border-radius: 10px !important;
+  }
+
+  /* ---------- MOBILE STEP 3: CONTACT ---------- */
+  #composerBody:has(.contactForm) {
+    padding: 10px !important;
+    border-radius: 15px !important;
+  }
+
+  #composer .contactForm {
+    padding: 12px !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  #composer .contactForm .full {
+    grid-column: auto !important;
+  }
+}
+
+/* Very Small Phones (<= 390px) */
+@media (max-width: 390px) {
+  #composer .v91ServiceCard {
+    grid-template-columns: minmax(0, 1fr) auto 54px 32px !important;
+    column-gap: 4px !important;
+    padding: 8px !important;
+  }
+
+  #composer .v91ServiceHeader b {
+    font-size: 12px !important;
+  }
+
+  #composer .v91ServiceControls .v76ScopePick {
+    gap: 3px !important;
+  }
+
+  #composer .v91ServiceControls .v76ScopePick label {
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 5px !important;
+    font-size: 7.4px !important;
+  }
+
+  #composer .v91ServicePrice {
+    font-size: 12px !important;
+  }
+
+  #composer .v91ServiceActions button[data-service-details] {
+    width: 54px !important;
+    min-width: 54px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    font-size: 7.5px !important;
+  }
+
+  #composer .v91ServiceActions button.remove {
+    width: 32px !important;
+    min-width: 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+  }
+
+  #composer .v48MobileServiceNext,
+  #composer .v46TotalDock {
+    grid-template-columns: minmax(0, 1fr) 104px !important;
+  }
+
+  #composer .v48MobileServiceNext button,
+  #composer .v46TotalDock .nextBtn {
+    width: 104px !important;
+    min-width: 104px !important;
+  }
+}
+
