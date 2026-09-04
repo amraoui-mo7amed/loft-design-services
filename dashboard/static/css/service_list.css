@@ -409,11 +409,78 @@
     text-decoration: none;
 }
 
+/* ── Modal Scrollable & Layout Rules ── */
+#serviceModal .modal-dialog {
+    max-height: calc(100vh - 3.5rem) !important;
+    margin-top: 1.75rem;
+    margin-bottom: 1.75rem;
+}
+
+#serviceModal .modal-dialog-scrollable {
+    height: min(850px, calc(100vh - 3.5rem)) !important;
+    max-height: calc(100vh - 3.5rem) !important;
+}
+
+#serviceModal .modal-content,
+#serviceModal #serviceForm {
+    max-height: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+#serviceModal .modal-header {
+    flex-shrink: 0 !important;
+}
+
+#serviceModal .modal-footer {
+    flex-shrink: 0 !important;
+}
+
+#serviceModal .svc-modal-body,
+#serviceModal .modal-body {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-height: 0 !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 214, 90, 0.4) rgba(255, 255, 255, 0.03);
+}
+
+#serviceModal .svc-modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+#serviceModal .svc-modal-body::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+}
+
+#serviceModal .svc-modal-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 214, 90, 0.25);
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+#serviceModal .svc-modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 214, 90, 0.5);
+}
+
+@media (max-width: 576px) {
+    #serviceModal .modal-dialog {
+        max-height: calc(100vh - 1rem);
+        margin: 0.5rem;
+    }
+    #serviceModal .modal-dialog-scrollable {
+        height: calc(100vh - 1rem);
+        max-height: calc(100vh - 1rem);
+    }
+}
+
 /* ── Modal Custom Select rules ── */
-.dashContent .modal,
-.dashContent .modal-dialog,
-.dashContent .svc-glass-modal,
-.dashContent .svc-glass-modal .modal-body,
+.dashContent #serviceFilterModal .svc-glass-modal,
+.dashContent #serviceFilterModal .modal-body,
 .dashContent .svc-glass-modal .tab-content,
 .dashContent .svc-glass-modal .tab-pane,
 .dashContent .svc-content-section {
@@ -436,6 +503,19 @@
     overflow-y: auto !important;
 }
 
+/* RTL / LTR layout rules */
+[dir="ltr"] .svc-card-foot {
+    flex-direction: row;
+}
+
 [dir="rtl"] .svc-card-foot {
+    flex-direction: row-reverse;
+}
+
+[dir="ltr"] #serviceModal .modal-footer {
+    flex-direction: row;
+}
+
+[dir="rtl"] #serviceModal .modal-footer {
     flex-direction: row-reverse;
 }

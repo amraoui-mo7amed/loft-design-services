@@ -614,6 +614,11 @@ def service_create(request):
             revisions_fr = (request.POST.get("included_revisions_fr") or request.POST.get("included_revisions") or "").strip()
             delivery_time_fr = (request.POST.get("estimated_delivery_time_fr") or request.POST.get("estimated_delivery_time") or "").strip()
 
+            allow_interior = request.POST.get("allow_interior") in ("true", "1", "on", True)
+            allow_exterior = request.POST.get("allow_exterior") in ("true", "1", "on", True)
+            default_interior_selected = request.POST.get("default_interior_selected") in ("true", "1", "on", True)
+            default_exterior_selected = request.POST.get("default_exterior_selected") in ("true", "1", "on", True)
+
             with transaction.atomic():
                 if is_default:
                     ServicePricing.objects.filter(is_default=True).update(is_default=False)
@@ -626,6 +631,10 @@ def service_create(request):
                     percentage_rate=percentage_rate,
                     min_fee=min_fee_val,
                     max_fee=max_fee_val,
+                    allow_interior=allow_interior,
+                    allow_exterior=allow_exterior,
+                    default_interior_selected=default_interior_selected,
+                    default_exterior_selected=default_exterior_selected,
                     short_description=short_desc_fr,
                     detailed_description=detailed_desc_fr,
                     included_items=included_fr,
@@ -756,6 +765,10 @@ def service_update(request, pk):
                 obj.percentage_rate = percentage_rate
                 obj.min_fee = min_fee_val
                 obj.max_fee = max_fee_val
+                obj.allow_interior = request.POST.get("allow_interior") in ("true", "1", "on", True)
+                obj.allow_exterior = request.POST.get("allow_exterior") in ("true", "1", "on", True)
+                obj.default_interior_selected = request.POST.get("default_interior_selected") in ("true", "1", "on", True)
+                obj.default_exterior_selected = request.POST.get("default_exterior_selected") in ("true", "1", "on", True)
                 obj.short_description = short_desc_fr
                 obj.detailed_description = detailed_desc_fr
                 obj.included_items = included_fr

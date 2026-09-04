@@ -8,7 +8,7 @@
 {% endblock dashTitle %}
 {% block extra_css %}
     <link rel="stylesheet"
-          href="{% static 'css/service_list.css' %}?v={{ ASSET_VERSION }}">
+          href="{% static 'css/service_list.css' %}?v={{ ASSET_VERSION }}&v=2">
     <link rel="stylesheet"
           href="{% static 'css/quotes.css' %}?v={{ ASSET_VERSION }}">
 {% endblock extra_css %}
@@ -243,6 +243,10 @@
                                         data-max-fee="{{ s.max_fee|default:''|unlocalize }}"
                                         data-video-link="{{ s.video_link|default:'' }}"
                                         data-is-default="{{ s.is_default|yesno:'true,false' }}"
+                                        data-allow-interior="{{ s.allow_interior|yesno:'true,false' }}"
+                                        data-allow-exterior="{{ s.allow_exterior|yesno:'true,false' }}"
+                                        data-default-interior-selected="{{ s.default_interior_selected|yesno:'true,false' }}"
+                                        data-default-exterior-selected="{{ s.default_exterior_selected|yesno:'true,false' }}"
                                         data-short-desc="{{ s.short_description|default:'' }}"
                                         data-detailed-desc="{{ s.detailed_description|default:'' }}"
                                         data-included="{{ s.included_items|join:'\n' }}"
@@ -361,32 +365,36 @@
          tabindex="-1"
          aria-labelledby="serviceModalTitle"
          aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content svc-glass-modal border-0 rounded-4 shadow-lg">
-                <form method="post"
-                      action="{% url 'dash:service_create' %}"
-                      enctype="multipart/form-data"
-                      id="serviceForm"
-                      novalidate>
-                    {% csrf_token %}
-                    <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom border-secondary border-opacity-25">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="svc-card-icon"
-                                 style="width:36px;
-                                        height:36px;
-                                        font-size:0.95rem">
-                                <i class="fas fa-cube"></i>
-                            </div>
-                            <h5 class="modal-title fw-bold text-light mb-0" id="serviceModalTitle">{% trans "New Service" %}</h5>
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable"
+             style="max-height: calc(100vh - 3.5rem); height: min(850px, calc(100vh - 3.5rem));">
+            <form class="modal-content svc-glass-modal border-0 rounded-4 shadow-lg"
+                  method="post"
+                  action="{% url 'dash:service_create' %}"
+                  enctype="multipart/form-data"
+                  id="serviceForm"
+                  style="max-height: 100%; height: 100%; overflow: hidden; display: flex; flex-direction: column;"
+                  novalidate>
+                {% csrf_token %}
+                <div class="modal-header d-flex align-items-center justify-content-between px-4 py-3 border-bottom border-secondary border-opacity-25 flex-shrink-0"
+                     style="flex-shrink: 0;">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="svc-card-icon"
+                             style="width:36px;
+                                    height:36px;
+                                    font-size:0.95rem">
+                            <i class="fas fa-cube"></i>
                         </div>
-                        <button type="button"
-                                class="btn-close btn-close-white"
-                                data-bs-dismiss="modal"
-                                aria-label="Close"></button>
+                        <h5 class="modal-title fw-bold text-light mb-0" id="serviceModalTitle">{% trans "New Service" %}</h5>
                     </div>
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
 
-                    <div class="p-4">
-                        {% include "partials/errorList.html" with form_id="serviceForm" %}
+                <div class="modal-body p-4 flex-grow-1 overflow-y-auto svc-modal-body"
+                     style="overflow-y: auto !important; min-height: 0; max-height: 100%; flex: 1 1 auto;">
+                    {% include "partials/errorList.html" with form_id="serviceForm" %}
 
                         <!-- Primary Main Tabs with Dark Liquid-Glass Pill Theme -->
                         <ul class="nav nav-pills svc-modal-tabs mb-4 gap-2 flex-nowrap w-100 position-relative" id="serviceMainTabs" role="tablist">
@@ -451,6 +459,48 @@
                                             <div class="alert alert-dark border border-warning border-opacity-25 p-2 rounded-3 text-warning mb-0" style="font-size:0.8rem;">
                                                 <i class="fas fa-info-circle me-1"></i>
                                                 {% trans "Formula: Fee = Estimated Total Project Cost × Percentage Rate ÷ 100 (applied with min/max bounds if configured)." %}
+                                            </div>
+                                        </div>
+
+                                        <!-- Perimeter & Surface Scope Options -->
+                                        <div class="col-12" id="areaScopeWrapper">
+                                            <div class="p-3 rounded-3 border border-secondary border-opacity-25" style="background: rgba(255,255,255,0.03);">
+                                                <div class="text-warning small fw-bold mb-2">
+                                                    <i class="fas fa-vector-square me-1"></i> {% trans "Perimeter & Surface Scope (m²)" %}
+                                                </div>
+                                                <p class="text-muted small mb-3">
+                                                    {% trans "Configure which surface scopes (Interior / Exterior) are available and selected by default for this service in the customer project composer." %}
+                                                </p>
+                                                <div class="row g-3">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="allow_interior" id="serviceAllowInteriorInput" value="1" checked>
+                                                            <label class="form-check-label text-light small fw-semibold" for="serviceAllowInteriorInput">
+                                                                {% trans "Allow Interior Surface" %}
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mt-2 ms-3">
+                                                            <input class="form-check-input" type="checkbox" name="default_interior_selected" id="serviceDefInteriorInput" value="1" checked>
+                                                            <label class="form-check-label text-muted small" for="serviceDefInteriorInput">
+                                                                {% trans "Selected by default: Interior" %}
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="allow_exterior" id="serviceAllowExteriorInput" value="1">
+                                                            <label class="form-check-label text-light small fw-semibold" for="serviceAllowExteriorInput">
+                                                                {% trans "Allow Exterior Surface" %}
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mt-2 ms-3">
+                                                            <input class="form-check-input" type="checkbox" name="default_exterior_selected" id="serviceDefExteriorInput" value="1">
+                                                            <label class="form-check-label text-muted small" for="serviceDefExteriorInput">
+                                                                {% trans "Selected by default: Exterior" %}
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -749,14 +799,14 @@
                         </div>
                     </div>
 
-                    <div class="px-4 py-3 d-flex gap-2 justify-content-end border-top border-secondary border-opacity-25">
+                    <div class="modal-footer px-4 py-3 d-flex gap-2 justify-content-end border-top border-secondary border-opacity-25 flex-shrink-0"
+                         style="flex-shrink: 0;">
                         <button type="button" class="btn btn-outline-light btn-sm px-3 rounded-3" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
                         <button type="submit" class="btn dash-btn-primary btn-sm px-4 rounded-3 fw-bold" id="serviceSubmitBtn">
                             <i class="fas fa-save me-1"></i> <span id="serviceSubmitBtnText">{% trans "Create Service" %}</span>
                         </button>
                     </div>
-                </form>
-            </div>
+            </form>
         </div>
     </div>
 {% endblock dashContent %}
@@ -767,6 +817,12 @@ document.addEventListener("DOMContentLoaded", function () {
     let serviceModal = null;
     if (serviceModalEl && typeof bootstrap !== "undefined") {
         serviceModal = new bootstrap.Modal(serviceModalEl);
+    }
+    if (serviceModalEl) {
+        serviceModalEl.addEventListener("show.bs.modal", function () {
+            const body = serviceModalEl.querySelector(".svc-modal-body");
+            if (body) body.scrollTop = 0;
+        });
     }
 
     const serviceForm = document.getElementById("serviceForm");
@@ -781,6 +837,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const minFeeWrapper = document.getElementById("minFeeWrapper");
     const maxFeeWrapper = document.getElementById("maxFeeWrapper");
     const percentExplanationBox = document.getElementById("percentExplanationBox");
+    const areaScopeWrapper = document.getElementById("areaScopeWrapper");
+    const allowInteriorInput = document.getElementById("serviceAllowInteriorInput");
+    const allowExteriorInput = document.getElementById("serviceAllowExteriorInput");
+    const defInteriorInput = document.getElementById("serviceDefInteriorInput");
+    const defExteriorInput = document.getElementById("serviceDefExteriorInput");
     const priceLabelText = document.getElementById("priceLabelText");
     const videoInput = document.getElementById("serviceVideoInput");
     const orderInput = document.getElementById("serviceOrderInput");
@@ -846,7 +907,6 @@ document.addEventListener("DOMContentLoaded", function () {
             minFeeWrapper?.classList.remove("d-none");
             maxFeeWrapper?.classList.remove("d-none");
             percentExplanationBox?.classList.remove("d-none");
-
             if (percentRateInput) {
                 percentRateInput.disabled = false;
                 percentRateInput.required = true;
@@ -906,6 +966,10 @@ document.addEventListener("DOMContentLoaded", function () {
             submitBtnText.textContent = "{% trans 'Create Service' %}";
             setCustomSelect("servicePricingTypeSelect", "fixed");
             if (orderInput) orderInput.value = "";
+            if (allowInteriorInput) allowInteriorInput.checked = true;
+            if (allowExteriorInput) allowExteriorInput.checked = false;
+            if (defInteriorInput) defInteriorInput.checked = true;
+            if (defExteriorInput) defExteriorInput.checked = false;
             updatePricingModelFields();
             activateTab("tab-main-pricing-btn");
             activateTab("tab-fr-btn");
@@ -933,6 +997,10 @@ document.addEventListener("DOMContentLoaded", function () {
             if (maxFeeInput) maxFeeInput.value = this.dataset.maxFee || "";
             if (videoInput) videoInput.value = this.dataset.videoLink || "";
             if (defaultInput) defaultInput.checked = this.dataset.isDefault === "true";
+            if (allowInteriorInput) allowInteriorInput.checked = this.dataset.allowInterior !== "false";
+            if (allowExteriorInput) allowExteriorInput.checked = this.dataset.allowExterior === "true";
+            if (defInteriorInput) defInteriorInput.checked = this.dataset.defaultInteriorSelected !== "false";
+            if (defExteriorInput) defExteriorInput.checked = this.dataset.defaultExteriorSelected === "true";
 
             updatePricingModelFields();
 

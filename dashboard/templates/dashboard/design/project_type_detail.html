@@ -103,7 +103,7 @@
     </div>
     <!-- Add Space Modal -->
     <div class="modal fade" id="spaceModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
             <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
                 <div class="pt-modal-header d-flex align-items-center justify-content-between">
                     <div>
@@ -112,7 +112,7 @@
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="p-4">
+                <div class="p-4 modal-body overflow-y-auto">
                     <form method="post"
                           action="{% url 'dash:space_create' %}"
                           enctype="multipart/form-data"
