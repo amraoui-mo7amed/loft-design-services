@@ -523,16 +523,28 @@ def _build_facturation_context(data):
                 if not primary_service:
                     primary_service = s_obj
                 if s_obj.pricing_type == "area":
-                    calc_val = total_surface * float(s_obj.service_price)
+                    can_int = getattr(s_obj, "allow_interior", True)
+                    can_ext = getattr(s_obj, "allow_exterior", False)
+                    s_calc = (surface_interior if can_int else 0.0) + (surface_exterior if can_ext else 0.0)
+                    if s_calc == 0 and total_surface and can_int:
+                        s_calc = total_surface
+                    calc_val = s_calc * float(s_obj.service_price)
                     rate_str = f"{float(s_obj.service_price):,.0f} DA / m²"
                 elif s_obj.pricing_type == "percent_project_cost":
-                    calc_val = (estimated_total_project_cost or 10000000) * (float(s_obj.percentage_rate or 5.0) / 100.0)
-                    rate_str = f"{float(s_obj.percentage_rate or 5):,.2f}% ({estimated_total_project_cost:,.0f} DA)"
+                    cost_base = estimated_total_project_cost or float(getattr(s_obj, "default_reference_amount", 100000.0) or 100000.0)
+                    calc_val = cost_base * (float(s_obj.percentage_rate or 5.0) / 100.0)
+                    if getattr(s_obj, "min_fee", None) is not None:
+                        calc_val = max(calc_val, float(s_obj.min_fee))
+                    if getattr(s_obj, "max_fee", None) is not None:
+                        calc_val = min(calc_val, float(s_obj.max_fee))
+                    rate_str = f"{float(s_obj.percentage_rate or 5):,.2f}% ({cost_base:,.0f} DA)"
                 elif s_obj.pricing_type == "hourly":
-                    calc_val = 10 * float(s_obj.service_price)
+                    h = float(getattr(s_obj, "default_hours", 20) or 20)
+                    calc_val = h * float(s_obj.service_price)
                     rate_str = f"{float(s_obj.service_price):,.0f} DA / hr"
                 else:
-                    calc_val = float(s_obj.service_price)
+                    qty = float(getattr(s_obj, "default_quantity", 1) or 1)
+                    calc_val = qty * float(s_obj.service_price)
                     rate_str = f"{float(s_obj.service_price):,.0f} DA"
 
                 calculated_total += calc_val

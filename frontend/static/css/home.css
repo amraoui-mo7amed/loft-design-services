@@ -8853,37 +8853,201 @@ body.galleryOpen {
   font-weight: 700;
 }
 
-/* Interactive Scope Checkboxes for 2D Services */
+/* Interactive Scope Checkboxes for 2D & Dual Scope Services */
 .v46ScopeChecks {
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
   width: 100%;
   margin-top: 6px;
   padding-top: 6px;
   border-top: 1px dashed rgba(255, 255, 255, 0.08);
 }
 
-.v46ScopeChecks label {
+.v46ScopeChecks.dual {
+  gap: 8px;
+}
+
+.v46ScopeCheckLabel {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   font-size: 11px;
-  color: #cfd8d5;
+  color: #a0aba6;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+  margin: 0;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.v46ScopeCheckLabel:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.v46ScopeCheckLabel.active {
+  background: rgba(85, 220, 255, 0.08);
+  border-color: rgba(85, 220, 255, 0.35);
+  color: #e2f8ff;
+  box-shadow: 0 0 10px rgba(85, 220, 255, 0.12);
+}
+
+.v46ScopeCheckLabel input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--cyan, #55dcff);
   cursor: pointer;
   margin: 0;
 }
 
-.v46ScopeChecks input[type="checkbox"] {
-  width: 15px;
-  height: 15px;
-  accent-color: var(--cyan, #55dcff);
-  cursor: pointer;
-}
-
-.v46ScopeChecks strong {
+.v46ScopeCheckLabel strong {
   color: var(--cyan, #55dcff);
   font-family: monospace, sans-serif;
+  font-weight: 700;
+}
+
+/* Locked Scope Badges for Mono-Scope & Specialized Services */
+.v46ScopeChecks.locked {
+  border-top: 1px dashed rgba(255, 255, 255, 0.06);
+  padding-top: 4px;
+}
+
+.v46ScopeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  line-height: 1.3;
+}
+
+.v46ScopeBadge i {
+  font-size: 10px;
+}
+
+.v46ScopeBadge.interior {
+  background: rgba(85, 220, 255, 0.08);
+  color: #55dcff;
+  border: 1px solid rgba(85, 220, 255, 0.25);
+}
+
+.v46ScopeBadge.exterior {
+  background: rgba(52, 211, 153, 0.08);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.25);
+}
+
+.v46ScopeBadge.hourly {
+  background: rgba(251, 191, 36, 0.08);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+
+.v46ScopeBadge.fixed {
+  background: rgba(148, 163, 184, 0.08);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.v46ScopeBadge.percent {
+  background: rgba(244, 114, 182, 0.08);
+  color: #f472b6;
+  border: 1px solid rgba(244, 114, 182, 0.25);
+}
+
+.v46ScopeBadge.warning {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Scope Tags on Available Prestations in Left List */
+.v46ScopeTag {
+  display: inline-block;
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 3px;
+  width: fit-content;
+}
+
+.v46ScopeTag.interior {
+  background: rgba(85, 220, 255, 0.1);
+  color: #55dcff;
+  border: 1px solid rgba(85, 220, 255, 0.2);
+}
+
+.v46ScopeTag.exterior {
+  background: rgba(52, 211, 153, 0.1);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.v46ScopeTag.mixed {
+  background: rgba(168, 85, 247, 0.12);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.25);
+}
+
+.v46ScopeTag.hourly {
+  background: rgba(251, 191, 36, 0.1);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.v46ScopeTag.fixed {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.v46ScopeTag.percent {
+  background: rgba(244, 114, 182, 0.1);
+  color: #f472b6;
+  border: 1px solid rgba(244, 114, 182, 0.2);
+}
+
+/* Warning indicator when 0 scope selected */
+.v46ScopeWarning {
+  margin-top: 5px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* RTL Support */
+[dir="rtl"] .v46ScopeCheckLabel {
+  direction: rtl;
+}
+
+[dir="rtl"] .v46ScopeBadge {
+  direction: rtl;
+}
+
+[dir="rtl"] .v46ScopeTag {
+  direction: rtl;
+}
+
+[dir="rtl"] .v46ScopeWarning {
+  direction: rtl;
 }
 
 /* Budget field for percentage services */

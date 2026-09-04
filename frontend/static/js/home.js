@@ -245,6 +245,42 @@ const surfaceExterior = () => {
 const totalSurface = () => surfaceInterior() + surfaceExterior();
 const area = totalSurface;
 
+// Helper: determine scope string ('interior', 'exterior', 'both', 'none', 'hourly', 'percent', 'fixed')
+function getServiceScope(s, sel) {
+  if (!s || !sel) return 'fixed';
+  const pType = sel.pricingType || s.pricingType || (
+    s.pricing_type === 'area' ? 'PRICE_PER_M2' :
+    (s.pricing_type === 'hourly' ? 'HOURLY' :
+    (s.pricing_type === 'percent_project_cost' ? 'PERCENTAGE' : 'FIXED_UNIT'))
+  );
+  if (pType === 'PRICE_PER_M2') {
+    const canInt = s.allowInterior !== false;
+    const canExt = Boolean(s.allowExterior);
+    const useInt = !!sel.useInterior && canInt;
+    const useExt = !!sel.useExterior && canExt;
+    if (useInt && useExt) return 'both';
+    if (useInt) return 'interior';
+    if (useExt) return 'exterior';
+    return 'none';
+  }
+  if (pType === 'HOURLY') return 'hourly';
+  if (pType === 'PERCENTAGE') return 'percent';
+  return 'fixed';
+}
+
+function getServiceScopeLabel(s, sel) {
+  const scope = getServiceScope(s, sel);
+  switch (scope) {
+    case 'both': return 'Intérieur + Extérieur';
+    case 'interior': return 'Intérieur seul';
+    case 'exterior': return 'Extérieur seul';
+    case 'none': return 'Aucun périmètre';
+    case 'hourly': return 'À l’heure';
+    case 'percent': return '% du projet';
+    default: return 'Forfait unitaire';
+  }
+}
+
 // Helper: create or get initial selection parameters for a service
 function getInitialSelection(s) {
   if (!s) return {};
@@ -263,12 +299,19 @@ function getInitialSelection(s) {
   let useInt = false;
   if (allowInt) {
     useInt = (s.defaultInteriorSelected !== false);
-    if (hasInt) useInt = true;
+    if (!allowExt && hasInt) useInt = true;
   }
 
   let useExt = false;
   if (allowExt) {
     useExt = Boolean(s.defaultExteriorSelected);
+    if (!allowInt && hasExt) useExt = true;
+  }
+
+  // If both are allowed but neither is default, auto-select available surface
+  if (allowInt && allowExt && !useInt && !useExt) {
+    if (hasInt) useInt = true;
+    else if (hasExt) useExt = true;
   }
 
   return {
@@ -277,7 +320,7 @@ function getInitialSelection(s) {
     useInterior: useInt,
     useExterior: useExt,
     hours: s.defaultHours || (s.pricing_type === 'hourly' ? 20 : 10),
-    quantity: s.defaultQuantity || (s.pricing_type === 'fixed' ? 3 : 1),
+    quantity: s.defaultQuantity || (s.pricing_type === 'fixed' ? 1 : 1),
     referenceAmount: s.defaultReferenceAmount || parseFloat(st.estimatedProjectCost || 100000),
   };
 }
@@ -292,7 +335,7 @@ function ensureSelectedServicesState() {
   });
 }
 
-// Rule 11: Single calculation engine
+// Rule 11: Single authoritative calculation engine
 function calculateService(service, selection, project) {
   if (!selection) return 0;
 
@@ -305,10 +348,13 @@ function calculateService(service, selection, project) {
   switch (pricingType) {
     case "PRICE_PER_M2": {
       let selectedSurface = 0;
-      if (selection.useInterior) {
+      const canInt = service.allowInterior !== false;
+      const canExt = Boolean(service.allowExterior);
+
+      if (selection.useInterior && canInt) {
         selectedSurface += (project.surfaceInterior || 0);
       }
-      if (selection.useExterior) {
+      if (selection.useExterior && canExt) {
         selectedSurface += (project.surfaceExterior || 0);
       }
       const rate = (service.unitRate !== undefined) ? service.unitRate : (service.price || 0);
@@ -328,7 +374,7 @@ function calculateService(service, selection, project) {
     }
 
     case "PERCENTAGE": {
-      const ref = (selection.referenceAmount !== undefined) ? selection.referenceAmount : (service.defaultReferenceAmount || 100000);
+      const ref = (selection.referenceAmount !== undefined) ? selection.referenceAmount : (service.defaultReferenceAmount || parseFloat(st.estimatedProjectCost || 100000));
       const pct = (service.percentage !== undefined) ? service.percentage : (service.percentage_rate || 0);
       let fee = (ref * pct) / 100;
       if (service.min_fee && fee < service.min_fee) fee = service.min_fee;
@@ -371,28 +417,36 @@ function getServiceCalculationDetail(sId) {
 
   switch (pType) {
     case 'PRICE_PER_M2': {
-      const parts = [];
-      if (sel.useInterior) parts.push(`${proj.surfaceInterior} m² int`);
-      if (sel.useExterior) parts.push(`${proj.surfaceExterior} m² ext`);
-      const totalS = (sel.useInterior ? proj.surfaceInterior : 0) + (sel.useExterior ? proj.surfaceExterior : 0);
+      const canInt = s.allowInterior !== false;
+      const canExt = Boolean(s.allowExterior);
+      const useInt = !!sel.useInterior && canInt;
+      const useExt = !!sel.useExterior && canExt;
       const rate = s.unitRate || s.price || 0;
-      if (parts.length === 0) return `0 m² × ${money(rate)}/m² = ${money(0)}`;
-      if (parts.length === 1) return `${parts[0]} × ${money(rate)}/m² = ${money(priceVal)}`;
-      return `${totalS} m² (${parts.join(' + ')}) × ${money(rate)}/m² = ${money(priceVal)}`;
+
+      if (useInt && useExt) {
+        const totalS = (proj.surfaceInterior || 0) + (proj.surfaceExterior || 0);
+        return `Intérieur (${proj.surfaceInterior} m²) + Extérieur (${proj.surfaceExterior} m²) = ${totalS} m² × ${money(rate)}/m² = ${money(priceVal)}`;
+      } else if (useInt) {
+        return `Intérieur : ${proj.surfaceInterior} m² × ${money(rate)}/m² = ${money(priceVal)}`;
+      } else if (useExt) {
+        return `Extérieur : ${proj.surfaceExterior} m² × ${money(rate)}/m² = ${money(priceVal)}`;
+      } else {
+        return `Aucun périmètre sélectionné (0 m²) × ${money(rate)}/m² = ${money(0)}`;
+      }
     }
     case 'HOURLY': {
-      const h = sel.hours || 0;
+      const h = (sel.hours !== undefined) ? sel.hours : (s.defaultHours || 20);
       const rate = s.hourlyRate || s.price || 0;
       return `${h} h × ${money(rate)}/h = ${money(priceVal)}`;
     }
     case 'FIXED_UNIT': {
-      const q = sel.quantity || 0;
+      const q = (sel.quantity !== undefined) ? sel.quantity : (s.defaultQuantity || 1);
       const rate = s.fixedUnitPrice || s.price || 0;
       const u = s.unitName || 'unité';
-      return `${q} ${u}(s) × ${money(rate)} = ${money(priceVal)}`;
+      return `${q} ${u}${q > 1 ? 's' : ''} × ${money(rate)} = ${money(priceVal)}`;
     }
     case 'PERCENTAGE': {
-      const ref = sel.referenceAmount || 0;
+      const ref = (sel.referenceAmount !== undefined) ? sel.referenceAmount : (s.defaultReferenceAmount || parseFloat(st.estimatedProjectCost || 100000));
       const pct = s.percentage || s.percentage_rate || 0;
       return `${pct}% de ${money(ref)} = ${money(priceVal)}`;
     }
@@ -1136,21 +1190,52 @@ function renderServices() {
             <strong>${money(linePrice)}</strong>
           </div>
 
-          <!-- Scope checkboxes for 2D plans -->
-          ${pType === 'PRICE_PER_M2' && (s.allowInterior !== false || s.allowExterior === true) ? `
-            <div class="v46ScopeChecks">
-              ${s.allowInterior !== false ? `
-                <label>
+          <!-- Scope checkboxes for dual-scope or locked badges for mono-scope -->
+          ${pType === 'PRICE_PER_M2' ? `
+            ${(s.allowInterior !== false && s.allowExterior === true) ? `
+              <div class="v46ScopeChecks dual">
+                <label class="v46ScopeCheckLabel ${sel.useInterior ? 'active' : ''}">
                   <input type="checkbox" data-scope-int="${s.id}" ${sel.useInterior ? 'checked' : ''}>
                   <span>Intérieur (<strong>${surfaceInterior()} m²</strong>)</span>
                 </label>
-              ` : ''}
-              ${s.allowExterior === true ? `
-                <label>
+                <label class="v46ScopeCheckLabel ${sel.useExterior ? 'active' : ''}">
                   <input type="checkbox" data-scope-ext="${s.id}" ${sel.useExterior ? 'checked' : ''}>
                   <span>Extérieur (<strong>${surfaceExterior()} m²</strong>)</span>
                 </label>
+              </div>
+              ${(!sel.useInterior && !sel.useExterior) ? `
+                <div class="v46ScopeWarning" data-scope-warning="${s.id}">
+                  <i class="fas fa-exclamation-triangle"></i> Aucun périmètre sélectionné (0 m²)
+                </div>
               ` : ''}
+            ` : (s.allowInterior !== false && !s.allowExterior) ? `
+              <div class="v46ScopeChecks locked">
+                <span class="v46ScopeBadge interior">
+                  <i class="fas fa-home"></i> Intérieur seul (<strong>${surfaceInterior()} m²</strong>)
+                </span>
+              </div>
+            ` : (!s.allowInterior && s.allowExterior === true) ? `
+              <div class="v46ScopeChecks locked">
+                <span class="v46ScopeBadge exterior">
+                  <i class="fas fa-tree"></i> Extérieur seul (<strong>${surfaceExterior()} m²</strong>)
+                </span>
+              </div>
+            ` : `
+              <div class="v46ScopeChecks locked">
+                <span class="v46ScopeBadge warning">Périmètre non configuré</span>
+              </div>
+            `}
+          ` : (pType === 'HOURLY') ? `
+            <div class="v46ScopeChecks locked">
+              <span class="v46ScopeBadge hourly"><i class="fas fa-clock"></i> Prestation à l’heure</span>
+            </div>
+          ` : (pType === 'FIXED_UNIT') ? `
+            <div class="v46ScopeChecks locked">
+              <span class="v46ScopeBadge fixed"><i class="fas fa-tag"></i> Forfait unitaire</span>
+            </div>
+          ` : (pType === 'PERCENTAGE') ? `
+            <div class="v46ScopeChecks locked">
+              <span class="v46ScopeBadge percent"><i class="fas fa-percentage"></i> % du montant projet</span>
             </div>
           ` : ''}
 
@@ -1207,14 +1292,33 @@ function renderServices() {
             );
 
             let unitRateText = '';
+            let scopeTagClass = 'interior';
+            let scopeTagLabel = 'Intérieur seul';
+
             if (pType === 'PRICE_PER_M2') {
               unitRateText = `${money(s.unitRate || s.price)} / m²`;
+              if (s.allowInterior !== false && s.allowExterior === true) {
+                scopeTagClass = 'mixed';
+                scopeTagLabel = 'Intérieur + Extérieur';
+              } else if (!s.allowInterior && s.allowExterior === true) {
+                scopeTagClass = 'exterior';
+                scopeTagLabel = 'Extérieur seul';
+              } else {
+                scopeTagClass = 'interior';
+                scopeTagLabel = 'Intérieur seul';
+              }
             } else if (pType === 'HOURLY') {
               unitRateText = `${money(s.hourlyRate || s.price)} / h`;
+              scopeTagClass = 'hourly';
+              scopeTagLabel = 'À l’heure';
             } else if (pType === 'FIXED_UNIT') {
               unitRateText = `${money(s.fixedUnitPrice || s.price)} / ${s.unitName || 'unité'}`;
+              scopeTagClass = 'fixed';
+              scopeTagLabel = s.unitName ? `Forfait (${s.unitName})` : 'Forfait unitaire';
             } else if (pType === 'PERCENTAGE') {
               unitRateText = `${s.percentage || s.percentage_rate || 10}% du montant`;
+              scopeTagClass = 'percent';
+              scopeTagLabel = '% du projet';
             }
 
             return `
@@ -1224,6 +1328,7 @@ function renderServices() {
                   <span>
                     <b>${s.name}</b>
                     <small>${unitRateText}</small>
+                    <span class="v46ScopeTag ${scopeTagClass}">${scopeTagLabel}</span>
                   </span>
                   <strong>${money(getServiceLinePrice(s.id))}</strong>
                 </button>
@@ -1322,7 +1427,7 @@ function renderServices() {
     };
   });
 
-  // Checkboxes for 2D scope (Int / Ext)
+  // Checkboxes for 2D scope (Int / Ext) with instant reactivity
   b.querySelectorAll('[data-scope-int]').forEach(cb => {
     cb.onchange = (e) => {
       const sId = cb.dataset.scopeInt;
@@ -1330,7 +1435,9 @@ function renderServices() {
       if (!s) return;
       if (!st.selectedServices[s.id]) st.selectedServices[s.id] = getInitialSelection(s);
       st.selectedServices[s.id].useInterior = e.target.checked;
-      renderServices();
+      const lbl = cb.closest('.v46ScopeCheckLabel');
+      if (lbl) lbl.classList.toggle('active', e.target.checked);
+      updateDockAndTotals();
     };
   });
 
@@ -1341,7 +1448,9 @@ function renderServices() {
       if (!s) return;
       if (!st.selectedServices[s.id]) st.selectedServices[s.id] = getInitialSelection(s);
       st.selectedServices[s.id].useExterior = e.target.checked;
-      renderServices();
+      const lbl = cb.closest('.v46ScopeCheckLabel');
+      if (lbl) lbl.classList.toggle('active', e.target.checked);
+      updateDockAndTotals();
     };
   });
 
@@ -1399,12 +1508,33 @@ function renderServices() {
     const dockTotal = document.querySelector('#dockTotalHT');
     if (dockTotal) dockTotal.textContent = money(totalHT());
     selected.forEach(s => {
+      const sel = st.selectedServices[s.id] || st.selectedServices[s.slug] || getInitialSelection(s);
       const card = b.querySelector(`[data-service-card="${s.id}"]`);
       if (card) {
         const strong = card.querySelector('.v46SelectedServiceTop > strong');
         if (strong) strong.textContent = money(getServiceLinePrice(s.id));
         const calcSpan = card.querySelector('.v46SelectedCalc > span');
         if (calcSpan) calcSpan.textContent = getServiceCalculationDetail(s.id);
+
+        const pType = sel.pricingType || s.pricingType || (
+          s.pricing_type === 'area' ? 'PRICE_PER_M2' :
+          (s.pricing_type === 'hourly' ? 'HOURLY' :
+          (s.pricing_type === 'percent_project_cost' ? 'PERCENTAGE' : 'FIXED_UNIT'))
+        );
+        let warnEl = card.querySelector(`[data-scope-warning="${s.id}"]`);
+        const noScope = (pType === 'PRICE_PER_M2') && !sel.useInterior && !sel.useExterior;
+        if (noScope) {
+          if (!warnEl) {
+            warnEl = document.createElement('div');
+            warnEl.className = 'v46ScopeWarning';
+            warnEl.setAttribute('data-scope-warning', s.id);
+            warnEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Aucun périmètre sélectionné (0 m²)';
+            const checksDiv = card.querySelector('.v46ScopeChecks');
+            if (checksDiv) checksDiv.after(warnEl);
+          }
+        } else if (warnEl) {
+          warnEl.remove();
+        }
       }
       const availCard = b.querySelector(`.v46AvailableService:has([data-service="${s.id}"]) .v46ServiceAdd > strong`);
       if (availCard) availCard.textContent = money(getServiceLinePrice(s.id));
@@ -1428,6 +1558,7 @@ function quoteRows(){
   if(st.mode==='quick') {
     spaces.filter(x=>st.spaces.includes(x.id)).forEach(x=>rows.push({
       designation: `Conception espace - ${x.name}`,
+      scope: 'Espace',
       pu: x.price,
       unit: 'ESPACE',
       qty: 1,
@@ -1438,12 +1569,23 @@ function quoteRows(){
     const sel = st.selectedServices[s.id] || getInitialSelection(s);
     const detail = getServiceCalculationDetail(s.id);
     const lineTotal = getServiceLinePrice(s.id);
-    const pType = s.pricingType || (s.pricing_type === 'per_sqm' || s.pricing_type === 'area' ? 'PRICE_PER_M2' : (s.pricing_type === 'hourly' ? 'HOURLY' : (s.pricing_type === 'percent_project_cost' ? 'PERCENTAGE' : 'FIXED_UNIT')));
+    const pType = sel.pricingType || s.pricingType || (
+      s.pricing_type === 'area' ? 'PRICE_PER_M2' :
+      (s.pricing_type === 'hourly' ? 'HOURLY' :
+      (s.pricing_type === 'percent_project_cost' ? 'PERCENTAGE' : 'FIXED_UNIT'))
+    );
+    const scopeLabel = getServiceScopeLabel(s, sel);
 
     if (pType === 'PRICE_PER_M2') {
-      const surfaceUsed = (sel.useInterior ? surfaceInterior() : 0) + (sel.useExterior ? surfaceExterior() : 0);
+      const canInt = s.allowInterior !== false;
+      const canExt = Boolean(s.allowExterior);
+      const useInt = !!sel.useInterior && canInt;
+      const useExt = !!sel.useExterior && canExt;
+      const surfaceUsed = (useInt ? surfaceInterior() : 0) + (useExt ? surfaceExterior() : 0);
       rows.push({
-        designation: `${s.name} (${detail})`,
+        designation: `${s.name} [${scopeLabel}]`,
+        scope: scopeLabel,
+        detail: detail,
         pu: s.unitRate || s.price || 0,
         unit: 'M²',
         qty: surfaceUsed,
@@ -1451,31 +1593,40 @@ function quoteRows(){
       });
     } else if (pType === 'HOURLY') {
       rows.push({
-        designation: `${s.name} (${detail})`,
+        designation: `${s.name} [${scopeLabel}]`,
+        scope: scopeLabel,
+        detail: detail,
         pu: s.hourlyRate || s.price || 0,
         unit: 'HEURE',
-        qty: sel.hours || 20,
+        qty: (sel.hours !== undefined) ? sel.hours : (s.defaultHours || 20),
         total: lineTotal
       });
     } else if (pType === 'FIXED_UNIT') {
       rows.push({
-        designation: `${s.name} (${detail})`,
+        designation: `${s.name} [${scopeLabel}]`,
+        scope: scopeLabel,
+        detail: detail,
         pu: s.fixedUnitPrice || s.price || 0,
         unit: (s.unitName || 'UNITE').toUpperCase(),
-        qty: sel.quantity || 1,
+        qty: (sel.quantity !== undefined) ? sel.quantity : (s.defaultQuantity || 1),
         total: lineTotal
       });
     } else if (pType === 'PERCENTAGE') {
+      const ref = (sel.referenceAmount !== undefined) ? sel.referenceAmount : (s.defaultReferenceAmount || parseFloat(st.estimatedProjectCost || 100000));
       rows.push({
-        designation: `${s.name} (${detail})`,
-        pu: `${s.percentage || 0}%`,
+        designation: `${s.name} [${scopeLabel}]`,
+        scope: scopeLabel,
+        detail: detail,
+        pu: `${s.percentage || s.percentage_rate || 0}%`,
         unit: '%',
-        qty: money(sel.referenceAmount || 0),
+        qty: money(ref),
         total: lineTotal
       });
     } else {
       rows.push({
-        designation: `${s.name} (${detail})`,
+        designation: `${s.name} [${scopeLabel}]`,
+        scope: scopeLabel,
+        detail: detail,
         pu: s.price || 0,
         unit: 'FORFAIT',
         qty: 1,
@@ -1489,7 +1640,11 @@ function quoteRows(){
 function clientLabel(c){return st.clientType==='professional'?(c.company||'Entreprise'):`${c.firstName||''} ${c.lastName||''}`.trim()}
 function summary(c=st.client||{}){
   const proj=st.mode==='quick'?`Espaces: ${spaces.filter(x=>st.spaces.includes(x.id)).map(x=>x.name).join(', ')}`:`Type: ${st.projectType||'Non spécifié'}; Intérieur: ${surfaceInterior()} m²; Extérieur: ${surfaceExterior()} m²; Niveaux: ${st.levels.map(l=>l+' '+(st.surfaces[l]||0)+' m²').join(', ')}`;
-  const selServices = services.filter(s=>st.services.some(id=>String(id)===String(s.id)||String(id)===s.slug)).map(x=>`${x.name} [${getServiceCalculationDetail(x.id)} = ${money(getServiceLinePrice(x.id))}]`).join('\n  - ');
+  const selServices = services.filter(s=>st.services.some(id=>String(id)===String(s.id)||String(id)===s.slug)).map(x=>{
+    const sel = st.selectedServices[x.id] || getInitialSelection(x);
+    const scopeLabel = getServiceScopeLabel(x, sel);
+    return `${x.name} (${scopeLabel}) [${getServiceCalculationDetail(x.id)}]`;
+  }).join('\n  - ');
   return `${proj}\nPrestations:\n  - ${selServices}\nClient: ${clientLabel(c)}\nTotal HT: ${money(totalHT())}${st.clientType==='professional'?`\nTVA 19%: ${money(tva())}\nTotal TTC: ${money(totalFinal())}`:''}`;
 }
 
@@ -1565,14 +1720,23 @@ function renderContactStep(){
     const selectedServicesData = st.services.map(sId => {
       const sObj = services.find(x => String(x.id) === String(sId) || String(x.slug) === String(sId));
       const sel = st.selectedServices[sId] || (sObj ? getInitialSelection(sObj) : {});
+      const pType = sObj ? (sObj.pricingType || sObj.pricing_type) : 'FIXED_UNIT';
+      const canInt = sObj ? sObj.allowInterior !== false : true;
+      const canExt = sObj ? Boolean(sObj.allowExterior) : false;
+      const useInt = !!sel.useInterior && canInt;
+      const useExt = !!sel.useExterior && canExt;
+      const billedSurf = (useInt ? surfaceInterior() : 0) + (useExt ? surfaceExterior() : 0);
       return {
         service_id: sId,
-        pricing_type: sObj ? (sObj.pricingType || sObj.pricing_type) : 'FIXED_UNIT',
-        use_interior: !!sel.useInterior,
-        use_exterior: !!sel.useExterior,
-        hours: sel.hours || 0,
-        quantity: sel.quantity || 1,
-        reference_amount: sel.referenceAmount || 0,
+        pricing_type: pType,
+        use_interior: useInt,
+        use_exterior: useExt,
+        scope: getServiceScope(sObj, sel),
+        scope_label: getServiceScopeLabel(sObj, sel),
+        billed_surface: billedSurf,
+        hours: (sel.hours !== undefined) ? sel.hours : (sObj ? sObj.defaultHours || 20 : 20),
+        quantity: (sel.quantity !== undefined) ? sel.quantity : (sObj ? sObj.defaultQuantity || 1 : 1),
+        reference_amount: (sel.referenceAmount !== undefined) ? sel.referenceAmount : (sObj ? sObj.defaultReferenceAmount || parseFloat(st.estimatedProjectCost || 100000) : 100000),
         calculation_detail: getServiceCalculationDetail(sId),
         line_total: getServiceLinePrice(sId),
       };
@@ -1744,27 +1908,36 @@ function renderSuccess(){
       const lineTot = getServiceLinePrice(sId);
       const detail = getServiceCalculationDetail(sId);
       const pType = sObj ? (sObj.pricingType || sObj.pricing_type) : 'FIXED_UNIT';
+      const canInt = sObj ? sObj.allowInterior !== false : true;
+      const canExt = sObj ? Boolean(sObj.allowExterior) : false;
+      const useInt = !!sel.useInterior && canInt;
+      const useExt = !!sel.useExterior && canExt;
+      const scopeVal = getServiceScope(sObj, sel);
+      const scopeLbl = getServiceScopeLabel(sObj, sel);
+      const billedSurf = (useInt ? surfaceInterior() : 0) + (useExt ? surfaceExterior() : 0);
 
       let rateLabel = 'Forfait';
       let qtyLabel = '1';
       let qtyNum = 1;
 
       if (pType === 'PRICE_PER_M2') {
-        const surf = (sel.useInterior ? surfaceInterior() : 0) + (sel.useExterior ? surfaceExterior() : 0);
         rateLabel = `${money(sObj.unitRate || sObj.price || 0)} / m²`;
-        qtyLabel = `${surf} m²`;
-        qtyNum = surf;
+        qtyLabel = `${billedSurf} m²`;
+        qtyNum = billedSurf;
       } else if (pType === 'HOURLY') {
+        const h = (sel.hours !== undefined) ? sel.hours : (sObj ? sObj.defaultHours || 20 : 20);
         rateLabel = `${money(sObj.hourlyRate || sObj.price || 0)} / h`;
-        qtyLabel = `${sel.hours || 20} h`;
-        qtyNum = sel.hours || 20;
+        qtyLabel = `${h} h`;
+        qtyNum = h;
       } else if (pType === 'FIXED_UNIT') {
+        const q = (sel.quantity !== undefined) ? sel.quantity : (sObj ? sObj.defaultQuantity || 1 : 1);
         rateLabel = `${money(sObj.fixedUnitPrice || sObj.price || 0)} / ${sObj.unitName || 'unité'}`;
-        qtyLabel = `${sel.quantity || 1} ${sObj.unitName || 'unité'}`;
-        qtyNum = sel.quantity || 1;
+        qtyLabel = `${q} ${sObj.unitName || 'unité'}`;
+        qtyNum = q;
       } else if (pType === 'PERCENTAGE') {
+        const ref = (sel.referenceAmount !== undefined) ? sel.referenceAmount : (sObj ? sObj.defaultReferenceAmount || parseFloat(st.estimatedProjectCost || 100000) : 100000);
         rateLabel = `${sObj.percentage || 0}%`;
-        qtyLabel = money(sel.referenceAmount || 0);
+        qtyLabel = money(ref);
         qtyNum = 1;
       }
 
@@ -1772,6 +1945,11 @@ function renderSuccess(){
         id: sId,
         name: sObj ? sObj.name : sId,
         detail: detail,
+        scope: scopeVal,
+        scope_label: scopeLbl,
+        billed_surface: billedSurf,
+        use_interior: useInt,
+        use_exterior: useExt,
         rate_label: rateLabel,
         qty_label: qtyLabel,
         pricing_type: pType,

@@ -51,9 +51,11 @@ def calculate_service_fee(
     surface = Decimal(str(total_surface or 0))
     h = Decimal(str(hours or 0))
 
+    ref_amt = Decimal(str(reference_amount or estimated_project_cost or getattr(service, "default_reference_amount", 0) or 0))
+
     if pricing_type in ("percent_project_cost", "percentage_project_cost", "percent"):
         rate = Decimal(str(getattr(service, "percentage_rate", 0) or 0))
-        fee = (cost * rate) / Decimal("100")
+        fee = (ref_amt * rate) / Decimal("100")
         min_fee = getattr(service, "min_fee", None)
         max_fee = getattr(service, "max_fee", None)
         if min_fee is not None:
@@ -62,9 +64,26 @@ def calculate_service_fee(
             fee = min(fee, Decimal(str(max_fee)))
         return fee.quantize(Decimal("0.01"))
     elif pricing_type in ("area", "per_sqm"):
-        return (surface * price).quantize(Decimal("0.01"))
+        can_int = getattr(service, "allow_interior", True)
+        can_ext = getattr(service, "allow_exterior", False)
+        use_int = (getattr(service, "default_interior_selected", True) if use_interior is None else bool(use_interior)) if can_int else False
+        use_ext = (getattr(service, "default_exterior_selected", False) if use_exterior is None else bool(use_exterior)) if can_ext else False
+
+        surf_int = Decimal(str(surface_interior or 0))
+        surf_ext = Decimal(str(surface_exterior or 0))
+        selected_surface = Decimal("0.00")
+        if use_int:
+            selected_surface += surf_int
+        if use_ext:
+            selected_surface += surf_ext
+        if not use_int and not use_ext and surface:
+            selected_surface = surface
+        return (selected_surface * price).quantize(Decimal("0.01"))
     elif pricing_type in ("hourly", "per_hour"):
-        qty = h if h > 0 else Decimal("1")
+        qty = Decimal(str(hours if hours > 0 else (getattr(service, "default_hours", 1) or 1)))
+        return (qty * price).quantize(Decimal("0.01"))
+    elif pricing_type in ("fixed", "fixed_unit"):
+        qty = Decimal(str(quantity if quantity > 0 else (getattr(service, "default_quantity", 1) or 1)))
         return (qty * price).quantize(Decimal("0.01"))
     else:
         return price.quantize(Decimal("0.01"))

@@ -1,3 +1,4 @@
+from decimal import Decimal
 import uuid
 
 from django.db import models
@@ -203,6 +204,46 @@ class DesignRequestOption(models.Model):
     @property
     def name(self):
         return self.service.service_name if self.service else str(_("Design Service"))
+
+    @property
+    def scope(self):
+        if self.pricing_type in ("area", "per_sqm"):
+            if self.use_interior and self.use_exterior:
+                return "both"
+            elif self.use_interior:
+                return "interior"
+            elif self.use_exterior:
+                return "exterior"
+            return "none"
+        elif self.pricing_type in ("hourly", "per_hour"):
+            return "hourly"
+        elif self.pricing_type in ("percent_project_cost", "percentage_project_cost"):
+            return "percent"
+        return "fixed"
+
+    @property
+    def scope_display(self):
+        s = self.scope
+        if s == "both":
+            return _("Interior + Exterior")
+        elif s == "interior":
+            return _("Interior")
+        elif s == "exterior":
+            return _("Exterior")
+        elif s == "hourly":
+            return _("Hourly")
+        elif s == "percent":
+            return _("% of Project")
+    @property
+    def billed_surface(self):
+        if self.pricing_type in ("area", "per_sqm"):
+            s = Decimal("0.00")
+            if self.use_interior and self.design_request:
+                s += Decimal(str(self.design_request.surface_interior or 0))
+            if self.use_exterior and self.design_request:
+                s += Decimal(str(self.design_request.surface_exterior or 0))
+            return s
+        return Decimal("0.00")
 
     class Meta:
         verbose_name = _("Request Option")

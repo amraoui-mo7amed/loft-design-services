@@ -35,9 +35,9 @@
   - [x] `default_quantity` (PositiveIntegerField, default=1) : Quantité par défaut pour `FIXED_UNIT`.
   - [x] `default_hours` (PositiveIntegerField, default=10/20) : Heures par défaut pour `HOURLY`.
   - [x] `default_reference_amount` (DecimalField, default=100000.00) : Montant de référence par défaut pour les pourcentages.
-- [ ] Dans `DesignRequest` et `Quote` (`dashboard/models/requests.py`) :
-  - [ ] Conserver `surface_interior` et `surface_exterior` de manière séparée en base.
-  - [ ] Enregistrer pour chaque ligne de service le snapshot du périmètre : `scope` (`interior`, `exterior`, `both`, `unit`, `hourly`, `percent`), `use_interior`, `use_exterior`, `billed_surface`.
+- [x] Dans `DesignRequest` et `Quote` (`dashboard/models/requests.py`) :
+  - [x] Conserver `surface_interior` et `surface_exterior` de manière séparée en base.
+  - [x] Enregistrer pour chaque ligne de service le snapshot du périmètre : `scope` (`interior`, `exterior`, `both`, `unit`, `hourly`, `percent`), `use_interior`, `use_exterior`, `billed_surface`.
 
 ---
 
@@ -76,21 +76,21 @@
 
 ## 4. Configurateur Public / Wizard (`frontend/static/js/home.js` & `home.html`)
 
-- [ ] Étape 2 — Sélection des Prestations :
-  - [ ] Pour les services compatibles (`allow_interior` ET `allow_exterior`) :
-    - [ ] Afficher les options sous forme de cases à cocher directement sur la carte de service :
+- [x] Étape 2 — Sélection des Prestations :
+  - [x] Pour les services compatibles (`allow_interior` ET `allow_exterior`) :
+    - [x] Afficher les options sous forme de cases à cocher directement sur la carte de service :
       - `[x] Intérieur (surfaceInterior m²)`
       - `[ ] Extérieur (surfaceExterior m²)`
-    - [ ] Initialiser les cases avec `default_interior_selected` et `default_exterior_selected`.
-  - [ ] Pour les services mono-périmètre :
-    - [ ] Si `allow_interior=True` et `allow_exterior=False` : verrouiller sur Intérieur (badge indicatif `Intérieur seul`).
-    - [ ] Si `allow_interior=False` et `allow_exterior=True` : verrouiller sur Extérieur (badge indicatif `Extérieur seul`).
-  - [ ] Réactivité instantanée :
-    - [ ] Le changement d'une case à cocher recalcule immédiatement la ligne du service et le total général sans rechargement.
-    - [ ] Si aucune case n'est cochée pour un service au m², afficher un avertissement ou surface = 0 m².
-- [ ] Panneau Récapitulatif / Tiroir de Devis :
-  - [ ] Afficher pour chaque prestation son périmètre explicite (`Intérieur`, `Extérieur`, ou `Intérieur + Extérieur`).
-  - [ ] Afficher la formule exacte : ex. `874 m² (Intérieur) × 150 DA/m² = 131 100 DA`.
+    - [x] Initialiser les cases avec `default_interior_selected` et `default_exterior_selected`.
+  - [x] Pour les services mono-périmètre :
+    - [x] Si `allow_interior=True` et `allow_exterior=False` : verrouiller sur Intérieur (badge indicatif `Intérieur seul`).
+    - [x] Si `allow_interior=False` et `allow_exterior=True` : verrouiller sur Extérieur (badge indicatif `Extérieur seul`).
+  - [x] Réactivité instantanée :
+    - [x] Le changement d'une case à cocher recalcule immédiatement la ligne du service et le total général sans rechargement.
+    - [x] Si aucune case n'est cochée pour un service au m², afficher un avertissement ou surface = 0 m².
+- [x] Panneau Récapitulatif / Tiroir de Devis :
+  - [x] Afficher pour chaque prestation son périmètre explicite (`Intérieur`, `Extérieur`, ou `Intérieur + Extérieur`).
+  - [x] Afficher la formule exacte : ex. `874 m² (Intérieur) × 150 DA/m² = 131 100 DA`.
 
 ---
 
