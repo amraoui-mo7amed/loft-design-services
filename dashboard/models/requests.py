@@ -49,6 +49,12 @@ class DesignRequest(models.Model):
     total_surface = models.DecimalField(
         max_digits=10, decimal_places=2, default=0, verbose_name=_("Total Surface (m²)")
     )
+    surface_interior = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name=_("Surface Intérieure (m²)")
+    )
+    surface_exterior = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name=_("Surface Extérieure (m²)")
+    )
     has_terrace = models.BooleanField(default=False, verbose_name=_("Has Terrace"))
     has_garden = models.BooleanField(default=False, verbose_name=_("Has Garden"))
     floors_above = models.IntegerField(default=0, verbose_name=_("Floors Above RDC"))
@@ -170,6 +176,27 @@ class DesignRequestOption(models.Model):
     )
     service = models.ForeignKey(
         Service, on_delete=models.SET_NULL, null=True, related_name="request_options", verbose_name=_("Service")
+    )
+    pricing_type = models.CharField(
+        max_length=30, blank=True, default="fixed", verbose_name=_("Pricing Type")
+    )
+    use_interior = models.BooleanField(
+        default=False, verbose_name=_("Use Interior")
+    )
+    use_exterior = models.BooleanField(
+        default=False, verbose_name=_("Use Exterior")
+    )
+    hours = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0, verbose_name=_("Hours")
+    )
+    quantity = models.DecimalField(
+        max_digits=10, decimal_places=2, default=1, verbose_name=_("Quantity")
+    )
+    reference_amount = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0, verbose_name=_("Reference Amount")
+    )
+    calculation_detail = models.CharField(
+        max_length=255, blank=True, verbose_name=_("Calculation Detail")
     )
     price_at_time = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name=_("Price at Time"))
 

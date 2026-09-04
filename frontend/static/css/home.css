@@ -1710,6 +1710,129 @@ header.nav,
   font-weight: 700;
 }
 
+/* Compositeur & Preview Calculation Styles */
+.formulaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.formulaMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.formulaDetail {
+  font-size: 11px;
+  color: var(--cyan, #55dcff);
+  font-family: monospace, sans-serif;
+  line-height: 1.35;
+  opacity: 0.92;
+  word-break: break-word;
+}
+
+.svc-calc-controls {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.svc-calc-controls .cursor-pointer {
+  cursor: pointer;
+}
+
+.svc-calc-controls input[type="number"] {
+  font-family: monospace, sans-serif;
+  background: rgba(0, 0, 0, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #fff !important;
+  border-radius: 6px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.svc-calc-controls input[type="number"]:focus {
+  border-color: var(--cyan, #55dcff) !important;
+  box-shadow: 0 0 8px rgba(85, 220, 255, 0.3) !important;
+  outline: none;
+}
+
+.svc-calc-controls .form-check-input {
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.svc-calc-controls .form-check-input:checked {
+  background-color: var(--cyan, #55dcff);
+  border-color: var(--cyan, #55dcff);
+  box-shadow: 0 0 8px rgba(85, 220, 255, 0.4);
+}
+
+.calcExplanationBadge {
+  background: rgba(85, 220, 255, 0.08);
+  border: 1px solid rgba(85, 220, 255, 0.25);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--cyan, #55dcff);
+  font-family: monospace, sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calcExplanationBadge i {
+  font-size: 10px;
+  opacity: 0.85;
+}
+
+.categoryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  margin-top: 6px;
+}
+
+.categoryHeader span {
+  font-weight: 700;
+  font-size: 13px;
+  color: #f3f7f8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+[dir="rtl"] .formulaRow {
+  text-align: right;
+}
+
+[dir="rtl"] .formulaMeta {
+  text-align: right;
+}
+
+[dir="rtl"] .categoryHeader {
+  direction: rtl;
+}
+
+[dir="rtl"] .svc-calc-controls {
+  direction: rtl;
+  text-align: right;
+}
+
 aside.quote .grand,
 aside.quote .nextBtn,
 .serviceStage .quote .grand,
@@ -7777,4 +7900,1200 @@ body.galleryOpen {
   color: #55dcff !important;
   border-color: rgba(85, 220, 255, 0.45) !important;
   box-shadow: 0 0 16px rgba(85, 220, 255, 0.25) !important;
+}
+
+/* ==========================================================================
+   V75 COMPOSER DESIGN SYSTEM (LOFT_DESIGN_V75_PORTFOLIO_9_CARD_EDGE_TO_EDGE)
+   ========================================================================== */
+
+#composer .v60ComposerHead {
+  width: min(1080px, calc(100vw - 28px)) !important;
+  margin: 0 auto 18px !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  display: block !important;
+}
+
+#composer .v60ComposerHead h2 {
+  margin: 0 !important;
+  color: #f6f8f7 !important;
+  font-size: clamp(34px, 3.4vw, 54px) !important;
+  line-height: 1 !important;
+  letter-spacing: -0.035em !important;
+  font-weight: 850 !important;
+  text-align: left !important;
+  text-wrap: balance !important;
+  display: block !important;
+}
+
+[dir="rtl"] #composer .v60ComposerHead h2 {
+  text-align: right !important;
+}
+
+#composer .v60ComposerHead .ey,
+#composer .v60ComposerHead .eyebrow,
+#composer .v60ComposerHead p,
+#composer .v60ComposerHead em {
+  display: none !important;
+}
+
+/* Progress bar V75 */
+#composer .progress {
+  width: min(760px, calc(100vw - 32px)) !important;
+  margin: 0 auto 18px !important;
+  gap: 10px !important;
+  align-items: center !important;
+  display: flex !important;
+  justify-content: center !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+#composer .progress > span {
+  min-width: 22px !important;
+  height: 1px !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+  display: block !important;
+}
+
+#composer .progress button {
+  min-width: 0 !important;
+  min-height: 46px !important;
+  padding: 0 10px !important;
+  gap: 8px !important;
+  border-radius: 14px !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  background: none !important;
+  border: none !important;
+  color: #818a87 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#composer .progress button i {
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  font-size: 11px !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  display: grid !important;
+  place-items: center !important;
+  font-style: normal;
+}
+
+#composer .progress button.active {
+  color: #fff !important;
+}
+
+#composer .progress button.active i {
+  background: var(--cyan, #55dcff) !important;
+  color: #041014 !important;
+  border-color: var(--cyan, #55dcff) !important;
+  box-shadow: 0 0 18px rgba(85, 220, 255, 0.25) !important;
+}
+
+#composer .progress button.done {
+  color: var(--cyan, #55dcff) !important;
+}
+
+#composer .progress button.done i {
+  border-color: var(--cyan, #55dcff) !important;
+  color: var(--cyan, #55dcff) !important;
+}
+
+#composer .progress button span {
+  min-width: 0 !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Step 1: Project Screen */
+#composer .v46ProjectScreen {
+  width: min(1080px, calc(100vw - 28px)) !important;
+  margin: 0 auto !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  background: rgba(5, 10, 12, 0.86) !important;
+  backdrop-filter: blur(16px) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34) !important;
+}
+
+#composer .v46ProjectRow {
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 10px 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.075);
+}
+
+#composer .v46ProjectRow:last-child {
+  border-bottom: 0;
+}
+
+[dir="rtl"] #composer .v46ProjectRow {
+  text-align: right;
+}
+
+#composer .v46RowLabel {
+  color: #74807c;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Row 1: Project Types */
+#composer .v46ProjectRow.v46TypeRow {
+  align-items: flex-start;
+  padding-top: 14px;
+}
+
+#composer .v46ProjectTypes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+#composer .v46ProjectTypes::-webkit-scrollbar {
+  width: 5px;
+}
+
+#composer .v46ProjectTypes::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#composer .v46ProjectTypes::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+[dir="rtl"] #composer .v46ProjectTypes {
+  padding-right: 0;
+  padding-left: 4px;
+}
+
+#composer .v46ProjectTypes button {
+  --v60c: 85, 220, 255;
+  min-width: 0;
+  height: 52px;
+  padding: 0 30px 0 14px;
+  border: 1px solid rgba(var(--v60c), 0.30);
+  border-radius: 14px;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v60c), 0.095),
+    rgba(var(--v60c), 0.025)
+  );
+  color: #ecf3f1;
+  font-size: 14px;
+  line-height: 1.08;
+  font-weight: 850;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  text-align: left;
+}
+
+[dir="rtl"] #composer .v46ProjectTypes button {
+  text-align: right;
+  padding: 0 14px 0 30px;
+}
+
+#composer .v46ProjectTypes button:nth-child(1),
+#composer .v46ProjectTypes button[data-type="villa"] { --v60c: 64, 205, 255; }   /* Villa */
+#composer .v46ProjectTypes button:nth-child(2),
+#composer .v46ProjectTypes button[data-type="appartement"] { --v60c: 180, 138, 255; } /* Appartement */
+#composer .v46ProjectTypes button:nth-child(3),
+#composer .v46ProjectTypes button[data-type="residence"] { --v60c: 103, 233, 166; } /* Résidence */
+#composer .v46ProjectTypes button:nth-child(4),
+#composer .v46ProjectTypes button[data-type="commercial"] { --v60c: 244, 189, 99; }  /* Commercial */
+#composer .v46ProjectTypes button:nth-child(5),
+#composer .v46ProjectTypes button[data-type="bureau"] { --v60c: 255, 135, 164; }  /* Bureau */
+#composer .v46ProjectTypes button:nth-child(6),
+#composer .v46ProjectTypes button[data-type="hotel"] { --v60c: 111, 159, 255; }   /* Hôtel */
+
+#composer .v46ProjectTypes button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(var(--v60c), 0.65);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v60c), 0.15),
+    rgba(var(--v60c), 0.05)
+  );
+}
+
+#composer .v46ProjectTypes button.selected {
+  border-color: rgba(var(--v60c), 0.92);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--v60c), 0.25),
+    rgba(var(--v60c), 0.09)
+  );
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(var(--v60c), 0.10), 0 7px 22px rgba(var(--v60c), 0.10);
+}
+
+#composer .v46ProjectTypes button i {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgb(var(--v60c));
+  color: #061014;
+  font-size: 9px;
+  font-weight: 950;
+  font-style: normal;
+}
+
+[dir="rtl"] #composer .v46ProjectTypes button i {
+  right: auto;
+  left: 8px;
+}
+
+/* Row 2: Counters */
+#composer .v46Counters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+#composer .v46Counter {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 7px 5px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 12px;
+  background: #0b1214;
+}
+
+#composer .v46Counter > span {
+  color: #dfe6e4;
+  font-size: 14px;
+  font-weight: 850;
+}
+
+#composer .v46Counter > div {
+  height: 38px;
+  display: grid;
+  grid-template-columns: 36px 42px 36px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+}
+
+#composer .v46Counter button {
+  border: 0;
+  background: #10181a;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+#composer .v46Counter button:hover:not(:disabled) {
+  color: var(--cyan, #55dcff);
+  background: rgba(85, 220, 255, 0.08);
+}
+
+#composer .v46Counter button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+#composer .v46Counter b {
+  display: grid;
+  place-items: center;
+  border-inline: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--cyan, #55dcff);
+  font-size: 16px;
+}
+
+#composer .v46Counter.basement {
+  border-left: 3px solid rgba(172, 132, 255, 0.6);
+}
+
+#composer .v46Counter.upper {
+  border-left: 3px solid rgba(85, 220, 255, 0.6);
+}
+
+[dir="rtl"] #composer .v46Counter.basement {
+  border-left: 1px solid rgba(255, 255, 255, 0.10);
+  border-right: 3px solid rgba(172, 132, 255, 0.6);
+}
+
+[dir="rtl"] #composer .v46Counter.upper {
+  border-left: 1px solid rgba(255, 255, 255, 0.10);
+  border-right: 3px solid rgba(85, 220, 255, 0.6);
+}
+
+/* Row 3: Base Surfaces (RDC + Extérieur) */
+#composer .v46BaseSurfaces {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+#composer .v46BaseSurface {
+  min-height: 52px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 8px 6px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 12px;
+  background: #0b1214;
+  cursor: text;
+}
+
+#composer .v46BaseSurface.rdc {
+  border-left: 3px solid rgba(125, 229, 174, 0.6);
+}
+
+#composer .v46BaseSurface.exterior {
+  border-left: 3px solid rgba(244, 184, 95, 0.6);
+}
+
+[dir="rtl"] #composer .v46BaseSurface.rdc {
+  border-left: 1px solid rgba(255, 255, 255, 0.10);
+  border-right: 3px solid rgba(125, 229, 174, 0.6);
+}
+
+[dir="rtl"] #composer .v46BaseSurface.exterior {
+  border-left: 1px solid rgba(255, 255, 255, 0.10);
+  border-right: 3px solid rgba(244, 184, 95, 0.6);
+}
+
+#composer .v46BaseSurface.filled {
+  background: rgba(125, 229, 174, 0.035);
+  border-color: rgba(125, 229, 174, 0.3);
+}
+
+#composer .v46BaseSurface > b {
+  font-size: 14px;
+  color: #f0f4f2;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+#composer .v46BaseSurface b small {
+  color: #697570;
+  font-size: 9px;
+  font-weight: 600;
+  display: block;
+}
+
+#composer .v46BaseSurface > span,
+#composer .v46LevelChip > span {
+  height: 38px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 10px;
+  background: #101719;
+}
+
+#composer .v46BaseSurface input,
+#composer .v46LevelChip input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #fff;
+  text-align: right;
+  font-size: 17px;
+  font-weight: 850;
+  font-family: monospace, sans-serif;
+}
+
+[dir="rtl"] #composer .v46BaseSurface input,
+[dir="rtl"] #composer .v46LevelChip input {
+  text-align: left;
+}
+
+#composer .v46BaseSurface em,
+#composer .v46LevelChip em {
+  color: #8d9995;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+/* Row 4: Extra Levels chips */
+#composer .v46ExtraRow {
+  min-height: 64px;
+}
+
+#composer .v46ExtraLevels {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  padding: 2px 0;
+}
+
+#composer .v46ExtraLevels::-webkit-scrollbar {
+  display: none;
+}
+
+#composer .v46NoExtra {
+  color: #64716d;
+  font-size: 12px;
+  font-style: italic;
+}
+
+#composer .v46LevelChip {
+  flex: 0 0 170px;
+  height: 48px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 11px;
+  background: #0b1214;
+}
+
+#composer .v46LevelChip > b {
+  display: grid;
+  place-items: center;
+  height: 36px;
+  border-radius: 8px;
+  color: var(--cyan, #55dcff);
+  background: rgba(85, 220, 255, 0.07);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+#composer .v46LevelChip.basement > b {
+  color: var(--violet, #ac84ff);
+  background: rgba(172, 132, 255, 0.08);
+}
+
+#composer .v46LevelChip.filled {
+  border-color: rgba(125, 229, 174, 0.35);
+  background: rgba(125, 229, 174, 0.03);
+}
+
+/* Row 5: Action Row */
+#composer .v46ActionRow {
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 68px;
+  background: rgba(0, 0, 0, 0.14);
+}
+
+#composer .v46ActionRow .v46RowLabel {
+  display: none;
+}
+
+#composer .v46CompactTotal {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#composer .v46CompactTotal small {
+  color: #75817d;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+#composer .v46CompactTotal b {
+  color: var(--cyan, #55dcff);
+  font-size: 22px;
+  font-family: monospace, sans-serif;
+  font-weight: 850;
+}
+
+#composer .v46CompactTotal span {
+  color: #78837f;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#composer .v46NextBtn {
+  min-width: 140px !important;
+  min-height: 48px !important;
+  padding: 0 24px !important;
+  border-radius: 999px !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  white-space: nowrap !important;
+  background: linear-gradient(135deg, #55dcff, #0099cc) !important;
+  color: #041014 !important;
+  border: none !important;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+#composer .v46NextBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 0 20px rgba(85, 220, 255, 0.4);
+}
+
+#composer .v46NextBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Step 2: Services Screen (Two Fixed Columns)
+   ========================================================================== */
+#composer .v46ServicesScreen {
+  width: min(1080px, calc(100vw - 28px)) !important;
+  height: calc(100dvh - var(--nav, 72px) - 205px);
+  min-height: 480px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(340px, 0.88fr);
+  gap: 12px;
+  overflow: hidden;
+}
+
+#composer .v46AvailableColumn,
+#composer .v46SelectedColumn {
+  min-height: 0;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 18px;
+  background: rgba(5, 10, 12, 0.88);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+}
+
+#composer .v46AvailableColumn {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+#composer .v46SelectedColumn {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+#composer .v46ColumnHead {
+  min-height: 58px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.075);
+}
+
+#composer .v46ColumnHead small {
+  display: block;
+  color: #65716d;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+#composer .v46ColumnHead h3 {
+  margin: 2px 0 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+}
+
+#composer .v46ColumnHead > span {
+  min-width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(85, 220, 255, 0.08);
+  color: var(--cyan, #55dcff);
+  font-size: 9px;
+  font-weight: 900;
+}
+
+#composer .v46AvailableScroll,
+#composer .v46SelectedScroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding: 8px;
+}
+
+/* Left Column: Available Service Card */
+#composer .v46AvailableService {
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 62px;
+  align-items: stretch;
+  gap: 6px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 13px;
+  background: #091012;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+#composer .v46AvailableService:hover {
+  border-color: rgba(85, 220, 255, 0.28);
+}
+
+#composer .v46AvailableService.selected {
+  border-color: rgba(85, 220, 255, 0.45);
+  background: rgba(85, 220, 255, 0.05);
+}
+
+#composer .v46ServiceAdd {
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+[dir="rtl"] #composer .v46ServiceAdd {
+  text-align: right;
+}
+
+#composer .v46ServiceAdd > i {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-style: normal;
+  color: #a8b2ae;
+  font-size: 11px;
+}
+
+#composer .v46AvailableService.selected .v46ServiceAdd > i {
+  background: var(--cyan, #55dcff);
+  border-color: var(--cyan, #55dcff);
+  color: #041014;
+  font-weight: 900;
+}
+
+#composer .v46ServiceAdd span {
+  min-width: 0;
+}
+
+#composer .v46ServiceAdd span b {
+  display: block;
+  font-size: 13px;
+  font-weight: 750;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
+}
+
+#composer .v46ServiceAdd span small {
+  display: block;
+  margin-top: 2px;
+  color: #72807b;
+  font-size: 10px;
+}
+
+#composer .v46ServiceAdd > strong {
+  color: var(--cyan, #55dcff);
+  font-size: 13px;
+  font-family: monospace, sans-serif;
+  white-space: nowrap;
+}
+
+#composer .v46ServiceInfo {
+  border: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
+  color: #aeb8b4;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+[dir="rtl"] #composer .v46ServiceInfo {
+  border-left: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+#composer .v46ServiceInfo:hover {
+  background: rgba(85, 220, 255, 0.08);
+  color: var(--cyan, #55dcff);
+}
+
+/* Right Column: Total Dock & Selected Services */
+#composer .v46TotalDock {
+  min-height: 72px;
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(85, 220, 255, 0.16);
+  background: linear-gradient(135deg, rgba(85, 220, 255, 0.085), rgba(5, 10, 12, 0.96));
+  box-shadow: 0 9px 25px rgba(0, 0, 0, 0.16);
+  z-index: 4;
+}
+
+#composer .v46TotalDock small {
+  display: block;
+  color: #71807b;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#composer .v46TotalDock strong {
+  display: block;
+  margin-top: 2px;
+  color: var(--cyan, #55dcff);
+  font-size: 22px;
+  font-family: monospace, sans-serif;
+  font-weight: 850;
+}
+
+#composer .v46TotalDock .nextBtn {
+  min-height: 42px !important;
+  padding: 0 18px !important;
+  font-size: 11px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #55dcff, #0099cc) !important;
+  color: #041014 !important;
+  font-weight: 900 !important;
+  border: none !important;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#composer .v46SelectedService {
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background: #091012;
+}
+
+#composer .v46SelectedServiceTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 9px;
+}
+
+#composer .v46SelectedServiceTop span {
+  min-width: 0;
+}
+
+#composer .v46SelectedServiceTop b {
+  display: block;
+  font-size: 13px;
+  font-weight: 750;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#composer .v46SelectedServiceTop small {
+  display: block;
+  margin-top: 2px;
+  color: #6f7c78;
+  font-size: 10px;
+}
+
+#composer .v46SelectedServiceTop > strong {
+  flex: 0 0 auto;
+  color: var(--cyan, #55dcff);
+  font-size: 13px;
+  font-family: monospace, sans-serif;
+  white-space: nowrap;
+}
+
+#composer .v46SelectedCalc {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.065);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#composer .v46SelectedCalc > span {
+  color: #8a9893;
+  font-size: 11px;
+  font-family: monospace, sans-serif;
+  flex: 1 1 auto;
+}
+
+#composer .v46SelectedCalc .v46Actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#composer .v46SelectedCalc button {
+  min-height: 28px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.025);
+  color: #aeb8b4;
+  font-size: 10px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+#composer .v46SelectedCalc button:hover {
+  border-color: rgba(85, 220, 255, 0.3);
+  color: #fff;
+}
+
+#composer .v46SelectedCalc button.remove {
+  color: #ff9d98;
+  font-size: 15px;
+  line-height: 1;
+  padding: 0 8px;
+}
+
+#composer .v46SelectedCalc button.remove:hover {
+  background: rgba(255, 100, 100, 0.12);
+  border-color: #ff9d98;
+}
+
+#composer .v46SelectionEmpty {
+  min-height: 160px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: #697570;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Quantity / Hours Stepper and Fields */
+.v74QtyField {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 2px 6px;
+  border: 1px solid rgba(244, 184, 95, 0.30);
+  border-radius: 8px;
+  background: rgba(244, 184, 95, 0.05);
+}
+
+.v74QtyField span {
+  font-size: 10px;
+  color: #e8c987;
+  font-weight: 850;
+}
+
+.v74QtyField input {
+  width: 52px;
+  height: 26px;
+  min-width: 0;
+  padding: 0 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: #0c1315;
+  color: #fff;
+  font-size: 11px;
+  text-align: center;
+  font-family: monospace, sans-serif;
+  font-weight: 700;
+}
+
+/* Interactive Scope Checkboxes for 2D Services */
+.v46ScopeChecks {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.v46ScopeChecks label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #cfd8d5;
+  cursor: pointer;
+  margin: 0;
+}
+
+.v46ScopeChecks input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--cyan, #55dcff);
+  cursor: pointer;
+}
+
+.v46ScopeChecks strong {
+  color: var(--cyan, #55dcff);
+  font-family: monospace, sans-serif;
+}
+
+/* Budget field for percentage services */
+#composer .v46BudgetField {
+  margin: 8px 8px 0;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 11px;
+  background: #0c1315;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+#composer .v46BudgetField > span {
+  font-size: 11px;
+  color: #cfd8d5;
+  font-weight: 750;
+}
+
+#composer .v46BudgetField > div {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: #101719;
+}
+
+#composer .v46BudgetField input {
+  width: 110px;
+  background: transparent;
+  border: 0;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  font-family: monospace, sans-serif;
+  text-align: right;
+}
+
+#composer .v46BudgetField b {
+  color: var(--cyan, #55dcff);
+  font-size: 10px;
+}
+
+/* Responsive Rules for V75 Composer */
+@media (max-width: 1050px) and (min-width: 841px) {
+  #composer .v46ProjectScreen,
+  #composer .v46ServicesScreen {
+    width: 100% !important;
+  }
+  #composer .v46ServicesScreen {
+    grid-template-columns: minmax(0, 1fr) 340px !important;
+  }
+}
+
+@media (max-width: 840px) {
+  #composer .v60ComposerHead {
+    width: calc(100vw - 28px) !important;
+    margin-bottom: 14px !important;
+  }
+  #composer .v60ComposerHead h2 {
+    font-size: clamp(28px, 7.5vw, 38px) !important;
+    text-align: left !important;
+  }
+  [dir="rtl"] #composer .v60ComposerHead h2 {
+    text-align: right !important;
+  }
+  #composer .progress {
+    width: calc(100vw - 26px) !important;
+    margin-bottom: 12px !important;
+    gap: 5px !important;
+  }
+  #composer .progress > span {
+    min-width: 10px !important;
+    flex: 1 1 16px !important;
+  }
+  #composer .progress button {
+    flex: 0 1 auto !important;
+    min-height: 42px !important;
+    padding: 0 6px !important;
+    gap: 5px !important;
+  }
+  #composer .progress button i {
+    width: 27px !important;
+    min-width: 27px !important;
+    height: 27px !important;
+    font-size: 9px !important;
+  }
+  #composer .progress button span {
+    font-size: 12px !important;
+  }
+  #composer .v46ProjectScreen {
+    width: calc(100vw - 12px) !important;
+    border-radius: 17px !important;
+  }
+  #composer .v46ProjectRow {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+    padding: 8px !important;
+  }
+  #composer .v46RowLabel {
+    display: none !important;
+  }
+  #composer .v46ProjectTypes {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)) !important;
+    max-height: 200px !important;
+    overflow-y: auto !important;
+    gap: 7px !important;
+    padding-right: 4px !important;
+  }
+  [dir="rtl"] #composer .v46ProjectTypes {
+    padding-right: 0 !important;
+    padding-left: 4px !important;
+  }
+  #composer .v46ProjectTypes button {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+    height: 50px !important;
+    padding: 0 28px 0 9px !important;
+    font-size: 12.5px !important;
+  }
+  [dir="rtl"] #composer .v46ProjectTypes button {
+    padding: 0 9px 0 28px !important;
+  }
+  #composer .v46ProjectTypes button i {
+    right: 6px !important;
+    width: 20px !important;
+    min-width: 20px !important;
+    height: 20px !important;
+  }
+  [dir="rtl"] #composer .v46ProjectTypes button i {
+    right: auto !important;
+    left: 6px !important;
+  }
+  #composer .v46Counters,
+  #composer .v46BaseSurfaces {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  #composer .v46BaseSurface {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+  }
+  #composer .v46BaseSurface > span {
+    height: 38px !important;
+  }
+  #composer .v46ActionRow {
+    grid-template-columns: 1fr auto !important;
+  }
+  #composer .v46ServicesScreen {
+    height: auto !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+  #composer .v46AvailableColumn,
+  #composer .v46SelectedColumn {
+    margin-bottom: 9px !important;
+    overflow: visible !important;
+  }
+  #composer .v46AvailableScroll,
+  #composer .v46SelectedScroll {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  #composer .v46TotalDock {
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: max(7px, env(safe-area-inset-bottom)) !important;
+    z-index: 90 !important;
+    border: 1px solid rgba(85, 220, 255, 0.35) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.46) !important;
+  }
+  #composer .v46SelectedColumn {
+    padding-bottom: 82px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  #composer .v46Counters,
+  #composer .v46BaseSurfaces {
+    grid-template-columns: 1fr !important;
+  }
+  #composer .v46ActionRow {
+    grid-template-columns: 1fr !important;
+  }
+  #composer .v46NextBtn {
+    width: 100% !important;
+  }
+  #composer .v46LevelChip {
+    flex-basis: 155px !important;
+  }
+}
+
+@media (max-width: 410px) {
+  #composer .v46ProjectTypes {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  #composer .v46ProjectTypes button {
+    height: 48px !important;
+    font-size: 12px !important;
+  }
+  #composer .progress button span {
+    display: none !important;
+  }
 }

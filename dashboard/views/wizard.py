@@ -112,14 +112,18 @@ def submit_design_request(request):
 
     try:
         with transaction.atomic():
-            project_type_slug = data.get("project_type_slug")
+            project_type_slug = data.get("project_type_slug") or data.get("project_type")
             project_type_id = data.get("project_type_id")
             
             project_type = None
             if project_type_slug:
                 project_type = ProjectType.objects.filter(slug=project_type_slug).first()
+                if not project_type:
+                    project_type = ProjectType.objects.filter(name__iexact=str(project_type_slug)).first()
             if not project_type and project_type_id:
                 project_type = ProjectType.objects.filter(pk=project_type_id).first()
+            if not project_type and project_type_slug and str(project_type_slug).isdigit():
+                project_type = ProjectType.objects.filter(pk=int(project_type_slug)).first()
             if not project_type:
                 project_type = ProjectType.objects.first()
 
@@ -142,12 +146,14 @@ def submit_design_request(request):
             has_terrace = data.get("has_terrace") in ("true", "1", True, "on")
             has_garden = data.get("has_garden") in ("true", "1", True, "on")
             total_surface = Decimal(str(data.get("total_surface", 0) or 0))
+            surface_interior = Decimal(str(data.get("surface_interior", 0) or 0))
+            surface_exterior = Decimal(str(data.get("surface_exterior", 0) or 0))
             total = Decimal(str(data.get("total", 0) or 0))
 
             project_name = data.get("project_name") or f"{project_type.name if project_type else 'Design'} - {company_name or f'{first_name} {last_name}'.strip()}".strip()
 
             design_request = DesignRequest.objects.create(
-                client=request.user if request.user.is_authenticated else None,
+                client=request.user if getattr(request, "user", None) and request.user.is_authenticated else None,
                 client_type=client_type,
                 company_name=company_name,
                 first_name=first_name,
@@ -162,6 +168,8 @@ def submit_design_request(request):
                 project_type=project_type,
                 service=service,
                 total_surface=total_surface,
+                surface_interior=surface_interior,
+                surface_exterior=surface_exterior,
                 floors_above=floors_above,
                 floors_below=floors_below,
                 has_terrace=has_terrace,
@@ -170,6 +178,13 @@ def submit_design_request(request):
             )
 
             # Multiple selected services
+            selected_services_data = data.get("selected_services") or []
+            if isinstance(selected_services_data, str):
+                try:
+                    selected_services_data = json.loads(selected_services_data)
+                except Exception:
+                    selected_services_data = []
+
             service_ids = data.get("service_ids") or []
             if isinstance(service_ids, str):
                 try:
@@ -178,6 +193,12 @@ def submit_design_request(request):
                     service_ids = [service_ids]
             if not service_ids and service_id:
                 service_ids = [service_id]
+
+            selected_svc_map = {}
+            for item in selected_services_data:
+                sid = str(item.get("service_id", ""))
+                if sid:
+                    selected_svc_map[sid] = item
 
             primary_service = service
             for s_id in service_ids:
@@ -189,10 +210,47 @@ def submit_design_request(request):
                 if s_obj:
                     if not primary_service:
                         primary_service = s_obj
+
+                    svc_item = selected_svc_map.get(str(s_obj.id)) or selected_svc_map.get(str(s_id)) or {}
+                    use_int = bool(svc_item.get("use_interior", False))
+                    use_ext = bool(svc_item.get("use_exterior", False))
+                    hours = Decimal(str(svc_item.get("hours", 0) or 0))
+                    qty = Decimal(str(svc_item.get("quantity", 1) or 1))
+                    ref_amt = Decimal(str(svc_item.get("reference_amount", 0) or 0))
+                    calc_detail = str(svc_item.get("calculation_detail", "") or "").strip()
+
+                    pricing = getattr(s_obj, "pricing", None) or s_obj
+                    if hasattr(pricing, "calculate_service_fee"):
+                        # Enforce admin constraints (Preview.html rule 4 & 10)
+                        if not pricing.allow_interior:
+                            use_int = False
+                        if not pricing.allow_exterior:
+                            use_ext = False
+                        line_price = pricing.calculate_service_fee(
+                            surface_interior=surface_interior,
+                            surface_exterior=surface_exterior,
+                            use_interior=use_int,
+                            use_exterior=use_ext,
+                            hours=hours,
+                            quantity=qty,
+                            reference_amount=ref_amt,
+                        )
+                        p_type = pricing.pricing_type
+                    else:
+                        line_price = s_obj.service_price
+                        p_type = s_obj.pricing_type
+
                     DesignRequestOption.objects.create(
                         design_request=design_request,
                         service=s_obj,
-                        price_at_time=s_obj.service_price,
+                        pricing_type=p_type,
+                        use_interior=use_int,
+                        use_exterior=use_ext,
+                        hours=hours,
+                        quantity=qty,
+                        reference_amount=ref_amt,
+                        calculation_detail=calc_detail,
+                        price_at_time=line_price,
                     )
 
             if primary_service and not design_request.service:
@@ -276,12 +334,14 @@ def submit_design_request(request):
             subtotal_ht = total / Decimal("1.19") if is_pro else total
             tax_amt = total - subtotal_ht if is_pro else Decimal("0.00")
 
+            auth_user = getattr(request, "user", None) if getattr(request, "user", None) and request.user.is_authenticated else None
+
             quote = Quote.objects.create(
                 quote_number=f"LOFT-QUO-{design_request.project_number.replace('LOFT-', '') if 'LOFT-' in design_request.project_number else design_request.project_number}",
                 revision_number=1,
                 is_current_revision=True,
                 design_request=design_request,
-                client=request.user if request.user.is_authenticated else None,
+                client=auth_user,
                 origin=Quote.Origin.CUSTOMER,
                 status=Quote.Status.DRAFT,
                 first_name=first_name,
@@ -307,26 +367,46 @@ def submit_design_request(request):
             for opt in design_request.options.select_related("service").all():
                 svc = opt.service
                 if svc:
-                    fee = calculate_service_fee(svc, estimated_project_cost=estimated_project_cost, total_surface=total_surface)
+                    fee = opt.price_at_time
                     trans = svc.get_translation("fr")
+                    
+                    if opt.pricing_type == "PRICE_PER_M2":
+                        qty_val = (surface_interior if opt.use_interior else Decimal("0.00")) + (surface_exterior if opt.use_exterior else Decimal("0.00"))
+                        unit_str = "M2"
+                    elif opt.pricing_type == "HOURLY":
+                        qty_val = opt.hours
+                        unit_str = "HEURE"
+                    elif opt.pricing_type == "FIXED_UNIT":
+                        qty_val = opt.quantity
+                        unit_str = (svc.unit_name or "UNITE").upper()
+                    elif opt.pricing_type == "PERCENTAGE":
+                        qty_val = Decimal("1.00")
+                        unit_str = "%"
+                    else:
+                        qty_val = total_surface if svc.pricing_type == ServicePricing.PricingType.AREA else Decimal("1.00")
+                        unit_str = "M2" if svc.pricing_type == ServicePricing.PricingType.AREA else "FORFAIT"
+
+                    details_dict = {
+                        "included": trans.get("included_items", []),
+                        "excluded": trans.get("excluded_items", []),
+                        "deliverables": trans.get("deliverables", []),
+                        "revisions": trans.get("included_revisions", ""),
+                        "delivery_time": trans.get("estimated_delivery_time", ""),
+                        "calculation_detail": opt.calculation_detail,
+                    }
+
                     QuoteItem.objects.create(
                         quote=quote,
                         service=svc,
                         service_name=svc.service_name,
-                        pricing_model=svc.pricing_type,
+                        pricing_model=opt.pricing_type or svc.pricing_type,
                         unit_price=svc.service_price,
                         percentage_rate=svc.percentage_rate,
-                        estimated_project_cost_base=estimated_project_cost if svc.pricing_type == ServicePricing.PricingType.PERCENTAGE_PROJECT_COST else None,
-                        quantity=total_surface if svc.pricing_type == ServicePricing.PricingType.AREA else Decimal("1.00"),
-                        unit="M2" if svc.pricing_type == ServicePricing.PricingType.AREA else "FORFAIT",
+                        estimated_project_cost_base=opt.reference_amount if opt.pricing_type == "PERCENTAGE" else None,
+                        quantity=qty_val,
+                        unit=unit_str,
                         line_total=fee,
-                        details_snapshot={
-                            "included": trans.get("included_items", []),
-                            "excluded": trans.get("excluded_items", []),
-                            "deliverables": trans.get("deliverables", []),
-                            "revisions": trans.get("included_revisions", ""),
-                            "delivery_time": trans.get("estimated_delivery_time", ""),
-                        },
+                        details_snapshot=details_dict,
                     )
 
             # Snapshot Quote spaces
@@ -342,14 +422,14 @@ def submit_design_request(request):
             # Initial Audit Log
             QuoteAuditEvent.objects.create(
                 quote=quote,
-                actor=request.user if request.user.is_authenticated else None,
+                actor=auth_user,
                 action="quote_created_by_customer",
                 new_value=f"Initial estimate: {total:,.2f} DA",
                 reason="Auto-created from customer online project composer",
             )
 
             # Clear session
-            if "request_flow_data" in request.session:
+            if hasattr(request, "session") and "request_flow_data" in request.session:
                 del request.session["request_flow_data"]
 
             # Notify admins
@@ -403,6 +483,8 @@ def _build_facturation_context(data):
             floors = []
 
     total_surface = float(data.get("total_surface", 0) or 0)
+    surface_interior = float(data.get("surface_interior", 0) or 0)
+    surface_exterior = float(data.get("surface_exterior", 0) or 0)
     estimated_total_project_cost = float(data.get("estimated_total_project_cost", 0) or 0)
 
     # Spaces list
@@ -509,6 +591,8 @@ def _build_facturation_context(data):
         "project_type": project_type_name,
         "project_type_name": project_type_name,
         "total_surface": total_surface,
+        "surface_interior": surface_interior,
+        "surface_exterior": surface_exterior,
         "estimated_total_project_cost": estimated_total_project_cost,
         "spaces": spaces,
         "items": items,

@@ -16,3 +16,6 @@ Before generating, modifying, or refactoring any code, thoroughly read and stric
    - Do not skip tasks or implement features outside the current scope defined in `TODO.md`.
    - Prevent any known bugs or anti-patterns listed in `BUGS.md`.
 3. **Task Completion:** Check off each completed item in `.agents/TODO.md` and provide a concise summary of the changes made and tests verified.
+
+Ps: 
+**Never push the changes untill i said so**

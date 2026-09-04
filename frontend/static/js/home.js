@@ -86,177 +86,616 @@ if (videoRail) {
 
 /* Composer */
 const money=v=>new Intl.NumberFormat('fr-DZ').format(Math.round(v))+' DA';
-const spaces = (window.SPACES_DATA && window.SPACES_DATA.length > 0) ? window.SPACES_DATA : [{id:'living',name:'Living room',price:8000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/living-room/16757/image_1.jpg'},{id:'bed',name:'Bedroom',price:6000,img:'https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-02-05-20-45-23_Enscape_scene_8.jpg'},{id:'kitchen',name:'Kitchen',price:12000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/kitchen-interior/11154/image_1.jpg'},{id:'bath',name:'Bathroom',price:7000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/bathroom/15230/image_1_dsgPgFt.jpg'},{id:'kids',name:'Children room',price:6500,img:'https://loftdesign.bilnov.com/media/spaces/gallery/children-room/10567/image_1_qP62mWe.jpg'}];
-const services = (window.SERVICES_DATA && window.SERVICES_DATA.length > 0) ? window.SERVICES_DATA : [{id:'3d',name:'Modélisation 3D',price:750},{id:'360',name:'Visite virtuelle 360°',price:8000},{id:'light',name:'Étude d’éclairage',price:12000}];
-const projectTypes = (window.PROJECT_TYPES_DATA && window.PROJECT_TYPES_DATA.length > 0) ? window.PROJECT_TYPES_DATA : [{id:'residence',name:'Résidence'},{id:'villa',name:'Villa'},{id:'appartement',name:'Appartement'},{id:'commercial',name:'Commercial'},{id:'bureau',name:'Bureau'},{id:'hotel',name:'Hôtel'}];
+const spaces = (window.SPACES_DATA && window.SPACES_DATA.length > 0) ? window.SPACES_DATA : [
+  {id:'living',name:'Living room',price:8000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/living-room/16757/image_1.jpg'},
+  {id:'bed',name:'Bedroom',price:6000,img:'https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-02-05-20-45-23_Enscape_scene_8.jpg'},
+  {id:'kitchen',name:'Kitchen',price:12000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/kitchen-interior/11154/image_1.jpg'},
+  {id:'bath',name:'Bathroom',price:7000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/bathroom/15230/image_1_dsgPgFt.jpg'},
+  {id:'kids',name:'Children room',price:6500,img:'https://loftdesign.bilnov.com/media/spaces/gallery/children-room/10567/image_1_qP62mWe.jpg'}
+];
+
+const services = (window.SERVICES_DATA && window.SERVICES_DATA.length > 0) ? window.SERVICES_DATA : [
+  {id:1, name:'Conception 3D intérieure', pricingType:'PRICE_PER_M2', pricing_type:'area', unitRate:900, price:900, allowInterior:true, allowExterior:false, defaultInteriorSelected:true, defaultExteriorSelected:false, unitName:'m²', is_default:true, short_description:'Modélisation 3D photoréaliste de l\'intérieur basée sur la surface intérieure.'},
+  {id:2, name:'Conception 3D extérieure', pricingType:'PRICE_PER_M2', pricing_type:'area', unitRate:600, price:600, allowInterior:false, allowExterior:true, defaultInteriorSelected:false, defaultExteriorSelected:true, unitName:'m²', is_default:false, short_description:'Conception 3D extérieure pour façades, terrasse, jardin et piscine.'},
+  {id:3, name:'Plan plomberie 2D', pricingType:'PRICE_PER_M2', pricing_type:'area', unitRate:150, price:150, allowInterior:true, allowExterior:true, defaultInteriorSelected:true, defaultExteriorSelected:false, unitName:'m²', is_default:false, short_description:'Plan technique des arrivées, évacuations et réseaux de plomberie.'},
+  {id:4, name:'Plan électricité & luminaires 2D', pricingType:'PRICE_PER_M2', pricing_type:'area', unitRate:150, price:150, allowInterior:true, allowExterior:true, defaultInteriorSelected:true, defaultExteriorSelected:false, unitName:'m²', is_default:false, short_description:'Plan d\'implantation des prises, circuits et luminaires.'},
+  {id:5, name:'Suivi de chantier', pricingType:'HOURLY', pricing_type:'hourly', hourlyRate:5000, price:5000, defaultHours:20, unitName:'h', is_default:false, short_description:'Assistance et visites de contrôle facturées à l\'heure.'},
+  {id:6, name:'Conception de façade', pricingType:'FIXED_UNIT', pricing_type:'fixed', fixedUnitPrice:100000, price:100000, defaultQuantity:3, unitName:'façade', is_default:false, short_description:'Conception architecturale et habillage de façade au forfait unitaire.'},
+  {id:7, name:'Gestion de projet', pricingType:'PERCENTAGE', pricing_type:'percent_project_cost', percentage:10, percentage_rate:10, defaultReferenceAmount:100000, unitName:'%', is_default:false, short_description:'Management global calculé en pourcentage du montant de référence.'}
+];
+
+const projectTypes = (window.PROJECT_TYPES_DATA && window.PROJECT_TYPES_DATA.length > 0) ? window.PROJECT_TYPES_DATA : [
+  {id:'residence',name:'Résidence'},{id:'villa',name:'Villa'},{id:'appartement',name:'Appartement'},{id:'commercial',name:'Commercial'},{id:'bureau',name:'Bureau'},{id:'hotel',name:'Hôtel'}
+];
 const defaultSelectedSpaces = [];
+
 // Strictly enforce SINGLE default service invariant on initialization
 const defaultSelectedServices = (() => {
   const def = services.find(s => s.is_default);
   if (def) return [def.id];
-  return (services.length > 0) ? [services[0].id] : ['3d'];
+  return (services.length > 0) ? [services[0].id] : [1];
 })();
-let upperLevels=['R+3','R+2','R+1'];const middleLevels=['Terrasse / Jardin','RDC'];let lowerLevels=['R-1'];
-let st={mode:'quick',step:'project',spaces:[],services:defaultSelectedServices,estimatedProjectCost:10000000,projectType:'',levels:[],surfaces:{},promptLevel:null,typeAttention:false,missing:[],clientType:'particular',success:false,ref:'',client:null};
-const area=()=>st.levels.reduce((s,l)=>s+(+st.surfaces[l]||0),0);
-const base=()=>st.mode==='quick'?spaces.filter(x=>st.spaces.includes(x.id)).reduce((s,x)=>s+(x.price||0),0):0;
-const servicePrice=id=>{
-  const s = services.find(x => String(x.id) === String(id) || (x.slug && String(x.slug) === String(id)) || (x.name && x.name.toLowerCase().includes('3d') && String(id) === '3d') || (x.name && x.name.toLowerCase().includes('360') && String(id) === '360') || (x.name && x.name.toLowerCase().includes('éclairage') && String(id) === 'light'));
-  if (!s) {
-    return id === '3d' ? (750 * (st.mode === 'custom' ? (area() || 320) : 320)) : (id === '360' ? 8000 : 12000);
-  }
-  if (s.pricing_type === 'percent_project_cost') {
-    const cost = parseFloat(st.estimatedProjectCost || 0);
-    const rate = parseFloat(s.percentage_rate || 0);
-    let fee = (cost * rate) / 100;
-    const minFee = parseFloat(s.min_fee || 0);
-    const maxFee = parseFloat(s.max_fee || 0);
-    if (minFee > 0) fee = Math.max(fee, minFee);
-    if (maxFee > 0) fee = Math.min(fee, maxFee);
-    return Math.round(fee);
-  }
-  const is3d = (s.name && s.name.toLowerCase().includes('3d')) || s.pricing_type === 'per_sqm' || s.pricing_type === 'area' || id === '3d';
-  if (is3d) {
-    const unitP = s.price || 750;
-    const a = st.mode === 'custom' ? area() : 320;
-    return unitP * (a > 0 ? a : 320);
-  }
-  return s.price || 0;
+
+let upperLevels = ['R+3', 'R+2', 'R+1'];
+const middleLevels = ['RDC'];
+const exteriorLevels = ['Terrasse / Jardin'];
+let lowerLevels = ['R-1'];
+
+const isExteriorLevel = l => {
+  const s = String(l).toLowerCase();
+  return s.includes('terrasse') || s.includes('jardin') || s.includes('ext') || s.includes('piscine') || s.includes('cour');
 };
-const servTotal=()=>st.services.reduce((s,id)=>s+servicePrice(id),0);
-const totalHT=()=>base()+servTotal();
-const tva=()=>st.clientType==='professional'?totalHT()*.19:0;
-const totalFinal=()=>totalHT()+tva();
-function gotoStep(step){st.step=step;st.success=false;renderComposer();document.querySelector('#composer').scrollIntoView({behavior:'smooth',block:'start'})}function updateProgress(){const order={project:0,services:1,contact:2};document.querySelectorAll('.progress button').forEach(b=>{const s=b.dataset.step;b.classList.toggle('active',s===st.step);b.classList.toggle('done',order[s]<order[st.step]);b.querySelector('i').textContent=order[s]<order[st.step]?'✓':String(order[s]+1).padStart(2,'0');b.onclick=()=>gotoStep(s)})}
-function drawTypeAttention(){st.typeAttention=true;renderComposer();setTimeout(()=>{const x=document.querySelector('#projectType');x?.focus()},80);setTimeout(()=>{st.typeAttention=false;document.querySelector('.typeBox')?.classList.remove('attention')},2500)}
-function levelClick(l){if(!st.projectType){drawTypeAttention();return}if(st.projectType==='Appartement'&&!st.levels.includes(l)&&st.levels.length>=1){const selected=document.querySelector('.levelRow.selected');selected?.classList.add('attention');setTimeout(()=>selected?.classList.remove('attention'),1000);return}if(st.levels.includes(l)){st.levels=st.levels.filter(x=>x!==l);delete st.surfaces[l];st.promptLevel=null}else{st.levels.push(l);st.promptLevel=l;st.missing=[]}renderComposer();setTimeout(()=>{const x=document.querySelector(`[data-surface="${CSS.escape(l)}"]`);if(x){x.focus();x.select?.()}},80)}
 
-function nextUpperLevel(){
-  const nums=upperLevels.map(x=>+x.replace('R+','')).filter(Number.isFinite);
-  return `R+${Math.max(0,...nums)+1}`;
-}
-function nextLowerLevel(){
-  const nums=lowerLevels.map(x=>+x.replace('R-','')).filter(Number.isFinite);
-  return `R-${Math.max(0,...nums)+1}`;
-}
-function addUpperLevel(){
-  const n=nextUpperLevel();
-  upperLevels=[n,...upperLevels];
-  renderComposer();
-  setTimeout(()=>document.querySelector(`[data-level="${n}"]`)?.closest('.levelRow')?.classList.add('newLevel'),20);
-}
-function addLowerLevel(){
-  const n=nextLowerLevel();
-  lowerLevels=[...lowerLevels,n];
-  renderComposer();
-  setTimeout(()=>document.querySelector(`[data-level="${n}"]`)?.closest('.levelRow')?.classList.add('newLevel'),20);
-}
-function levelRowHTML(l){
-  return `<div class="levelRow ${st.levels.includes(l)?'selected':''}">
-    <button type="button" data-level="${l}">
-      <i>${st.levels.includes(l)?'✓':''}</i><strong>${l}</strong>
-    </button>
-    ${st.levels.includes(l)?`<div class="surface ${st.promptLevel===l&&!(+st.surfaces[l]>0)?'prompt':''} ${st.missing.includes(l)?'error':''}">
-      <input type="number" min="1" inputmode="decimal" placeholder="Surface" data-surface="${l}" value="${st.surfaces[l]??''}">
-      <span>m²</span>
-    </div>`:''}
-  </div>`;
-}
-function validateSurfaces(){if(!st.projectType){drawTypeAttention();return false}if(!st.levels.length){document.querySelector('.levels')?.animate([{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'none'}],{duration:360,iterations:2});return false}const missing=st.levels.filter(l=>!(+st.surfaces[l]>0));if(missing.length){st.missing=missing;renderComposer();return false}return true}
-function renderProject(){
-  const body=document.querySelector('#composerBody');
-  body.innerHTML=`
-    <div class="modeTabs">
-      <button class="${st.mode==='quick'?'on':''}" id="quickMode"><b>Choisir mes espaces</b><small>Rapide et visuel</small></button>
-      <button class="${st.mode==='custom'?'on':''}" id="customMode"><b>Projet personnalisé</b><small>Niveaux et superficies</small></button>
-    </div>
-    <div id="modeBody"></div>`;
+let st = {
+  mode: 'custom',
+  step: 'project',
+  spaces: [],
+  services: [...defaultSelectedServices],
+  selectedServices: {},
+  estimatedProjectCost: 10000000,
+  projectType: '',
+  basementCount: 0,
+  upperCount: 0,
+  levelAreas: { RDC: 0 },
+  structureChosen: false,
+  surfaceInterior: 0,
+  surfaceExterior: 0,
+  levels: ['RDC · niveau principal'],
+  surfaces: { 'RDC · niveau principal': 0 },
+  promptLevel: null,
+  typeAttention: false,
+  missing: [],
+  clientType: 'particular',
+  success: false,
+  ref: '',
+  client: null
+};
 
-  document.querySelector('#quickMode').onclick=()=>{st.mode='quick';renderComposer()};
-  document.querySelector('#customMode').onclick=()=>{st.mode='custom';renderComposer()};
-  const m=document.querySelector('#modeBody');
+function ensureLevelState() {
+  if (typeof st.basementCount !== 'number' || isNaN(st.basementCount)) st.basementCount = 0;
+  if (typeof st.upperCount !== 'number' || isNaN(st.upperCount)) st.upperCount = 0;
+  if (typeof st.structureChosen !== 'boolean') st.structureChosen = false;
+  if (!st.levelAreas || typeof st.levelAreas !== 'object') st.levelAreas = { RDC: 0 };
+  if (!('RDC' in st.levelAreas)) st.levelAreas.RDC = 0;
+}
 
-  if(st.mode==='quick'){
-    m.innerHTML=`
-      <div class="spaceGrid">
-        ${spaces.map(s=>`<button class="spaceCard ${st.spaces.includes(s.id)?'selected':''}" data-space="${s.id}">
-          <img src="${s.img}" alt="${s.name}" onerror="if(!this.dataset.retried){this.dataset.retried='1';this.src='https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=600';}">
-          <i class="check">${st.spaces.includes(s.id)?'✓':'+'}</i>
-          <span class="copy"><strong>${s.name}</strong><small>${money(s.price)} HT</small></span>
-        </button>`).join('')}
-      </div>
-      <div class="composerBottom">
-        <div><small>${st.spaces.length} espaces sélectionnés</small><b>${money(base())} HT</b></div>
-        <button class="nextBtn" id="toServices">Continuer →</button>
-      </div>`;
-    m.querySelectorAll('[data-space]').forEach(b=>b.onclick=()=>{
-      const id=b.dataset.space;
-      st.spaces=st.spaces.includes(id)?st.spaces.filter(x=>x!==id):[...st.spaces,id];
-      renderComposer();
-    });
-    document.querySelector('#toServices').onclick=()=>gotoStep('services');
-    return;
+function projectLevelCodes() {
+  ensureLevelState();
+  const codes = [];
+  for (let i = st.upperCount; i >= 1; i--) codes.push(`R+${i}`);
+  codes.push('RDC');
+  for (let i = 1; i <= st.basementCount; i++) codes.push(`R-${i}`);
+  return codes;
+}
+
+function levelDisplayName(code) {
+  if (code === 'RDC') return 'RDC · niveau principal';
+  if (code.startsWith('R+')) {
+    const n = +code.slice(2);
+    return `${code} · étage ${n}`;
+  }
+  if (code.startsWith('R-')) {
+    const n = +code.slice(2);
+    return `${code} · sous-sol ${n}`;
+  }
+  return code;
+}
+
+function interiorLevelsTotal() {
+  ensureLevelState();
+  return projectLevelCodes().reduce((sum, code) => sum + (+st.levelAreas[code] || 0), 0);
+}
+
+function syncInteriorFromLevels() {
+  ensureLevelState();
+  const codes = projectLevelCodes();
+  st.levelCount = codes.length;
+  st.surfaceInterior = interiorLevelsTotal();
+  st.levels = codes.map(levelDisplayName);
+  st.surfaces = {};
+  codes.forEach(code => {
+    st.surfaces[levelDisplayName(code)] = +st.levelAreas[code] || 0;
+  });
+  if (+st.surfaceExterior > 0) {
+    st.levels.push('Extérieur');
+    st.surfaces['Extérieur'] = +st.surfaceExterior || 0;
+  }
+}
+
+function setBuildingStructure(basements, uppers, chosen = true) {
+  ensureLevelState();
+  st.basementCount = Math.max(0, Math.min(4, Math.round(+basements || 0)));
+  st.upperCount = Math.max(0, Math.min(8, Math.round(+uppers || 0)));
+  st.structureChosen = chosen;
+
+  /* Keep values of levels that still exist; remove abandoned levels. */
+  const allowed = new Set(projectLevelCodes());
+  Object.keys(st.levelAreas).forEach(code => {
+    if (!allowed.has(code)) delete st.levelAreas[code];
+  });
+  syncInteriorFromLevels();
+}
+
+// Rule 1: surfaceInterior = R-2 + R-1 + RDC + R+1 + ...
+const surfaceInterior = () => {
+  if (st.mode === 'quick') {
+    return st.spaces.length > 0 ? (st.spaces.length * 25) : 0;
+  }
+  if (st.levelAreas && typeof st.levelAreas === 'object') {
+    return interiorLevelsTotal();
+  }
+  return st.levels
+    .filter(l => !isExteriorLevel(l))
+    .reduce((sum, l) => sum + (+st.surfaces[l] || 0), 0);
+};
+
+// Rule 1: surfaceExterior = terrasse, jardin, piscine, etc.
+const surfaceExterior = () => {
+  if (st.mode === 'quick') {
+    return 0;
+  }
+  if (typeof st.surfaceExterior === 'number' && !isNaN(st.surfaceExterior)) {
+    return st.surfaceExterior;
+  }
+  return st.levels
+    .filter(l => isExteriorLevel(l))
+    .reduce((sum, l) => sum + (+st.surfaces[l] || 0), 0);
+};
+
+const totalSurface = () => surfaceInterior() + surfaceExterior();
+const area = totalSurface;
+
+// Helper: create or get initial selection parameters for a service
+function getInitialSelection(s) {
+  if (!s) return {};
+  const pType = s.pricingType || (
+    s.pricing_type === 'area' ? 'PRICE_PER_M2' :
+    (s.pricing_type === 'hourly' ? 'HOURLY' :
+    (s.pricing_type === 'percent_project_cost' ? 'PERCENTAGE' : 'FIXED_UNIT'))
+  );
+
+  const hasInt = surfaceInterior() > 0;
+  const hasExt = surfaceExterior() > 0;
+
+  const allowInt = s.allowInterior !== false;
+  const allowExt = Boolean(s.allowExterior);
+
+  let useInt = false;
+  if (allowInt) {
+    useInt = (s.defaultInteriorSelected !== false);
+    if (hasInt) useInt = true;
   }
 
-  const canAddLevels=st.projectType!=='Appartement';
-  m.innerHTML=`
-    <div class="typeBox ${st.typeAttention?'attention':''}">
-      <label>TYPE DE PROJET · OBLIGATOIRE</label>
-      <select id="projectType">
-        <option value="">Sélectionnez un type de projet</option>
-        ${projectTypes.map(x=>`<option value="${x.name}" ${st.projectType===x.name?'selected':''}>${x.name}</option>`).join('')}
-      </select>
-      ${!st.projectType?'<div class="typeHint">Commencez ici avant de sélectionner un niveau.</div>':''}
-    </div>
+  let useExt = false;
+  if (allowExt) {
+    useExt = Boolean(s.defaultExteriorSelected);
+  }
 
-    <div class="levels levelsVertical ${!st.projectType?'locked':''}">
-      ${canAddLevels?'<button type="button" class="addLevelBtn addUpper" id="addUpper">＋ Ajouter un étage</button>':''}
+  return {
+    serviceId: s.id,
+    pricingType: pType,
+    useInterior: useInt,
+    useExterior: useExt,
+    hours: s.defaultHours || (s.pricing_type === 'hourly' ? 20 : 10),
+    quantity: s.defaultQuantity || (s.pricing_type === 'fixed' ? 3 : 1),
+    referenceAmount: s.defaultReferenceAmount || parseFloat(st.estimatedProjectCost || 100000),
+  };
+}
 
-      <div class="levelGroup upperGroup">
-        <span class="levelGroupLabel">ÉTAGES</span>
-        ${upperLevels.map(levelRowHTML).join('')}
-      </div>
-
-      <div class="levelGroup middleGroup">
-        <span class="levelGroupLabel">NIVEAU PRINCIPAL</span>
-        ${middleLevels.map(levelRowHTML).join('')}
-      </div>
-
-      <div class="levelGroup lowerGroup">
-        <span class="levelGroupLabel">SOUS-SOLS</span>
-        ${lowerLevels.map(levelRowHTML).join('')}
-      </div>
-
-      ${canAddLevels?'<button type="button" class="addLevelBtn addLower" id="addLower">＋ Ajouter un étage</button>':''}
-    </div>
-
-    <div class="composerBottom">
-      <div><small>${st.levels.length} niveau(x) · ${area()} m²</small><b>${st.projectType||'Type non sélectionné'}</b></div>
-      <button class="nextBtn" id="toServices">Continuer →</button>
-    </div>`;
-
-  document.querySelector('#projectType').onchange=e=>{
-    st.projectType=e.target.value;
-    st.typeAttention=false;
-    if(st.projectType==='Appartement'&&st.levels.length>1){
-      const keep=st.levels[0];
-      st.levels=[keep];
-      st.surfaces=Object.fromEntries([[keep,st.surfaces[keep]||'']]);
+function ensureSelectedServicesState() {
+  st.services.forEach(sId => {
+    const s = services.find(x => String(x.id) === String(sId) || String(x.slug) === String(sId));
+    if (!s) return;
+    if (!st.selectedServices[s.id] && !st.selectedServices[sId]) {
+      st.selectedServices[s.id] = getInitialSelection(s);
     }
-    renderComposer();
+  });
+}
+
+// Rule 11: Single calculation engine
+function calculateService(service, selection, project) {
+  if (!selection) return 0;
+
+  const pricingType = selection.pricingType || service.pricingType || (
+    service.pricing_type === 'area' ? 'PRICE_PER_M2' :
+    (service.pricing_type === 'hourly' ? 'HOURLY' :
+    (service.pricing_type === 'percent_project_cost' ? 'PERCENTAGE' : 'FIXED_UNIT'))
+  );
+
+  switch (pricingType) {
+    case "PRICE_PER_M2": {
+      let selectedSurface = 0;
+      if (selection.useInterior) {
+        selectedSurface += (project.surfaceInterior || 0);
+      }
+      if (selection.useExterior) {
+        selectedSurface += (project.surfaceExterior || 0);
+      }
+      const rate = (service.unitRate !== undefined) ? service.unitRate : (service.price || 0);
+      return Math.round(selectedSurface * rate);
+    }
+
+    case "HOURLY": {
+      const h = (selection.hours !== undefined) ? selection.hours : (service.defaultHours || 20);
+      const rate = (service.hourlyRate !== undefined) ? service.hourlyRate : (service.price || 0);
+      return Math.round(h * rate);
+    }
+
+    case "FIXED_UNIT": {
+      const q = (selection.quantity !== undefined) ? selection.quantity : (service.defaultQuantity || 1);
+      const rate = (service.fixedUnitPrice !== undefined) ? service.fixedUnitPrice : (service.price || 0);
+      return Math.round(q * rate);
+    }
+
+    case "PERCENTAGE": {
+      const ref = (selection.referenceAmount !== undefined) ? selection.referenceAmount : (service.defaultReferenceAmount || 100000);
+      const pct = (service.percentage !== undefined) ? service.percentage : (service.percentage_rate || 0);
+      let fee = (ref * pct) / 100;
+      if (service.min_fee && fee < service.min_fee) fee = service.min_fee;
+      if (service.max_fee && fee > service.max_fee) fee = service.max_fee;
+      return Math.round(fee);
+    }
+
+    default:
+      return Math.round(service.price || 0);
+  }
+}
+
+function getServiceLinePrice(sId) {
+  const s = services.find(x => String(x.id) === String(sId) || String(x.slug) === String(sId));
+  if (!s) return 0;
+  const sel = st.selectedServices[s.id] || st.selectedServices[sId] || getInitialSelection(s);
+  const proj = {
+    surfaceInterior: surfaceInterior(),
+    surfaceExterior: surfaceExterior(),
+  };
+  return calculateService(s, sel, proj);
+}
+
+function getServiceCalculationDetail(sId) {
+  const s = services.find(x => String(x.id) === String(sId) || String(x.slug) === String(sId));
+  if (!s) return '';
+  const sel = st.selectedServices[s.id] || st.selectedServices[sId] || getInitialSelection(s);
+  const proj = {
+    surfaceInterior: surfaceInterior(),
+    surfaceExterior: surfaceExterior(),
   };
 
-  document.querySelector('#addUpper')?.addEventListener('click',addUpperLevel);
-  document.querySelector('#addLower')?.addEventListener('click',addLowerLevel);
+  const pType = sel.pricingType || s.pricingType || (
+    s.pricing_type === 'area' ? 'PRICE_PER_M2' :
+    (s.pricing_type === 'hourly' ? 'HOURLY' :
+    (s.pricing_type === 'percent_project_cost' ? 'PERCENTAGE' : 'FIXED_UNIT'))
+  );
 
-  m.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>levelClick(b.dataset.level));
-  m.querySelectorAll('[data-surface]').forEach(i=>i.oninput=e=>{
-    st.surfaces[e.target.dataset.surface]=e.target.value;
-    st.promptLevel=null;
-    st.missing=st.missing.filter(x=>x!==e.target.dataset.surface);
-    e.target.closest('.surface').classList.remove('error');
+  const priceVal = calculateService(s, sel, proj);
+
+  switch (pType) {
+    case 'PRICE_PER_M2': {
+      const parts = [];
+      if (sel.useInterior) parts.push(`${proj.surfaceInterior} m² int`);
+      if (sel.useExterior) parts.push(`${proj.surfaceExterior} m² ext`);
+      const totalS = (sel.useInterior ? proj.surfaceInterior : 0) + (sel.useExterior ? proj.surfaceExterior : 0);
+      const rate = s.unitRate || s.price || 0;
+      if (parts.length === 0) return `0 m² × ${money(rate)}/m² = ${money(0)}`;
+      if (parts.length === 1) return `${parts[0]} × ${money(rate)}/m² = ${money(priceVal)}`;
+      return `${totalS} m² (${parts.join(' + ')}) × ${money(rate)}/m² = ${money(priceVal)}`;
+    }
+    case 'HOURLY': {
+      const h = sel.hours || 0;
+      const rate = s.hourlyRate || s.price || 0;
+      return `${h} h × ${money(rate)}/h = ${money(priceVal)}`;
+    }
+    case 'FIXED_UNIT': {
+      const q = sel.quantity || 0;
+      const rate = s.fixedUnitPrice || s.price || 0;
+      const u = s.unitName || 'unité';
+      return `${q} ${u}(s) × ${money(rate)} = ${money(priceVal)}`;
+    }
+    case 'PERCENTAGE': {
+      const ref = sel.referenceAmount || 0;
+      const pct = s.percentage || s.percentage_rate || 0;
+      return `${pct}% de ${money(ref)} = ${money(priceVal)}`;
+    }
+    default:
+      return `${money(priceVal)}`;
+  }
+}
+
+const servicePrice = getServiceLinePrice;
+const base = () => st.mode === 'quick' ? spaces.filter(x => st.spaces.includes(x.id)).reduce((s, x) => s + (x.price || 0), 0) : 0;
+const servTotal = () => st.services.reduce((s, id) => s + getServiceLinePrice(id), 0);
+const totalHT = () => base() + servTotal();
+const tva = () => st.clientType === 'professional' ? totalHT() * 0.19 : 0;
+const totalFinal = () => totalHT() + tva();
+
+function gotoStep(step) {
+  st.step = step;
+  st.success = false;
+  renderComposer();
+  document.querySelector('#composer').scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+
+function updateProgress() {
+  const order = {project: 0, services: 1, contact: 2};
+  document.querySelectorAll('.progress button').forEach(b => {
+    const s = b.dataset.step;
+    b.classList.toggle('active', s === st.step);
+    b.classList.toggle('done', order[s] < order[st.step]);
+    b.querySelector('i').textContent = order[s] < order[st.step] ? '✓' : String(order[s] + 1).padStart(2, '0');
+    b.onclick = () => gotoStep(s);
   });
-  document.querySelector('#toServices').onclick=()=>{if(validateSurfaces())gotoStep('services')};
+}
+
+function drawTypeAttention() {
+  st.typeAttention = true;
+  const row = document.querySelector('.v46TypeRow');
+  row?.animate([
+    { transform: 'translateX(-5px)' },
+    { transform: 'translateX(5px)' },
+    { transform: 'none' }
+  ], { duration: 300, iterations: 2 });
+  setTimeout(() => {
+    document.querySelector('.v46ProjectTypes button')?.focus();
+  }, 80);
+}
+
+function validateSurfaces() {
+  ensureLevelState();
+
+  if (!st.projectType) {
+    drawTypeAttention();
+    return false;
+  }
+
+  const missing = projectLevelCodes().filter(code => !(+st.levelAreas[code] > 0));
+  if (missing.length) {
+    document.querySelectorAll('.v46LevelChip, .v46BaseSurface').forEach(el => {
+      const input = el.querySelector('[data-level-area]');
+      if (input && missing.includes(input.dataset.levelArea)) {
+        el.classList.add('error');
+      }
+    });
+    const firstMissing = document.querySelector(`[data-level-area="${missing[0]}"]`);
+    if (firstMissing) firstMissing.focus();
+    return false;
+  }
+
+  syncInteriorFromLevels();
+  return st.surfaceInterior > 0;
+}
+
+function renderProject() {
+  ensureLevelState();
+  syncInteriorFromLevels();
+
+  st.mode = 'custom';
+  const body = document.querySelector('#composerBody');
+  const COLOR_TONES = [
+    '64,205,255',   // Cyan
+    '180,138,255',  // Violet
+    '103,233,166',  // Emerald / Mint
+    '244,189,99',   // Amber / Gold
+    '255,135,164',  // Rose / Coral
+    '111,159,255',  // Neon Blue
+    '255,179,71',   // Orange
+    '78,205,196',   // Teal
+  ];
+  const projectTypesList = (projectTypes && projectTypes.length > 0 ? projectTypes : [
+    { id: 'residence', slug: 'residence', name: 'Résidence' },
+    { id: 'villa', slug: 'villa', name: 'Villa' },
+    { id: 'appartement', slug: 'appartement', name: 'Appartement' },
+    { id: 'commercial', slug: 'commercial', name: 'Commercial' },
+    { id: 'bureau', slug: 'bureau', name: 'Bureau' },
+    { id: 'hotel', slug: 'hotel', name: 'Hôtel' }
+  ]).map((pt, idx) => ({
+    id: pt.id || pt.slug,
+    slug: pt.slug || String(pt.id),
+    name: pt.name,
+    tone: COLOR_TONES[idx % COLOR_TONES.length],
+  }));
+  const nf = new Intl.NumberFormat('fr-DZ');
+
+  const basementCodes = Array.from({ length: st.basementCount || 0 }, (_, i) => `R-${i + 1}`);
+  const upperCodes = Array.from({ length: st.upperCount || 0 }, (_, i) => `R+${i + 1}`);
+  const extraCodes = [...basementCodes, ...upperCodes];
+
+  const extraLevelInputs = extraCodes.map(code => {
+    const tone = code.startsWith('R-') ? 'basement' : 'upper';
+    return `<label class="v46LevelChip ${tone} ${+st.levelAreas?.[code] > 0 ? 'filled' : ''}" data-level-code="${code}">
+      <b>${code}</b>
+      <span>
+        <input type="number" min="1" step="1" inputmode="decimal"
+          data-level-area="${code}" value="${st.levelAreas?.[code] || ''}" placeholder="0">
+        <em>m²</em>
+      </span>
+    </label>`;
+  }).join('');
+
+  const missingInterior = st.projectType && (
+    !(+st.levelAreas?.RDC > 0) ||
+    extraCodes.some(code => !(+st.levelAreas?.[code] > 0))
+  );
+
+  body.innerHTML = `
+    <div class="v46ProjectScreen">
+      <!-- 1. TYPE DE PROJET -->
+      <section class="v46ProjectRow v46TypeRow">
+        <div class="v46RowLabel">Projet</div>
+        <div class="v46ProjectTypes" id="projectTypeContainer">
+          ${projectTypesList.map(x => {
+            const isSel = (
+              st.projectType && (
+                st.projectType === x.name ||
+                st.projectType === x.slug ||
+                String(st.projectType) === String(x.id)
+              )
+            );
+            return `<button type="button"
+              class="${isSel ? 'selected' : ''}"
+              data-project-type="${x.name}"
+              data-type="${x.slug || x.id}"
+              data-id="${x.id}"
+              title="${x.name}"
+              style="--v60c:${x.tone};"
+              aria-pressed="${isSel}">
+              ${x.name}${isSel ? '<i>✓</i>' : ''}
+            </button>`;
+          }).join('')}
+        </div>
+      </section>
+
+      <!-- 2. CALCULATEURS SOUS-SOLS / ETAGES -->
+      <section class="v46ProjectRow v46CounterRow ${st.projectType ? '' : 'disabled'}">
+        <div class="v46RowLabel">Niveaux</div>
+        <div class="v46Counters">
+          <div class="v46Counter basement">
+            <span>Sous-sols</span>
+            <div>
+              <button type="button" id="basementMinus" ${!st.projectType ? 'disabled' : ''}>−</button>
+              <b>${st.basementCount || 0}</b>
+              <button type="button" id="basementPlus" ${!st.projectType ? 'disabled' : ''}>+</button>
+            </div>
+          </div>
+          <div class="v46Counter upper">
+            <span>Étages</span>
+            <div>
+              <button type="button" id="upperMinus" ${!st.projectType ? 'disabled' : ''}>−</button>
+              <b>${st.upperCount || 0}</b>
+              <button type="button" id="upperPlus" ${!st.projectType ? 'disabled' : ''}>+</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. RDC + EXTERIEUR -->
+      <section class="v46ProjectRow v46BaseSurfaceRow ${st.projectType ? '' : 'disabled'}">
+        <div class="v46RowLabel">Surfaces</div>
+        <div class="v46BaseSurfaces">
+          <label class="v46BaseSurface rdc ${+st.levelAreas?.RDC > 0 ? 'filled' : ''}">
+            <b>RDC</b>
+            <span>
+              <input type="number" min="1" step="1" inputmode="decimal"
+                id="rdcSurface" data-level-area="RDC"
+                value="${st.levelAreas?.RDC || ''}" placeholder="Surface">
+              <em>m²</em>
+            </span>
+          </label>
+
+          <label class="v46BaseSurface exterior ${+st.surfaceExterior > 0 ? 'filled' : ''}">
+            <b>Extérieur <small>optionnel</small></b>
+            <span>
+              <input type="number" min="0" step="1" inputmode="decimal"
+                id="surfaceExteriorInput"
+                value="${st.surfaceExterior || ''}" placeholder="0">
+              <em>m²</em>
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <!-- 4. ETAGES / SOUS-SOLS SELECTIONNES -->
+      <section class="v46ProjectRow v46ExtraRow ${extraCodes.length ? 'hasLevels' : 'empty'}">
+        <div class="v46RowLabel">Sélection</div>
+        <div class="v46ExtraLevels">
+          ${extraCodes.length
+            ? extraLevelInputs
+            : `<span class="v46NoExtra">Aucun autre niveau sélectionné</span>`}
+        </div>
+      </section>
+
+      <!-- 5. TOTAL + SUIVANT -->
+      <section class="v46ProjectRow v46ActionRow">
+        <div class="v46CompactTotal">
+          <small>Total intérieur</small>
+          <b id="levelInteriorTotal">${nf.format(st.surfaceInterior || 0)} m²</b>
+          ${+st.surfaceExterior > 0 ? `<span>+ ${nf.format(st.surfaceExterior)} m² ext.</span>` : ''}
+        </div>
+        <button class="nextBtn v46NextBtn" id="toServices"
+          ${(!st.projectType || missingInterior) ? 'disabled' : ''}>
+          Choisir mes prestations
+        </button>
+      </section>
+    </div>`;
+
+  body.querySelectorAll('[data-project-type]').forEach(btn => {
+    btn.onclick = () => {
+      const next = btn.dataset.projectType;
+      const changed = st.projectType && st.projectType !== next;
+      st.projectType = next;
+      st.typeAttention = false;
+      st.structureChosen = true;
+
+      if (changed) {
+        st.basementCount = 0;
+        st.upperCount = 0;
+        st.levelAreas = { RDC: 0 };
+        st.surfaceInterior = 0;
+        st.surfaceExterior = 0;
+      } else if (!st.levelAreas || !('RDC' in st.levelAreas)) {
+        st.levelAreas = { ...(st.levelAreas || {}), RDC: 0 };
+      }
+
+      syncInteriorFromLevels();
+      renderComposer();
+      setTimeout(() => document.querySelector('#rdcSurface')?.focus(), 60);
+    };
+  });
+
+  document.querySelector('#basementMinus')?.addEventListener('click', () => {
+    setBuildingStructure(Math.max(0, (st.basementCount || 0) - 1), st.upperCount || 0, true);
+    renderComposer();
+  });
+  document.querySelector('#basementPlus')?.addEventListener('click', () => {
+    setBuildingStructure(Math.min(4, (st.basementCount || 0) + 1), st.upperCount || 0, true);
+    renderComposer();
+    setTimeout(() => document.querySelector(`[data-level-area="R-${st.basementCount}"]`)?.focus(), 60);
+  });
+  document.querySelector('#upperMinus')?.addEventListener('click', () => {
+    setBuildingStructure(st.basementCount || 0, Math.max(0, (st.upperCount || 0) - 1), true);
+    renderComposer();
+  });
+  document.querySelector('#upperPlus')?.addEventListener('click', () => {
+    setBuildingStructure(st.basementCount || 0, Math.min(8, (st.upperCount || 0) + 1), true);
+    renderComposer();
+    setTimeout(() => document.querySelector(`[data-level-area="R+${st.upperCount}"]`)?.focus(), 60);
+  });
+
+  body.querySelectorAll('[data-level-area]').forEach(input => {
+    input.addEventListener('input', e => {
+      const code = e.target.dataset.levelArea;
+      st.levelAreas = st.levelAreas || {};
+      st.levelAreas[code] = Math.max(0, +e.target.value || 0);
+      syncInteriorFromLevels();
+
+      e.target.closest('.v46LevelChip, .v46BaseSurface')?.classList.toggle('filled', +e.target.value > 0);
+
+      const totalEl = document.querySelector('#levelInteriorTotal');
+      if (totalEl) totalEl.textContent = `${nf.format(st.surfaceInterior || 0)} m²`;
+
+      const missing = !(+st.levelAreas.RDC > 0) ||
+        [...basementCodes, ...upperCodes].some(c => !(+st.levelAreas[c] > 0));
+      const nextBtn = document.querySelector('#toServices');
+      if (nextBtn) nextBtn.disabled = !st.projectType || missing;
+    });
+  });
+
+  document.querySelector('#surfaceExteriorInput')?.addEventListener('input', e => {
+    st.surfaceExterior = Math.max(0, +e.target.value || 0);
+    e.target.closest('.v46BaseSurface')?.classList.toggle('filled', st.surfaceExterior > 0);
+    syncInteriorFromLevels();
+    const totalEl = document.querySelector('#levelInteriorTotal');
+    if (totalEl) {
+      totalEl.parentElement.innerHTML = `
+        <small>Total intérieur</small>
+        <b id="levelInteriorTotal">${nf.format(st.surfaceInterior || 0)} m²</b>
+        ${+st.surfaceExterior > 0 ? `<span>+ ${nf.format(st.surfaceExterior)} m² ext.</span>` : ''}
+      `;
+    }
+  });
+
+  document.querySelector('#toServices')?.addEventListener('click', () => {
+    if (validateSurfaces()) gotoStep('services');
+  });
 }
 
 function openServiceDetailsModal(serviceId) {
@@ -550,190 +989,432 @@ if (composerSectionEl && 'IntersectionObserver' in window) {
   }, { passive: true });
 }
 
-function renderServices() {
-  const b = document.querySelector('#composerBody');
-  const existingChoices = b.querySelector('.serviceChoices');
-  const savedScrollTop = existingChoices ? existingChoices.scrollTop : 0;
-  const hasPercentageService = services.some(s => s.pricing_type === 'percent_project_cost');
-
-  // Minimalist floating Price & NextBtn bar fixed to top right under navbar
-  let floatingBar = document.querySelector('#composerFloatingPriceBar');
-  if (!floatingBar) {
-    floatingBar = document.createElement('div');
-    floatingBar.id = 'composerFloatingPriceBar';
-    floatingBar.className = 'composerFloatingPriceBar';
-    document.body.appendChild(floatingBar);
+function showValidationError(msg) {
+  if (window.Swal) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Vérification requise',
+      text: msg,
+      confirmButtonText: 'D’accord',
+      customClass: { popup: 'swal2-popup', confirmButton: 'btn neonCyan' },
+      buttonsStyling: false
+    });
+  } else {
+    alert(msg);
   }
-  floatingBar.innerHTML = `
-    <div class="floatingPriceInfo grand">
-      <small>TOTAL ESTIMÉ HT</small>
-      <strong class="floatingPriceAmount">${money(totalHT())}</strong>
-    </div>
-    <button class="nextBtn floatingNextBtn" id="toContactFloating">
-      <span>Continuer</span>
-      <i class="fas fa-arrow-right ms-1"></i>
-    </button>
-  `;
-  floatingBar.querySelector('#toContactFloating').onclick = () => gotoStep('contact');
-  updateFloatingBarVisibility();
+}
+
+function validateServices() {
+  if (!st.services || st.services.length === 0) {
+    showValidationError('Veuillez sélectionner au moins une prestation pour continuer.');
+    return false;
+  }
+
+  const proj = {
+    surfaceInterior: surfaceInterior(),
+    surfaceExterior: surfaceExterior(),
+  };
+
+  for (const sId of st.services) {
+    const s = services.find(x => String(x.id) === String(sId) || String(x.slug) === String(sId));
+    if (!s) continue;
+    const sel = st.selectedServices[s.id] || st.selectedServices[sId] || getInitialSelection(s);
+
+    const pType = sel.pricingType || s.pricingType || (
+      s.pricing_type === 'area' ? 'PRICE_PER_M2' :
+      (s.pricing_type === 'hourly' ? 'HOURLY' :
+      (s.pricing_type === 'percent_project_cost' ? 'PERCENTAGE' : 'FIXED_UNIT'))
+    );
+
+    if (pType === 'PRICE_PER_M2') {
+      const sName = (s.name || '').toLowerCase();
+      const is3dInt = sName.includes('3d') && (sName.includes('int') || !s.allowExterior);
+      const is3dExt = sName.includes('3d') && (sName.includes('ext') || !s.allowInterior);
+
+      // Rule 9: 3D intérieur sélectionné mais surface intérieure = 0
+      if (is3dInt && proj.surfaceInterior <= 0) {
+        showValidationError(`La prestation "${s.name}" nécessite une surface intérieure supérieure à 0 m². Veuillez renseigner vos surfaces intérieures à l'étape 1.`);
+        return false;
+      }
+
+      // Rule 9: 3D extérieur sélectionné mais surface extérieure = 0
+      if (is3dExt && proj.surfaceExterior <= 0) {
+        showValidationError(`La prestation "${s.name}" nécessite une surface extérieure supérieure à 0 m². Veuillez renseigner votre surface extérieure (terrasse / jardin) à l'étape 1.`);
+        return false;
+      }
+
+      // Rule 9: 2D avec aucune case cochée
+      if (!sel.useInterior && !sel.useExterior) {
+        showValidationError(`Pour la prestation "${s.name}", vous devez cocher au moins un périmètre (Intérieur ou Extérieur).`);
+        return false;
+      }
+
+      // Rule 9: 2D avec Intérieur coché mais surface intérieure = 0
+      if (sel.useInterior && proj.surfaceInterior <= 0) {
+        showValidationError(`La prestation "${s.name}" a le périmètre Intérieur coché, mais la surface intérieure est de 0 m². Veuillez renseigner votre surface intérieure.`);
+        return false;
+      }
+
+      // Rule 9: 2D avec Extérieur coché mais surface extérieure = 0
+      if (sel.useExterior && proj.surfaceExterior <= 0) {
+        showValidationError(`La prestation "${s.name}" a le périmètre Extérieur coché, mais la surface extérieure est de 0 m². Veuillez renseigner votre surface extérieure.`);
+        return false;
+      }
+    }
+
+    // Rule 9: Horaire avec heures = 0
+    if (pType === 'HOURLY') {
+      if (!sel.hours || sel.hours <= 0) {
+        showValidationError(`Veuillez spécifier un nombre d'heures supérieur à 0 pour la prestation "${s.name}".`);
+        return false;
+      }
+    }
+
+    // Rule 9: Prix fixe avec quantité = 0
+    if (pType === 'FIXED_UNIT') {
+      if (!sel.quantity || sel.quantity <= 0) {
+        showValidationError(`Veuillez spécifier une quantité supérieure à 0 pour la prestation "${s.name}".`);
+        return false;
+      }
+    }
+
+    // Rule 9: Pourcentage sans montant de référence
+    if (pType === 'PERCENTAGE') {
+      if (!sel.referenceAmount || sel.referenceAmount <= 0) {
+        showValidationError(`Veuillez saisir un montant de référence supérieur à 0 DA pour la prestation "${s.name}".`);
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+function renderServices() {
+  ensureSelectedServicesState();
+  syncInteriorFromLevels();
+  const b = document.querySelector('#composerBody');
+
+  // Remove old floating price bar if present, since V75 uses .v46TotalDock
+  const oldFloatingBar = document.querySelector('#composerFloatingPriceBar');
+  if (oldFloatingBar) oldFloatingBar.remove();
+
+  const selected = services.filter(s => st.services.some(id => String(id) === String(s.id) || String(id) === s.slug));
+  const usesBudget = selected.some(s => {
+    const sel = st.selectedServices[s.id] || st.selectedServices[s.slug] || getInitialSelection(s);
+    return sel.pricingType === 'PERCENTAGE' || s.pricing_type === 'percent_project_cost';
+  });
+
+  const selectedMarkup = selected.length
+    ? selected.map(s => {
+        const sel = st.selectedServices[s.id] || st.selectedServices[s.slug] || getInitialSelection(s);
+        const pType = sel.pricingType || s.pricingType || (
+          s.pricing_type === 'area' ? 'PRICE_PER_M2' :
+          (s.pricing_type === 'hourly' ? 'HOURLY' :
+          (s.pricing_type === 'percent_project_cost' ? 'PERCENTAGE' : 'FIXED_UNIT'))
+        );
+        const linePrice = getServiceLinePrice(s.id);
+        const calcDetail = getServiceCalculationDetail(s.id);
+
+        let pricingLabel = '';
+        if (pType === 'PRICE_PER_M2') {
+          pricingLabel = `${money(s.unitRate || s.price)} / m²`;
+        } else if (pType === 'HOURLY') {
+          pricingLabel = `${money(s.hourlyRate || s.price)} / h`;
+        } else if (pType === 'FIXED_UNIT') {
+          pricingLabel = `${money(s.fixedUnitPrice || s.price)} / ${s.unitName || 'unité'}`;
+        } else if (pType === 'PERCENTAGE') {
+          pricingLabel = `${s.percentage || s.percentage_rate || 10}% du montant`;
+        }
+
+        return `<article class="v46SelectedService" data-service-card="${s.id}">
+          <div class="v46SelectedServiceTop">
+            <span>
+              <b>${s.name}</b>
+              <small>${pricingLabel}</small>
+            </span>
+            <strong>${money(linePrice)}</strong>
+          </div>
+
+          <!-- Scope checkboxes for 2D plans -->
+          ${pType === 'PRICE_PER_M2' && (s.allowInterior !== false || s.allowExterior === true) ? `
+            <div class="v46ScopeChecks">
+              ${s.allowInterior !== false ? `
+                <label>
+                  <input type="checkbox" data-scope-int="${s.id}" ${sel.useInterior ? 'checked' : ''}>
+                  <span>Intérieur (<strong>${surfaceInterior()} m²</strong>)</span>
+                </label>
+              ` : ''}
+              ${s.allowExterior === true ? `
+                <label>
+                  <input type="checkbox" data-scope-ext="${s.id}" ${sel.useExterior ? 'checked' : ''}>
+                  <span>Extérieur (<strong>${surfaceExterior()} m²</strong>)</span>
+                </label>
+              ` : ''}
+            </div>
+          ` : ''}
+
+          <div class="v46SelectedCalc">
+            <span>${calcDetail}</span>
+
+            ${pType === 'HOURLY' ? `
+              <label class="v74QtyField" title="Nombre d’heures">
+                <span>Heures</span>
+                <input type="number" min="1" step="1" inputmode="numeric" data-svc-hours="${s.id}" value="${sel.hours || 20}">
+              </label>
+            ` : ''}
+
+            ${pType === 'FIXED_UNIT' && (s.allowQuantity !== false) ? `
+              <label class="v74QtyField" title="Quantité">
+                <span>Qté</span>
+                <input type="number" min="1" step="1" inputmode="numeric" data-svc-qty="${s.id}" value="${sel.quantity || 1}">
+              </label>
+            ` : ''}
+
+            ${pType === 'PERCENTAGE' ? `
+              <label class="v74QtyField" title="Montant de référence">
+                <span>Ref.</span>
+                <input type="number" min="1" step="50000" inputmode="numeric" data-svc-ref="${s.id}" value="${sel.referenceAmount || 100000}" style="width:78px;">
+              </label>
+            ` : ''}
+
+            <div class="v46Actions">
+              <button type="button" data-service-details="${s.id}">Détails</button>
+              <button type="button" class="remove" data-service-remove="${s.id}" aria-label="Retirer">×</button>
+            </div>
+          </div>
+        </article>`;
+      }).join('')
+    : `<div class="v46SelectionEmpty">Sélectionnez une prestation à gauche.</div>`;
 
   b.innerHTML = `
-    <div class="serviceStage">
-      <div class="serviceChoices">
-        <h3>Prestations disponibles</h3>
-        <p>Choisissez les services à ajouter. Le total évolue immédiatement.</p>
+    <div class="v46ServicesScreen">
+      <!-- GAUCHE : PRESTATIONS DISPONIBLES / SCROLL INDEPENDANT -->
+      <section class="v46AvailableColumn">
+        <header class="v46ColumnHead">
+          <div><small>02 · PRESTATIONS</small><h3>Prestations disponibles</h3></div>
+          <span>${services.length}</span>
+        </header>
 
-        ${hasPercentageService ? `
-          <div class="projectCostInputBox mb-3 p-3 rounded-3" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.12);">
-            <label class="d-flex align-items-center justify-content-between text-light small fw-bold mb-1">
-              <span><i class="fas fa-coins text-warning me-1"></i> Coût estimatif global du projet (DA)</span>
-              <span class="text-warning font-monospace" id="costLiveFormatted">${money(st.estimatedProjectCost || 10000000)}</span>
-            </label>
-            <input type="number" id="estimatedProjectCostInput" min="0" step="100000" class="form-control" style="background:rgba(0,0,0,0.4); border-color:rgba(255,255,255,0.2); color:#fff; font-family:monospace;" value="${st.estimatedProjectCost || 10000000}" placeholder="10000000">
-            <small class="text-muted d-block mt-1" style="font-size:0.75rem;">Ce montant sert de base de calcul pour les prestations calculées en pourcentage du coût du projet.</small>
+        <div class="v46AvailableScroll" id="v46AvailableScroll">
+          ${services.map(s => {
+            const isSelected = st.services.some(id => String(id) === String(s.id) || String(id) === s.slug);
+            const sel = st.selectedServices[s.id] || st.selectedServices[s.slug] || getInitialSelection(s);
+            const pType = sel.pricingType || s.pricingType || (
+              s.pricing_type === 'area' ? 'PRICE_PER_M2' :
+              (s.pricing_type === 'hourly' ? 'HOURLY' :
+              (s.pricing_type === 'percent_project_cost' ? 'PERCENTAGE' : 'FIXED_UNIT'))
+            );
+
+            let unitRateText = '';
+            if (pType === 'PRICE_PER_M2') {
+              unitRateText = `${money(s.unitRate || s.price)} / m²`;
+            } else if (pType === 'HOURLY') {
+              unitRateText = `${money(s.hourlyRate || s.price)} / h`;
+            } else if (pType === 'FIXED_UNIT') {
+              unitRateText = `${money(s.fixedUnitPrice || s.price)} / ${s.unitName || 'unité'}`;
+            } else if (pType === 'PERCENTAGE') {
+              unitRateText = `${s.percentage || s.percentage_rate || 10}% du montant`;
+            }
+
+            return `
+              <article class="v46AvailableService ${isSelected ? 'selected' : ''}">
+                <button type="button" class="v46ServiceAdd" data-service="${s.id}" aria-pressed="${isSelected}">
+                  <i>${isSelected ? '✓' : '+'}</i>
+                  <span>
+                    <b>${s.name}</b>
+                    <small>${unitRateText}</small>
+                  </span>
+                  <strong>${money(getServiceLinePrice(s.id))}</strong>
+                </button>
+                <button type="button" class="v46ServiceInfo" data-service-details="${s.id}">Détails</button>
+              </article>
+            `;
+          }).join('')}
+        </div>
+      </section>
+
+      <!-- DROITE : TOTAL FIXE + SELECTION / SCROLL INDEPENDANT -->
+      <aside class="v46SelectedColumn">
+        <div class="v46TotalDock">
+          <div>
+            <small>TOTAL ESTIMÉ HT</small>
+            <strong id="dockTotalHT">${money(totalHT())}</strong>
+          </div>
+          <button class="nextBtn" id="toContact">Continuer</button>
+        </div>
+
+        ${usesBudget ? `
+          <div class="v46BudgetField">
+            <span>Budget projet global</span>
+            <div>
+              <input id="globalProjectBudget" type="number" min="1" step="50000" inputmode="numeric"
+                value="${st.projectBudget || st.estimatedProjectCost || 10000000}" placeholder="10 000 000">
+              <b>DA</b>
+            </div>
           </div>
         ` : ''}
 
-        ${services.map(s => {
-          const isSelected = st.services.some(id => String(id) === String(s.id) || String(id) === s.slug);
-          const is3d = (s.name && s.name.toLowerCase().includes('3d')) || s.pricing_type === 'per_sqm' || s.pricing_type === 'area' || s.id === '3d';
-          let unitBadge = '';
-          if (s.pricing_type === 'percent_project_cost') {
-            unitBadge = `${s.percentage_rate || 0}% du coût du projet`;
-          } else if (is3d) {
-            unitBadge = `${money(s.price || 750)} / m²`;
-          } else {
-            unitBadge = `${money(s.price || 0)} / forfait`;
-          }
+        <header class="v46ColumnHead selected">
+          <div><small>VOTRE CHOIX</small><h3>Prestations sélectionnées</h3></div>
+          <span>${selected.length}</span>
+        </header>
 
-          return `
-            <div class="serviceChoice ${isSelected ? 'selected' : ''}" data-service="${s.id}">
-              <div class="d-flex align-items-center gap-3 flex-grow-1">
-                <i class="svc-check-icon fas ${isSelected ? 'fa-check' : 'fa-plus'}"></i>
-                <div class="svc-info">
-                  <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <strong class="text-light">${s.name}</strong>
-                    ${s.is_default ? `<span class="badge bg-warning text-dark border border-warning border-opacity-25 rounded-pill font-monospace" style="font-size:0.65rem;">Inclus par défaut</span>` : ''}
-                  </div>
-                  ${s.short_description ? `<div class="svc-short-desc text-light opacity-75 small mt-1" style="font-size:0.8rem; line-height:1.3; max-width:320px;">${s.short_description}</div>` : ''}
-                  <small class="text-info font-monospace d-block mt-1">${unitBadge}</small>
-                </div>
-              </div>
-              <div class="d-flex flex-column align-items-end gap-2 ms-2">
-                <b class="font-monospace text-warning">${money(servicePrice(s.id))}</b>
-                <button type="button" class="btn btn-sm btn-service-details px-2 py-1 rounded-pill text-light" data-service-details="${s.id}" title="Détails de la prestation" style="font-size:0.75rem;">
-                  <i class="fas fa-info-circle me-1"></i>Détails
-                </button>
-              </div>
-            </div>
-          `;
-        }).join('')}
-      </div>
-
-      <aside class="quote">
-        <h3>Prestations sélectionnées</h3>
-        <p class="text-muted small mb-3">Récapitulatif de votre composition</p>
-        <div class="quoteRowsList">
-          ${services.filter(s => st.services.some(id => String(id) === String(s.id) || String(id) === s.slug)).map(s => `
-            <div class="quoteRow">
-              <span>✓ ${s.name}</span>
-              <b>${money(servicePrice(s.id))}</b>
-            </div>
-          `).join('')}
-          <div class="quoteRow">
-            <span>Base projet</span>
-            <b>${money(base())}</b>
-          </div>
+        <div class="v46SelectedScroll" id="v46SelectedScroll">
+          ${selectedMarkup}
         </div>
-        <strong class="grand d-none">
-          <small>TOTAL ESTIMÉ HT</small>
-          ${money(totalHT())}
-        </strong>
-        <button class="nextBtn d-none" id="toContact">Continuer →</button>
       </aside>
     </div>
   `;
 
-  // Cost input binding
-  const costInput = b.querySelector('#estimatedProjectCostInput');
-  if (costInput) {
-    costInput.oninput = (e) => {
-      st.estimatedProjectCost = parseFloat(e.target.value) || 0;
-      const formatted = b.querySelector('#costLiveFormatted');
-      if (formatted) formatted.textContent = money(st.estimatedProjectCost);
-      renderComposer();
-    };
+  // Preserve scroll positions
+  const leftScroll = document.querySelector('#v46AvailableScroll');
+  const rightScroll = document.querySelector('#v46SelectedScroll');
+  if (leftScroll) {
+    leftScroll.scrollTop = st.serviceScrollLeft || 0;
+    leftScroll.addEventListener('scroll', () => { st.serviceScrollLeft = leftScroll.scrollTop; }, { passive: true });
+  }
+  if (rightScroll) {
+    rightScroll.scrollTop = st.serviceScrollSelected || 0;
+    rightScroll.addEventListener('scroll', () => { st.serviceScrollSelected = rightScroll.scrollTop; }, { passive: true });
   }
 
-  // Details button click -> stopPropagation and open details modal
-  b.querySelectorAll('.btn-service-details').forEach(btn => {
+  // Service toggle buttons on left
+  b.querySelectorAll('.v46ServiceAdd').forEach(btn => {
+    btn.onclick = () => {
+      if (leftScroll) st.serviceScrollLeft = leftScroll.scrollTop;
+      if (rightScroll) st.serviceScrollSelected = rightScroll.scrollTop;
+
+      const id = btn.dataset.service;
+      const s = services.find(x => String(x.id) === String(id) || String(x.slug) === String(id));
+      if (!s) return;
+
+      const isSel = st.services.some(x => String(x) === String(s.id) || String(x) === s.slug);
+      if (isSel) {
+        st.services = st.services.filter(x => String(x) !== String(s.id) && String(x) !== s.slug);
+      } else {
+        st.services = [...st.services, s.id];
+        if (!st.selectedServices[s.id]) {
+          st.selectedServices[s.id] = getInitialSelection(s);
+        }
+      }
+      renderServices();
+    };
+  });
+
+  // Remove buttons on right
+  b.querySelectorAll('[data-service-remove]').forEach(btn => {
     btn.onclick = (e) => {
       e.stopPropagation();
-      const sId = btn.dataset.serviceDetails;
-      openServiceDetailsModal(sId);
+      const id = btn.dataset.serviceRemove;
+      const s = services.find(x => String(x.id) === String(id) || String(x.slug) === String(id));
+      if (!s) return;
+      st.services = st.services.filter(x => String(x) !== String(s.id) && String(x) !== s.slug);
+      renderServices();
     };
   });
 
-  // Card click -> toggle selection
-  b.querySelectorAll('.serviceChoice').forEach(card => {
-    card.onclick = (e) => {
-      if (e.target.closest('.btn-service-details')) return;
-      const id = card.dataset.service;
-      const matching = services.find(s => String(s.id) === String(id));
-      const finalId = matching ? matching.id : id;
-      const has = st.services.some(y => String(y) === String(finalId));
-      st.services = has ? st.services.filter(y => String(y) !== String(finalId)) : [...st.services, finalId];
-
-      const isNowSelected = !has;
-      card.classList.toggle('selected', isNowSelected);
-      const icon = card.querySelector('.svc-check-icon');
-      if (icon) {
-        icon.className = `svc-check-icon fas ${isNowSelected ? 'fa-check' : 'fa-plus'}`;
-      }
-
-      // Update right-side quote summary in-place without re-rendering or resetting scroll
-      const quoteList = b.querySelector('.quoteRowsList');
-      if (quoteList) {
-        const selectedSvcsHtml = services
-          .filter(s => st.services.some(sid => String(sid) === String(s.id) || String(sid) === s.slug))
-          .map(s => `
-            <div class="quoteRow">
-              <span>✓ ${s.name}</span>
-              <b>${money(servicePrice(s.id))}</b>
-            </div>
-          `).join('');
-        quoteList.innerHTML = `
-          ${selectedSvcsHtml}
-          <div class="quoteRow">
-            <span>Base projet</span>
-            <b>${money(base())}</b>
-          </div>
-        `;
-      }
-
-      // Update hidden grand in quote if present
-      const grandInQuote = b.querySelector('.quote .grand');
-      if (grandInQuote) {
-        grandInQuote.innerHTML = `<small>TOTAL ESTIMÉ HT</small>${money(totalHT())}`;
-      }
-
-      // Update floating price bar
-      const floatingAmount = document.querySelector('.floatingPriceAmount');
-      if (floatingAmount) {
-        floatingAmount.textContent = money(totalHT());
-      }
-      updateFloatingBarVisibility();
-      updateProgress();
+  // Details buttons
+  b.querySelectorAll('[data-service-details]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      openServiceDetailsModal(btn.dataset.serviceDetails);
     };
   });
 
-  const newChoices = b.querySelector('.serviceChoices');
-  if (newChoices && savedScrollTop > 0) {
-    newChoices.scrollTop = savedScrollTop;
+  // Checkboxes for 2D scope (Int / Ext)
+  b.querySelectorAll('[data-scope-int]').forEach(cb => {
+    cb.onchange = (e) => {
+      const sId = cb.dataset.scopeInt;
+      const s = services.find(x => String(x.id) === String(sId) || String(x.slug) === String(sId));
+      if (!s) return;
+      if (!st.selectedServices[s.id]) st.selectedServices[s.id] = getInitialSelection(s);
+      st.selectedServices[s.id].useInterior = e.target.checked;
+      renderServices();
+    };
+  });
+
+  b.querySelectorAll('[data-scope-ext]').forEach(cb => {
+    cb.onchange = (e) => {
+      const sId = cb.dataset.scopeExt;
+      const s = services.find(x => String(x.id) === String(sId) || String(x.slug) === String(sId));
+      if (!s) return;
+      if (!st.selectedServices[s.id]) st.selectedServices[s.id] = getInitialSelection(s);
+      st.selectedServices[s.id].useExterior = e.target.checked;
+      renderServices();
+    };
+  });
+
+  // Steppers / inputs for hours
+  b.querySelectorAll('[data-svc-hours]').forEach(input => {
+    input.oninput = (e) => {
+      const sId = input.dataset.svcHours;
+      const s = services.find(x => String(x.id) === String(sId) || String(x.slug) === String(sId));
+      if (!s) return;
+      if (!st.selectedServices[s.id]) st.selectedServices[s.id] = getInitialSelection(s);
+      st.selectedServices[s.id].hours = Math.max(1, parseInt(e.target.value, 10) || 1);
+      updateDockAndTotals();
+    };
+  });
+
+  // Steppers / inputs for quantity
+  b.querySelectorAll('[data-svc-qty]').forEach(input => {
+    input.oninput = (e) => {
+      const sId = input.dataset.svcQty;
+      const s = services.find(x => String(x.id) === String(sId) || String(x.slug) === String(sId));
+      if (!s) return;
+      if (!st.selectedServices[s.id]) st.selectedServices[s.id] = getInitialSelection(s);
+      st.selectedServices[s.id].quantity = Math.max(1, parseInt(e.target.value, 10) || 1);
+      updateDockAndTotals();
+    };
+  });
+
+  // Steppers / inputs for percentage reference amount
+  b.querySelectorAll('[data-svc-ref]').forEach(input => {
+    input.oninput = (e) => {
+      const sId = input.dataset.svcRef;
+      const s = services.find(x => String(x.id) === String(sId) || String(x.slug) === String(sId));
+      if (!s) return;
+      if (!st.selectedServices[s.id]) st.selectedServices[s.id] = getInitialSelection(s);
+      st.selectedServices[s.id].referenceAmount = Math.max(1, parseFloat(e.target.value) || 1);
+      updateDockAndTotals();
+    };
+  });
+
+  // Global project budget input
+  document.querySelector('#globalProjectBudget')?.addEventListener('input', (e) => {
+    const val = Math.max(1, parseFloat(e.target.value) || 1);
+    st.projectBudget = val;
+    st.estimatedProjectCost = val;
+    services.forEach(s => {
+      const sel = st.selectedServices[s.id];
+      if (sel && sel.pricingType === 'PERCENTAGE') {
+        sel.referenceAmount = val;
+      }
+    });
+    updateDockAndTotals();
+  });
+
+  function updateDockAndTotals() {
+    const dockTotal = document.querySelector('#dockTotalHT');
+    if (dockTotal) dockTotal.textContent = money(totalHT());
+    selected.forEach(s => {
+      const card = b.querySelector(`[data-service-card="${s.id}"]`);
+      if (card) {
+        const strong = card.querySelector('.v46SelectedServiceTop > strong');
+        if (strong) strong.textContent = money(getServiceLinePrice(s.id));
+        const calcSpan = card.querySelector('.v46SelectedCalc > span');
+        if (calcSpan) calcSpan.textContent = getServiceCalculationDetail(s.id);
+      }
+      const availCard = b.querySelector(`.v46AvailableService:has([data-service="${s.id}"]) .v46ServiceAdd > strong`);
+      if (availCard) availCard.textContent = money(getServiceLinePrice(s.id));
+    });
   }
 
-  const mainNextBtn = document.querySelector('#toContact');
-  if (mainNextBtn) mainNextBtn.onclick = () => gotoStep('contact');
+  // Next button to contact step
+  document.querySelector('#toContact')?.addEventListener('click', () => {
+    if (validateServices()) gotoStep('contact');
+  });
 }
 
 /* Algeria 2026 dataset */
@@ -745,15 +1426,61 @@ function populateCommunes(id){const cs=document.querySelector('#commune');if(!cs
 function quoteRows(){
   const rows=[];
   if(st.mode==='quick') {
-    spaces.filter(x=>st.spaces.includes(x.id)).forEach(x=>rows.push({designation:`Conception espace - ${x.name}`,pu:x.price,unit:'ESPACE',qty:1,total:x.price}));
+    spaces.filter(x=>st.spaces.includes(x.id)).forEach(x=>rows.push({
+      designation: `Conception espace - ${x.name}`,
+      pu: x.price,
+      unit: 'ESPACE',
+      qty: 1,
+      total: x.price
+    }));
   }
   services.filter(s=>st.services.some(id=>String(id)===String(s.id)||String(id)===s.slug)).forEach(s=>{
-    const is3d = (s.name && s.name.toLowerCase().includes('3d')) || s.pricing_type === 'per_sqm' || s.id === '3d';
-    if(is3d && st.mode==='custom') {
-      const a = area() > 0 ? area() : 1;
-      rows.push({designation:'Modélisation 3D - rendu immersif',pu:(s.price||750),unit:'M2',qty:a,total:(s.price||750)*a});
+    const sel = st.selectedServices[s.id] || getInitialSelection(s);
+    const detail = getServiceCalculationDetail(s.id);
+    const lineTotal = getServiceLinePrice(s.id);
+    const pType = s.pricingType || (s.pricing_type === 'per_sqm' || s.pricing_type === 'area' ? 'PRICE_PER_M2' : (s.pricing_type === 'hourly' ? 'HOURLY' : (s.pricing_type === 'percent_project_cost' ? 'PERCENTAGE' : 'FIXED_UNIT')));
+
+    if (pType === 'PRICE_PER_M2') {
+      const surfaceUsed = (sel.useInterior ? surfaceInterior() : 0) + (sel.useExterior ? surfaceExterior() : 0);
+      rows.push({
+        designation: `${s.name} (${detail})`,
+        pu: s.unitRate || s.price || 0,
+        unit: 'M²',
+        qty: surfaceUsed,
+        total: lineTotal
+      });
+    } else if (pType === 'HOURLY') {
+      rows.push({
+        designation: `${s.name} (${detail})`,
+        pu: s.hourlyRate || s.price || 0,
+        unit: 'HEURE',
+        qty: sel.hours || 20,
+        total: lineTotal
+      });
+    } else if (pType === 'FIXED_UNIT') {
+      rows.push({
+        designation: `${s.name} (${detail})`,
+        pu: s.fixedUnitPrice || s.price || 0,
+        unit: (s.unitName || 'UNITE').toUpperCase(),
+        qty: sel.quantity || 1,
+        total: lineTotal
+      });
+    } else if (pType === 'PERCENTAGE') {
+      rows.push({
+        designation: `${s.name} (${detail})`,
+        pu: `${s.percentage || 0}%`,
+        unit: '%',
+        qty: money(sel.referenceAmount || 0),
+        total: lineTotal
+      });
     } else {
-      rows.push({designation:s.name,pu:servicePrice(s.id),unit:'FORFAIT',qty:1,total:servicePrice(s.id)});
+      rows.push({
+        designation: `${s.name} (${detail})`,
+        pu: s.price || 0,
+        unit: 'FORFAIT',
+        qty: 1,
+        total: lineTotal
+      });
     }
   });
   return rows;
@@ -761,9 +1488,9 @@ function quoteRows(){
 
 function clientLabel(c){return st.clientType==='professional'?(c.company||'Entreprise'):`${c.firstName||''} ${c.lastName||''}`.trim()}
 function summary(c=st.client||{}){
-  const proj=st.mode==='quick'?`Espaces: ${spaces.filter(x=>st.spaces.includes(x.id)).map(x=>x.name).join(', ')}`:`Type: ${st.projectType||'Non spécifié'}; Niveaux: ${st.levels.map(l=>l+' '+(st.surfaces[l]||0)+' m²').join(', ')}`;
-  const selServices = services.filter(s=>st.services.some(id=>String(id)===String(s.id)||String(id)===s.slug)).map(x=>x.name).join(', ');
-  return `${proj}\nPrestations: ${selServices}\nClient: ${clientLabel(c)}\nTotal HT: ${money(totalHT())}${st.clientType==='professional'?`\nTVA 19%: ${money(tva())}\nTotal TTC: ${money(totalFinal())}`:''}`;
+  const proj=st.mode==='quick'?`Espaces: ${spaces.filter(x=>st.spaces.includes(x.id)).map(x=>x.name).join(', ')}`:`Type: ${st.projectType||'Non spécifié'}; Intérieur: ${surfaceInterior()} m²; Extérieur: ${surfaceExterior()} m²; Niveaux: ${st.levels.map(l=>l+' '+(st.surfaces[l]||0)+' m²').join(', ')}`;
+  const selServices = services.filter(s=>st.services.some(id=>String(id)===String(s.id)||String(id)===s.slug)).map(x=>`${x.name} [${getServiceCalculationDetail(x.id)} = ${money(getServiceLinePrice(x.id))}]`).join('\n  - ');
+  return `${proj}\nPrestations:\n  - ${selServices}\nClient: ${clientLabel(c)}\nTotal HT: ${money(totalHT())}${st.clientType==='professional'?`\nTVA 19%: ${money(tva())}\nTotal TTC: ${money(totalFinal())}`:''}`;
 }
 
 function makeRef(){const d=new Date(),n=Math.floor(1000+Math.random()*9000);return `LOFT-${d.getFullYear()}-${n}`}
@@ -835,6 +1562,28 @@ function renderContactStep(){
     btn.textContent='Envoi…';
     status.textContent='';
 
+    const selectedServicesData = st.services.map(sId => {
+      const sObj = services.find(x => String(x.id) === String(sId) || String(x.slug) === String(sId));
+      const sel = st.selectedServices[sId] || (sObj ? getInitialSelection(sObj) : {});
+      return {
+        service_id: sId,
+        pricing_type: sObj ? (sObj.pricingType || sObj.pricing_type) : 'FIXED_UNIT',
+        use_interior: !!sel.useInterior,
+        use_exterior: !!sel.useExterior,
+        hours: sel.hours || 0,
+        quantity: sel.quantity || 1,
+        reference_amount: sel.referenceAmount || 0,
+        calculation_detail: getServiceCalculationDetail(sId),
+        line_total: getServiceLinePrice(sId),
+      };
+    });
+
+    const selectedProjType = projectTypes.find(x => 
+      x.name === st.projectType || 
+      x.slug === st.projectType || 
+      String(x.id) === String(st.projectType)
+    );
+
     const payload = {
       mode: st.mode,
       client_type: st.clientType,
@@ -848,9 +1597,13 @@ function renderContactStep(){
       wilayaName: c.wilayaName || '',
       commune: c.commune || '',
       message: c.message || '',
-      project_type_name: st.projectType,
-      project_type: st.projectType,
+      project_type_name: selectedProjType ? selectedProjType.name : (st.projectType || ''),
+      project_type_id: selectedProjType ? selectedProjType.id : null,
+      project_type_slug: selectedProjType ? selectedProjType.slug : null,
+      project_type: selectedProjType ? (selectedProjType.slug || selectedProjType.name) : (st.projectType || ''),
       total_surface: area(),
+      surface_interior: surfaceInterior(),
+      surface_exterior: surfaceExterior(),
       estimated_total_project_cost: st.estimatedProjectCost || 0,
       total: totalFinal(),
       floors: st.levels.map((l, idx) => ({
@@ -860,6 +1613,7 @@ function renderContactStep(){
       })),
       spaces: st.mode === 'quick' ? st.spaces : [],
       service_ids: st.services,
+      selected_services: selectedServicesData,
     };
 
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
@@ -965,7 +1719,11 @@ function renderSuccess(){
   `;
   function buildFacturationPayload(targetEmail) {
     const c = st.client || {};
-    const selectedProjType = projectTypes.find(x => x.id === st.projectType || x.slug === st.projectType);
+    const selectedProjType = projectTypes.find(x => 
+      x.name === st.projectType || 
+      x.slug === st.projectType || 
+      String(x.id) === String(st.projectType)
+    );
     const projTypeName = selectedProjType ? selectedProjType.name : (st.projectType || 'Projet');
     const clientFullName = clientLabel(c);
     const nameParts = clientFullName.split(' ');
@@ -973,24 +1731,55 @@ function renderSuccess(){
     const lastName = nameParts.slice(1).join(' ') || '';
 
     const spacesData = (st.spaces || []).map(s => {
-      const spObj = spaces.find(x => x.id === s.spaceId || x.slug === s.spaceId);
+      const spObj = spaces.find(x => x.id === s.spaceId || x.slug === s.spaceId || x.id === s);
       return {
-        name: spObj ? spObj.name : s.spaceId,
-        price: s.price || (spObj ? spObj.price : 0)
+        name: spObj ? spObj.name : (s.spaceId || s),
+        price: spObj ? spObj.price : 0
       };
     });
 
     const servicesData = (st.services || []).map(sId => {
-      const sObj = services.find(x => x.id === sId || x.slug === sId);
-      const lineTot = servicePrice(sId);
+      const sObj = services.find(x => String(x.id) === String(sId) || String(x.slug) === String(sId));
+      const sel = st.selectedServices[sId] || (sObj ? getInitialSelection(sObj) : {});
+      const lineTot = getServiceLinePrice(sId);
+      const detail = getServiceCalculationDetail(sId);
+      const pType = sObj ? (sObj.pricingType || sObj.pricing_type) : 'FIXED_UNIT';
+
+      let rateLabel = 'Forfait';
+      let qtyLabel = '1';
+      let qtyNum = 1;
+
+      if (pType === 'PRICE_PER_M2') {
+        const surf = (sel.useInterior ? surfaceInterior() : 0) + (sel.useExterior ? surfaceExterior() : 0);
+        rateLabel = `${money(sObj.unitRate || sObj.price || 0)} / m²`;
+        qtyLabel = `${surf} m²`;
+        qtyNum = surf;
+      } else if (pType === 'HOURLY') {
+        rateLabel = `${money(sObj.hourlyRate || sObj.price || 0)} / h`;
+        qtyLabel = `${sel.hours || 20} h`;
+        qtyNum = sel.hours || 20;
+      } else if (pType === 'FIXED_UNIT') {
+        rateLabel = `${money(sObj.fixedUnitPrice || sObj.price || 0)} / ${sObj.unitName || 'unité'}`;
+        qtyLabel = `${sel.quantity || 1} ${sObj.unitName || 'unité'}`;
+        qtyNum = sel.quantity || 1;
+      } else if (pType === 'PERCENTAGE') {
+        rateLabel = `${sObj.percentage || 0}%`;
+        qtyLabel = money(sel.referenceAmount || 0);
+        qtyNum = 1;
+      }
+
       return {
+        id: sId,
         name: sObj ? sObj.name : sId,
-        pricing_type: sObj ? sObj.pricing_type : 'fixed',
-        price: sObj ? (sObj.price || 0) : 0,
-        percentage_rate: sObj ? (sObj.percentage_rate || 0) : 0,
+        detail: detail,
+        rate_label: rateLabel,
+        qty_label: qtyLabel,
+        pricing_type: pType,
+        price: sObj ? (sObj.unitRate || sObj.fixedUnitPrice || sObj.hourlyRate || sObj.price || 0) : 0,
+        percentage_rate: sObj ? (sObj.percentage || 0) : 0,
         line_total: lineTot,
-        qty: (sObj && (sObj.pricing_type === 'per_sqm' || sObj.pricing_type === 'area') && totalSurface() > 0) ? totalSurface() : 1,
-        unit: (sObj && sObj.pricing_type === 'percent_project_cost') ? '%' : ((sObj && (sObj.pricing_type === 'per_sqm' || sObj.pricing_type === 'area')) ? 'm²' : 'Forfait')
+        qty: qtyNum,
+        unit: (pType === 'PRICE_PER_M2') ? 'm²' : ((pType === 'HOURLY') ? 'h' : ((pType === 'PERCENTAGE') ? '%' : (sObj ? sObj.unitName || 'Unité' : 'Unité'))),
       };
     });
 
@@ -1003,8 +1792,10 @@ function renderSuccess(){
       client_type: st.clientType || 'particular',
       project_type_name: projTypeName,
       project_name: `${projTypeName} - ${clientFullName}`,
-      total_surface: totalSurface(),
-      estimated_total_project_cost: st.estimatedProjectCost || 10000000,
+      total_surface: area(),
+      surface_interior: surfaceInterior(),
+      surface_exterior: surfaceExterior(),
+      estimated_total_project_cost: st.estimatedProjectCost || 0,
       spaces: spacesData,
       service_ids: st.services || [],
       services: servicesData,

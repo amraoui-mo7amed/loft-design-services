@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loft Design — Rapport développeur — Compositeur de projet / Méthode de calcul</title>
+<style>
+:root{
+  --bg:#071014; --panel:#0c171b; --panel2:#101d22; --line:#24343a;
+  --txt:#f3f7f8; --muted:#9eb0b7; --cyan:#54d8f0; --green:#64e3a1;
+  --gold:#f5c45d; --violet:#b58cff; --red:#ff7b7b;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:linear-gradient(180deg,#061014,#091318 60%,#061014);
+  color:var(--txt); font:15px/1.55 Inter,Segoe UI,Arial,sans-serif;
+}
+.wrap{max-width:1180px;margin:auto;padding:32px 22px 70px}
+.hero{
+  padding:28px;border:1px solid var(--line);border-radius:22px;
+  background:linear-gradient(135deg,rgba(84,216,240,.08),rgba(181,140,255,.05));
+  margin-bottom:18px
+}
+.kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:800}
+h1{font-size:38px;line-height:1.08;margin:9px 0 10px}
+h1 span{color:var(--cyan)}
+.subtitle{color:#c9d5d9;max-width:970px}
+.pillrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.pill{border:1px solid var(--line);padding:8px 11px;border-radius:999px;color:#c7d5da;background:#081216}
+section{
+  margin:16px 0;padding:22px;border:1px solid var(--line);
+  border-radius:18px;background:rgba(12,23,27,.95)
+}
+h2{font-size:24px;margin:0 0 12px}
+h3{font-size:17px;margin:20px 0 8px;color:#dff9ff}
+p{margin:8px 0;color:#d6e0e3}
+ul,ol{margin:8px 0 8px 22px}
+li{margin:5px 0;color:#d6e0e3}
+.badge{
+  display:inline-block;border:1px solid rgba(84,216,240,.35);background:rgba(84,216,240,.08);
+  color:var(--cyan);padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px
+}
+.badge.p0{color:#ffb0b0;border-color:rgba(255,123,123,.35);background:rgba(255,123,123,.08)}
+.badge.admin{color:var(--gold);border-color:rgba(245,196,93,.35);background:rgba(245,196,93,.08)}
+.badge.ux{color:var(--green);border-color:rgba(100,227,161,.35);background:rgba(100,227,161,.08)}
+.warn,.note,.ok{
+  margin:13px 0;padding:13px 15px;border-radius:12px;border:1px solid var(--line)
+}
+.warn{border-color:rgba(255,123,123,.35);background:rgba(255,123,123,.07)}
+.note{border-color:rgba(84,216,240,.35);background:rgba(84,216,240,.06)}
+.ok{border-color:rgba(100,227,161,.35);background:rgba(100,227,161,.06)}
+code{color:#8ee7f7}
+pre{
+  white-space:pre-wrap;overflow:auto;margin:12px 0;padding:14px;border-radius:12px;
+  border:1px solid #263a42;background:#061014;color:#bcecf5;font:13px/1.55 Consolas,monospace
+}
+table{width:100%;border-collapse:collapse;margin:13px 0}
+th,td{border:1px solid #25373e;padding:10px;vertical-align:top}
+th{background:#102329;color:#dff9ff;text-align:left}
+td{color:#d4dfe2}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.card{border:1px solid var(--line);background:#081317;border-radius:14px;padding:14px}
+.flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}
+.flow span{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#081317}
+.flow .arrow{border:0;background:transparent;color:var(--cyan);font-weight:900}
+.formula{font-weight:800;color:var(--cyan)}
+.footer{color:#72868d;text-align:center;padding:28px 0 0;font-size:12px}
+@media(max-width:760px){
+  .wrap{padding:18px 12px 50px}
+  h1{font-size:29px}
+  .grid{grid-template-columns:1fr}
+  section{padding:16px}
+  table{font-size:13px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="kicker">LOFT DESIGN · SPÉCIFICATION FONCTIONNELLE</div>
+    <h1>Compositeur de projet — <span>Méthode de calcul</span></h1>
+    <div class="subtitle">
+      Rapport autonome destiné au développeur. Il définit uniquement la logique de calcul du Compositeur :
+      surfaces intérieures / extérieures, prestations 3D, prestations 2D, prix horaire, prix fixe et pourcentage.
+      Cette logique doit être unique et identique entre Frontend, API, base de données, devis et PDF.
+    </div>
+    <div class="pillrow">
+      <span class="pill">Périmètre : Compositeur uniquement</span>
+      <span class="pill">Calcul temps réel</span>
+      <span class="pill">Admin = source de vérité</span>
+      <span class="pill">Responsive PC / tablette / mobile</span>
+    </div>
+  </div>
+
+  <section>
+    <span class="badge p0">Règle fondamentale</span>
+    <h2>1. Ne jamais appliquer une seule surface globale à toutes les prestations</h2>
+    <p>Le Compositeur doit maintenir séparément :</p>
+    <pre>surfaceInterior
+surfaceExterior</pre>
+    <p>La surface intérieure correspond à la somme des niveaux intérieurs réellement traités :</p>
+    <pre>surfaceInterior =
+R-2 + R-1 + RDC + R+1 + R+2 + ...</pre>
+    <p>La surface extérieure correspond à la surface extérieure réellement traitée : terrasse, jardin, piscine, cour, parking ou autre zone extérieure selon le projet.</p>
+    <div class="warn">
+      <strong>Interdiction :</strong> ne jamais utiliser automatiquement
+      <code>surfaceInterior + surfaceExterior</code> comme quantité pour tous les services.
+      Chaque prestation doit connaître son propre périmètre et son propre mode de calcul.
+    </div>
+  </section>
+
+  <section>
+    <span class="badge">3D · INTÉRIEUR / EXTÉRIEUR</span>
+    <h2>2. Prestations 3D : deux calculs indépendants</h2>
+
+    <h3>2.1 Conception 3D intérieure</h3>
+    <p>La prestation <strong>Conception 3D intérieure</strong> utilise uniquement la surface intérieure.</p>
+    <pre>total3DInterior = surfaceInterior × rate3DInterior</pre>
+
+    <h3>2.2 Conception 3D extérieure</h3>
+    <p>La prestation <strong>Conception 3D extérieure</strong> utilise uniquement la surface extérieure.</p>
+    <pre>total3DExterior = surfaceExterior × rate3DExterior</pre>
+
+    <h3>2.3 Si les deux prestations sont sélectionnées</h3>
+    <pre>total3D = total3DInterior + total3DExterior</pre>
+
+    <div class="note">
+      Ces deux prestations sont les prestations de référence par défaut pour les deux familles de surfaces :
+      Intérieur → tarif 3D intérieur ; Extérieur → tarif 3D extérieur.
+    </div>
+
+    <h3>Exemple de référence</h3>
+    <p>Données :</p>
+    <pre>surfaceInterior = 100 m²
+surfaceExterior = 50 m²
+rate3DInterior = 900 DA/m²
+rate3DExterior = 600 DA/m²</pre>
+
+    <table>
+      <thead><tr><th>Sélection</th><th>Calcul</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr><td>3D intérieur uniquement</td><td>100 × 900</td><td><strong>90 000 DA</strong></td></tr>
+        <tr><td>3D extérieur uniquement</td><td>50 × 600</td><td><strong>30 000 DA</strong></td></tr>
+        <tr><td>3D intérieur + extérieur</td><td>(100 × 900) + (50 × 600)</td><td><strong>120 000 DA</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn">
+      <strong>Référence arithmétique à utiliser par le développeur :</strong>
+      avec 50 m² à 600 DA/m², le total extérieur est 30 000 DA.
+      Le total combiné est donc 120 000 DA.
+    </div>
+  </section>
+
+  <section>
+    <span class="badge">2D · SURFACE</span>
+    <h2>3. Prestations 2D : choix Intérieur / Extérieur par prestation</h2>
+
+    <p>Sont concernés notamment : plomberie, éclairage / luminaires, faux plafond, électricité, revêtement, démolition / construction et autres plans 2D facturés au m².</p>
+
+    <h3>3.1 Comportement lors de la sélection d’une prestation 2D</h3>
+    <ul>
+      <li>La case <strong>Intérieur</strong> est cochée automatiquement par défaut si une surface intérieure existe.</li>
+      <li>La case <strong>Extérieur</strong> est affichée uniquement si l’Admin autorise cette prestation à être appliquée à l’extérieur.</li>
+      <li>Le client peut sélectionner Intérieur uniquement, Extérieur uniquement, ou les deux.</li>
+      <li>Chaque changement recalcule le prix immédiatement.</li>
+    </ul>
+
+    <pre>☑ Intérieur  100 m²
+☐ Extérieur   50 m²</pre>
+
+    <h3>3.2 Formule</h3>
+    <pre>selected2DSurface =
+  (useInterior ? surfaceInterior : 0)
++ (useExterior ? surfaceExterior : 0)
+
+total2D = selected2DSurface × service2DRate</pre>
+
+    <h3>3.3 Exemple</h3>
+    <p>Données :</p>
+    <pre>surfaceInterior = 100 m²
+surfaceExterior = 50 m²
+service2DRate = 150 DA/m²</pre>
+
+    <table>
+      <thead><tr><th>Cases cochées</th><th>Surface facturée</th><th>Calcul</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr><td>Intérieur uniquement</td><td>100 m²</td><td>100 × 150</td><td><strong>15 000 DA</strong></td></tr>
+        <tr><td>Extérieur uniquement</td><td>50 m²</td><td>50 × 150</td><td><strong>7 500 DA</strong></td></tr>
+        <tr><td>Intérieur + Extérieur</td><td>150 m²</td><td>150 × 150</td><td><strong>22 500 DA</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="ok">
+      La même logique doit être réutilisée par toutes les prestations 2D configurées avec un prix au m².
+      Ne pas recréer une formule différente pour chaque plan.
+    </div>
+  </section>
+
+  <section>
+    <span class="badge admin">Configuration Admin</span>
+    <h2>4. L’Admin contrôle si une prestation 2D peut être appliquée à l’extérieur</h2>
+
+    <p>Chaque prestation 2D doit contenir au minimum les propriétés suivantes :</p>
+    <pre>pricingType = PRICE_PER_M2
+
+allowInterior = true / false
+allowExterior = true / false
+
+defaultInteriorSelected = true / false
+defaultExteriorSelected = true / false
+
+unitRate = number</pre>
+
+    <p>Configuration recommandée pour la majorité des plans 2D :</p>
+    <pre>allowInterior = true
+allowExterior = true ou false selon la prestation
+defaultInteriorSelected = true
+defaultExteriorSelected = false</pre>
+
+    <h3>Règle d’affichage</h3>
+    <pre>if allowExterior == false:
+    ne pas afficher la case "Extérieur"
+
+if allowInterior == false:
+    ne pas afficher la case "Intérieur"</pre>
+
+    <div class="warn">
+      Une option non autorisée par l’Admin ne doit pas seulement être cachée visuellement :
+      l’API doit également refuser qu’elle soit utilisée dans le calcul.
+    </div>
+  </section>
+
+  <section>
+    <span class="badge">HORAIRE</span>
+    <h2>5. Prestations facturées à l’heure</h2>
+
+    <p>Lorsqu’une prestation horaire est sélectionnée, afficher un champ de saisie du nombre d’heures.</p>
+
+    <pre>Nombre d’heures : [ 20 ]</pre>
+
+    <p class="formula">totalHourly = hours × hourlyRate</p>
+
+    <h3>Exemple</h3>
+    <pre>hourlyRate = 5 000 DA/h
+hours = 20
+
+total = 20 × 5 000
+total = 100 000 DA</pre>
+
+    <ul>
+      <li>Le nombre d’heures doit être supérieur à 0.</li>
+      <li>Le montant doit être recalculé en temps réel.</li>
+      <li>Le récapitulatif doit afficher : <strong>20 h × 5 000 DA/h = 100 000 DA</strong>.</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="badge">PRIX FIXE / QUANTITÉ</span>
+    <h2>6. Prestations à prix fixe</h2>
+
+    <p>Lorsqu’un service au prix fixe est sélectionné, afficher un champ <strong>Quantité</strong>.</p>
+
+    <pre>Quantité : [ 3 ]</pre>
+
+    <p class="formula">totalFixed = quantity × fixedUnitPrice</p>
+
+    <h3>Exemple</h3>
+    <pre>fixedUnitPrice = 100 000 DA
+quantity = 3
+
+total = 3 × 100 000
+total = 300 000 DA</pre>
+
+    <div class="note">
+      Le libellé d’un prix fixe doit utiliser la bonne unité métier :
+      « / façade », « / unité », « / visite », etc. — jamais « / m² » si ce n’est pas une prestation au m².
+    </div>
+  </section>
+
+  <section>
+    <span class="badge">POURCENTAGE</span>
+    <h2>7. Prestations calculées en pourcentage</h2>
+
+    <p>
+      Lorsqu’une prestation en pourcentage est sélectionnée, afficher un champ
+      <strong>Montant de référence en DA</strong>.
+    </p>
+
+    <pre>Montant de référence : [ 100 000 DA ]</pre>
+
+    <p class="formula">totalPercentage = referenceAmount × percentage / 100</p>
+
+    <h3>Exemple</h3>
+    <pre>referenceAmount = 100 000 DA
+percentage = 10 %
+
+total = 100 000 × 10 / 100
+total = 10 000 DA</pre>
+
+    <ul>
+      <li>Le pourcentage est défini par l’Admin dans la prestation.</li>
+      <li>Le client saisit uniquement le montant de référence.</li>
+      <li>Le montant calculé est mis à jour instantanément.</li>
+      <li>Le récapitulatif doit afficher clairement la base : <strong>10 % de 100 000 DA = 10 000 DA</strong>.</li>
+    </ul>
+
+    <div class="warn">
+      Cette spécification demande un champ de montant de référence au niveau de la prestation sélectionnée.
+      Si l’implémentation actuelle utilise un unique « coût global du projet » partagé par toutes les prestations en pourcentage,
+      elle doit être adaptée à cette nouvelle règle du Compositeur.
+    </div>
+  </section>
+
+  <section>
+    <span class="badge ux">UX · COMPOSITEUR</span>
+    <h2>8. Affichage recommandé dans l’étape « Prestations »</h2>
+
+    <p>Chaque ligne de prestation doit afficher uniquement les informations nécessaires à la compréhension du calcul.</p>
+
+    <div class="grid">
+      <div class="card">
+        <strong>3D intérieur</strong><br>
+        900 DA/m²<br>
+        Base : 100 m² intérieur<br>
+        <strong>90 000 DA</strong>
+      </div>
+      <div class="card">
+        <strong>Plan plomberie 2D</strong><br>
+        150 DA/m²<br>
+        ☑ Intérieur 100 m² &nbsp; ☐ Extérieur 50 m²<br>
+        <strong>15 000 DA</strong>
+      </div>
+      <div class="card">
+        <strong>Suivi de chantier</strong><br>
+        5 000 DA/h<br>
+        Heures : [20]<br>
+        <strong>100 000 DA</strong>
+      </div>
+      <div class="card">
+        <strong>Gestion de projet</strong><br>
+        10 %<br>
+        Montant de référence : [100 000 DA]<br>
+        <strong>10 000 DA</strong>
+      </div>
+    </div>
+
+    <h3>Règle de lisibilité</h3>
+    <p>Le client doit pouvoir comprendre chaque montant sans ouvrir « Détails ».</p>
+    <pre>Nom du service
+Prix unitaire / taux
+Base utilisée
+Montant calculé</pre>
+  </section>
+
+  <section>
+    <span class="badge p0">VALIDATIONS</span>
+    <h2>9. Empêcher les calculs impossibles ou incohérents</h2>
+
+    <table>
+      <thead><tr><th>Cas</th><th>Comportement attendu</th></tr></thead>
+      <tbody>
+        <tr><td>3D intérieur sélectionné mais surface intérieure = 0</td><td>Bloquer la validation et mettre le champ de surface intérieure en évidence.</td></tr>
+        <tr><td>3D extérieur sélectionné mais surface extérieure = 0</td><td>Bloquer la validation et demander la surface extérieure.</td></tr>
+        <tr><td>2D avec Intérieur coché mais surface intérieure = 0</td><td>Ne pas calculer ; demander la surface intérieure.</td></tr>
+        <tr><td>2D avec Extérieur coché mais surface extérieure = 0</td><td>Ne pas calculer ; demander la surface extérieure.</td></tr>
+        <tr><td>2D avec aucune case cochée</td><td>Service invalide : demander de choisir au moins un périmètre.</td></tr>
+        <tr><td>Horaire avec heures = 0</td><td>Bloquer la validation de cette prestation.</td></tr>
+        <tr><td>Prix fixe avec quantité = 0</td><td>Bloquer la validation de cette prestation.</td></tr>
+        <tr><td>Pourcentage sans montant de référence</td><td>Bloquer la validation de cette prestation.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="badge">MODÈLE DE DONNÉES</span>
+    <h2>10. Structure minimale recommandée</h2>
+
+    <pre>ProjectComposer
+  surfaceInterior
+  surfaceExterior
+
+SelectedService
+  serviceId
+  pricingType
+
+  // PRICE_PER_M2
+  useInterior
+  useExterior
+
+  // HOURLY
+  hours
+
+  // FIXED_UNIT
+  quantity
+
+  // PERCENTAGE
+  referenceAmount
+
+Service
+  id
+  name
+  pricingType
+  unitRate
+  fixedUnitPrice
+  hourlyRate
+  percentage
+  allowInterior
+  allowExterior
+  defaultInteriorSelected
+  defaultExteriorSelected</pre>
+
+    <div class="note">
+      Ne pas stocker uniquement le total final. Enregistrer également les valeurs qui ont produit le calcul
+      afin que le devis puisse expliquer et reproduire le montant plus tard.
+    </div>
+  </section>
+
+  <section>
+    <span class="badge">PSEUDO-CODE</span>
+    <h2>11. Fonction de calcul unique</h2>
+
+    <pre>function calculateService(service, selection, project) {
+
+  switch (service.pricingType) {
+
+    case "PRICE_PER_M2":
+      let selectedSurface = 0
+
+      if (selection.useInterior)
+        selectedSurface += project.surfaceInterior
+
+      if (selection.useExterior)
+        selectedSurface += project.surfaceExterior
+
+      return selectedSurface * service.unitRate
+
+
+    case "HOURLY":
+      return selection.hours * service.hourlyRate
+
+
+    case "FIXED_UNIT":
+      return selection.quantity * service.fixedUnitPrice
+
+
+    case "PERCENTAGE":
+      return selection.referenceAmount
+             * service.percentage / 100
+  }
+}</pre>
+
+    <p>Le même moteur doit être utilisé pour :</p>
+    <div class="flow">
+      <span>Compositeur</span><span class="arrow">→</span>
+      <span>API</span><span class="arrow">→</span>
+      <span>Récapitulatif</span><span class="arrow">→</span>
+      <span>Devis</span><span class="arrow">→</span>
+      <span>PDF</span>
+    </div>
+  </section>
+
+  <section>
+    <span class="badge p0">TESTS D’ACCEPTATION</span>
+    <h2>12. Jeux de tests obligatoires</h2>
+
+    <h3>Projet de référence</h3>
+    <pre>Intérieur = 100 m²
+Extérieur = 50 m²
+
+3D intérieur = 900 DA/m²
+3D extérieur = 600 DA/m²
+Plan 2D = 150 DA/m²</pre>
+
+    <table>
+      <thead><tr><th>#</th><th>Test</th><th>Résultat attendu</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>3D intérieur uniquement</td><td>90 000 DA</td></tr>
+        <tr><td>2</td><td>3D extérieur uniquement</td><td>30 000 DA</td></tr>
+        <tr><td>3</td><td>3D intérieur + extérieur</td><td>120 000 DA</td></tr>
+        <tr><td>4</td><td>2D intérieur uniquement</td><td>15 000 DA</td></tr>
+        <tr><td>5</td><td>2D extérieur uniquement</td><td>7 500 DA</td></tr>
+        <tr><td>6</td><td>2D intérieur + extérieur</td><td>22 500 DA</td></tr>
+        <tr><td>7</td><td>Horaire : 20 h × 5 000 DA</td><td>100 000 DA</td></tr>
+        <tr><td>8</td><td>Fixe : quantité 3 × 100 000 DA</td><td>300 000 DA</td></tr>
+        <tr><td>9</td><td>Pourcentage : 10 % de 100 000 DA</td><td>10 000 DA</td></tr>
+        <tr><td>10</td><td>Admin désactive allowExterior pour un plan 2D</td><td>Case Extérieur absente côté client et impossible à envoyer via API.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <span class="badge p0">INSTRUCTION DÉVELOPPEUR</span>
+    <h2>13. Règles non négociables</h2>
+    <ol>
+      <li>Une prestation 3D intérieure ne doit jamais utiliser la surface extérieure.</li>
+      <li>Une prestation 3D extérieure ne doit jamais utiliser la surface intérieure.</li>
+      <li>Une prestation 2D utilise uniquement les surfaces cochées sur cette prestation.</li>
+      <li>La case Intérieur d’une prestation 2D est cochée par défaut lorsqu’elle est autorisée et qu’une surface intérieure existe.</li>
+      <li>La disponibilité de la case Extérieur d’un plan 2D est administrable.</li>
+      <li>Une prestation horaire utilise uniquement <code>heures × prix horaire</code>.</li>
+      <li>Une prestation fixe utilise uniquement <code>quantité × prix unitaire fixe</code>.</li>
+      <li>Une prestation en pourcentage utilise uniquement <code>montant de référence × pourcentage</code>.</li>
+      <li>Le détail du calcul doit être sauvegardé avec le devis, pas seulement le total.</li>
+      <li>Le Frontend ne doit contenir aucun tarif, pourcentage ou règle de disponibilité codé en dur si ces valeurs existent dans l’Admin.</li>
+    </ol>
+
+    <div class="ok">
+      <strong>Critère de réussite :</strong> un même jeu de données doit produire exactement le même résultat dans
+      le Compositeur, le récapitulatif, le devis sauvegardé et le PDF final.
+    </div>
+  </section>
+
+  <div class="footer">Loft Design — Rapport développeur — Compositeur de projet / Méthode de calcul</div>
+</div>
+</body>
+</html>

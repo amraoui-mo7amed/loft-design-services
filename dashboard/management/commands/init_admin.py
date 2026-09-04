@@ -6,7 +6,14 @@ from user_auth.models import UserProfile
 
 
 class Command(BaseCommand):
-    help = "Creates the admin superuser from .env settings if it does not exist"
+    help = "Creates or updates the admin superuser and profile from .env settings"
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--reset-password",
+            action="store_true",
+            help="Reset the admin password to the configured password",
+        )
 
     def handle(self, *args, **options):
         username = config("ADMIN_USERNAME", default="admin")
@@ -24,20 +31,32 @@ class Command(BaseCommand):
                     "last_name": last_name,
                     "is_staff": True,
                     "is_superuser": True,
+                    "is_active": True,
                 },
             )
-            if created:
+            if created or options.get("reset_password"):
                 user.set_password(password)
-                user.save()
-                UserProfile.objects.get_or_create(
-                    user=user,
-                    defaults={
-                        "role": UserProfile.Role.ADMIN,
-                        "is_approved": True,
-                    },
-                )
 
-        if created:
-            self.stdout.write(self.style.SUCCESS(f"Admin '{username}' created successfully."))
-        else:
-            self.stdout.write(self.style.WARNING(f"Admin '{username}' already exists. Skipping."))
+            user.is_staff = True
+            user.is_superuser = True
+            user.is_active = True
+            user.save()
+
+            profile, prof_created = UserProfile.objects.get_or_create(
+                user=user,
+                defaults={
+                    "role": UserProfile.Role.ADMIN,
+                    "is_approved": True,
+                },
+            )
+            if not prof_created and (profile.role != UserProfile.Role.ADMIN or not profile.is_approved):
+                profile.role = UserProfile.Role.ADMIN
+                profile.is_approved = True
+                profile.save()
+
+        action = "created" if created else "initialized/updated"
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Admin user '{username}' successfully {action} (staff=True, superuser=True, role=ADMIN, approved=True)."
+            )
+        )

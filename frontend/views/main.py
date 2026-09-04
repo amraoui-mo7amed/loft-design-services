@@ -78,6 +78,19 @@ def home_view(request):
             is_def = bool(s.is_default and not has_default)
             if is_def:
                 has_default = True
+            pricing_type_str = s.pricing_type
+            preview_pricing_type = (
+                "PRICE_PER_M2" if pricing_type_str == "area"
+                else ("HOURLY" if pricing_type_str == "hourly"
+                else ("PERCENTAGE" if pricing_type_str == "percent_project_cost"
+                else "FIXED_UNIT"))
+            )
+            unit_name = s.unit_name or (
+                "m²" if pricing_type_str == "area"
+                else ("h" if pricing_type_str == "hourly"
+                else ("%" if pricing_type_str == "percent_project_cost"
+                else "forfait"))
+            )
             services_data.append({
                 "id": s.id,
                 "slug": s.id,
@@ -91,7 +104,20 @@ def home_view(request):
                 "estimated_delivery_time": t.get("estimated_delivery_time") or s.estimated_delivery_time or "",
                 "price": float(s.service_price),
                 "pricing_type": s.pricing_type,
+                "pricingType": preview_pricing_type,
+                "unitRate": float(s.service_price),
+                "fixedUnitPrice": float(s.service_price),
+                "hourlyRate": float(s.service_price),
+                "percentage": float(s.percentage_rate or 0),
                 "percentage_rate": float(s.percentage_rate or 0),
+                "allowInterior": getattr(s, "allow_interior", True),
+                "allowExterior": getattr(s, "allow_exterior", False),
+                "defaultInteriorSelected": getattr(s, "default_interior_selected", True),
+                "defaultExteriorSelected": getattr(s, "default_exterior_selected", False),
+                "unitName": unit_name,
+                "defaultQuantity": getattr(s, "default_quantity", 1),
+                "defaultHours": getattr(s, "default_hours", 20 if s.pricing_type == "hourly" else 10),
+                "defaultReferenceAmount": float(getattr(s, "default_reference_amount", 100000) or 100000),
                 "min_fee": float(s.min_fee) if s.min_fee is not None else None,
                 "max_fee": float(s.max_fee) if s.max_fee is not None else None,
                 "video_link": s.video_link or "",
@@ -272,21 +298,22 @@ def home_view(request):
             {"id": "v3", "title": "Projet résidentiel · détails & lumière", "youtube_id": "66qSJ4EIIdM", "thumbnail": "https://loftdesign.bilnov.com/media/portfolio/thumbnails/SEJOUR_4.png"},
         ]
 
-    project_types_qs = ProjectType.objects.all().order_by("name")
+    project_types_qs = ProjectType.objects.all().order_by("-featured_on_home", "name")
     if project_types_qs.exists():
         project_types_data = [{
             "id": pt.id,
             "slug": pt.slug,
             "name": pt.name,
+            "featured": pt.featured_on_home,
         } for pt in project_types_qs]
     else:
         project_types_data = [
-            {"id": 1, "slug": "residence", "name": "Résidence"},
-            {"id": 2, "slug": "villa", "name": "Villa"},
-            {"id": 3, "slug": "appartement", "name": "Appartement"},
-            {"id": 4, "slug": "commercial", "name": "Commercial"},
-            {"id": 5, "slug": "bureau", "name": "Bureau"},
-            {"id": 6, "slug": "hotel", "name": "Hôtel"},
+            {"id": 1, "slug": "residence", "name": "Résidence", "featured": False},
+            {"id": 2, "slug": "villa", "name": "Villa", "featured": True},
+            {"id": 3, "slug": "appartement", "name": "Appartement", "featured": False},
+            {"id": 4, "slug": "commercial", "name": "Commercial", "featured": False},
+            {"id": 5, "slug": "bureau", "name": "Bureau", "featured": False},
+            {"id": 6, "slug": "hotel", "name": "Hôtel", "featured": False},
         ]
 
     gallery_data = build_gallery_data(all_spaces)

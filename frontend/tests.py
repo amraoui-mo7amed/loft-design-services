@@ -79,6 +79,10 @@ class FrontendGalleryAndHomeTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "home.html")
         self.assertIn("spaces", response.context)
+        self.assertIn("project_types", response.context)
+        self.assertIn("project_types_json", response.context)
+        self.assertTrue(any(pt["name"] == "Residential" for pt in response.context["project_types"]))
+        self.assertIn('"name": "Residential"', response.content.decode("utf-8"))
 
     def test_gallery_all_spaces_view(self):
         response = self.client.get(reverse("frontend:space_gallery"))

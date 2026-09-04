@@ -9,23 +9,40 @@ def calculate_subtotal(spaces_qs):
     return result["total"] or Decimal("0")
 
 
-def calculate_service_fee(service, estimated_project_cost=0, total_surface=0, hours=0):
+def calculate_service_fee(
+    service,
+    surface_interior=0,
+    surface_exterior=0,
+    use_interior=None,
+    use_exterior=None,
+    hours=0,
+    quantity=1,
+    reference_amount=0,
+    estimated_project_cost=0,
+    total_surface=0,
+):
     """
-    Authoritative pure calculation for a service fee.
+    Authoritative pure calculation for a service fee matching preview.html specification:
     Supports:
-    - percent_project_cost: (cost * rate / 100) bounded by min_fee / max_fee
-    - area: surface * price
-    - hourly: hours * price
-    - fixed: fixed price
+    - area / PRICE_PER_M2: (useInterior * surf_int + useExterior * surf_ext) * unitRate
+    - hourly / HOURLY: hours * hourlyRate
+    - fixed / FIXED_UNIT: quantity * fixedUnitPrice
+    - percent_project_cost / PERCENTAGE: (referenceAmount * rate / 100) bounded by min_fee / max_fee
     """
     if not service:
         return Decimal("0.00")
 
     if hasattr(service, "calculate_service_fee"):
         return service.calculate_service_fee(
+            surface_interior=surface_interior,
+            surface_exterior=surface_exterior,
+            use_interior=use_interior,
+            use_exterior=use_exterior,
+            hours=hours,
+            quantity=quantity,
+            reference_amount=reference_amount,
             estimated_project_cost=estimated_project_cost,
             total_surface=total_surface,
-            hours=hours,
         )
 
     pricing_type = getattr(service, "pricing_type", "fixed")

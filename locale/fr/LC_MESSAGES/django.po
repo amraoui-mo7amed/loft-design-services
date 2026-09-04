@@ -3250,9 +3250,6 @@ msgstr "Ce qui est inclus"
 msgid "What is not included"
 msgstr "Ce qui n'est pas inclus"
 
-msgid "Deliverables"
-msgstr "Livrables"
-
 msgid "Included revisions"
 msgstr "Révisions incluses"
 

@@ -45,6 +45,44 @@ class ServicePricing(models.Model):
         blank=True,
         verbose_name=_("Maximum Fee (DA)"),
     )
+    allow_interior = models.BooleanField(
+        default=True,
+        verbose_name=_("Allow Interior"),
+        help_text=_("Allow this service to apply to interior surface"),
+    )
+    allow_exterior = models.BooleanField(
+        default=False,
+        verbose_name=_("Allow Exterior"),
+        help_text=_("Allow this service to apply to exterior surface (e.g. 2D plans, 3D exterior)"),
+    )
+    default_interior_selected = models.BooleanField(
+        default=True,
+        verbose_name=_("Default Interior Selected"),
+    )
+    default_exterior_selected = models.BooleanField(
+        default=False,
+        verbose_name=_("Default Exterior Selected"),
+    )
+    unit_name = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        verbose_name=_("Unit Name (e.g. m², h, façade, visite, forfait)"),
+    )
+    default_quantity = models.PositiveIntegerField(
+        default=1,
+        verbose_name=_("Default Quantity"),
+    )
+    default_hours = models.PositiveIntegerField(
+        default=10,
+        verbose_name=_("Default Hours"),
+    )
+    default_reference_amount = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("100000.00"),
+        verbose_name=_("Default Reference Amount (DA)"),
+    )
 
     # Base description fields (fallback / French default)
     short_description = models.CharField(
@@ -191,26 +229,61 @@ class ServicePricing(models.Model):
     def detailed_description_ar(self):
         return self.get_translation("ar")["detailed_description"]
 
-    def calculate_service_fee(self, estimated_project_cost=0, total_surface=0, hours=0):
-        cost = Decimal(str(estimated_project_cost or 0))
-        surface = Decimal(str(total_surface or 0))
-        h = Decimal(str(hours or 0))
+    def calculate_service_fee(
+        self,
+        surface_interior=0,
+        surface_exterior=0,
+        use_interior=None,
+        use_exterior=None,
+        hours=0,
+        quantity=1,
+        reference_amount=0,
+        estimated_project_cost=0,
+        total_surface=0,
+    ):
+        surf_int = Decimal(str(surface_interior or 0))
+        surf_ext = Decimal(str(surface_exterior or 0))
+        if surf_int == 0 and surf_ext == 0 and total_surface:
+            surf_int = Decimal(str(total_surface))
 
-        if self.pricing_type == self.PricingType.PERCENTAGE_PROJECT_COST:
+        if use_interior is None:
+            use_interior = self.default_interior_selected and (surf_int > 0)
+        if use_exterior is None:
+            use_exterior = self.default_exterior_selected and (surf_ext > 0)
+
+        # Enforce admin constraints: if allow_exterior is False, cannot use exterior
+        if not self.allow_exterior:
+            use_exterior = False
+        if not self.allow_interior:
+            use_interior = False
+
+        if self.pricing_type == self.PricingType.AREA:
+            selected_surface = Decimal("0.00")
+            if use_interior:
+                selected_surface += surf_int
+            if use_exterior:
+                selected_surface += surf_ext
+            return (selected_surface * self.service_price).quantize(Decimal("0.01"))
+
+        elif self.pricing_type == self.PricingType.HOURLY:
+            h = Decimal(str(hours if hours > 0 else (self.default_hours or 1)))
+            return (h * self.service_price).quantize(Decimal("0.01"))
+
+        elif self.pricing_type == self.PricingType.FIXED:
+            q = Decimal(str(quantity if quantity > 0 else (self.default_quantity or 1)))
+            return (q * self.service_price).quantize(Decimal("0.01"))
+
+        elif self.pricing_type == self.PricingType.PERCENTAGE_PROJECT_COST:
+            ref = Decimal(str(reference_amount or estimated_project_cost or self.default_reference_amount or 0))
             rate = self.percentage_rate or Decimal("0")
-            fee = (cost * rate) / Decimal("100")
+            fee = (ref * rate) / Decimal("100")
             if self.min_fee is not None:
                 fee = max(fee, self.min_fee)
             if self.max_fee is not None:
                 fee = min(fee, self.max_fee)
             return fee.quantize(Decimal("0.01"))
-        elif self.pricing_type == self.PricingType.AREA:
-            return (surface * self.service_price).quantize(Decimal("0.01"))
-        elif self.pricing_type == self.PricingType.HOURLY:
-            qty = h if h > 0 else Decimal("1")
-            return (qty * self.service_price).quantize(Decimal("0.01"))
-        else:
-            return self.service_price
+
+        return self.service_price
 
 
 class ServiceTranslation(models.Model):

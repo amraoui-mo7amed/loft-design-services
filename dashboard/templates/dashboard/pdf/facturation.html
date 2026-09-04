@@ -435,7 +435,14 @@
                     <div class="card-header-title">{% trans "Projet & Programme Spatial" %}</div>
                     <div class="card-main-name">{{ project_type|default:project_type_name }}</div>
                     <div class="card-row"><strong>{% trans "Intitulé" %}:</strong> {{ project_name }}</div>
-                    {% if total_surface and total_surface > 0 %}<div class="card-row"><strong>{% trans "Surface Totale" %}:</strong> {{ total_surface|floatformat:1 }} m²</div>{% endif %}
+                    {% if total_surface and total_surface > 0 %}
+                        <div class="card-row">
+                            <strong>{% trans "Surface Totale" %}:</strong> {{ total_surface|floatformat:1 }} m²
+                            {% if surface_interior or surface_exterior %}
+                                <span style="font-size: 7.5pt; color: #64748b;">({% trans "Int." %} {{ surface_interior|default:0|floatformat:1 }} m² / {% trans "Ext." %} {{ surface_exterior|default:0|floatformat:1 }} m²)</span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                     {% if estimated_total_project_cost and estimated_total_project_cost > 0 %}
                         <div class="card-row"><strong>{% trans "Coût Estimatif Global" %}:</strong> {{ estimated_total_project_cost|floatformat:0 }} DA</div>
                     {% endif %}
@@ -497,14 +504,18 @@
                     <tr>
                         <td>
                             <strong>{{ s.name }}</strong>
-                            {% if s.percentage_rate and s.percentage_rate > 0 %}
+                            {% if s.detail %}
+                                <div class="service-desc-sub">{{ s.detail }}</div>
+                            {% elif s.percentage_rate and s.percentage_rate > 0 %}
                                 <div class="service-desc-sub">{{ s.percentage_rate }}% {% trans "du coût estimatif global du projet" %}</div>
                             {% elif s.pricing_type == 'area' %}
                                 <div class="service-desc-sub">{% trans "Tarification calculée au mètre carré (m²)" %}</div>
                             {% endif %}
                         </td>
                         <td class="center">
-                            {% if s.pricing_type == 'percent_project_cost' or s.percentage_rate > 0 %}
+                            {% if s.rate_label %}
+                                {{ s.rate_label }}
+                            {% elif s.pricing_type == 'percent_project_cost' or s.percentage_rate > 0 %}
                                 {{ s.percentage_rate }}% ({% trans "Coût Projet" %})
                             {% elif s.pricing_type == 'area' %}
                                 {{ s.price|default:0|floatformat:2 }} DA / m²
@@ -513,13 +524,15 @@
                             {% endif %}
                         </td>
                         <td class="center">
-                            {% if s.pricing_type == 'area' and total_surface > 0 %}
+                            {% if s.qty_label %}
+                                {{ s.qty_label }}
+                            {% elif s.pricing_type == 'area' and total_surface > 0 %}
                                 {{ total_surface|floatformat:1 }} m²
                             {% else %}
                                 {{ s.qty|default:1 }}
                             {% endif %}
                         </td>
-                        <td class="right" style="font-weight: bold;">{{ s.line_total|default:s.price|default:0|floatformat:2 }} DA</td>
+                        <td class="right" style="font-weight: bold;">{{ s.line_total|default:0|floatformat:2 }} DA</td>
                     </tr>
                 {% endfor %}
             {% elif services_list %}
