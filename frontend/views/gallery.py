@@ -1,4 +1,5 @@
 import json
+from decimal import Decimal
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
@@ -293,7 +294,7 @@ def submit_client_gallery_selection(request, token):
         })
 
     except Exception as e:
-        return JsonResponse({"success": False, "errors": [humanize_error(e)]})
+        return JsonResponse({"success": False, "errors": humanize_error(e)})
 
 
 def submit_public_gallery_selection(request):
@@ -348,8 +349,9 @@ def submit_public_gallery_selection(request):
                 message=f"Sélection galerie ({len(items)} éléments) : {items_str}. Observations : {notes}",
             )
 
+            client_user = request.user if getattr(request, "user", None) and request.user.is_authenticated else None
             project = DesignRequest.objects.create(
-                client=request.user if request.user.is_authenticated else None,
+                client=client_user,
                 first_name=first_name,
                 last_name=last_name,
                 email=email,
@@ -358,6 +360,14 @@ def submit_public_gallery_selection(request):
                 status=DesignRequest.Status.PENDING,
                 message=f"Sélection de {len(items)} inspirations depuis la galerie.\nNotes client: {notes}" if notes else f"Sélection de {len(items)} inspirations depuis la galerie.",
                 mode="gallery",
+                total_surface=Decimal("0.00"),
+                surface_interior=Decimal("0.00"),
+                surface_exterior=Decimal("0.00"),
+                floors_above=0,
+                floors_below=0,
+                has_terrace=False,
+                has_garden=False,
+                total=Decimal("0.00"),
             )
 
             # Link spaces and images to the project
@@ -442,7 +452,10 @@ def submit_public_gallery_selection(request):
                         design_request=project,
                         floor=floor,
                         space=space_obj,
-                        defaults={"custom_name": display_name},
+                        defaults={
+                            "custom_name": display_name,
+                            "price_at_time": getattr(space_obj, "base_price", Decimal("0.00")) or Decimal("0.00"),
+                        },
                     )
                     if cat:
                         img_obj = cat.images.filter(is_default=True).first() or cat.images.first()
@@ -481,5 +494,8 @@ def submit_public_gallery_selection(request):
             "message": str(_("Votre sélection d'inspirations a bien été enregistrée et transmise à nos architectes !")),
         })
     except Exception as e:
-        return JsonResponse({"success": False, "errors": [humanize_error(e)]})
+        import sys, traceback
+        print(f"[SUBMIT_PUBLIC_GALLERY ERROR] {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+        traceback.print_exc()
+        return JsonResponse({"success": False, "errors": humanize_error(e)})
 

@@ -137,6 +137,9 @@ class Command(BaseCommand):
                     status=status,
                     budget=20000 + i * 1000,
                     total=30000 + i * 1500,
+                    total_surface=0,
+                    surface_interior=0,
+                    surface_exterior=0,
                     created_at=base_dt - timedelta(hours=i * 3),
                 )
                 counts["inquiries"] += 1
