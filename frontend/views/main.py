@@ -326,7 +326,18 @@ def home_view(request):
             {"id": 6, "slug": "hotel", "name": "Hôtel", "featured": False},
         ]
 
-    gallery_data = build_gallery_data(all_spaces)
+    featured_pt = ProjectType.objects.filter(featured_on_home=True).first()
+    if featured_pt:
+        featured_spaces = Space.objects.filter(
+            project_types__project_type=featured_pt,
+            project_types__show_on_home=True,
+        ).prefetch_related("categories__images").order_by("project_types__sort_order", "name")
+    else:
+        featured_spaces = Space.objects.filter(
+            project_types__show_on_home=True,
+        ).prefetch_related("categories__images").order_by("name").distinct()
+
+    gallery_data = build_gallery_data(featured_spaces, only_featured_images=True)
 
     return render(request, "home.html", {
         "project_types": project_types_data,
