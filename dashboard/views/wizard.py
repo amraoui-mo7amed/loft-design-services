@@ -632,7 +632,7 @@ def _build_facturation_context(data):
         "tax_amount": tax_amount,
         "final_total": total_val,
         "total": total_val,
-        "thank_you_message": _("Thank you for choosing LoftDesign! Our architectural team will contact you promptly."),
+        "thank_you_message": _("Merci d'avoir choisi LOFT DESIGN !"),
     }
 
 
@@ -673,8 +673,8 @@ def facturation_email(request):
         try:
             sent = _send_email_with_attachment(
                 to_email,
-                subject=str(_("Your LoftDesign Facture Estimate - %(doc)s") % {"doc": context["doc_number"]}),
-                text=f"Hi {context['client_name']},\n\nPlease find attached your facturation estimate for {context['project_name']}.\n\nTotal: {context['total']} DA\n\n{context['thank_you_message']}",
+                subject=str(_("Votre devis LOFT DESIGN - %(doc)s") % {"doc": context["doc_number"]}),
+                text=f"Bonjour {context['client_name']},\n\nVeuillez trouver ci-joint votre devis estimatif pour le projet {context['project_name']}.\n\nTotal : {context['total']} DA\n\n{context['thank_you_message']}",
                 attachment=(_facturation_filename(), pdf_bytes, "application/pdf"),
             )
         except Exception as mail_err:

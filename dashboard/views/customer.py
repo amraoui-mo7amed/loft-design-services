@@ -79,7 +79,7 @@ def _build_project_facturation_context(project):
         "items": items,
         "services_list": services_list,
         "total": f"{float(project.total):,.0f}",
-        "thank_you_message": _("Thank you for choosing LoftDesign! Our architectural team is managing your request."),
+        "thank_you_message": _("Merci d'avoir choisi LOFT DESIGN !"),
     }
 
 

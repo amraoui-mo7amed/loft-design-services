@@ -124,7 +124,7 @@ def normalize_facturation_context(context):
         "final_total": final_tot,
         "total": final_tot,
         "thank_you_message": ctx.get("thank_you_message") or _(
-            "Thank you for choosing LoftDesign Studio! Our architectural team will contact you promptly."
+            "Merci d'avoir choisi LOFT DESIGN Studio !"
         ),
         "company_nif": getattr(settings, "COMPANY_NIF", "002216089056427"),
         "company_nis": getattr(settings, "COMPANY_NIS", "002216010045189"),
