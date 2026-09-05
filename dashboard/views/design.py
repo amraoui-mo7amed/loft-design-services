@@ -583,8 +583,6 @@ def service_create(request):
         order_val = request.POST.get("order")
         if order_val and str(order_val).strip().isdigit():
             order_num = int(str(order_val).strip())
-            if ServicePricing.objects.filter(order=order_num).exists():
-                return JsonResponse({"success": False, "errors": [_("A service with this display order already exists.")]})
         else:
             order_num = None
 
@@ -750,10 +748,9 @@ def service_update(request, pk):
 
             order_val = request.POST.get("order")
             if order_val and str(order_val).strip().isdigit():
-                order_num = int(str(order_val).strip())
-                if ServicePricing.objects.filter(order=order_num).exclude(pk=obj.pk).exists():
-                    return JsonResponse({"success": False, "errors": [_("A service with this display order already exists.")]})
-                obj.order = order_num
+                obj.order = int(str(order_val).strip())
+            else:
+                obj.order = None
 
             with transaction.atomic():
                 if is_default and not obj.is_default:

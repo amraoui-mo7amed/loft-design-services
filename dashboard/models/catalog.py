@@ -12,7 +12,7 @@ class ServicePricing(models.Model):
 
     service_name = models.CharField(max_length=150, verbose_name=_("Service Name"))
     order = models.PositiveIntegerField(
-        unique=True,
+        unique=False,
         null=True,
         blank=True,
         verbose_name=_("Order"),

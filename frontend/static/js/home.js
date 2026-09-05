@@ -417,9 +417,17 @@ const totalHT = () => base() + servTotal();
 const tva = () => st.clientType === 'professional' ? totalHT() * 0.19 : 0;
 const totalFinal = () => totalHT() + tva();
 
+function triggerComposerShake(el) {
+  if (!el) return;
+  el.classList.remove('composerShake');
+  void el.offsetWidth;
+  el.classList.add('composerShake');
+  setTimeout(() => el.classList.remove('composerShake'), 800);
+}
+
 function v47Attention(el) {
   if (!el) return;
-  el.classList.remove('v47NeedsAttention');
+  el.classList.remove('v47NeedsAttention', 'composerShake');
   void el.offsetWidth;
   el.classList.add('v47NeedsAttention');
   el.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
@@ -449,6 +457,8 @@ function v47ProjectComplete() {
 function v47ShowProjectMissing() {
   const missing = v47ProjectMissing();
   if (!missing) return true;
+
+  triggerComposerShake(document.querySelector('#v47ToServices'));
 
   if (missing.type === 'project') {
     const el = document.querySelector('.v86TypeBlock') || document.querySelector('.v47TypeRow');
@@ -481,7 +491,10 @@ function gotoStep(step) {
     st.step = 'project';
     st.success = false;
     renderComposer();
-    setTimeout(v47ShowProjectMissing, 80);
+    setTimeout(() => {
+      v47ShowProjectMissing();
+      triggerComposerShake(document.querySelector('.progress button[data-step="services"]'));
+    }, 80);
     return;
   }
   if (step === 'contact') {
@@ -489,7 +502,14 @@ function gotoStep(step) {
       st.step = 'project';
       st.success = false;
       renderComposer();
-      setTimeout(v47ShowProjectMissing, 80);
+      setTimeout(() => {
+        v47ShowProjectMissing();
+        triggerComposerShake(document.querySelector('.progress button[data-step="contact"]'));
+      }, 80);
+      return;
+    }
+    if (!validateServices()) {
+      triggerComposerShake(document.querySelector('.progress button[data-step="contact"]'));
       return;
     }
   }
@@ -1181,6 +1201,10 @@ function showValidationError(msg) {
 
 function validateServices() {
   if (!st.services || st.services.length === 0) {
+    const avail = document.querySelector('.v46AvailableColumn') || document.querySelector('.v46ServicesScreen');
+    v47Attention(avail);
+    triggerComposerShake(document.querySelector('#toContact'));
+    triggerComposerShake(document.querySelector('.v48MobileServiceNext'));
     showValidationError('Veuillez sélectionner au moins une prestation pour continuer.');
     return false;
   }
@@ -1201,6 +1225,8 @@ function validateServices() {
       (s.pricing_type === 'percent_project_cost' ? 'PERCENTAGE' : 'FIXED_UNIT'))
     );
 
+    const getCard = () => document.querySelector(`.v91ServiceCard[data-service-card="${CSS.escape(s.id)}"]`) || document.querySelector(`[data-service="${CSS.escape(s.id)}"]`)?.closest('.v91ServiceCard, .v46AvailableService');
+
     if (pType === 'PRICE_PER_M2') {
       const sName = (s.name || '').toLowerCase();
       const is3dInt = sName.includes('3d') && (sName.includes('int') || !s.allowExterior);
@@ -1208,30 +1234,40 @@ function validateServices() {
 
       // Rule 9: 3D intérieur sélectionné mais surface intérieure = 0
       if (is3dInt && proj.surfaceInterior <= 0) {
+        v47Attention(getCard());
+        triggerComposerShake(document.querySelector('#toContact'));
         showValidationError(`La prestation "${s.name}" nécessite une surface intérieure supérieure à 0 m². Veuillez renseigner vos surfaces intérieures à l'étape 1.`);
         return false;
       }
 
       // Rule 9: 3D extérieur sélectionné mais surface extérieure = 0
       if (is3dExt && proj.surfaceExterior <= 0) {
+        v47Attention(getCard());
+        triggerComposerShake(document.querySelector('#toContact'));
         showValidationError(`La prestation "${s.name}" nécessite une surface extérieure supérieure à 0 m². Veuillez renseigner votre surface extérieure (terrasse / jardin) à l'étape 1.`);
         return false;
       }
 
       // Rule 9: 2D avec aucune case cochée
       if (!sel.useInterior && !sel.useExterior) {
+        v47Attention(getCard());
+        triggerComposerShake(document.querySelector('#toContact'));
         showValidationError(`Pour la prestation "${s.name}", vous devez cocher au moins un périmètre (Intérieur ou Extérieur).`);
         return false;
       }
 
       // Rule 9: 2D avec Intérieur coché mais surface intérieure = 0
       if (sel.useInterior && proj.surfaceInterior <= 0) {
+        v47Attention(getCard());
+        triggerComposerShake(document.querySelector('#toContact'));
         showValidationError(`La prestation "${s.name}" a le périmètre Intérieur coché, mais la surface intérieure est de 0 m². Veuillez renseigner votre surface intérieure.`);
         return false;
       }
 
       // Rule 9: 2D avec Extérieur coché mais surface extérieure = 0
       if (sel.useExterior && proj.surfaceExterior <= 0) {
+        v47Attention(getCard());
+        triggerComposerShake(document.querySelector('#toContact'));
         showValidationError(`La prestation "${s.name}" a le périmètre Extérieur coché, mais la surface extérieure est de 0 m². Veuillez renseigner votre surface extérieure.`);
         return false;
       }
@@ -1240,6 +1276,8 @@ function validateServices() {
     // Rule 9: Horaire avec heures = 0
     if (pType === 'HOURLY') {
       if (!sel.hours || sel.hours <= 0) {
+        v47Attention(getCard());
+        triggerComposerShake(document.querySelector('#toContact'));
         showValidationError(`Veuillez spécifier un nombre d'heures supérieur à 0 pour la prestation "${s.name}".`);
         return false;
       }
@@ -1248,6 +1286,8 @@ function validateServices() {
     // Rule 9: Prix fixe avec quantité = 0
     if (pType === 'FIXED_UNIT') {
       if (!sel.quantity || sel.quantity <= 0) {
+        v47Attention(getCard());
+        triggerComposerShake(document.querySelector('#toContact'));
         showValidationError(`Veuillez spécifier une quantité supérieure à 0 pour la prestation "${s.name}".`);
         return false;
       }
@@ -1256,6 +1296,8 @@ function validateServices() {
     // Rule 9: Pourcentage sans montant de référence
     if (pType === 'PERCENTAGE') {
       if (!sel.referenceAmount || sel.referenceAmount <= 0) {
+        v47Attention(document.querySelector('.v46BudgetField') || getCard());
+        triggerComposerShake(document.querySelector('#toContact'));
         showValidationError(`Veuillez saisir un montant de référence supérieur à 0 DA pour la prestation "${s.name}".`);
         return false;
       }
@@ -1652,7 +1694,12 @@ function setupMobileServiceStages() {
     document.querySelector('#composerBody')?.appendChild(bar);
 
     document.querySelector('#v48ServicesNext')?.addEventListener('click', () => {
-      if (!(st.services?.length > 0)) return;
+      if (!(st.services?.length > 0)) {
+        triggerComposerShake(document.querySelector('.v48MobileServiceNext'));
+        const avail = document.querySelector('.v46AvailableColumn');
+        v47Attention(avail);
+        return;
+      }
       st.mobileServiceStage = 2;
       renderServices();
       document.querySelector('#composer')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1870,6 +1917,10 @@ function renderContactStep(){
   document.querySelector('#wilaya').onchange=e=>populateCommunes(e.target.value);
 
   const f=document.querySelector('#composerForm');
+  f.addEventListener('invalid', e => {
+    triggerComposerShake(e.target);
+    triggerComposerShake(f);
+  }, true);
   f.onsubmit=async e=>{
     e.preventDefault();
     const c=getClientData(f),btn=document.querySelector('#sendProject'),status=document.querySelector('#formStatus');
@@ -1981,6 +2032,8 @@ function renderContactStep(){
         });
       }
       status.textContent = err.message || 'Une erreur est survenue lors de l’envoi.';
+      triggerComposerShake(status);
+      triggerComposerShake(f);
       btn.disabled = false;
       btn.textContent = 'Réessayer';
     }

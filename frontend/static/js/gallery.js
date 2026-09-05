@@ -439,12 +439,27 @@ function galleryPulseSelection(id, wasAdded) {
 function galleryApplySelectionState(animate = false) {
   const topCart = document.getElementById('galleryCartTop');
   const mobileCart = document.getElementById('galleryMobileCart');
+  const v55Dock = document.getElementById('v55GallerySelectionDock');
   const topCount = document.getElementById('galleryCartCount');
   const mobileCount = document.getElementById('galleryMobileCount');
+  const v55Count = document.getElementById('v55GallerySelectionCount');
   const a = parseInt(topCount?.textContent || '0', 10);
   const b = parseInt(mobileCount?.textContent || '0', 10);
   const total = Number.isFinite(a) ? a : (Number.isFinite(b) ? b : 0);
   const has = total > 0;
+
+  if (v55Count) v55Count.textContent = String(total);
+  if (v55Dock) {
+    v55Dock.classList.toggle('hasSelection', has);
+    v55Dock.setAttribute('aria-label', has ? `Ma sélection — ${total} élément${total > 1 ? 's' : ''}` : 'Ma sélection — vide');
+    if (animate) {
+      v55Dock.classList.remove('selectionPulse');
+      void v55Dock.offsetWidth;
+      v55Dock.classList.add('selectionPulse');
+      setTimeout(() => v55Dock.classList.remove('selectionPulse'), 760);
+    }
+  }
+
   [topCart, mobileCart].forEach(el => {
     if (!el) return;
     el.classList.toggle('hasSelection', has);
@@ -462,6 +477,7 @@ function galleryApplySelectionState(animate = false) {
 (function () {
   const topCount = document.getElementById('galleryCartCount');
   const mobileCount = document.getElementById('galleryMobileCount');
+  const v55Count = document.getElementById('v55GallerySelectionCount');
   let previousTotal = null;
   function getTotal() {
     const a = parseInt(topCount?.textContent || '0', 10);
@@ -596,6 +612,7 @@ function galleryCloseCart() {
 }
 document.getElementById('galleryCartTop')?.addEventListener('click', galleryOpenCart);
 document.getElementById('galleryMobileCart')?.addEventListener('click', galleryOpenCart);
+document.getElementById('v55GallerySelectionDock')?.addEventListener('click', galleryOpenCart);
 document.getElementById('galleryCartClose')?.addEventListener('click', galleryCloseCart);
 
 function galleryNewBoard() {
