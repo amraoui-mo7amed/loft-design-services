@@ -130,16 +130,16 @@ def submit_design_request(request):
             service_id = data.get("service_id") or data.get("package_id")
             service = Service.objects.filter(id=service_id).first() if service_id else None
 
-            first_name = data.get("first_name", "").strip()
-            last_name = data.get("last_name", "").strip()
-            company_name = data.get("company") or data.get("company_name", "").strip()
+            first_name = (data.get("first_name") or "").strip()
+            last_name = (data.get("last_name") or "").strip()
+            company_name = (data.get("company") or data.get("company_name") or "").strip()
             client_type = data.get("client_type") or ("professional" if company_name else "particular")
-            email = data.get("email", "").strip()
-            phone = data.get("phone", "").strip()
-            wilaya = data.get("wilayaName") or data.get("wilaya", "").strip()
-            commune = data.get("commune", "").strip()
-            message = data.get("message", "").strip()
-            mode = data.get("mode", "quick")
+            email = (data.get("email") or "").strip()
+            phone = (data.get("phone") or "").strip()
+            wilaya = (data.get("wilayaName") or data.get("wilaya") or "").strip()
+            commune = (data.get("commune") or "").strip()
+            message = (data.get("message") or "").strip()
+            mode = data.get("mode") or "quick"
             
             floors_above = int(data.get("floors_above", 0) or 0)
             floors_below = int(data.get("floors_below", 0) or 0)
@@ -243,14 +243,14 @@ def submit_design_request(request):
                     DesignRequestOption.objects.create(
                         design_request=design_request,
                         service=s_obj,
-                        pricing_type=p_type,
+                        pricing_type=p_type or "fixed",
                         use_interior=use_int,
                         use_exterior=use_ext,
                         hours=hours,
                         quantity=qty,
                         reference_amount=ref_amt,
-                        calculation_detail=calc_detail,
-                        price_at_time=line_price,
+                        calculation_detail=calc_detail or "",
+                        price_at_time=line_price or Decimal("0.00"),
                     )
 
             if primary_service and not design_request.service:
@@ -325,7 +325,8 @@ def submit_design_request(request):
                             design_request=design_request,
                             floor=target_floor,
                             space=space_obj,
-                            price_at_time=space_obj.base_price,
+                            custom_name=space_obj.name or "",
+                            price_at_time=getattr(space_obj, "base_price", Decimal("0.00")) or Decimal("0.00"),
                         )
 
             # Automatically create synchronized Commercial Quote for this request
@@ -336,8 +337,18 @@ def submit_design_request(request):
 
             auth_user = getattr(request, "user", None) if getattr(request, "user", None) and request.user.is_authenticated else None
 
+            # Generate collision-safe unique quote number
+            candidate_base = f"LOFT-QUO-{design_request.project_number.replace('LOFT-', '') if 'LOFT-' in design_request.project_number else design_request.project_number}"
+            quote_number = candidate_base
+            if Quote.objects.filter(quote_number=quote_number).exists():
+                seq = 1
+                quote_number = f"{candidate_base}-{seq}"
+                while Quote.objects.filter(quote_number=quote_number).exists():
+                    seq += 1
+                    quote_number = f"{candidate_base}-{seq}"
+
             quote = Quote.objects.create(
-                quote_number=f"LOFT-QUO-{design_request.project_number.replace('LOFT-', '') if 'LOFT-' in design_request.project_number else design_request.project_number}",
+                quote_number=quote_number,
                 revision_number=1,
                 is_current_revision=True,
                 design_request=design_request,
@@ -367,45 +378,45 @@ def submit_design_request(request):
             for opt in design_request.options.select_related("service").all():
                 svc = opt.service
                 if svc:
-                    fee = opt.price_at_time
-                    trans = svc.get_translation("fr")
+                    fee = opt.price_at_time or Decimal("0.00")
+                    trans = svc.get_translation("fr") if hasattr(svc, "get_translation") else {}
                     
                     if opt.pricing_type == "PRICE_PER_M2":
                         qty_val = (surface_interior if opt.use_interior else Decimal("0.00")) + (surface_exterior if opt.use_exterior else Decimal("0.00"))
                         unit_str = "M2"
                     elif opt.pricing_type == "HOURLY":
-                        qty_val = opt.hours
+                        qty_val = opt.hours or Decimal("0.00")
                         unit_str = "HEURE"
                     elif opt.pricing_type == "FIXED_UNIT":
-                        qty_val = opt.quantity
-                        unit_str = (svc.unit_name or "UNITE").upper()
+                        qty_val = opt.quantity or Decimal("1.00")
+                        unit_str = (getattr(svc, "unit_name", "") or "UNITE").upper()
                     elif opt.pricing_type == "PERCENTAGE":
                         qty_val = Decimal("1.00")
                         unit_str = "%"
                     else:
-                        qty_val = total_surface if svc.pricing_type == ServicePricing.PricingType.AREA else Decimal("1.00")
-                        unit_str = "M2" if svc.pricing_type == ServicePricing.PricingType.AREA else "FORFAIT"
+                        qty_val = total_surface if getattr(svc, "pricing_type", "") == ServicePricing.PricingType.AREA else Decimal("1.00")
+                        unit_str = "M2" if getattr(svc, "pricing_type", "") == ServicePricing.PricingType.AREA else "FORFAIT"
 
                     details_dict = {
-                        "included": trans.get("included_items", []),
-                        "excluded": trans.get("excluded_items", []),
-                        "deliverables": trans.get("deliverables", []),
-                        "revisions": trans.get("included_revisions", ""),
-                        "delivery_time": trans.get("estimated_delivery_time", ""),
-                        "calculation_detail": opt.calculation_detail,
+                        "included": trans.get("included_items", []) if isinstance(trans, dict) else [],
+                        "excluded": trans.get("excluded_items", []) if isinstance(trans, dict) else [],
+                        "deliverables": trans.get("deliverables", []) if isinstance(trans, dict) else [],
+                        "revisions": trans.get("included_revisions", "") if isinstance(trans, dict) else "",
+                        "delivery_time": trans.get("estimated_delivery_time", "") if isinstance(trans, dict) else "",
+                        "calculation_detail": opt.calculation_detail or "",
                     }
 
                     QuoteItem.objects.create(
                         quote=quote,
                         service=svc,
-                        service_name=svc.service_name,
-                        pricing_model=opt.pricing_type or svc.pricing_type,
-                        unit_price=svc.service_price,
-                        percentage_rate=svc.percentage_rate,
+                        service_name=getattr(svc, "service_name", "") or "Service",
+                        pricing_model=opt.pricing_type or getattr(svc, "pricing_type", "fixed") or "fixed",
+                        unit_price=getattr(svc, "service_price", Decimal("0.00")) or Decimal("0.00"),
+                        percentage_rate=getattr(svc, "percentage_rate", Decimal("0.00")),
                         estimated_project_cost_base=opt.reference_amount if opt.pricing_type == "PERCENTAGE" else None,
-                        quantity=qty_val,
-                        unit=unit_str,
-                        line_total=fee,
+                        quantity=qty_val or Decimal("1.00"),
+                        unit=unit_str or "FORFAIT",
+                        line_total=fee or Decimal("0.00"),
                         details_snapshot=details_dict,
                     )
 
@@ -414,9 +425,9 @@ def submit_design_request(request):
                 QuoteSpace.objects.create(
                     quote=quote,
                     space=dr_sp.space,
-                    space_name=dr_sp.space.name if dr_sp.space else "Space",
+                    space_name=dr_sp.space.name if dr_sp.space else (dr_sp.custom_name or "Space"),
                     floor_name=dr_sp.floor.name if dr_sp.floor else "",
-                    price_at_time=dr_sp.price_at_time,
+                    price_at_time=dr_sp.price_at_time or Decimal("0.00"),
                 )
 
             # Initial Audit Log
@@ -458,6 +469,10 @@ def submit_design_request(request):
             "redirect_url": reverse("dash:customer_projects"),
         })
     except Exception as e:
+        import sys, traceback
+        print(f"[SUBMIT_DESIGN_REQUEST ERROR] payload was: {data}", file=sys.stderr, flush=True)
+        print(f"[SUBMIT_DESIGN_REQUEST ERROR] {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+        traceback.print_exc()
         return JsonResponse({"success": False, "errors": humanize_error(e)})
 
 

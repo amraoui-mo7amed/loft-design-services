@@ -2255,10 +2255,9 @@ msgid "A product with this SKU already exists."
 msgstr "Un produit avec cette référence (SKU) existe déjà."#: dashboard/utils.py:29
 msgid "This product is already recommended for this space."
 msgstr "Ce produit est déjà recommandé pour cet espace."#: dashboard/utils.py:43 dashboard/utils.py:48
-#, fuzzy, python-format
-#| msgid "This email is already registered."
+#, python-format
 msgid "%(field)s already exists."
-msgstr "Cet e-mail est déjà enregistré."
+msgstr "%(field)s existe déjà."
 
 #: dashboard/utils.py:49
 msgid "A record with the same value already exists."

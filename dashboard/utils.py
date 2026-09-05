@@ -66,6 +66,8 @@ def build_packages_context():
 
 
 def humanize_error(e):
+    import sys
+    print(f"[HUMANIZE_ERROR CALLED] {type(e).__name__}: {e}", file=sys.stderr, flush=True)
     logger.exception("Error handled by humanize_error: %s", e)
     if isinstance(e, list):
         return e
@@ -75,17 +77,65 @@ def humanize_error(e):
     for constraint, human_msg in HUMAN_ERROR_MAP.items():
         if constraint in msg:
             return [human_msg]
-    # PostgreSQL: Key (field)=(value) already exists.
-    pg_match = re.search(r'Key \(([^)]+)\)=', msg)
-    if pg_match:
-        field_name = pg_match.group(1).replace("_", " ").title()
+
+    # 1. PostgreSQL: Key (...) already exists
+    pg_key_exists = re.search(r'Key \(([^)]+)\)=.*already exists', msg)
+    if pg_key_exists:
+        raw_field = pg_key_exists.group(1).split(",")[-1].strip()
+        field_name = raw_field.replace("_", " ").title()
         return [_("%(field)s already exists.") % {"field": field_name}]
-    # SQLite: UNIQUE constraint failed: table.column
+
+    # 2. PostgreSQL unique constraint violation by name
+    pg_uniq_constr = re.search(r'violates unique constraint ["\']?([^"\'\s]+)["\']?', msg)
+    if pg_uniq_constr:
+        c_name = pg_uniq_constr.group(1).lower()
+        if "quote_number" in c_name:
+            return [_("A quote with this reference number already exists.")]
+        if "uuid" in c_name:
+            return [_("A record with this identifier already exists.")]
+        if "email" in c_name:
+            return [_("An entry with this email already exists.")]
+        if "slug" in c_name or "name" in c_name:
+            return [_("An item with this name already exists.")]
+        return [_("A record with this value already exists (%(constraint)s).") % {"constraint": c_name}]
+
+    # 3. PostgreSQL NOT NULL constraint violation
+    pg_not_null = re.search(r'null value in column ["\']?([^"\'\s]+)["\']?.*violates not-null constraint', msg)
+    if pg_not_null:
+        col = pg_not_null.group(1).replace("_", " ").title()
+        return [_("The field %(field)s is required.") % {"field": col}]
+
+    # 4. PostgreSQL Foreign Key violation
+    pg_fk_not_present = re.search(r'Key \(([^)]+)\)=.*is not present in table ["\']?([^"\'\s]+)["\']?', msg)
+    if pg_fk_not_present:
+        fk_field = pg_fk_not_present.group(1).replace("_id", "").replace("_", " ").title()
+        return [_("The referenced %(field)s does not exist.") % {"field": fk_field}]
+
+    # 5. SQLite: UNIQUE constraint failed: table.column
     sqlite_match = re.search(r'UNIQUE constraint failed: \w+\.(\w+)', msg)
     if sqlite_match:
         field_name = sqlite_match.group(1).replace("_", " ").title()
         return [_("%(field)s already exists.") % {"field": field_name}]
-    return [_("A record with the same value already exists.")]
+
+    # 6. SQLite: NOT NULL constraint failed: table.column
+    sqlite_not_null = re.search(r'NOT NULL constraint failed: \w+\.(\w+)', msg)
+    if sqlite_not_null:
+        field_name = sqlite_not_null.group(1).replace("_", " ").title()
+        return [_("The field %(field)s is required.") % {"field": field_name}]
+
+    # 7. Check constraint
+    pg_check = re.search(r'violates check constraint ["\']?([^"\'\s]+)["\']?', msg)
+    if pg_check:
+        return [_("A value violates database validation rules.")]
+
+    # 8. Fallback: generic Key (field)=
+    pg_generic_key = re.search(r'Key \(([^)]+)\)=', msg)
+    if pg_generic_key:
+        field_name = pg_generic_key.group(1).replace("_", " ").title()
+        return [_("%(field)s already exists.") % {"field": field_name}]
+
+    first_line = msg.splitlines()[0] if msg else ""
+    return [_("A database constraint error occurred: %(detail)s") % {"detail": first_line}]
 
 
 def optimize_image(uploaded_file, max_dimension=1920, quality=0.9):
