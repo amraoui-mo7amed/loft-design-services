@@ -701,6 +701,81 @@ def _send_email_with_attachment(to_email, subject, text, attachment):
     return email.send() == 1
 
 
+# ──────────────────────────────────────────────
+# Devis / contract dossier: server-persisted snapshot + public tokenized link.
+# Each project's Quote row already carries a unique uuid (set at creation in
+# submit_design_request), so that uuid is reused as the dossier's token —
+# no separate token field is needed.
+# ──────────────────────────────────────────────
+
+@require_POST
+def quote_save_snapshot(request, quote_uuid):
+    quote = get_object_or_404(Quote, uuid=quote_uuid)
+    try:
+        data = json.loads(request.body) if request.body else {}
+    except json.JSONDecodeError:
+        data = {}
+
+    html = (data.get("html") or "").strip()
+    if not html:
+        return JsonResponse({"success": False, "errors": [_("Missing devis content.")]})
+
+    from django.utils import timezone
+    from django.core.files.base import ContentFile
+    import base64
+
+    update_fields = ["html_snapshot", "updated_at"]
+    quote.html_snapshot = html
+    if quote.status == Quote.Status.DRAFT:
+        quote.status = Quote.Status.READY_TO_SEND
+        update_fields.append("status")
+
+    # The exact unified PDF generated client-side by the composer (same
+    # content as "Télécharger PDF"), stored so the admin's "Send Quote"
+    # action can attach this instead of the older devis-only PDF.
+    pdf_base64 = data.get("pdf_base64")
+    if pdf_base64:
+        try:
+            if "," in pdf_base64:
+                pdf_base64 = pdf_base64.split(",", 1)[1]
+            pdf_bytes = base64.b64decode(pdf_base64)
+            quote.pdf_snapshot.save(
+                f"{quote.quote_number}.pdf", ContentFile(pdf_bytes), save=False
+            )
+            update_fields.append("pdf_snapshot")
+        except Exception:
+            pass
+
+    if data.get("mark_sent"):
+        if not quote.sent_at:
+            quote.sent_at = timezone.now()
+            update_fields.append("sent_at")
+        if quote.status in (Quote.Status.DRAFT, Quote.Status.READY_TO_SEND):
+            quote.status = Quote.Status.SENT
+            if "status" not in update_fields:
+                update_fields.append("status")
+
+    quote.save(update_fields=update_fields)
+    url = request.build_absolute_uri(reverse("quote_public_view", kwargs={"quote_uuid": quote.uuid}))
+    return JsonResponse({"success": True, "url": url})
+
+
+def quote_public_view(request, quote_uuid):
+    quote = get_object_or_404(Quote, uuid=quote_uuid)
+    if not quote.html_snapshot:
+        from django.http import Http404
+        raise Http404("This dossier has not been saved yet.")
+
+    from django.utils import timezone
+    if not quote.viewed_at:
+        quote.viewed_at = timezone.now()
+        if quote.status == Quote.Status.SENT:
+            quote.status = Quote.Status.VIEWED
+        quote.save(update_fields=["viewed_at", "status"])
+
+    return render(request, "public_quote.html", {"quote": quote})
+
+
 # Backward compatibility views
 def step_combined(request):
     return redirect("design_service")

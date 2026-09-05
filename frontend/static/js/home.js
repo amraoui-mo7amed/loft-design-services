@@ -85,7 +85,15 @@ if (videoRail) {
 }
 
 /* Composer */
-const money=v=>new Intl.NumberFormat('fr-DZ').format(Math.round(v))+' DA';
+/* Intl.NumberFormat('fr-DZ') isn't reliably supported everywhere — some
+   environments group thousands with "/" instead of a space. Format manually
+   so the separator is always a plain space, regardless of ICU data. */
+const groupThousands=v=>{
+  const n=Math.round(Number(v)||0);
+  const sign=n<0?'-':'';
+  return `${sign}${String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' ')}`;
+};
+const money=v=>`${groupThousands(v)} DA`;
 const spaces = (window.SPACES_DATA && window.SPACES_DATA.length > 0) ? window.SPACES_DATA : [
   {id:'living',name:'Living room',price:8000,img:'https://loftdesign.bilnov.com/media/spaces/gallery/living-room/16757/image_1.jpg'},
   {id:'bed',name:'Bedroom',price:6000,img:'https://loftdesign.bilnov.com/media/portfolio/thumbnails/Enscape_2026-02-05-20-45-23_Enscape_scene_8.jpg'},
@@ -149,6 +157,7 @@ let st = {
   success: false,
   ref: '',
   client: null,
+  quoteUuid: null,
   mobileServiceStage: 1
 };
 
@@ -548,7 +557,7 @@ function renderProject() {
 
   st.mode = 'custom';
   const body = document.querySelector('#composerBody');
-  const nf = new Intl.NumberFormat('fr-DZ');
+  const nf = { format: groupThousands };
 
   const v86Visuals = {
     'villa': {
@@ -2132,99 +2141,66 @@ function contractHtml(){
     </div>`;
 }
 
-/* ---------- Quote persistence, sharing & read-only public view ---------- */
-const QUOTE_STORE_KEY='loftDesign.quoteSnapshots.v1';
-
-function quoteStore(){try{return JSON.parse(localStorage.getItem(QUOTE_STORE_KEY)||'[]')}catch(_){return []}}
-function saveQuoteStore(rows){localStorage.setItem(QUOTE_STORE_KEY,JSON.stringify(rows||[]))}
-
-function quoteSnapshot(){
-  const c=st.client||{};
-  return {
-    id:st.ref||`LOFT-${Date.now()}`,
-    ref:st.ref||'',
-    savedAt:new Date().toISOString(),
-    clientType:st.clientType,
-    client:c,
-    project:{type:st.projectType,label:projectLabel(),surfaceInterior:surfaceInterior(),surfaceExterior:surfaceExterior()},
-    rows:quoteRows(),
-    totals:{ht:totalHT(),tva:tva(),final:totalFinal()},
-    contractHtml:contractHtml()
-  };
+/* ---------- Quote persistence & sharing (server-backed) ----------
+   Each project's Quote row (created server-side on submission) already
+   carries a unique uuid — st.quoteUuid — which doubles as the dossier's
+   public token. "Enregistrer" and "Envoyer le lien" both POST the exact
+   rendered .v47UnifiedDocument HTML to the server, which stores it and
+   serves it back, unmodified, at /devis/<uuid>/ — a real, durable,
+   per-project URL rather than a client-side encoded snapshot. */
+function getCsrfToken(){
+  return document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+    (document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/) || [])[1] || '';
 }
 
-function saveCurrentQuote(){
-  const snap=quoteSnapshot();
-  const rows=quoteStore();
-  const i=rows.findIndex(x=>x.id===snap.id);
-  if(i>=0)rows[i]=snap;else rows.unshift(snap);
-  saveQuoteStore(rows.slice(0,50));
-  return snap;
-}
+async function persistQuoteSnapshot(markSent){
+  if(!st.quoteUuid){
+    throw new Error('Aucun devis enregistré côté serveur pour ce projet.');
+  }
+  const docEl=document.querySelector('#composerBody .v47UnifiedDocument');
+  const html=docEl ? docEl.outerHTML : '';
+  if(!html){
+    throw new Error('Le dossier n’a pas pu être capturé.');
+  }
 
-function encodeQuote(snapshot){return btoa(unescape(encodeURIComponent(JSON.stringify(snapshot))))}
-function decodeQuote(value){try{return JSON.parse(decodeURIComponent(escape(atob(value))))}catch(_){return null}}
+  /* Also upload the exact same PDF "Télécharger PDF" would produce, so the
+     admin dashboard's "Send Quote" can attach this instead of the older
+     devis-only PDF. Best-effort: saving the dossier must still succeed even
+     if PDF generation fails for some reason. */
+  let pdfBase64=null;
+  try{
+    const pdfDoc=await buildUnifiedPdfDoc();
+    if(pdfDoc)pdfBase64=pdfDoc.output('datauristring');
+  }catch(_){}
 
-function publicQuoteUrl(snapshot=quoteSnapshot()){
-  const base=location.href.split('?')[0].split('#')[0];
-  return `${base}?quote=${encodeURIComponent(encodeQuote(snapshot))}#quote`;
+  const resp=await fetch(`/devis/save/${st.quoteUuid}/`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRFToken':getCsrfToken()},
+    body:JSON.stringify({html,mark_sent:!!markSent,pdf_base64:pdfBase64})
+  });
+  const data=await resp.json();
+  if(!data.success){
+    throw new Error((data.errors && data.errors.join(', ')) || 'Erreur lors de l’enregistrement du devis.');
+  }
+  return data.url;
 }
 
 async function shareQuoteLink(){
-  const snap=saveCurrentQuote();
-  const url=publicQuoteUrl(snap);
-  const title=`Devis LOFT DESIGN ${snap.ref||snap.id}`;
-  if(navigator.share){
-    try{await navigator.share({title,text:`${title}\n${url}`,url});return}catch(_){}
-  }
   try{
-    await navigator.clipboard.writeText(url);
-    if(window.Swal){Swal.fire({icon:'success',title:'Lien copié',text:'Le lien du dossier a été copié, vous pouvez le partager.',confirmButtonText:'Parfait',customClass:{popup:'swal2-popup',confirmButton:'btn neonCyan'},buttonsStyling:false})}
-    else alert('Lien du dossier copié.');
-  }catch(_){prompt('Copiez le lien du dossier :',url)}
-}
-
-function renderPublicQuote(snapshot){
-  if(!snapshot)return;
-  document.querySelector('#publicQuoteView')?.remove();
-  document.body.classList.add('publicQuoteMode');
-  const c=snapshot.client||{};
-  const root=document.createElement('div');
-  root.id='publicQuoteView';
-  root.innerHTML=`
-    <div class="publicQuoteShell">
-      <button type="button" class="publicQuoteClose" id="publicQuoteClose">✕ Fermer</button>
-      <article class="v47UnifiedDocument">
-        ${companyHeaderHtml()}
-        <section class="v47DocSection">
-          <div class="v47DocSectionTitle"><h4>1 · Devis / offre financière</h4><span>${new Date(snapshot.savedAt).toLocaleDateString('fr-DZ')} · Réf. ${snapshot.ref}</span></div>
-          <div class="v47ClientMeta">
-            <span><b>Client</b><br>${clientLabel(c)}</span>
-            <span><b>Projet</b><br>${snapshot.project?.label||''}</span>
-            <span><b>Adresse</b><br>${clientAddress(c)}</span>
-            <span><b>Contact</b><br>${c.phone||''} · ${c.email||''}</span>
-          </div>
-          <table class="v47DocTable">
-            <thead><tr><th>Désignation</th><th>PU HT</th><th>Unité</th><th>Qté</th><th>Montant HT</th></tr></thead>
-            <tbody>${(snapshot.rows||[]).map(r=>`<tr><td>${r.designation}</td><td>${typeof r.pu==='number'?money(r.pu):r.pu}</td><td>${r.unit}</td><td>${r.qty}</td><td>${money(r.total)}</td></tr>`).join('')}</tbody>
-          </table>
-          <div class="v47DocGrandTotal"><span>Total HT</span><b>${money(snapshot.totals?.ht||0)}</b></div>
-          ${snapshot.clientType==='professional'?`
-            <div class="v47DocGrandTotal"><span>TVA 19 %</span><b>${money(snapshot.totals?.tva||0)}</b></div>
-            <div class="v47DocGrandTotal"><span>Total TTC</span><b>${money(snapshot.totals?.final||0)}</b></div>`:''}
-        </section>
-        <section class="v47DocSection v79ContractSection">
-          <div class="v47DocSectionTitle"><h4>2 · Contrat personnalisé de prestations</h4><span>Offre technique intégrée · Réf. ${snapshot.ref}</span></div>
-          ${snapshot.contractHtml||''}
-        </section>
-      </article>
-    </div>`;
-  document.body.appendChild(root);
-  root.querySelector('#publicQuoteClose').onclick=()=>{
-    root.remove();
-    document.body.classList.remove('publicQuoteMode');
-    history.replaceState(null,'',location.pathname+location.hash.replace(/^#?quote$/,''));
-  };
+    const url=await persistQuoteSnapshot(true);
+    const title=`Devis LOFT DESIGN ${st.ref}`;
+    if(navigator.share){
+      try{await navigator.share({title,text:`${title}\n${url}`,url});return}catch(_){}
+    }
+    try{
+      await navigator.clipboard.writeText(url);
+      if(window.Swal){Swal.fire({icon:'success',title:'Lien copié',text:'Le lien du dossier a été copié, vous pouvez l’envoyer au client.',confirmButtonText:'Parfait',customClass:{popup:'swal2-popup',confirmButton:'btn neonCyan'},buttonsStyling:false})}
+      else alert('Lien du dossier copié : '+url);
+    }catch(_){prompt('Copiez le lien du dossier :',url)}
+  }catch(err){
+    if(window.Swal){Swal.fire({icon:'error',title:'Échec',text:err.message,confirmButtonText:'D’accord',customClass:{popup:'swal2-popup',confirmButton:'btn neonCyan'},buttonsStyling:false})}
+    else alert(err.message);
+  }
 }
 
 function summary(c=st.client||{}){
@@ -2379,6 +2355,7 @@ function renderContactStep(){
       }
       st.ref = data.project_number || makeRef();
       st.client = c;
+      st.quoteUuid = data.quote_uuid || null;
       st.success = true;
       renderComposer();
 
@@ -2486,12 +2463,20 @@ function renderSuccess(){
     };
   });
 
-  document.querySelector('#v47SaveDoc').onclick=()=>{
-    const snap=saveCurrentQuote();
-    const status=document.querySelector('#v47SavedStatus');
-    if(status){
-      status.textContent=`Dossier ${snap.ref||snap.id} enregistré.`;
-      setTimeout(()=>{status.textContent=''},2600);
+  document.querySelector('#v47SaveDoc').onclick=async(e)=>{
+    const btn=e.currentTarget,label=btn.textContent,status=document.querySelector('#v47SavedStatus');
+    btn.disabled=true;btn.textContent='Enregistrement…';
+    try{
+      await persistQuoteSnapshot(false);
+      if(status){
+        status.textContent=`Dossier ${st.ref} enregistré.`;
+        setTimeout(()=>{status.textContent=''},2600);
+      }
+    }catch(err){
+      if(window.Swal){Swal.fire({icon:'error',title:'Échec',text:err.message,confirmButtonText:'D’accord',customClass:{popup:'swal2-popup',confirmButton:'btn neonCyan'},buttonsStyling:false})}
+      else alert(err.message);
+    }finally{
+      btn.disabled=false;btn.textContent=label;
     }
   };
 
@@ -2720,8 +2705,11 @@ function loadLogoDataUrl(){
    v47DocumentStage dossier (the server-generated PDF behind "Envoyer par e-mail"
    only covers the devis, so this client-side export is what produces the full
    contract dossier as a downloadable file). */
-async function downloadUnifiedPdf(){
-  if(!window.jspdf){alert('Le module PDF se charge. Réessayez dans un instant.');return}
+/* Builds the unified devis+contract jsPDF document without saving it, so it
+   can be reused both for the local "Télécharger PDF" download and for
+   uploading the exact same PDF bytes to the server (see persistQuoteSnapshot). */
+async function buildUnifiedPdfDoc(){
+  if(!window.jspdf){alert('Le module PDF se charge. Réessayez dans un instant.');return null}
   const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'a4'});
   const rows=quoteRows(),c=st.client||{};
   const teal=[18,126,143],cyan=[221,241,244],cyan2=[157,208,218],red=[173,38,38];
@@ -2766,34 +2754,34 @@ async function downloadUnifiedPdf(){
     letterhead();
     sectionTitle(`DOSSIER ${st.ref}`,data.pageNumber>1?'DEVIS · OFFRE FINANCIÈRE (suite)':'DEVIS · OFFRE FINANCIÈRE');
     if(data.pageNumber===1){
-      doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(60);
-      doc.text(`CLIENT : ${clientLabel(c)}`,15,66);
-      doc.text(`PROJET : ${projectLabel()}`,15,72);
+      doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(60);
+      doc.text(`CLIENT : ${clientLabel(c)}`,15,67);
+      doc.text(`PROJET : ${projectLabel()}`,15,74);
       doc.setFont('helvetica','normal');
-      doc.text(`ADRESSE : ${clientAddress(c)}`,15,78);
-      doc.text(`DATE : ${new Date().toLocaleDateString('fr-DZ')}`,150,66);
+      doc.text(`ADRESSE : ${clientAddress(c)}`,15,81);
+      doc.text(`DATE : ${new Date().toLocaleDateString('fr-DZ')}`,150,67);
     }
   }
 
   doc.autoTable({
-    startY:84,margin:{left:15,right:15,top:64,bottom:20},
+    startY:88,margin:{left:15,right:15,top:64,bottom:20},
     head:[['DÉSIGNATION','PU HT','UNITÉ','QTÉ','MONTANT HT']],
     body:rows.map(r=>[r.designation,typeof r.pu==='number'?money(r.pu):r.pu,r.unit,String(r.qty),money(r.total)]),
-    headStyles:{fillColor:teal,textColor:255,fontSize:8},
-    styles:{fontSize:8,cellPadding:3,textColor:[62,69,67]},
+    headStyles:{fillColor:teal,textColor:255,fontSize:10},
+    styles:{fontSize:10,cellPadding:3.5,textColor:[62,69,67]},
     didDrawPage:drawDevisHeader
   });
 
   let y=doc.lastAutoTable.finalY+6;
-  if(y>255){doc.addPage();drawDevisHeader({pageNumber:2});y=66}
-  doc.setFillColor(...cyan);doc.rect(115,y,80,9,'F');
-  doc.setFont('helvetica','bold');doc.setTextColor(50);doc.setFontSize(9.5);
-  doc.text('TOTAL HT',120,y+6);doc.text(money(totalHT()),190,y+6,{align:'right'});
+  if(y>255){doc.addPage();drawDevisHeader({pageNumber:2});y=67}
+  doc.setFillColor(...cyan);doc.rect(115,y,80,10,'F');
+  doc.setFont('helvetica','bold');doc.setTextColor(50);doc.setFontSize(11);
+  doc.text('TOTAL HT',120,y+7);doc.text(money(totalHT()),190,y+7,{align:'right'});
   if(st.clientType==='professional'){
-    y+=9;doc.setFillColor(...cyan2);doc.rect(115,y,80,9,'F');
-    doc.text('TVA 19 %',120,y+6);doc.text(money(tva()),190,y+6,{align:'right'});
-    y+=9;doc.setFillColor(...cyan2);doc.rect(115,y,80,9,'F');
-    doc.text('TOTAL TTC',120,y+6);doc.text(money(totalFinal()),190,y+6,{align:'right'});
+    y+=10;doc.setFillColor(...cyan2);doc.rect(115,y,80,10,'F');
+    doc.text('TVA 19 %',120,y+7);doc.text(money(tva()),190,y+7,{align:'right'});
+    y+=10;doc.setFillColor(...cyan2);doc.rect(115,y,80,10,'F');
+    doc.text('TOTAL TTC',120,y+7);doc.text(money(totalFinal()),190,y+7,{align:'right'});
   }
 
   /* Contract, rendered as a single-column autoTable so pagination is automatic.
@@ -2860,7 +2848,12 @@ async function downloadUnifiedPdf(){
   doc.text(['Nom : ____________________','Date : ____________________','Signature'],15,sy+6,{lineHeightFactor:1.8});
   doc.text(['Nom : ____________________','Date : ____________________','Signature précédée de « Lu et approuvé »'],110,sy+6,{lineHeightFactor:1.8});
 
-  doc.save(`DOSSIER_LOFT_DESIGN_${st.ref.replaceAll('/','-')}.pdf`);
+  return doc;
+}
+
+async function downloadUnifiedPdf(){
+  const doc=await buildUnifiedPdfDoc();
+  if(doc)doc.save(`DOSSIER_LOFT_DESIGN_${st.ref.replaceAll('/','-')}.pdf`);
 }
 
 function renderComposer(){
@@ -2875,15 +2868,6 @@ function renderComposer(){
   updateFloatingBarVisibility();
 }
 renderComposer();
-
-/* Opening a shared dossier link (?quote=...) shows the read-only public view. */
-(function(){
-  const encoded=new URLSearchParams(location.search).get('quote');
-  if(encoded){
-    const snap=decodeQuote(encoded);
-    if(snap)renderPublicQuote(snap);
-  }
-})();
 
 /* Quick contact */
 const quickWaBtn = document.querySelector('#quickWa');

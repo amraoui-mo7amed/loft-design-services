@@ -9859,7 +9859,7 @@ body.galleryOpen {
   grid-template-columns: auto auto;
   column-gap: 26px;
   row-gap: 3px;
-  font-size: 9.5px;
+  font-size: 12px;
   line-height: 1.5;
   color: #4b5351;
   white-space: nowrap;
@@ -9891,10 +9891,10 @@ body.galleryOpen {
   padding: 10px 12px;
   border-radius: 10px;
   background: #eef2ef;
-  font-size: 10px;
+  font-size: 12px;
 }
 .v47ClientMeta b { color: #414946 }
-.v47DocTable { width: 100%; border-collapse: collapse; font-size: 10px }
+.v47DocTable { width: 100%; border-collapse: collapse; font-size: 12px }
 .v47DocTable th { padding: 8px; background: #147e8e; color: #fff; text-align: left }
 .v47DocTable td { padding: 8px; border-bottom: 1px solid #e1e5e3 }
 .v47DocTable th:last-child,
@@ -9907,13 +9907,13 @@ body.galleryOpen {
   gap: 10px;
   padding: 11px 13px;
   background: #dceff2;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 900;
 }
 .v47ContractClause { margin-bottom: 10px }
-.v47ContractClause h5 { margin: 0 0 3px; color: #147e8e; font-size: 10px }
+.v47ContractClause h5 { margin: 0 0 3px; color: #147e8e; font-size: 12px }
 .v47ContractClause p,
-.v47ContractClause ul { margin: 0; font-size: 9.5px; line-height: 1.55; color: #59625f }
+.v47ContractClause ul { margin: 0; font-size: 12px; line-height: 1.55; color: #59625f }
 .v47Signatures {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -9924,7 +9924,7 @@ body.galleryOpen {
   min-height: 90px;
   border-top: 1px solid #99a39f;
   padding-top: 7px;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.6;
   color: #68716e;
 }
@@ -9938,7 +9938,7 @@ body.galleryOpen {
   border-radius: 10px;
   background: rgba(18, 126, 143, .035);
 }
-.v79ContractIntro p { margin: 3px 0; color: #46514e; font-size: 10px }
+.v79ContractIntro p { margin: 3px 0; color: #46514e; font-size: 12px }
 .v79TechnicalArticle > p { margin-bottom: 10px }
 .v79ContractServices {
   display: grid;
@@ -9972,11 +9972,11 @@ body.galleryOpen {
   font-size: 8px;
   font-weight: 900;
 }
-.v79ContractService h6 { margin: 0 0 3px; color: #33403c; font-size: 11px; line-height: 1.25 }
+.v79ContractService h6 { margin: 0 0 3px; color: #33403c; font-size: 13px; line-height: 1.3 }
 .v79ContractService small {
   display: block;
   color: #127e8f;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.4;
 }
@@ -9992,11 +9992,11 @@ body.galleryOpen {
 }
 .v79ServiceLabel.inc { color: #266f52 }
 .v79ServiceLabel.exc { color: #ad2626 }
-.v79ContractServiceBody > p { margin: 0; color: #66716e; font-size: 9.5px; line-height: 1.42 }
+.v79ContractServiceBody > p { margin: 0; color: #66716e; font-size: 12px; line-height: 1.5 }
 .v79ListInc,
 .v79ListExc { margin: 0; padding-left: 16px }
-.v79ListInc li { margin: 2px 0; color: #59645f; font-size: 9px; line-height: 1.35 }
-.v79ListExc li { margin: 2px 0; color: #9c3a3a; font-size: 9px; line-height: 1.35 }
+.v79ListInc li { margin: 2px 0; color: #59645f; font-size: 12px; line-height: 1.4 }
+.v79ListExc li { margin: 2px 0; color: #9c3a3a; font-size: 12px; line-height: 1.4 }
 .v79RedBox {
   margin-top: 9px;
   padding: 8px 10px;
@@ -10041,7 +10041,7 @@ body.galleryOpen {
 .v81ContractOptionalActions button.add { background: #ad2626; border-color: #ad2626; color: #fff }
 
 .v79Obligations { margin: 6px 0 0; padding-left: 19px }
-.v79Obligations li { margin: 4px 0; color: #59635f; font-size: 10px; line-height: 1.45 }
+.v79Obligations li { margin: 4px 0; color: #59635f; font-size: 12px; line-height: 1.5 }
 .v79Signatures { margin-top: 20px }
 .v79Signatures .v47Signature { min-height: 110px; line-height: 1.6 }
 
@@ -10059,12 +10059,7 @@ body.galleryOpen {
   .v47DocCompanyGrid { grid-template-columns: 1fr; white-space: normal }
 }
 
-/* Read-only public dossier view, opened via a shared ?quote= link */
-body.publicQuoteMode > header,
-body.publicQuoteMode > main,
-body.publicQuoteMode > footer,
-body.publicQuoteMode > .mobileAppNav { display: none !important }
-body.publicQuoteMode { overflow: auto !important }
+/* Read-only public dossier page, served at /devis/<uuid>/ (public_quote.html) */
 #publicQuoteView {
   position: fixed;
   inset: 0;
@@ -10074,16 +10069,3 @@ body.publicQuoteMode { overflow: auto !important }
   padding: 32px 16px 60px;
 }
 .publicQuoteShell { width: min(930px, 100%); margin: 0 auto }
-.publicQuoteClose {
-  display: block;
-  margin: 0 0 12px auto;
-  min-height: 36px;
-  padding: 0 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(18, 126, 143, .25);
-  background: #fff;
-  color: #147e8e;
-  font-size: 11px;
-  font-weight: 800;
-  cursor: pointer;
-}
