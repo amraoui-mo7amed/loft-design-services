@@ -1943,6 +1943,284 @@ function quoteRows(){
 }
 
 function clientLabel(c){return st.clientType==='professional'?(c.company||'Entreprise'):`${c.firstName||''} ${c.lastName||''}`.trim()}
+function clientAddress(c){return [c?.commune,c?.wilayaName||c?.wilaya].filter(Boolean).join(', ')||'—'}
+
+function companyHeaderHtml(){
+  return `
+    <header class="v47DocHeader">
+      <div class="v47DocCompany">
+        <h3>${COMPANY.name}</h3>
+        <div class="v47DocCompanyGrid">
+          <span><b>R.I.B N°:</b> ${COMPANY.rib}</span>
+          <span></span>
+          <span><b>RC N° :</b> ${COMPANY.rc}</span>
+          <span><b>MAIL:</b> ${COMPANY.mail}</span>
+          <span><b>NIS N°:</b> ${COMPANY.nis}</span>
+          <span><b>MOBILE :</b> ${COMPANY.mobile}</span>
+          <span><b>NIF :</b> ${COMPANY.nif}</span>
+          <span><b>ADRESSE :</b> ${COMPANY.address}</span>
+          <span><b>N ART :</b>${COMPANY.nart}</span>
+          <span></span>
+        </div>
+      </div>
+      <img class="v47DocLogo" src="/static/img/icon.jpeg" alt="LOFT DESIGN">
+    </header>`;
+}
+
+function projectLabel(){
+  if(st.mode==='quick')return spaces.filter(x=>st.spaces.includes(x.id)).map(x=>x.name).join(', ')||'Projet';
+  const parts=[st.projectType||'Projet',`${projectLevelCodes().length} niveau(x)`,`${surfaceInterior()} m² intérieur`];
+  if(surfaceExterior()>0)parts.push(`${surfaceExterior()} m² extérieur`);
+  return parts.join(' · ');
+}
+
+function selectedServiceObjects(){
+  return services.filter(s=>st.services.some(id=>String(id)===String(s.id)||String(id)===s.slug));
+}
+function serviceDesc(s){return s.short_description||s.desc||s.detailed_description||''}
+function serviceIncludedItems(s){return s.included_items||s.includes||[]}
+function serviceExcludedItems(s){return s.excluded_items||s.excludes||[]}
+
+function servicePricingLabel(s){
+  const pType=s.pricingType||'FIXED_UNIT';
+  if(pType==='PRICE_PER_M2')return `${money(s.unitRate||s.price||0)} / m²`;
+  if(pType==='HOURLY')return `${money(s.hourlyRate||s.price||0)} / h`;
+  if(pType==='PERCENTAGE')return `${s.percentage||0}%`;
+  return `${money(s.fixedUnitPrice||s.price||0)} / ${s.unitName||'forfait'}`;
+}
+
+/* Site-supervision / follow-up style services are identified by name since the
+   real service catalog (admin-managed) has no dedicated category field for it. */
+function isFollowupService(s){return /suivi|chantier|supervision|coordination|pilotage/i.test(`${s.name||''}`)}
+function hasFollowupSelected(){return selectedServiceObjects().some(isFollowupService)}
+function optionalFollowupServices(){
+  if(hasFollowupSelected())return [];
+  return services.filter(s=>!st.services.some(id=>String(id)===String(s.id))&&isFollowupService(s));
+}
+
+function uniqueTexts(values){
+  const seen=new Set();
+  return (values||[]).filter(v=>{
+    const t=String(v||'').trim();
+    if(!t)return false;
+    const k=t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    if(seen.has(k))return false;
+    seen.add(k);
+    return true;
+  });
+}
+
+function selectedExclusions(){
+  const seen=new Set(),result=[];
+  selectedServiceObjects().forEach(s=>{
+    serviceExcludedItems(s).forEach(item=>{
+      const text=String(item||'').trim();
+      if(!text)return;
+      const key=text.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      if(seen.has(key))return;
+      seen.add(key);
+      result.push(text);
+    });
+  });
+  return result;
+}
+
+function loftObligations(){
+  const obligations=[
+    'Exécuter uniquement les prestations expressément sélectionnées et décrites dans le présent contrat.',
+    'Respecter le périmètre, les surfaces, quantités, heures et montants de référence validés dans le devis.',
+    'Informer le client lorsqu’une demande sort du périmètre convenu avant d’engager une prestation supplémentaire.'
+  ];
+  selectedServiceObjects().forEach(s=>{
+    obligations.push(`Réaliser la prestation « ${s.name} » selon le périmètre décrit : ${serviceDesc(s)||'voir le descriptif de la prestation.'}`);
+  });
+  if(!hasFollowupSelected()){
+    obligations.push('La mission de Loft Design s’arrête aux études et livrables sélectionnés : aucun suivi de chantier, pilotage quotidien ou gestion des intervenants n’est compris.');
+  }
+  return uniqueTexts(obligations);
+}
+
+function clientObligations(){
+  const obligations=[
+    'Fournir des informations, plans, dimensions, photos et documents exacts et suffisamment complets pour permettre l’exécution des prestations.',
+    'Valider ou commenter les propositions dans des délais compatibles avec l’avancement du projet.',
+    'Informer Loft Design de toute modification du programme, des surfaces, des contraintes techniques ou du chantier susceptible d’affecter les études.',
+    'Régler les montants dus selon le devis et les documents de facturation émis.'
+  ];
+  if(hasFollowupSelected()){
+    obligations.push(
+      'Garantir l’accès au chantier pendant les visites prévues et désigner un interlocuteur opérationnel disponible.',
+      'Maintenir sous la responsabilité du maître d’ouvrage et des entreprises la sécurité du chantier, les méthodes d’exécution et l’organisation quotidienne non comprise dans la mission choisie.'
+    );
+  }
+  return uniqueTexts(obligations);
+}
+
+function technicalContractHtml(){
+  return selectedServiceObjects().map((s,i)=>`
+    <article class="v79ContractService v81ContractService">
+      <button type="button" class="v79ContractServiceHead v81ContractServiceToggle" data-contract-detail="${s.id}" aria-expanded="false">
+        <span>${String(i+1).padStart(2,'0')}</span>
+        <div><h6>${s.name}</h6><small>${getServiceCalculationDetail(s.id)}${getServiceCalculationDetail(s.id)?' · ':''}${servicePricingLabel(s)}</small></div>
+        <i>Voir les détails</i>
+      </button>
+      <div class="v81ContractServiceDetails">
+        <p>${serviceDesc(s)||'Prestation exécutée conformément au périmètre validé.'}</p>
+        <div class="v79ContractIncluded"><b>Inclus dans cette prestation</b>
+          <ul>${serviceIncludedItems(s).map(x=>`<li>${x}</li>`).join('')||'<li>Périmètre décrit dans la prestation.</li>'}</ul>
+        </div>
+      </div>
+    </article>`).join('');
+}
+
+function contractHtml(){
+  const c=st.client||{};
+  const exclusions=selectedExclusions();
+  const optional=optionalFollowupServices();
+  const loft=loftObligations(),client=clientObligations();
+  return `
+    <div class="v79ContractIntro">
+      <p><b>Entre :</b> ${COMPANY.name}, ci-après « Loft Design », et <b>${clientLabel(c)}</b>, ci-après « le Client ».</p>
+      <p><b>Projet :</b> ${projectLabel()} · <b>Référence :</b> ${st.ref}</p>
+    </div>
+    <div class="v47ContractClause"><h5>1. Objet du contrat</h5><p>Le présent contrat définit le périmètre de la mission confiée à Loft Design, les prestations retenues, les engagements de Loft Design et les obligations du Client.</p></div>
+    <div class="v47ContractClause"><h5>2. Prix et base contractuelle</h5><p>Le devis financier ${st.ref} fait partie intégrante du contrat. Montant total HT : <b>${money(totalHT())}</b>.${st.clientType==='professional'?` TVA 19 % : <b>${money(tva())}</b>. Total TTC : <b>${money(totalFinal())}</b>.`:''} Toute prestation supplémentaire nécessite un accord écrit.</p></div>
+    <div class="v47ContractClause v79TechnicalArticle">
+      <h5>3. Offre technique intégrée au contrat</h5>
+      <p>Les prestations ci-dessous constituent le périmètre technique contractuel. Cliquez sur une prestation pour consulter son descriptif et les éléments inclus.</p>
+      <div class="v79ContractServices">${technicalContractHtml()}</div>
+    </div>
+    ${(exclusions.length||optional.length)?`
+    <div class="v79ContractNb v81ContractNb">
+      <h5>4. NB · Éléments et missions non inclus</h5>
+      ${exclusions.length?`<ul class="v81ContractExclusions">${exclusions.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}
+      ${optional.length?`
+      <div class="v81ContractOptional">
+        <b>Prestations d’accompagnement disponibles</b>
+        <p>Une formule peut être ajoutée au devis avant validation définitive.</p>
+        <div class="v81ContractOptionalList">
+          ${optional.map(s=>`
+          <article class="v81ContractOptionalRow">
+            <div><h6>${s.name}</h6><span>${servicePricingLabel(s)}</span></div>
+            <div class="v81ContractOptionalActions"><button type="button" class="add" data-contract-add="${s.id}">Ajouter au devis</button></div>
+          </article>`).join('')}
+        </div>
+      </div>`:''}
+    </div>`:''}
+    <div class="v47ContractClause"><h5>5. Obligations de Loft Design</h5><ul class="v79Obligations">${loft.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+    <div class="v47ContractClause"><h5>6. Obligations du Client</h5><ul class="v79Obligations">${client.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+    <div class="v47ContractClause"><h5>7. Validations, modifications et prestations supplémentaires</h5><p>Toute modification après validation ou tout changement de surface, quantité, heures, programme ou périmètre peut entraîner une révision du prix, du planning ou des livrables.</p></div>
+    <div class="v47ContractClause"><h5>8. Intervention des entreprises et tiers</h5><p>Les entreprises, artisans, fournisseurs, bureaux d’études et autres intervenants restent responsables de leurs travaux, méthodes d’exécution, dimensionnements techniques, conformité réglementaire, sécurité et engagements contractuels.</p></div>
+    <div class="v47ContractClause"><h5>9. Délais et coopération</h5><p>Les délais dépendent de la remise des informations nécessaires, des validations du Client et de la disponibilité des tiers concernés.</p></div>
+    <div class="v47ContractClause"><h5>10. Validité et acceptation</h5><p>L’offre est valable 30 jours sauf indication contraire. La signature du contrat vaut acceptation du devis, de l’offre technique intégrée, des éléments non inclus et des obligations respectives.</p></div>
+    <div class="v47Signatures v79Signatures">
+      <div class="v47Signature"><b>Pour Loft Design</b><br><br>Nom : ____________________<br>Date : ____________________<br><br>Signature</div>
+      <div class="v47Signature"><b>Le Client</b><br><br>Nom : ____________________<br>Date : ____________________<br><br>Signature précédée de « Lu et approuvé »</div>
+    </div>`;
+}
+
+/* ---------- Quote persistence, sharing & read-only public view ---------- */
+const QUOTE_STORE_KEY='loftDesign.quoteSnapshots.v1';
+
+function quoteStore(){try{return JSON.parse(localStorage.getItem(QUOTE_STORE_KEY)||'[]')}catch(_){return []}}
+function saveQuoteStore(rows){localStorage.setItem(QUOTE_STORE_KEY,JSON.stringify(rows||[]))}
+
+function quoteSnapshot(){
+  const c=st.client||{};
+  return {
+    id:st.ref||`LOFT-${Date.now()}`,
+    ref:st.ref||'',
+    savedAt:new Date().toISOString(),
+    clientType:st.clientType,
+    client:c,
+    project:{type:st.projectType,label:projectLabel(),surfaceInterior:surfaceInterior(),surfaceExterior:surfaceExterior()},
+    rows:quoteRows(),
+    totals:{ht:totalHT(),tva:tva(),final:totalFinal()},
+    contractHtml:contractHtml()
+  };
+}
+
+function saveCurrentQuote(){
+  const snap=quoteSnapshot();
+  const rows=quoteStore();
+  const i=rows.findIndex(x=>x.id===snap.id);
+  if(i>=0)rows[i]=snap;else rows.unshift(snap);
+  saveQuoteStore(rows.slice(0,50));
+  return snap;
+}
+
+function encodeQuote(snapshot){return btoa(unescape(encodeURIComponent(JSON.stringify(snapshot))))}
+function decodeQuote(value){try{return JSON.parse(decodeURIComponent(escape(atob(value))))}catch(_){return null}}
+
+function publicQuoteUrl(snapshot=quoteSnapshot()){
+  const base=location.href.split('?')[0].split('#')[0];
+  return `${base}?quote=${encodeURIComponent(encodeQuote(snapshot))}#quote`;
+}
+
+async function shareQuoteLink(){
+  const snap=saveCurrentQuote();
+  const url=publicQuoteUrl(snap);
+  const title=`Devis LOFT DESIGN ${snap.ref||snap.id}`;
+  if(navigator.share){
+    try{await navigator.share({title,text:`${title}\n${url}`,url});return}catch(_){}
+  }
+  try{
+    await navigator.clipboard.writeText(url);
+    if(window.Swal){Swal.fire({icon:'success',title:'Lien copié',text:'Le lien du dossier a été copié, vous pouvez le partager.',confirmButtonText:'Parfait',customClass:{popup:'swal2-popup',confirmButton:'btn neonCyan'},buttonsStyling:false})}
+    else alert('Lien du dossier copié.');
+  }catch(_){prompt('Copiez le lien du dossier :',url)}
+}
+
+function renderPublicQuote(snapshot){
+  if(!snapshot)return;
+  document.querySelector('#publicQuoteView')?.remove();
+  document.body.classList.add('publicQuoteMode');
+  const c=snapshot.client||{};
+  const root=document.createElement('div');
+  root.id='publicQuoteView';
+  root.innerHTML=`
+    <div class="publicQuoteShell">
+      <button type="button" class="publicQuoteClose" id="publicQuoteClose">✕ Fermer</button>
+      <article class="v47UnifiedDocument">
+        ${companyHeaderHtml()}
+        <section class="v47DocSection">
+          <div class="v47DocSectionTitle"><h4>1 · Devis / offre financière</h4><span>${new Date(snapshot.savedAt).toLocaleDateString('fr-DZ')} · Réf. ${snapshot.ref}</span></div>
+          <div class="v47ClientMeta">
+            <span><b>Client</b><br>${clientLabel(c)}</span>
+            <span><b>Projet</b><br>${snapshot.project?.label||''}</span>
+            <span><b>Adresse</b><br>${clientAddress(c)}</span>
+            <span><b>Contact</b><br>${c.phone||''} · ${c.email||''}</span>
+          </div>
+          <table class="v47DocTable">
+            <thead><tr><th>Désignation</th><th>PU HT</th><th>Unité</th><th>Qté</th><th>Montant HT</th></tr></thead>
+            <tbody>${(snapshot.rows||[]).map(r=>`<tr><td>${r.designation}</td><td>${typeof r.pu==='number'?money(r.pu):r.pu}</td><td>${r.unit}</td><td>${r.qty}</td><td>${money(r.total)}</td></tr>`).join('')}</tbody>
+          </table>
+          <div class="v47DocGrandTotal"><span>Total HT</span><b>${money(snapshot.totals?.ht||0)}</b></div>
+          ${snapshot.clientType==='professional'?`
+            <div class="v47DocGrandTotal"><span>TVA 19 %</span><b>${money(snapshot.totals?.tva||0)}</b></div>
+            <div class="v47DocGrandTotal"><span>Total TTC</span><b>${money(snapshot.totals?.final||0)}</b></div>`:''}
+        </section>
+        <section class="v47DocSection v79ContractSection">
+          <div class="v47DocSectionTitle"><h4>2 · Contrat personnalisé de prestations</h4><span>Offre technique intégrée · Réf. ${snapshot.ref}</span></div>
+          ${snapshot.contractHtml||''}
+        </section>
+      </article>
+    </div>`;
+  document.body.appendChild(root);
+  root.querySelector('#publicQuoteClose').onclick=()=>{
+    root.remove();
+    document.body.classList.remove('publicQuoteMode');
+    history.replaceState(null,'',location.pathname+location.hash.replace(/^#?quote$/,''));
+  };
+  root.querySelectorAll('[data-contract-detail]').forEach(btn=>{
+    btn.onclick=()=>{
+      const card=btn.closest('.v81ContractService');if(!card)return;
+      const open=card.classList.toggle('open');
+      btn.setAttribute('aria-expanded',open?'true':'false');
+    };
+  });
+}
+
 function summary(c=st.client||{}){
   const proj=st.mode==='quick'?`Espaces: ${spaces.filter(x=>st.spaces.includes(x.id)).map(x=>x.name).join(', ')}`:`Type: ${st.projectType||'Non spécifié'}; Intérieur: ${surfaceInterior()} m²; Extérieur: ${surfaceExterior()} m²; Niveaux: ${st.levels.map(l=>l+' '+(st.surfaces[l]||0)+' m²').join(', ')}`;
   const selServices = services.filter(s=>st.services.some(id=>String(id)===String(s.id)||String(id)===s.slug)).map(x=>`${x.name} [${getServiceCalculationDetail(x.id)} = ${money(getServiceLinePrice(x.id))}]`).join('\n  - ');
@@ -2135,50 +2413,90 @@ function renderContactStep(){
 }
 
 function renderSuccess(){
-  const b=document.querySelector('#composerBody'),c=st.client||{};
+  const b=document.querySelector('#composerBody'),c=st.client||{},rows=quoteRows();
   b.innerHTML=`
-    <div class="success text-center py-4">
-      <div class="successTop mb-4">
-        <div class="ok mb-3" style="width:64px;height:64px;margin:0 auto;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(85,220,255,0.15);color:var(--cyan);font-size:28px;border:2px solid var(--cyan);box-shadow:0 0 20px rgba(85,220,255,0.35);">✓</div>
-        <h3 style="font-size:26px;font-weight:800;color:#fff;">Votre demande a été enregistrée avec succès !</h3>
-        <p style="color:#aeb6b3;font-size:15px;margin-top:8px;">Référence projet : <b style="color:var(--cyan);font-size:18px;">${st.ref}</b> · <span class="badge" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#e2e8f0;">${st.clientType==='professional'?'Professionnel - TTC':'Particulier - HT'}</span></p>
+    <div class="v47DocumentStage">
+      <div class="v47DocumentActions">
+        <div>
+          <small>DOSSIER CLIENT · ${st.ref}</small>
+          <b>Devis + contrat</b>
+          <span class="v47SavedStatus" id="v47SavedStatus"></span>
+        </div>
+        <div class="v47DocumentButtons v81DocumentButtons">
+          <button id="v47SaveDoc">Enregistrer</button>
+          <button class="primary" id="v47DownloadDoc">Télécharger PDF</button>
+          <button id="v47SendDoc">Envoyer le lien</button>
+          <button id="sendEmailFacture">Envoyer par e-mail</button>
+          <button id="restart">Nouveau projet</button>
+        </div>
       </div>
 
-      <div class="facture-summary-box mb-4 p-4" style="max-width:560px;margin:0 auto;background:rgba(255,255,255,0.03);border:1px solid rgba(85,220,255,0.25);border-radius:18px;backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(0,0,0,0.37);">
-        <div class="d-flex justify-content-between align-items-center mb-2" style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:12px;">
-          <span style="color:#94a3b8;font-size:14px;">Client</span>
-          <strong style="color:#fff;">${clientLabel(c)}</strong>
-        </div>
-        <div class="d-flex justify-content-between align-items-center mb-2" style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:12px;">
-          <span style="color:#94a3b8;font-size:14px;">Total Estimé</span>
-          <strong style="color:var(--cyan);font-size:20px;font-weight:800;">${money(totalFinal())}</strong>
-        </div>
-        <p class="small text-muted mb-0" style="font-size:12px;">Une équipe d'architectes et designers LoftDesign étudie actuellement votre dossier.</p>
-      </div>
+      <article class="v47UnifiedDocument">
+        ${companyHeaderHtml()}
 
-      <div class="downloadRow d-flex flex-wrap justify-content-center gap-3 mt-4">
-        <button class="btn neonCyan d-inline-flex align-items-center gap-2" id="sendEmailFacture">
-          <i class="fas fa-envelope"></i>
-          <span>Envoyer la facture par e-mail</span>
-        </button>
-        <button class="btn neonCyan d-inline-flex align-items-center gap-2" id="downloadQuote">
-          <i class="fas fa-file-pdf"></i>
-          <span>Télécharger le devis PDF</span>
-        </button>
-        <a class="btn storeTop d-inline-flex align-items-center gap-2" href="https://store.bilnov.com" target="_blank" rel="noopener">
-          <span class="storeIcon" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <path d="M3.5 4h2l2.1 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 2-1.5L21 8H7"/>
-              <circle cx="10" cy="19" r="1.4"/>
-              <circle cx="18" cy="19" r="1.4"/>
-            </svg>
-          </span>
-          Explorer Store Bilnov
-        </a>
-        <button class="btn neonViolet" id="restart">Nouveau projet</button>
-      </div>
+        <section class="v47DocSection">
+          <div class="v47DocSectionTitle">
+            <h4>1 · Devis / offre financière</h4>
+            <span>${new Date().toLocaleDateString('fr-DZ')} · Réf. ${st.ref}</span>
+          </div>
+          <div class="v47ClientMeta">
+            <span><b>Client</b><br>${clientLabel(c)}</span>
+            <span><b>Projet</b><br>${projectLabel()}</span>
+            <span><b>Adresse</b><br>${clientAddress(c)}</span>
+            <span><b>Contact</b><br>${c.phone||''} · ${c.email||''}</span>
+          </div>
+          <table class="v47DocTable">
+            <thead><tr><th>Désignation</th><th>PU HT</th><th>Unité</th><th>Qté</th><th>Montant HT</th></tr></thead>
+            <tbody>${rows.map(r=>`<tr><td>${r.designation}</td><td>${typeof r.pu==='number'?money(r.pu):r.pu}</td><td>${r.unit}</td><td>${r.qty}</td><td>${money(r.total)}</td></tr>`).join('')}</tbody>
+          </table>
+          <div class="v47DocGrandTotal"><span>Total HT</span><b>${money(totalHT())}</b></div>
+          ${st.clientType==='professional'?`
+            <div class="v47DocGrandTotal"><span>TVA 19 %</span><b>${money(tva())}</b></div>
+            <div class="v47DocGrandTotal"><span>Total TTC</span><b>${money(totalFinal())}</b></div>
+          `:''}
+        </section>
+
+        <section class="v47DocSection v79ContractSection">
+          <div class="v47DocSectionTitle">
+            <h4>2 · Contrat personnalisé de prestations</h4>
+            <span>Offre technique intégrée · Réf. ${st.ref}</span>
+          </div>
+          ${contractHtml()}
+        </section>
+      </article>
     </div>
   `;
+
+  document.querySelectorAll('[data-contract-detail]').forEach(btn=>{
+    btn.onclick=()=>{
+      const card=btn.closest('.v81ContractService');if(!card)return;
+      const open=card.classList.toggle('open');
+      btn.setAttribute('aria-expanded',open?'true':'false');
+      const label=btn.querySelector('i');if(label)label.textContent=open?'Masquer les détails':'Voir les détails';
+    };
+  });
+
+  document.querySelectorAll('[data-contract-add]').forEach(btn=>{
+    btn.onclick=()=>{
+      const id=btn.dataset.contractAdd;
+      if(!st.services.includes(id))st.services=[...st.services,id];
+      ensureSelectedServicesState();
+      renderSuccess();
+    };
+  });
+
+  document.querySelector('#v47SaveDoc').onclick=()=>{
+    const snap=saveCurrentQuote();
+    const status=document.querySelector('#v47SavedStatus');
+    if(status){
+      status.textContent=`Dossier ${snap.ref||snap.id} enregistré.`;
+      setTimeout(()=>{status.textContent=''},2600);
+    }
+  };
+
+  document.querySelector('#v47DownloadDoc').onclick=()=>downloadUnifiedPdf();
+  document.querySelector('#v47SendDoc').onclick=()=>shareQuoteLink();
+
   function buildFacturationPayload(targetEmail) {
     const c = st.client || {};
     const selectedProjType = projectTypes.find(x => 
@@ -2274,37 +2592,6 @@ function renderSuccess(){
     return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
       (document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/) || [])[1] || '';
   }
-
-  document.querySelector('#downloadQuote').onclick = async () => {
-    try {
-      const payload = buildFacturationPayload();
-      const resp = await fetch('/request/facturation/download/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCsrf(),
-        },
-        body: JSON.stringify(payload)
-      });
-      if (resp.ok) {
-        const blob = await resp.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const refName = (st.ref || 'PROFORMA').replace(/[^a-zA-Z0-9_-]/g, '_');
-        a.download = `DEVIS_LOFT_DESIGN_${refName}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-        return;
-      }
-    } catch (e) {
-      console.warn("Server PDF download fallback to client jsPDF:", e);
-    }
-    // Fallback to client-side jsPDF
-    downloadQuotePdf();
-  };
 
   document.querySelector('#sendEmailFacture').onclick = async () => {
     const defaultEmail = (st.client && st.client.email) || '';
@@ -2405,45 +2692,114 @@ function renderSuccess(){
   };
 }
 
-function downloadQuotePdf(){
+/* Unified PDF export: devis + technical/contract offer, matching the on-screen
+   v47DocumentStage dossier (the server-generated PDF behind "Envoyer par e-mail"
+   only covers the devis, so this client-side export is what produces the full
+   contract dossier as a downloadable file). */
+function downloadUnifiedPdf(){
   if(!window.jspdf){alert('Le module PDF se charge. Réessayez dans un instant.');return}
-  const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'a4'}),rows=quoteRows(),c=st.client||{};
-  const teal=[18,126,143],dark=[9,84,96],light=[231,238,229],cyan=[221,241,244],cyan2=[157,208,218];
-  doc.setFillColor(...light);doc.rect(0,0,150,55,'F');doc.setTextColor(72,77,75);doc.setFont('helvetica','bold');doc.setFontSize(14);
-  doc.text(COMPANY.name,25,15);doc.setFont('helvetica','normal');doc.setFontSize(8.5);
-  doc.text([`R.I.B N°: ${COMPANY.rib}`,`RC N°: ${COMPANY.rc}`,`NIS N°: ${COMPANY.nis}`,`NIF: ${COMPANY.nif}`,`N ART: ${COMPANY.nart}`],25,23,{lineHeightFactor:1.55});
-  doc.setFont('helvetica','bold');doc.text('MAIL:',116,25);doc.setFont('helvetica','normal');doc.text(COMPANY.mail,127,25);
-  doc.setFont('helvetica','bold');doc.text('MOBILE:',116,32);doc.setFont('helvetica','normal');doc.text(COMPANY.mobile,132,32);
-  doc.setFont('helvetica','bold');doc.text('ADRESSE:',92,39);doc.setFont('helvetica','normal');doc.text(COMPANY.address,111,39);
-  doc.setDrawColor(244,184,95);doc.setLineWidth(.8);doc.rect(164,14,32,22);
-  doc.setFont('helvetica','bold');doc.setFontSize(18);doc.text('LOFT',180,24,{align:'center'});doc.setFontSize(9);doc.text('DESIGN',180,30,{align:'center'});
-  doc.setFontSize(17);doc.text(`DEVIS ${st.ref}`,105,77,{align:'center'});doc.setFontSize(11);
-  doc.text('CLIENT :',25,91);doc.setFont('helvetica','normal');doc.text(clientLabel(c),48,91);
-  doc.setFont('helvetica','bold');doc.text('ADRESSE :',25,102);doc.setFont('helvetica','normal');doc.text(`${c.commune||''}, ${c.wilayaName||c.wilaya||''}`,50,102);
-  doc.setFont('helvetica','bold');doc.text('DATE',153,116);doc.setFont('helvetica','normal');doc.text(new Date().toLocaleDateString('fr-DZ'),164,116);
-  doc.autoTable({
-    startY:127,margin:{left:25,right:25},
-    head:[['DESIGNATION','PRIX UNITAIRE HT','UNITE','QUANTITE','MONTANT HT DA']],
-    body:rows.map(r=>[r.designation,`${new Intl.NumberFormat('fr-DZ').format(r.pu)} DA`,r.unit,String(r.qty),`${new Intl.NumberFormat('fr-DZ').format(r.total)} DA`]),
-    headStyles:{fillColor:teal,textColor:255,fontSize:8,halign:'center'},
-    styles:{fontSize:8,cellPadding:3,textColor:[75,80,78]},
-    alternateRowStyles:{fillColor:[245,245,245]},
-    columnStyles:{0:{cellWidth:47},1:{cellWidth:32},2:{cellWidth:22,halign:'center'},3:{cellWidth:22,halign:'center'},4:{cellWidth:32,halign:'right'}}
-  });
-  let y=doc.lastAutoTable.finalY+2;
-  doc.setFillColor(...cyan);doc.rect(92,y,103,st.clientType==='professional'?27:9,'F');
-  doc.setFont('helvetica','bold');doc.setTextColor(76,81,79);doc.setFontSize(10);
-  doc.text('TOTAL HT',120,y+6);doc.setFillColor(...cyan2);doc.rect(160,y,35,9,'F');
-  doc.text(`${new Intl.NumberFormat('fr-DZ').format(totalHT())} DA`,191,y+6,{align:'right'});
-  if(st.clientType==='professional'){
-    doc.text('TVA 19%',120,y+15);doc.setFillColor(96,180,196);doc.rect(160,y+9,35,9,'F');
-    doc.text(`${new Intl.NumberFormat('fr-DZ').format(tva())} DA`,191,y+15,{align:'right'});
-    doc.text('TOTAL TTC',120,y+24);doc.setFillColor(...cyan2);doc.rect(160,y+18,35,9,'F');
-    doc.text(`${new Intl.NumberFormat('fr-DZ').format(totalFinal())} DA`,191,y+24,{align:'right'});
+  const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'a4'});
+  const rows=quoteRows(),c=st.client||{};
+  const teal=[18,126,143],cyan=[221,241,244],cyan2=[157,208,218];
+
+  function pageHeader(subtitle){
+    doc.setFillColor(231,238,229);doc.rect(0,0,210,48,'F');
+    doc.setTextColor(72,77,75);doc.setFont('helvetica','bold');doc.setFontSize(12);
+    doc.text(COMPANY.name,15,13);
+    doc.setFontSize(7);doc.setTextColor(75,83,81);
+    doc.text(`R.I.B N°: ${COMPANY.rib}`,15,19);
+    doc.setFont('helvetica','bold');doc.text('RC N° :',15,24);doc.setFont('helvetica','normal');doc.text(COMPANY.rc,29,24);
+    doc.setFont('helvetica','bold');doc.text('MAIL:',95,24);doc.setFont('helvetica','normal');doc.text(COMPANY.mail,105,24);
+    doc.setFont('helvetica','bold');doc.text('NIS N°:',15,29);doc.setFont('helvetica','normal');doc.text(COMPANY.nis,29,29);
+    doc.setFont('helvetica','bold');doc.text('MOBILE :',95,29);doc.setFont('helvetica','normal');doc.text(COMPANY.mobile,111,29);
+    doc.setFont('helvetica','bold');doc.text('NIF :',15,34);doc.setFont('helvetica','normal');doc.text(COMPANY.nif,25,34);
+    doc.setFont('helvetica','bold');doc.text('ADRESSE :',95,34);doc.setFont('helvetica','normal');doc.text(COMPANY.address,113,34);
+    doc.setFont('helvetica','bold');doc.text('N ART :',15,39);doc.setFont('helvetica','normal');doc.text(COMPANY.nart,29,39);
+    doc.setDrawColor(244,184,95);doc.setLineWidth(.8);doc.rect(178,6,20,18);
+    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text('LOFT',188,13,{align:'center'});
+    doc.setFontSize(6);doc.text('DESIGN',188,19,{align:'center'});
+    doc.setFontSize(11);doc.setTextColor(40);doc.text(`DOSSIER ${st.ref}`,150,29,{align:'right'});
+    doc.setFontSize(7.5);doc.setTextColor(90);doc.text(subtitle,150,35,{align:'right'});
   }
-  doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(130);
-  doc.text('Document généré depuis le compositeur LOFT DESIGN.',105,287,{align:'center'});
-  doc.save(`DEVIS_LOFT_DESIGN_${st.ref.replaceAll('/','-')}.pdf`);
+
+  /* Page 1+: devis */
+  pageHeader('DEVIS · OFFRE FINANCIÈRE');
+  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(60);
+  doc.text(`CLIENT : ${clientLabel(c)}`,15,58);
+  doc.text(`PROJET : ${projectLabel()}`,15,64);
+  doc.setFont('helvetica','normal');
+  doc.text(`ADRESSE : ${clientAddress(c)}`,15,70);
+  doc.text(`DATE : ${new Date().toLocaleDateString('fr-DZ')}`,150,58);
+
+  doc.autoTable({
+    startY:76,margin:{left:15,right:15,top:50,bottom:20},
+    head:[['DÉSIGNATION','PU HT','UNITÉ','QTÉ','MONTANT HT']],
+    body:rows.map(r=>[r.designation,typeof r.pu==='number'?money(r.pu):r.pu,r.unit,String(r.qty),money(r.total)]),
+    headStyles:{fillColor:teal,textColor:255,fontSize:8},
+    styles:{fontSize:8,cellPadding:3,textColor:[62,69,67]},
+    didDrawPage:(data)=>{if(data.pageNumber>1)pageHeader('DEVIS · OFFRE FINANCIÈRE (suite)')}
+  });
+
+  let y=doc.lastAutoTable.finalY+6;
+  if(y>255){doc.addPage();pageHeader('DEVIS · OFFRE FINANCIÈRE (suite)');y=58}
+  doc.setFillColor(...cyan);doc.rect(115,y,80,9,'F');
+  doc.setFont('helvetica','bold');doc.setTextColor(50);doc.setFontSize(9.5);
+  doc.text('TOTAL HT',120,y+6);doc.text(money(totalHT()),190,y+6,{align:'right'});
+  if(st.clientType==='professional'){
+    y+=9;doc.setFillColor(...cyan2);doc.rect(115,y,80,9,'F');
+    doc.text('TVA 19 %',120,y+6);doc.text(money(tva()),190,y+6,{align:'right'});
+    y+=9;doc.setFillColor(...cyan2);doc.rect(115,y,80,9,'F');
+    doc.text('TOTAL TTC',120,y+6);doc.text(money(totalFinal()),190,y+6,{align:'right'});
+  }
+
+  /* Contract, rendered as a single-column autoTable so pagination is automatic. */
+  const clauseRows=[];
+  const addTitle=t=>clauseRows.push([{content:t,styles:{fontStyle:'bold',textColor:teal,fontSize:9,cellPadding:{top:5,bottom:2,left:0,right:0}}}]);
+  const addText=t=>clauseRows.push([{content:t,styles:{fontSize:8,textColor:[70,78,75],cellPadding:{top:0,bottom:3,left:0,right:0}}}]);
+  const addList=items=>items.forEach(it=>clauseRows.push([{content:`•  ${it}`,styles:{fontSize:7.6,textColor:[70,78,75],cellPadding:{top:.5,bottom:.5,left:4,right:0}}}]));
+
+  addTitle('Entre');
+  addText(`${COMPANY.name} (« Loft Design ») et ${clientLabel(c)} (« le Client »). Projet : ${projectLabel()}. Référence : ${st.ref}.`);
+  addTitle('1. Objet du contrat');
+  addText('Le présent contrat définit le périmètre de la mission confiée à Loft Design, les prestations retenues, les engagements de Loft Design et les obligations du Client.');
+  addTitle('2. Prix et base contractuelle');
+  addText(`Le devis financier ${st.ref} fait partie intégrante du contrat. Montant total HT : ${money(totalHT())}.${st.clientType==='professional'?` TVA 19 % : ${money(tva())}. Total TTC : ${money(totalFinal())}.`:''} Toute prestation supplémentaire nécessite un accord écrit.`);
+  addTitle('3. Offre technique intégrée au contrat');
+  selectedServiceObjects().forEach((s,i)=>{
+    addTitle(`${String(i+1).padStart(2,'0')} · ${s.name} — ${servicePricingLabel(s)}`);
+    addText(serviceDesc(s)||'Prestation exécutée conformément au périmètre validé.');
+    addList(serviceIncludedItems(s).length?serviceIncludedItems(s):['Périmètre décrit dans la prestation.']);
+  });
+  const exclusions=selectedExclusions();
+  if(exclusions.length){addTitle('4. NB · Éléments et missions non inclus');addList(exclusions)}
+  addTitle('5. Obligations de Loft Design');addList(loftObligations());
+  addTitle('6. Obligations du Client');addList(clientObligations());
+  addTitle('7. Validations, modifications et prestations supplémentaires');
+  addText('Toute modification après validation ou tout changement de surface, quantité, heures, programme ou périmètre peut entraîner une révision du prix, du planning ou des livrables.');
+  addTitle('8. Intervention des entreprises et tiers');
+  addText('Les entreprises, artisans, fournisseurs, bureaux d’études et autres intervenants restent responsables de leurs travaux, méthodes d’exécution, dimensionnements techniques, conformité réglementaire, sécurité et engagements contractuels.');
+  addTitle('9. Délais et coopération');
+  addText('Les délais dépendent de la remise des informations nécessaires, des validations du Client et de la disponibilité des tiers concernés.');
+  addTitle('10. Validité et acceptation');
+  addText('L’offre est valable 30 jours sauf indication contraire. La signature du contrat vaut acceptation du devis, de l’offre technique intégrée, des éléments non inclus et des obligations respectives.');
+
+  doc.addPage();
+  doc.autoTable({
+    startY:50,margin:{left:15,right:15,top:50,bottom:20},
+    theme:'plain',showHead:false,body:clauseRows,
+    didDrawPage:()=>pageHeader('CONTRAT PERSONNALISÉ DE PRESTATIONS')
+  });
+
+  let sy=doc.lastAutoTable.finalY+10;
+  if(sy>250){doc.addPage();pageHeader('CONTRAT — SIGNATURES');sy=58}
+  doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(60);
+  doc.text('Pour Loft Design',15,sy);
+  doc.text('Le Client',110,sy);
+  doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(90);
+  doc.text(['Nom : ____________________','Date : ____________________','Signature'],15,sy+6,{lineHeightFactor:1.8});
+  doc.text(['Nom : ____________________','Date : ____________________','Signature précédée de « Lu et approuvé »'],110,sy+6,{lineHeightFactor:1.8});
+
+  doc.save(`DOSSIER_LOFT_DESIGN_${st.ref.replaceAll('/','-')}.pdf`);
 }
 
 function renderComposer(){
@@ -2458,6 +2814,16 @@ function renderComposer(){
   updateFloatingBarVisibility();
 }
 renderComposer();
+
+/* Opening a shared dossier link (?quote=...) shows the read-only public view. */
+(function(){
+  const encoded=new URLSearchParams(location.search).get('quote');
+  if(encoded){
+    const snap=decodeQuote(encoded);
+    if(snap)renderPublicQuote(snap);
+  }
+})();
+
 /* Quick contact */
 const quickWaBtn = document.querySelector('#quickWa');
 if (quickWaBtn) {

@@ -9767,3 +9767,312 @@ body.galleryOpen {
   border-color: rgba(255, 99, 132, 0.7) !important;
 }
 
+
+/* =========================================================
+   UNIFIED DEVIS + CONTRACT DOCUMENT STAGE (final composer step)
+   The document/contract classes below are intentionally NOT scoped to
+   #composer: the same markup is reused, unchanged, by the read-only public
+   dossier view (#publicQuoteView) opened from a shared ?quote= link.
+   ========================================================= */
+#composer .v47DocumentStage {
+  width: min(100%, 930px);
+  margin: 0 auto;
+}
+#composer .v47DocumentActions {
+  position: sticky;
+  top: 4px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: rgba(5, 10, 12, .92);
+  backdrop-filter: blur(18px);
+}
+#composer .v47DocumentActions > div:first-child small {
+  display: block;
+  color: var(--muted);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+#composer .v47DocumentActions > div:first-child b {
+  display: block;
+  color: #f3f6f5;
+  font-size: 11px;
+  margin-top: 2px;
+}
+#composer .v47SavedStatus {
+  color: var(--green);
+  font-size: 7.5px;
+  min-height: 12px;
+}
+#composer .v47DocumentButtons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+#composer .v47DocumentButtons button {
+  min-height: 36px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #0d1517;
+  color: #e9efed;
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+#composer .v47DocumentButtons button:hover {
+  border-color: rgba(85, 220, 255, .4);
+}
+#composer .v47DocumentButtons .primary {
+  border-color: rgba(85, 220, 255, .55);
+  color: var(--cyan);
+}
+
+/* ---- Document look (shared by the composer stage and the public view) ---- */
+.v47UnifiedDocument {
+  background: #f6f7f5;
+  color: #39413f;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, .34);
+}
+.v47DocHeader {
+  padding: 22px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  background: #e9efe9;
+}
+.v47DocCompany { min-width: 0 }
+.v47DocHeader h3 { margin: 0 0 8px; font-size: 15px; letter-spacing: .01em; color: #4b5351 }
+.v47DocCompanyGrid {
+  display: grid;
+  grid-template-columns: auto auto;
+  column-gap: 26px;
+  row-gap: 3px;
+  font-size: 9.5px;
+  line-height: 1.5;
+  color: #4b5351;
+  white-space: nowrap;
+}
+.v47DocCompanyGrid b { color: #3d4643; font-weight: 800 }
+.v47DocLogo {
+  width: 92px;
+  height: auto;
+  flex: 0 0 auto;
+}
+.v47DocSection {
+  padding: 20px 24px;
+  border-top: 1px solid #dfe4e1;
+}
+.v47DocSectionTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 13px;
+}
+.v47DocSectionTitle h4 { margin: 0; font-size: 15px; color: #3d4643 }
+.v47DocSectionTitle span { font-size: 9px; color: #7b8381 }
+.v47ClientMeta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 13px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #eef2ef;
+  font-size: 10px;
+}
+.v47ClientMeta b { color: #414946 }
+.v47DocTable { width: 100%; border-collapse: collapse; font-size: 10px }
+.v47DocTable th { padding: 8px; background: #147e8e; color: #fff; text-align: left }
+.v47DocTable td { padding: 8px; border-bottom: 1px solid #e1e5e3 }
+.v47DocTable th:last-child,
+.v47DocTable td:last-child { text-align: right }
+.v47DocGrandTotal {
+  margin: 12px 0 0 auto;
+  width: min(320px, 100%);
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 13px;
+  background: #dceff2;
+  font-size: 11px;
+  font-weight: 900;
+}
+.v47ContractClause { margin-bottom: 10px }
+.v47ContractClause h5 { margin: 0 0 3px; color: #147e8e; font-size: 10px }
+.v47ContractClause p,
+.v47ContractClause ul { margin: 0; font-size: 9.5px; line-height: 1.55; color: #59625f }
+.v47Signatures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 22px;
+}
+.v47Signature {
+  min-height: 90px;
+  border-top: 1px solid #99a39f;
+  padding-top: 7px;
+  font-size: 9px;
+  line-height: 1.6;
+  color: #68716e;
+}
+
+/* Contract intro + technical offer + NB block */
+.v79ContractSection { padding-bottom: 28px }
+.v79ContractIntro {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(18, 126, 143, .16);
+  border-radius: 10px;
+  background: rgba(18, 126, 143, .035);
+}
+.v79ContractIntro p { margin: 3px 0; color: #46514e; font-size: 10px }
+.v79TechnicalArticle > p { margin-bottom: 10px }
+.v79ContractServices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+.v79ContractService {
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(18, 126, 143, .16);
+  border-radius: 10px;
+  background: #f8fbfb;
+}
+.v79ContractServiceHead {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 11px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.v79ContractServiceHead > span {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #127e8f;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 900;
+}
+.v79ContractService h6 { margin: 0 0 2px; color: #33403c; font-size: 11px; line-height: 1.25 }
+.v79ContractService small { color: #127e8f; font-size: 8.5px; font-weight: 800 }
+.v79ContractServiceHead i { color: #127e8f; font-size: 8px; font-style: normal; font-weight: 850; white-space: nowrap }
+.v81ContractServiceDetails { display: none; padding: 0 11px 11px }
+.v79ContractService.open .v81ContractServiceDetails { display: block }
+.v79ContractService.open .v79ContractServiceHead { background: rgba(18, 126, 143, .06) }
+.v79ContractService > p,
+.v81ContractServiceDetails > p { margin: 6px 0; color: #66716e; font-size: 9.5px; line-height: 1.42 }
+.v79ContractIncluded { margin-top: 8px; padding-top: 7px; border-top: 1px solid rgba(38, 111, 82, .14) }
+.v79ContractIncluded > b { color: #266f52; font-size: 9px }
+.v79ContractIncluded ul { margin: 5px 0 0; padding-left: 17px }
+.v79ContractIncluded li { margin: 2px 0; color: #59645f; font-size: 9px; line-height: 1.35 }
+
+.v79ContractNb {
+  margin: 14px 0;
+  padding: 13px 15px;
+  border: 1px solid rgba(194, 62, 62, .62);
+  border-radius: 10px;
+  background: #fff1f1;
+}
+.v79ContractNb h5 { margin: 0 0 7px; color: var(--danger); font-size: 11px }
+.v81ContractExclusions { margin: 0; padding-left: 18px }
+.v81ContractExclusions li { margin: 3px 0; color: #5a5f5d; font-size: 9.5px; line-height: 1.4 }
+.v81ContractOptional { margin-top: 9px; padding-top: 8px; border-top: 1px solid rgba(194, 62, 62, .18) }
+.v81ContractOptional > b { color: #ad2626; font-size: 10px }
+.v81ContractOptional > p { margin: 3px 0 0; color: #6d6968; font-size: 9px }
+.v81ContractOptionalList { display: grid; gap: 6px; margin-top: 7px }
+.v81ContractOptionalRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(173, 38, 38, .14);
+}
+.v81ContractOptionalRow:last-child { border-bottom: 0 }
+.v81ContractOptionalRow h6 { margin: 0; color: #4d5653; font-size: 10px }
+.v81ContractOptionalRow span { color: #ad2626; font-size: 9px; font-weight: 800 }
+.v81ContractOptionalActions button {
+  min-height: 29px;
+  padding: 0 9px;
+  border: 1px solid rgba(173, 38, 38, .35);
+  border-radius: 7px;
+  background: #fff;
+  color: #ad2626;
+  font-size: 8.5px;
+  font-weight: 850;
+  cursor: pointer;
+}
+.v81ContractOptionalActions button.add { background: #ad2626; border-color: #ad2626; color: #fff }
+
+.v79Obligations { margin: 6px 0 0; padding-left: 19px }
+.v79Obligations li { margin: 4px 0; color: #59635f; font-size: 10px; line-height: 1.45 }
+.v79Signatures { margin-top: 20px }
+.v79Signatures .v47Signature { min-height: 110px; line-height: 1.6 }
+
+@media (max-width: 840px) {
+  #composer .v47DocumentActions { position: sticky; top: 0; align-items: flex-start; display: block }
+  #composer .v47DocumentButtons { width: 100%; margin-top: 7px }
+  #composer .v47DocumentButtons button { flex: 1 1 auto }
+  .v47ClientMeta,
+  .v47Signatures,
+  .v79ContractServices { grid-template-columns: 1fr }
+  .v79ContractIntro,
+  .v79ContractService,
+  .v79ContractNb { padding: 11px }
+  .v47DocHeader { flex-direction: column }
+  .v47DocCompanyGrid { grid-template-columns: 1fr; white-space: normal }
+}
+
+/* Read-only public dossier view, opened via a shared ?quote= link */
+body.publicQuoteMode > header,
+body.publicQuoteMode > main,
+body.publicQuoteMode > footer,
+body.publicQuoteMode > .mobileAppNav { display: none !important }
+body.publicQuoteMode { overflow: auto !important }
+#publicQuoteView {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  overflow: auto;
+  background: #eef3f3;
+  padding: 32px 16px 60px;
+}
+.publicQuoteShell { width: min(930px, 100%); margin: 0 auto }
+.publicQuoteClose {
+  display: block;
+  margin: 0 0 12px auto;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(18, 126, 143, .25);
+  background: #fff;
+  color: #147e8e;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
