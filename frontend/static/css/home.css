@@ -9978,8 +9978,15 @@ body.galleryOpen {
   font-size: 8px;
   font-weight: 900;
 }
-.v79ContractService h6 { margin: 0 0 2px; color: #33403c; font-size: 11px; line-height: 1.25 }
-.v79ContractService small { color: #127e8f; font-size: 8.5px; font-weight: 800 }
+.v79ContractService h6 { margin: 0 0 3px; color: #33403c; font-size: 11px; line-height: 1.25 }
+.v79ContractService small {
+  display: block;
+  color: #66716e;
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1.4;
+  white-space: normal;
+}
 .v79ContractServiceHead i { color: #127e8f; font-size: 8px; font-style: normal; font-weight: 850; white-space: nowrap }
 .v81ContractServiceDetails { display: none; padding: 0 11px 11px }
 .v79ContractService.open .v81ContractServiceDetails { display: block }

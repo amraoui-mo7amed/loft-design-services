@@ -1892,14 +1892,13 @@ function quoteRows(){
   }
   services.filter(s=>st.services.some(id=>String(id)===String(s.id)||String(id)===s.slug)).forEach(s=>{
     const sel = st.selectedServices[s.id] || getInitialSelection(s);
-    const detail = getServiceCalculationDetail(s.id);
     const lineTotal = getServiceLinePrice(s.id);
     const pType = s.pricingType || (s.pricing_type === 'per_sqm' || s.pricing_type === 'area' ? 'PRICE_PER_M2' : (s.pricing_type === 'hourly' ? 'HOURLY' : (s.pricing_type === 'percent_project_cost' ? 'PERCENTAGE' : 'FIXED_UNIT')));
 
     if (pType === 'PRICE_PER_M2') {
       const surfaceUsed = (sel.useInterior ? surfaceInterior() : 0) + (sel.useExterior ? surfaceExterior() : 0);
       rows.push({
-        designation: `${s.name} (${detail})`,
+        designation: s.name,
         pu: s.unitRate || s.price || 0,
         unit: 'M²',
         qty: surfaceUsed,
@@ -1907,7 +1906,7 @@ function quoteRows(){
       });
     } else if (pType === 'HOURLY') {
       rows.push({
-        designation: `${s.name} (${detail})`,
+        designation: s.name,
         pu: s.hourlyRate || s.price || 0,
         unit: 'HEURE',
         qty: sel.hours || 20,
@@ -1915,7 +1914,7 @@ function quoteRows(){
       });
     } else if (pType === 'FIXED_UNIT') {
       rows.push({
-        designation: `${s.name} (${detail})`,
+        designation: s.name,
         pu: s.fixedUnitPrice || s.price || 0,
         unit: (s.unitName || 'UNITE').toUpperCase(),
         qty: sel.quantity || 1,
@@ -1923,7 +1922,7 @@ function quoteRows(){
       });
     } else if (pType === 'PERCENTAGE') {
       rows.push({
-        designation: `${s.name} (${detail})`,
+        designation: s.name,
         pu: `${s.percentage || 0}%`,
         unit: '%',
         qty: money(sel.referenceAmount || 0),
@@ -1931,7 +1930,7 @@ function quoteRows(){
       });
     } else {
       rows.push({
-        designation: `${s.name} (${detail})`,
+        designation: s.name,
         pu: s.price || 0,
         unit: 'FORFAIT',
         qty: 1,
@@ -2061,11 +2060,10 @@ function technicalContractHtml(){
     <article class="v79ContractService v81ContractService">
       <button type="button" class="v79ContractServiceHead v81ContractServiceToggle" data-contract-detail="${s.id}" aria-expanded="false">
         <span>${String(i+1).padStart(2,'0')}</span>
-        <div><h6>${s.name}</h6><small>${getServiceCalculationDetail(s.id)}${getServiceCalculationDetail(s.id)?' · ':''}${servicePricingLabel(s)}</small></div>
+        <div><h6>${s.name}</h6><small>${s.detailed_description||serviceDesc(s)||'Prestation exécutée conformément au périmètre validé.'}</small></div>
         <i>Voir les détails</i>
       </button>
       <div class="v81ContractServiceDetails">
-        <p>${serviceDesc(s)||'Prestation exécutée conformément au périmètre validé.'}</p>
         <div class="v79ContractIncluded"><b>Inclus dans cette prestation</b>
           <ul>${serviceIncludedItems(s).map(x=>`<li>${x}</li>`).join('')||'<li>Périmètre décrit dans la prestation.</li>'}</ul>
         </div>
@@ -2766,8 +2764,8 @@ function downloadUnifiedPdf(){
   addText(`Le devis financier ${st.ref} fait partie intégrante du contrat. Montant total HT : ${money(totalHT())}.${st.clientType==='professional'?` TVA 19 % : ${money(tva())}. Total TTC : ${money(totalFinal())}.`:''} Toute prestation supplémentaire nécessite un accord écrit.`);
   addTitle('3. Offre technique intégrée au contrat');
   selectedServiceObjects().forEach((s,i)=>{
-    addTitle(`${String(i+1).padStart(2,'0')} · ${s.name} — ${servicePricingLabel(s)}`);
-    addText(serviceDesc(s)||'Prestation exécutée conformément au périmètre validé.');
+    addTitle(`${String(i+1).padStart(2,'0')} · ${s.name}`);
+    addText(s.detailed_description||serviceDesc(s)||'Prestation exécutée conformément au périmètre validé.');
     addList(serviceIncludedItems(s).length?serviceIncludedItems(s):['Périmètre décrit dans la prestation.']);
   });
   const exclusions=selectedExclusions();
