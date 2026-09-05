@@ -20,6 +20,15 @@ from ..pdf_generator import render_facturation_pdf_bytes
 from ..utils import build_packages_context, notify_user, humanize_error
 
 
+def _safe_decimal(val, default="0.00"):
+    if val is None or val == "" or str(val).strip().lower() in ("none", "null", "undefined", "nan"):
+        return Decimal(default)
+    try:
+        return Decimal(str(val).strip())
+    except Exception:
+        return Decimal(default)
+
+
 # ──────────────────────────────────────────────
 # Progressive On-Scroll Request Form (Steps 1 - 4)
 # ──────────────────────────────────────────────
