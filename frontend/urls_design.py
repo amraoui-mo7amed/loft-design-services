@@ -14,5 +14,6 @@ urlpatterns = [
     path("request/facturation/email/", wizard.facturation_email, name="facturation_email"),
     path("request/submit/", wizard.submit_design_request, name="request_submit"),
     path("devis/save/<uuid:quote_uuid>/", wizard.quote_save_snapshot, name="quote_save_snapshot"),
+    path("devis/<uuid:quote_uuid>/state/", wizard.quote_state_json, name="quote_state_json"),
     path("devis/<uuid:quote_uuid>/", wizard.quote_public_view, name="quote_public_view"),
 ]

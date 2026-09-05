@@ -10027,18 +10027,24 @@ body.galleryOpen {
 .v81ContractOptionalRow h6 { margin: 0; color: #4d5653; font-size: 10px }
 .v81ContractOptionalRow span { color: #ad2626; font-size: 9px; font-weight: 800 }
 .v81ContractOptionalActions { display: flex; gap: 6px; flex-wrap: wrap }
-.v81ContractOptionalActions button {
+.v81ContractOptionalActions button,
+.v81ContractOptionalActions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 29px;
   padding: 0 9px;
   border: 1px solid rgba(173, 38, 38, .35);
   border-radius: 7px;
   background: #fff;
   color: #ad2626;
-  font-size: 8.5px;
+  font-size: 10px;
   font-weight: 850;
   cursor: pointer;
+  text-decoration: none;
 }
-.v81ContractOptionalActions button.add { background: #ad2626; border-color: #ad2626; color: #fff }
+.v81ContractOptionalActions button.add,
+.v81ContractOptionalActions a.add { background: #ad2626; border-color: #ad2626; color: #fff }
 
 .v79Obligations { margin: 6px 0 0; padding-left: 19px }
 .v79Obligations li { margin: 4px 0; color: #59635f; font-size: 12px; line-height: 1.5 }

@@ -2051,6 +2051,42 @@ function serviceTarifTag(s){
   return `${servicePricingLabel(s)}${scope?' \u00b7 '+scope:''}`;
 }
 
+/* Link back to the live composer for a given accompaniment service, prefilled
+   with this project. Works both inside a live composer session (the JS click
+   handlers below intercept it and act in-session) and from the static public
+   dossier page, which has no composer JS at all \u2014 there the browser just
+   follows the link and the composer resumes this project on load. */
+function resumeComposerUrl(serviceId,action){
+  const params=new URLSearchParams();
+  if(st.quoteUuid)params.set('resume',st.quoteUuid);
+  params.set(action,serviceId);
+  return `${location.origin}/?${params.toString()}#composer`;
+}
+
+/* The minimal, reconstructible composer selection for this project \u2014 saved
+   alongside the devis so a client can reopen it from the public dossier link. */
+function composerStateSnapshot(){
+  return {
+    mode:st.mode,
+    projectType:st.projectType,
+    basementCount:st.basementCount,
+    upperCount:st.upperCount,
+    levelAreas:st.levelAreas,
+    structureChosen:st.structureChosen,
+    surfaceInterior:st.surfaceInterior,
+    surfaceExterior:st.surfaceExterior,
+    levels:st.levels,
+    surfaces:st.surfaces,
+    spaces:st.spaces,
+    services:st.services,
+    selectedServices:st.selectedServices,
+    clientType:st.clientType,
+    client:st.client,
+    ref:st.ref,
+    estimatedProjectCost:st.estimatedProjectCost
+  };
+}
+
 function loftObligations(){
   return uniqueTexts([
     'Réaliser les prestations sélectionnées conformément au devis et à l’offre technique.',
@@ -2123,8 +2159,8 @@ function contractHtml(){
         <article class="v81ContractOptionalRow">
           <div><h6>${s.name}</h6><span>${servicePricingLabel(s)}</span></div>
           <div class="v81ContractOptionalActions">
-            <button type="button" data-contract-details="${s.id}">Détails</button>
-            <button type="button" class="add" data-contract-add="${s.id}">Ajouter au devis</button>
+            <a href="${resumeComposerUrl(s.id,'details')}" data-contract-details="${s.id}">Détails</a>
+            <a href="${resumeComposerUrl(s.id,'add')}" class="add" data-contract-add="${s.id}">Ajouter au devis</a>
           </div>
         </article>`).join('')}
       </div>
@@ -2176,7 +2212,7 @@ async function persistQuoteSnapshot(markSent){
   const resp=await fetch(`/devis/save/${st.quoteUuid}/`,{
     method:'POST',
     headers:{'Content-Type':'application/json','X-CSRFToken':getCsrfToken()},
-    body:JSON.stringify({html,mark_sent:!!markSent,pdf_base64:pdfBase64})
+    body:JSON.stringify({html,mark_sent:!!markSent,pdf_base64:pdfBase64,state:composerStateSnapshot()})
   });
   const data=await resp.json();
   if(!data.success){
@@ -2451,11 +2487,12 @@ function renderSuccess(){
   `;
 
   document.querySelectorAll('[data-contract-details]').forEach(btn=>{
-    btn.onclick=()=>openServiceDetailsModal(btn.dataset.contractDetails);
+    btn.onclick=(e)=>{e.preventDefault();openServiceDetailsModal(btn.dataset.contractDetails)};
   });
 
   document.querySelectorAll('[data-contract-add]').forEach(btn=>{
-    btn.onclick=()=>{
+    btn.onclick=(e)=>{
+      e.preventDefault();
       const id=btn.dataset.contractAdd;
       if(!st.services.includes(id))st.services=[...st.services,id];
       ensureSelectedServicesState();
@@ -2867,7 +2904,52 @@ function renderComposer(){
   if(st.step==='contact')renderContactStep();
   updateFloatingBarVisibility();
 }
-renderComposer();
+
+/* Resuming an existing project from a public dossier link: ?resume=<quote_uuid>
+   (+ optional &add=<serviceId> / &details=<serviceId>). Fetches the composer
+   state saved alongside that devis and reopens the services step with it,
+   so a client can add an accompaniment service to their real project instead
+   of starting over. Returns true when a resume is in flight (the caller
+   should skip the normal synchronous initial render in that case). */
+function tryResumeFromQuery(){
+  const params=new URLSearchParams(location.search);
+  const resumeUuid=params.get('resume');
+  if(!resumeUuid)return false;
+
+  (async()=>{
+    try{
+      const resp=await fetch(`/devis/${resumeUuid}/state/`);
+      const data=await resp.json();
+      if(!data.success)throw new Error((data.errors&&data.errors[0])||'État introuvable.');
+
+      Object.assign(st,data.state||{});
+      st.quoteUuid=resumeUuid;
+      st.success=false;
+      st.step='services';
+
+      const addId=params.get('add');
+      if(addId && !st.services.includes(addId))st.services=[...st.services,addId];
+      ensureSelectedServicesState();
+
+      renderComposer();
+      history.replaceState(null,'',location.pathname+location.hash);
+
+      const detailsId=params.get('details');
+      setTimeout(()=>{
+        document.querySelector('#composer')?.scrollIntoView({behavior:'smooth',block:'start'});
+        if(detailsId)openServiceDetailsModal(detailsId);
+      },150);
+    }catch(err){
+      if(window.Swal){
+        Swal.fire({icon:'error',title:'Reprise impossible',text:err.message,confirmButtonText:'D’accord',customClass:{popup:'swal2-popup',confirmButton:'btn neonCyan'},buttonsStyling:false});
+      }
+      renderComposer();
+    }
+  })();
+  return true;
+}
+
+if(!tryResumeFromQuery())renderComposer();
 
 /* Quick contact */
 const quickWaBtn = document.querySelector('#quickWa');

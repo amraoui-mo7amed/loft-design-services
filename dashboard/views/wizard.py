@@ -746,6 +746,15 @@ def quote_save_snapshot(request, quote_uuid):
         except Exception:
             pass
 
+    # Reconstructible composer state (project, surfaces, services, client) so
+    # a client can reopen this exact project in the live composer from a
+    # button on the public dossier page — e.g. to add an accompaniment
+    # service that wasn't originally selected.
+    state = data.get("state")
+    if isinstance(state, dict):
+        quote.composer_state = state
+        update_fields.append("composer_state")
+
     if data.get("mark_sent"):
         if not quote.sent_at:
             quote.sent_at = timezone.now()
@@ -774,6 +783,16 @@ def quote_public_view(request, quote_uuid):
         quote.save(update_fields=["viewed_at", "status"])
 
     return render(request, "public_quote.html", {"quote": quote})
+
+
+def quote_state_json(request, quote_uuid):
+    """Public, read-only: the reconstructible composer state for this quote,
+    used by the composer to resume the project when a client clicks
+    "Ajouter au devis" / "Détails" from their emailed dossier link."""
+    quote = get_object_or_404(Quote, uuid=quote_uuid)
+    if not quote.composer_state:
+        return JsonResponse({"success": False, "errors": [_("No editable state saved for this dossier.")]})
+    return JsonResponse({"success": True, "state": quote.composer_state})
 
 
 # Backward compatibility views
