@@ -277,7 +277,11 @@ function getInitialSelection(s) {
 
   let useExt = false;
   if (allowExt) {
-    useExt = Boolean(s.defaultExteriorSelected);
+    if (!allowInt) {
+      useExt = true;
+    } else {
+      useExt = Boolean(s.defaultExteriorSelected) && hasExt;
+    }
   }
 
   return {
@@ -1244,7 +1248,25 @@ function validateServices() {
       if (is3dExt && proj.surfaceExterior <= 0) {
         v47Attention(getCard());
         triggerComposerShake(document.querySelector('#toContact'));
-        showValidationError(`La prestation "${s.name}" nécessite une surface extérieure supérieure à 0 m². Veuillez renseigner votre surface extérieure (terrasse / jardin) à l'étape 1.`);
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Surface extérieure requise',
+            text: `La prestation "${s.name}" nécessite une surface extérieure. Veuillez entrer votre surface extérieure (terrasse / jardin) en m² :`,
+            input: 'number',
+            inputAttributes: { min: 1, step: 1 },
+            inputValue: 30,
+            showCancelButton: true,
+            confirmButtonText: 'Valider',
+            cancelButtonText: 'Annuler',
+          }).then(res => {
+            if (res.isConfirmed && Number(res.value) > 0) {
+              st.surfaceExterior = Number(res.value);
+              renderServices();
+            }
+          });
+        } else {
+          showValidationError(`La prestation "${s.name}" nécessite une surface extérieure supérieure à 0 m². Veuillez renseigner votre surface extérieure (terrasse / jardin) à l'étape 1.`);
+        }
         return false;
       }
 
@@ -1268,7 +1290,28 @@ function validateServices() {
       if (sel.useExterior && proj.surfaceExterior <= 0) {
         v47Attention(getCard());
         triggerComposerShake(document.querySelector('#toContact'));
-        showValidationError(`La prestation "${s.name}" a le périmètre Extérieur coché, mais la surface extérieure est de 0 m². Veuillez renseigner votre surface extérieure.`);
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Surface extérieure requise',
+            text: `La prestation "${s.name}" a le périmètre Extérieur coché. Veuillez entrer votre surface extérieure en m² (ou décocher Extérieur) :`,
+            input: 'number',
+            inputAttributes: { min: 1, step: 1 },
+            inputValue: 30,
+            showCancelButton: true,
+            confirmButtonText: 'Valider',
+            cancelButtonText: 'Décocher Extérieur',
+          }).then(res => {
+            if (res.isConfirmed && Number(res.value) > 0) {
+              st.surfaceExterior = Number(res.value);
+              renderServices();
+            } else {
+              sel.useExterior = false;
+              renderServices();
+            }
+          });
+        } else {
+          showValidationError(`La prestation "${s.name}" a le périmètre Extérieur coché, mais la surface extérieure est de 0 m². Veuillez renseigner votre surface extérieure.`);
+        }
         return false;
       }
     }
@@ -1508,13 +1551,40 @@ function renderServices() {
       const isSel = st.services.some(x => String(x) === String(s.id) || String(x) === s.slug);
       if (isSel) {
         st.services = st.services.filter(x => String(x) !== String(s.id) && String(x) !== s.slug);
+        renderServices();
       } else {
+        const sName = (s.name || '').toLowerCase();
+        const is3dExt = sName.includes('3d') && (sName.includes('ext') || !s.allowInterior);
+        const isExtOnly = (!s.allowInterior && s.allowExterior) || is3dExt;
+        if (isExtOnly && surfaceExterior() <= 0) {
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              title: 'Surface extérieure requise',
+              text: `La prestation "${s.name}" s'applique aux espaces extérieurs. Veuillez indiquer votre surface extérieure (m²) :`,
+              input: 'number',
+              inputAttributes: { min: 1, step: 1 },
+              inputValue: 30,
+              showCancelButton: true,
+              confirmButtonText: 'Valider',
+              cancelButtonText: 'Annuler',
+            }).then(res => {
+              if (res.isConfirmed && Number(res.value) > 0) {
+                st.surfaceExterior = Number(res.value);
+                st.services = [...st.services, s.id];
+                st.selectedServices[s.id] = getInitialSelection(s);
+                st.selectedServices[s.id].useExterior = true;
+                renderServices();
+              }
+            });
+            return;
+          }
+        }
         st.services = [...st.services, s.id];
         if (!st.selectedServices[s.id]) {
           st.selectedServices[s.id] = getInitialSelection(s);
         }
+        renderServices();
       }
-      renderServices();
     };
   });
 
@@ -1556,6 +1626,30 @@ function renderServices() {
       const s = services.find(x => String(x.id) === String(sId) || String(x.slug) === String(sId));
       if (!s) return;
       if (!st.selectedServices[s.id]) st.selectedServices[s.id] = getInitialSelection(s);
+      if (e.target.checked && surfaceExterior() <= 0) {
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: 'Surface extérieure',
+            text: 'Veuillez renseigner votre surface extérieure (terrasse, jardin, etc.) en m² :',
+            input: 'number',
+            inputAttributes: { min: 1, step: 1 },
+            inputValue: 30,
+            showCancelButton: true,
+            confirmButtonText: 'Valider',
+            cancelButtonText: 'Annuler',
+          }).then(res => {
+            if (res.isConfirmed && Number(res.value) > 0) {
+              st.surfaceExterior = Number(res.value);
+              st.selectedServices[s.id].useExterior = true;
+              renderServices();
+            } else {
+              st.selectedServices[s.id].useExterior = false;
+              renderServices();
+            }
+          });
+          return;
+        }
+      }
       st.selectedServices[s.id].useExterior = e.target.checked;
       renderServices();
     };

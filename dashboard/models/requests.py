@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -32,7 +33,7 @@ class DesignRequest(models.Model):
         max_length=20, choices=Status.choices, default=Status.PENDING, verbose_name=_("Status")
     )
     budget = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, verbose_name=_("Budget"))
-    total = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name=_("Total"))
+    total = models.DecimalField(max_digits=12, decimal_places=2, default=0, null=True, blank=True, verbose_name=_("Total"))
     designer = models.ForeignKey(
         userModel,
         on_delete=models.SET_NULL,
@@ -47,13 +48,13 @@ class DesignRequest(models.Model):
         Service, on_delete=models.SET_NULL, null=True, blank=True, related_name="requests", verbose_name=_("Service")
     )
     total_surface = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0, verbose_name=_("Total Surface (m²)")
+        max_digits=10, decimal_places=2, default=0, null=True, blank=True, verbose_name=_("Total Surface (m²)")
     )
     surface_interior = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0, verbose_name=_("Surface Intérieure (m²)")
+        max_digits=10, decimal_places=2, default=0, null=True, blank=True, verbose_name=_("Surface Intérieure (m²)")
     )
     surface_exterior = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0, verbose_name=_("Surface Extérieure (m²)")
+        max_digits=10, decimal_places=2, default=0, null=True, blank=True, verbose_name=_("Surface Extérieure (m²)")
     )
     has_terrace = models.BooleanField(default=False, verbose_name=_("Has Terrace"))
     has_garden = models.BooleanField(default=False, verbose_name=_("Has Garden"))
@@ -127,6 +128,17 @@ class DesignRequest(models.Model):
     def package(self, val):
         self.service = val
 
+    def save(self, *args, **kwargs):
+        if self.total_surface is None:
+            self.total_surface = Decimal("0.00")
+        if self.surface_interior is None:
+            self.surface_interior = Decimal("0.00")
+        if self.surface_exterior is None:
+            self.surface_exterior = Decimal("0.00")
+        if self.total is None:
+            self.total = Decimal("0.00")
+        super().save(*args, **kwargs)
+
 
 class DesignRequestFloor(models.Model):
     design_request = models.ForeignKey(
@@ -136,8 +148,13 @@ class DesignRequestFloor(models.Model):
     level = models.IntegerField(default=0, verbose_name=_("Level"))
     order = models.IntegerField(default=0, verbose_name=_("Order"))
     surface = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0, verbose_name=_("Surface (m²)")
+        max_digits=10, decimal_places=2, default=0, null=True, blank=True, verbose_name=_("Surface (m²)")
     )
+
+    def save(self, *args, **kwargs):
+        if self.surface is None:
+            self.surface = Decimal("0.00")
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _("Floor")
