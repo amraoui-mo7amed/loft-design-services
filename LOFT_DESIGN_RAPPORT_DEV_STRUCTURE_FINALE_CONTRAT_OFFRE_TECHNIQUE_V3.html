@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LOFT DESIGN — Structure finale devis, contrat et offre technique V3</title>
+<style>
+:root{--bg:#071012;--panel:#0d171a;--panel2:#111d20;--line:#26373b;--txt:#eef5f3;--muted:#9ba9a4;--cyan:#41d0e5;--red:#dc5b5b;--redbg:#261416;--green:#69d1aa;--gold:#d5ac55}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.5}
+main{width:min(1120px,calc(100% - 24px));margin:auto;padding:24px 0 70px}
+.hero,.sec{border:1px solid var(--line);border-radius:17px;background:var(--panel);margin-bottom:15px;overflow:hidden}.hero{padding:22px}
+.ey{color:var(--cyan);font-size:11px;font-weight:900;letter-spacing:.14em}.hero h1{margin:7px 0 10px;font-size:clamp(32px,5vw,52px);line-height:1}.hero p{max-width:880px;color:var(--muted);margin:0}
+.sec>header{padding:14px 17px;border-bottom:1px solid var(--line)}h2,h3,p{margin-top:0}.sec h2{font-size:20px;margin-bottom:3px}.sec header p{font-size:12px;color:var(--muted);margin:0}.pad{padding:16px 17px}
+.note{padding:12px 13px;border-left:4px solid var(--cyan);border-radius:0 10px 10px 0;background:#0b2228;color:#c6d2ce;font-size:13px}.note.red{border-color:var(--red);background:var(--redbg)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{border:1px solid #2a3b3f;background:var(--panel2);border-radius:12px;padding:13px}.card h3{font-size:14px;margin-bottom:7px}.card p,.card li{font-size:12px;color:#bac5c1}.card ul{margin:7px 0 0;padding-left:18px}
+.sample{border:1px solid #2c3c40;border-radius:13px;background:#101b1f;padding:14px}.sampleTitle{font-weight:900;font-size:16px;color:#fff}.sampleSub{font-size:11px;color:#8e9b97;margin:3px 0 12px}.label{display:inline-block;margin:8px 0 5px;font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}.label.inc{color:var(--green)}.label.exc{color:var(--red)}
+.listInc,.listExc{margin:0;padding-left:18px}.listInc li{color:#c4cec9;font-size:12px;margin:3px 0}.listExc li{color:#ef8585;font-size:12px;margin:3px 0}.redBox{margin-top:10px;border:1px solid #743a3e;background:#211315;border-radius:10px;padding:10px}
+.follow{display:grid;gap:8px}.followItem{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px;border:1px solid #2a3a3e;border-radius:11px;background:#101b1f}.followItem strong{font-size:13px}.followItem small{display:block;color:#91a09b;margin-top:2px}.followItem em{color:var(--cyan);font-style:normal;font-size:11px;font-weight:850}.actions{display:flex;gap:5px}.actions span{padding:7px 9px;border-radius:7px;border:1px solid #34464a;color:#c8d3cf;font-size:10px}.actions .add{background:var(--cyan);border-color:var(--cyan);color:#062027;font-weight:900}
+pre{white-space:pre-wrap;background:#061013;border:1px solid #27383c;border-radius:11px;padding:13px;color:#dce7e3;font-size:12px;overflow:auto}code{background:#061013;border:1px solid #27383c;border-radius:5px;color:#76deed;padding:2px 5px}
+.req{display:grid;gap:7px}.r{padding:10px 12px;border:1px solid #293a3e;background:#101b1f;border-radius:10px;font-size:12px;color:#bdc8c4}.r b{color:var(--cyan)}
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.step{padding:10px;border:1px solid #2a3a3f;border-radius:10px;background:#101b1f}.step b{display:block;color:var(--cyan);font-size:10px}.step span{font-size:11px;color:#b8c4c0}
+@media(max-width:820px){.grid,.flow{grid-template-columns:1fr}.followItem{grid-template-columns:1fr}.actions{justify-content:flex-start}}
+</style>
+</head>
+<body><main>
+
+<section class="hero">
+<div class="ey">LOFT DESIGN · RAPPORT DÉVELOPPEUR · VERSION FINALE</div>
+<h1>Structure finale du devis, du contrat et de l’offre technique</h1>
+<p>Cette version remplace la logique précédente du grand NB global. Les éléments non inclus reviennent dans la fiche de chaque prestation. Le NB global est réservé aux prestations d’accompagnement chantier.</p>
+</section>
+
+<section class="sec">
+<header><h2>1. Structure finale à respecter</h2><p>Ordre du dossier client sur la plateforme et dans le PDF.</p></header>
+<div class="pad flow">
+<div class="step"><b>01</b><span>Devis / offre financière</span></div>
+<div class="step"><b>02</b><span>Contrat personnalisé</span></div>
+<div class="step"><b>03</b><span>Offre technique intégrée au contrat</span></div>
+<div class="step"><b>04</b><span>NB accompagnement chantier</span></div>
+<div class="step"><b>05</b><span>Obligations + clauses + signatures</span></div>
+</div>
+</section>
+
+<section class="sec">
+<header><h2>2. Une fiche complète pour chaque prestation sélectionnée</h2><p>Chaque service sélectionné doit être affiché avec la même structure, dans le même ordre.</p></header>
+<div class="pad">
+<div class="sample">
+<div class="sampleTitle">Conception 3D intérieure immersive</div>
+<div class="sampleSub">900 DA / m² · Intérieur</div>
+
+<div class="label">Description détaillée</div>
+<p style="color:#bdc8c4;font-size:12px">Description complète de la prestation extraite du catalogue Admin.</p>
+
+<div class="label inc">Ce qui est inclus</div>
+<ul class="listInc">
+<li>Éléments inclus propres à cette prestation.</li>
+<li>Livrables, corrections, études ou rendus prévus dans le service.</li>
+<li>Tout élément réellement couvert par la prestation sélectionnée.</li>
+</ul>
+
+<div class="redBox">
+<div class="label exc">Non inclus dans cette prestation</div>
+<ul class="listExc">
+<li>Éléments explicitement exclus de cette prestation.</li>
+<li>Prestations techniques ou d’exécution qui ne font pas partie de son périmètre.</li>
+</ul>
+</div>
+</div>
+
+<div class="note" style="margin-top:12px"><b>Important :</b> utiliser le libellé « Non inclus dans cette prestation » et non « Non inclus » tout court. Un élément exclu d’un service peut être couvert par un autre service sélectionné dans le même devis.</div>
+</div>
+</section>
+
+<section class="sec">
+<header><h2>3. Source des contenus : catalogue Admin</h2><p>Le développeur ne doit pas écrire les textes techniques directement dans le composant du devis.</p></header>
+<div class="pad grid">
+<div class="card"><h3><code>technical_description</code></h3><p>Description détaillée affichée dans la fiche du service.</p></div>
+<div class="card"><h3><code>included_items[]</code></h3><p>Liste « Ce qui est inclus ».</p></div>
+<div class="card"><h3><code>excluded_items[]</code></h3><p>Liste « Non inclus dans cette prestation », affichée en rouge.</p></div>
+<div class="card"><h3><code>loft_obligations[]</code> / <code>client_obligations[]</code></h3><p>Utilisées pour personnaliser les obligations du contrat.</p></div>
+</div>
+<div class="pad"><div class="note red"><b>Ne plus fusionner tous les excluded_items dans un grand NB global.</b> Les exclusions restent attachées à leur prestation respective.</div></div>
+</section>
+
+<section class="sec">
+<header><h2>4. Règle de cohérence entre prestations</h2></header>
+<div class="pad req">
+<div class="r"><b>R1</b> — Une exclusion affichée sous un service décrit uniquement la limite de ce service.</div>
+<div class="r"><b>R2</b> — Si la même capacité est couverte par une autre prestation sélectionnée, ne pas la présenter comme une exclusion générale du contrat.</div>
+<div class="r"><b>R3</b> — Le contrat doit montrer clairement ce que LOFT DESIGN réalise avant de montrer les limites de chaque prestation.</div>
+<div class="r"><b>R4</b> — Les listes « inclus » et « non inclus » doivent rester courtes, ciblées et spécifiques au service.</div>
+</div>
+</section>
+
+<section class="sec">
+<header><h2>5. Le NB global est réservé aux prestations d’accompagnement</h2><p>Le NB ne doit plus contenir toutes les exclusions techniques du projet.</p></header>
+<div class="pad">
+<div class="note red"><b>NB · Prestations d’accompagnement non sélectionnées</b><br>Les prestations suivantes peuvent être ajoutées au devis selon les besoins du client.</div>
+<div class="follow" style="margin-top:10px">
+<div class="followItem"><div><strong>1. Suivi de chantier</strong><small>Visites, contrôle de conformité au design, constat d’avancement, briefing / orientation des intervenants.</small><em>5 000 DA / heure</em></div><div class="actions"><span>Détails</span><span class="add">Ajouter au devis</span></div></div>
+<div class="followItem"><div><strong>2. Gestion & coordination de projet</strong><small>Planning, rétroplanning, coordination et suivi quotidien des intervenants, réunions et pilotage.</small><em>10 % du montant de référence</em></div><div class="actions"><span>Détails</span><span class="add">Ajouter au devis</span></div></div>
+<div class="followItem"><div><strong>3. Assistance complète au maître d’ouvrage</strong><small>Suivi + coordination + achats + approvisionnements + logistique + gestion des stocks.</small><em>20 % du montant de référence</em></div><div class="actions"><span>Détails</span><span class="add">Ajouter au devis</span></div></div>
+</div>
+</div>
+</section>
+
+<section class="sec">
+<header><h2>6. Comportement dynamique du NB accompagnement</h2></header>
+<div class="pad req">
+<div class="r"><b>Aucune formule sélectionnée</b> — afficher les 3 prestations dans le NB.</div>
+<div class="r"><b>Une formule sélectionnée</b> — elle devient une prestation normale du devis et du contrat avec Description + Inclus + Non inclus. Elle disparaît du NB. Le NB affiche seulement les formules restantes.</div>
+<div class="r"><b>Deux formules sélectionnées</b> — le NB affiche uniquement la formule restante.</div>
+<div class="r"><b>Les 3 sélectionnées</b> — ne pas afficher le bloc NB accompagnement.</div>
+</div>
+<div class="pad"><div class="note">Le comportement doit être identique dans le frontend dynamique. Dans le PDF, afficher uniquement les formules d’accompagnement non retenues, sans boutons.</div></div>
+</section>
+
+<section class="sec">
+<header><h2>7. Affichage Web vs PDF</h2></header>
+<div class="pad grid">
+<div class="card"><h3>Version web dynamique</h3><ul><li>Chaque prestation sélectionnée est cliquable.</li><li>Ouverture du descriptif détaillé.</li><li>Affichage Inclus.</li><li>Affichage Non inclus en rouge.</li><li>NB accompagnement avec Détails + Ajouter au devis.</li></ul></div>
+<div class="card"><h3>Version PDF</h3><ul><li>Devis + Contrat uniquement.</li><li>Offre technique intégrée au contrat.</li><li>Description + Inclus + Non inclus pour chaque service.</li><li>Non inclus en rouge ou avec signalétique rouge lisible.</li><li>NB accompagnement sans boutons.</li></ul></div>
+</div>
+</section>
+
+<section class="sec">
+<header><h2>8. Obligations LOFT DESIGN — rester positives et concises</h2></header>
+<div class="pad"><pre>LOFT DESIGN s’engage à :
+
+• réaliser les prestations sélectionnées conformément au devis et à l’offre technique ;
+• fournir les études, plans, conceptions et livrables prévus dans le périmètre validé ;
+• respecter les surfaces, quantités, corrections et modalités prévues pour les prestations retenues ;
+• informer le client avant toute prestation ou coût supplémentaire hors périmètre ;
+• assurer la qualité et la cohérence des livrables relevant directement de sa mission.</pre></div>
+</section>
+
+<section class="sec">
+<header><h2>9. Obligations du client — version courte</h2></header>
+<div class="pad"><pre>Le Client s’engage à :
+
+• fournir les informations, plans, mesures et documents nécessaires ;
+• valider ou commenter les propositions dans des délais raisonnables ;
+• signaler toute modification pouvant affecter le projet ou les études ;
+• régler les montants dus selon le devis et les conditions convenues.</pre></div>
+</section>
+
+<section class="sec">
+<header><h2>10. Structure technique recommandée du service</h2></header>
+<div class="pad"><pre>Service
+- id
+- name
+- short_description
+- technical_description
+- pricing_model
+- unit_price
+- unit
+- scope_mode
+- allow_exterior
+- included_items[]
+- excluded_items[]
+- loft_obligations[]
+- client_obligations[]
+- sort_order
+- active</pre></div>
+</section>
+
+<section class="sec">
+<header><h2>11. Tests d’acceptation P0</h2></header>
+<div class="pad req">
+<div class="r"><b>P0.1</b> — Chaque prestation sélectionnée affiche sa désignation complète, sa description, ses inclusions et ses exclusions.</div>
+<div class="r"><b>P0.2</b> — Les exclusions propres au service apparaissent en rouge.</div>
+<div class="r"><b>P0.3</b> — Aucun grand NB global ne regroupe les exclusions techniques de tous les services.</div>
+<div class="r"><b>P0.4</b> — Le NB global contient uniquement les prestations d’accompagnement non sélectionnées.</div>
+<div class="r"><b>P0.5</b> — Une formule ajoutée au devis disparaît immédiatement du NB et reçoit sa propre fiche technique.</div>
+<div class="r"><b>P0.6</b> — Le PDF reproduit exactement la même logique, sans boutons interactifs.</div>
+<div class="r"><b>P0.7</b> — Le devis web reste dynamique et chaque prestation peut être ouverte pour voir ses détails.</div>
+</div>
+</section>
+
+<section class="sec">
+<header><h2>12. Instruction directe pour Gemini / Kimi / Codex</h2></header>
+<div class="pad"><pre>Applique cette structure finale dans le module devis/contrat LOFT DESIGN.
+
+1. POUR CHAQUE PRESTATION SÉLECTIONNÉE :
+Afficher dans le contrat :
+- Désignation
+- Tarif / unité / périmètre
+- Description détaillée
+- Ce qui est inclus
+- Non inclus dans cette prestation
+
+La section « Non inclus dans cette prestation » doit être visuellement rouge.
+Ne fusionne plus les excluded_items de tous les services dans un grand NB global.
+
+2. NB GLOBAL :
+Le NB global est réservé aux prestations d’accompagnement chantier :
+- Suivi de chantier
+- Gestion & coordination de projet
+- Assistance complète au maître d’ouvrage
+
+Afficher uniquement les formules non sélectionnées.
+Chaque formule non sélectionnée possède sur le web :
+- Détails
+- Ajouter au devis
+
+Si une formule est ajoutée, elle devient une prestation normale du devis et du contrat avec Description + Inclus + Non inclus, et elle disparaît du NB.
+Si les 3 formules sont sélectionnées, supprimer entièrement le bloc NB accompagnement.
+
+3. VERSION WEB :
+Les prestations sont cliquables pour ouvrir les détails.
+
+4. PDF :
+Le PDF contient Devis + Contrat.
+L’offre technique est intégrée dans le contrat.
+Chaque prestation contient Description + Inclus + Non inclus.
+Le NB accompagnement affiche seulement les formules non retenues et aucun bouton.
+
+5. SOURCE DES DONNÉES :
+Utiliser les champs Admin : technical_description, included_items[], excluded_items[], loft_obligations[], client_obligations[].
+Ne pas coder ces textes en dur dans le composant frontend.</pre></div>
+</section>
+
+</main></body></html>

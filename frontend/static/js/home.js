@@ -1988,12 +1988,13 @@ function servicePricingLabel(s){
   return `${money(s.fixedUnitPrice||s.price||0)} / ${s.unitName||'forfait'}`;
 }
 
-/* Site-supervision / follow-up style services are identified by name since the
-   real service catalog (admin-managed) has no dedicated category field for it. */
-function isFollowupService(s){return /suivi|chantier|supervision|coordination|pilotage/i.test(`${s.name||''}`)}
-function hasFollowupSelected(){return selectedServiceObjects().some(isFollowupService)}
+/* Site-supervision / project-management "accompagnement" style services are
+   identified by name since the real service catalog (admin-managed) has no
+   dedicated category field for it. */
+function isFollowupService(s){return /suivi|chantier|supervision|coordination|pilotage|gestion|ma[iî]trise d.ouvrage|\bamo\b|assistance/i.test(`${s.name||''}`)}
+/* Returns every accompaniment-style service not yet selected — each formula
+   drops out of this list individually as soon as it is added to the quote. */
 function optionalFollowupServices(){
-  if(hasFollowupSelected())return [];
   return services.filter(s=>!st.services.some(id=>String(id)===String(s.id))&&isFollowupService(s));
 }
 
@@ -2009,71 +2010,87 @@ function uniqueTexts(values){
   });
 }
 
-function selectedExclusions(){
-  const seen=new Set(),result=[];
-  selectedServiceObjects().forEach(s=>{
-    serviceExcludedItems(s).forEach(item=>{
-      const text=String(item||'').trim();
-      if(!text)return;
-      const key=text.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-      if(seen.has(key))return;
-      seen.add(key);
-      result.push(text);
-    });
+/* An excluded item stays attached to its own service card. It is only hidden
+   when another currently selected service already covers it (its name shows
+   up in the exclusion text), so it is never presented as a contract-wide gap. */
+function isExclusionResolved(text){
+  const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const t=norm(text);
+  if(!t)return true;
+  return selectedServiceObjects().some(s=>{
+    const n=norm(s.name);
+    return n && (t.includes(n)||n.includes(t));
   });
-  return result;
+}
+
+function serviceExclusionsFor(s){
+  return serviceExcludedItems(s).filter(x=>!isExclusionResolved(x));
+}
+
+/* Short "tarif \u00b7 p\u00e9rim\u00e8tre" tag shown under the service name, e.g. "900 DA / m\u00b2 \u00b7 Int\u00e9rieur". */
+function serviceScopeTag(s){
+  const pType=s.pricingType||'FIXED_UNIT';
+  if(pType!=='PRICE_PER_M2')return '';
+  const sel=st.selectedServices[s.id]||getInitialSelection(s);
+  const parts=[];
+  if(sel.useInterior)parts.push('Int\u00e9rieur');
+  if(sel.useExterior)parts.push('Ext\u00e9rieur');
+  return parts.join(' + ');
+}
+function serviceTarifTag(s){
+  const scope=serviceScopeTag(s);
+  return `${servicePricingLabel(s)}${scope?' \u00b7 '+scope:''}`;
 }
 
 function loftObligations(){
-  const obligations=[
-    'Exécuter uniquement les prestations expressément sélectionnées et décrites dans le présent contrat.',
-    'Respecter le périmètre, les surfaces, quantités, heures et montants de référence validés dans le devis.',
-    'Informer le client lorsqu’une demande sort du périmètre convenu avant d’engager une prestation supplémentaire.'
-  ];
-  selectedServiceObjects().forEach(s=>{
-    obligations.push(`Réaliser la prestation « ${s.name} » selon le périmètre décrit : ${serviceDesc(s)||'voir le descriptif de la prestation.'}`);
-  });
-  if(!hasFollowupSelected()){
-    obligations.push('La mission de Loft Design s’arrête aux études et livrables sélectionnés : aucun suivi de chantier, pilotage quotidien ou gestion des intervenants n’est compris.');
-  }
-  return uniqueTexts(obligations);
+  return uniqueTexts([
+    'Réaliser les prestations sélectionnées conformément au devis et à l’offre technique.',
+    'Fournir les études, plans, conceptions et livrables prévus dans le périmètre validé.',
+    'Respecter les surfaces, quantités, corrections et modalités prévues pour les prestations retenues.',
+    'Informer le client avant toute prestation ou coût supplémentaire hors périmètre.',
+    'Assurer la qualité et la cohérence des livrables relevant directement de sa mission.'
+  ]);
 }
 
 function clientObligations(){
-  const obligations=[
-    'Fournir des informations, plans, dimensions, photos et documents exacts et suffisamment complets pour permettre l’exécution des prestations.',
-    'Valider ou commenter les propositions dans des délais compatibles avec l’avancement du projet.',
-    'Informer Loft Design de toute modification du programme, des surfaces, des contraintes techniques ou du chantier susceptible d’affecter les études.',
-    'Régler les montants dus selon le devis et les documents de facturation émis.'
-  ];
-  if(hasFollowupSelected()){
-    obligations.push(
-      'Garantir l’accès au chantier pendant les visites prévues et désigner un interlocuteur opérationnel disponible.',
-      'Maintenir sous la responsabilité du maître d’ouvrage et des entreprises la sécurité du chantier, les méthodes d’exécution et l’organisation quotidienne non comprise dans la mission choisie.'
-    );
-  }
-  return uniqueTexts(obligations);
+  return uniqueTexts([
+    'Fournir les informations, plans, mesures et documents nécessaires.',
+    'Valider ou commenter les propositions dans des délais raisonnables.',
+    'Signaler toute modification pouvant affecter le projet ou les études.',
+    'Régler les montants dus selon le devis et les conditions convenues.'
+  ]);
 }
 
+/* Each selected service gets its own always-visible fiche: designation, tarif,
+   description détaillée (catalogue Admin), ce qui est inclus, and — only when
+   relevant — "Non inclus dans cette prestation" in red. Exclusions are never
+   merged into a single contract-wide NB block (see contractHtml). */
 function technicalContractHtml(){
-  return selectedServiceObjects().map((s,i)=>`
-    <article class="v79ContractService v81ContractService">
-      <button type="button" class="v79ContractServiceHead v81ContractServiceToggle" data-contract-detail="${s.id}" aria-expanded="false">
+  return selectedServiceObjects().map((s,i)=>{
+    const exclusions=serviceExclusionsFor(s);
+    return `
+    <article class="v79ContractService">
+      <div class="v79ContractServiceHead">
         <span>${String(i+1).padStart(2,'0')}</span>
-        <div><h6>${s.name}</h6><small>${s.detailed_description||serviceDesc(s)||'Prestation exécutée conformément au périmètre validé.'}</small></div>
-        <i>Voir les détails</i>
-      </button>
-      <div class="v81ContractServiceDetails">
-        <div class="v79ContractIncluded"><b>Inclus dans cette prestation</b>
-          <ul>${serviceIncludedItems(s).map(x=>`<li>${x}</li>`).join('')||'<li>Périmètre décrit dans la prestation.</li>'}</ul>
-        </div>
+        <div><h6>${s.name}</h6><small>${serviceTarifTag(s)}</small></div>
       </div>
-    </article>`).join('');
+      <div class="v79ContractServiceBody">
+        <div class="v79ServiceLabel">Description détaillée</div>
+        <p>${s.detailed_description||serviceDesc(s)||'Prestation exécutée conformément au périmètre validé.'}</p>
+        <div class="v79ServiceLabel inc">Ce qui est inclus</div>
+        <ul class="v79ListInc">${serviceIncludedItems(s).map(x=>`<li>${x}</li>`).join('')||'<li>Périmètre décrit dans la prestation.</li>'}</ul>
+        ${exclusions.length?`
+        <div class="v79RedBox">
+          <div class="v79ServiceLabel exc">Non inclus dans cette prestation</div>
+          <ul class="v79ListExc">${exclusions.map(x=>`<li>${x}</li>`).join('')}</ul>
+        </div>`:''}
+      </div>
+    </article>`;
+  }).join('');
 }
 
 function contractHtml(){
   const c=st.client||{};
-  const exclusions=selectedExclusions();
   const optional=optionalFollowupServices();
   const loft=loftObligations(),client=clientObligations();
   return `
@@ -2085,25 +2102,23 @@ function contractHtml(){
     <div class="v47ContractClause"><h5>2. Prix et base contractuelle</h5><p>Le devis financier ${st.ref} fait partie intégrante du contrat. Montant total HT : <b>${money(totalHT())}</b>.${st.clientType==='professional'?` TVA 19 % : <b>${money(tva())}</b>. Total TTC : <b>${money(totalFinal())}</b>.`:''} Toute prestation supplémentaire nécessite un accord écrit.</p></div>
     <div class="v47ContractClause v79TechnicalArticle">
       <h5>3. Offre technique intégrée au contrat</h5>
-      <p>Les prestations ci-dessous constituent le périmètre technique contractuel. Cliquez sur une prestation pour consulter son descriptif et les éléments inclus.</p>
+      <p>Chaque prestation retenue est détaillée ci-dessous : description, éléments inclus et, le cas échéant, éléments non inclus propres à cette prestation.</p>
       <div class="v79ContractServices">${technicalContractHtml()}</div>
     </div>
-    ${(exclusions.length||optional.length)?`
+    ${optional.length?`
     <div class="v79ContractNb v81ContractNb">
-      <h5>4. NB · Éléments et missions non inclus</h5>
-      ${exclusions.length?`<ul class="v81ContractExclusions">${exclusions.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}
-      ${optional.length?`
-      <div class="v81ContractOptional">
-        <b>Prestations d’accompagnement disponibles</b>
-        <p>Une formule peut être ajoutée au devis avant validation définitive.</p>
-        <div class="v81ContractOptionalList">
-          ${optional.map(s=>`
-          <article class="v81ContractOptionalRow">
-            <div><h6>${s.name}</h6><span>${servicePricingLabel(s)}</span></div>
-            <div class="v81ContractOptionalActions"><button type="button" class="add" data-contract-add="${s.id}">Ajouter au devis</button></div>
-          </article>`).join('')}
-        </div>
-      </div>`:''}
+      <h5>4. NB · Prestations d’accompagnement non sélectionnées</h5>
+      <p class="v79NbIntro">Les prestations suivantes peuvent être ajoutées au devis selon les besoins du client.</p>
+      <div class="v81ContractOptionalList">
+        ${optional.map(s=>`
+        <article class="v81ContractOptionalRow">
+          <div><h6>${s.name}</h6><span>${servicePricingLabel(s)}</span></div>
+          <div class="v81ContractOptionalActions">
+            <button type="button" data-contract-details="${s.id}">Détails</button>
+            <button type="button" class="add" data-contract-add="${s.id}">Ajouter au devis</button>
+          </div>
+        </article>`).join('')}
+      </div>
     </div>`:''}
     <div class="v47ContractClause"><h5>5. Obligations de Loft Design</h5><ul class="v79Obligations">${loft.map(x=>`<li>${x}</li>`).join('')}</ul></div>
     <div class="v47ContractClause"><h5>6. Obligations du Client</h5><ul class="v79Obligations">${client.map(x=>`<li>${x}</li>`).join('')}</ul></div>
@@ -2210,13 +2225,6 @@ function renderPublicQuote(snapshot){
     document.body.classList.remove('publicQuoteMode');
     history.replaceState(null,'',location.pathname+location.hash.replace(/^#?quote$/,''));
   };
-  root.querySelectorAll('[data-contract-detail]').forEach(btn=>{
-    btn.onclick=()=>{
-      const card=btn.closest('.v81ContractService');if(!card)return;
-      const open=card.classList.toggle('open');
-      btn.setAttribute('aria-expanded',open?'true':'false');
-    };
-  });
 }
 
 function summary(c=st.client||{}){
@@ -2465,13 +2473,8 @@ function renderSuccess(){
     </div>
   `;
 
-  document.querySelectorAll('[data-contract-detail]').forEach(btn=>{
-    btn.onclick=()=>{
-      const card=btn.closest('.v81ContractService');if(!card)return;
-      const open=card.classList.toggle('open');
-      btn.setAttribute('aria-expanded',open?'true':'false');
-      const label=btn.querySelector('i');if(label)label.textContent=open?'Masquer les détails':'Voir les détails';
-    };
+  document.querySelectorAll('[data-contract-details]').forEach(btn=>{
+    btn.onclick=()=>openServiceDetailsModal(btn.dataset.contractDetails);
   });
 
   document.querySelectorAll('[data-contract-add]').forEach(btn=>{
@@ -2492,7 +2495,12 @@ function renderSuccess(){
     }
   };
 
-  document.querySelector('#v47DownloadDoc').onclick=()=>downloadUnifiedPdf();
+  document.querySelector('#v47DownloadDoc').onclick=async(e)=>{
+    const btn=e.currentTarget,label=btn.textContent;
+    btn.disabled=true;btn.textContent='Génération…';
+    try{await downloadUnifiedPdf()}
+    finally{btn.disabled=false;btn.textContent=label}
+  };
   document.querySelector('#v47SendDoc').onclick=()=>shareQuoteLink();
 
   function buildFacturationPayload(targetEmail) {
@@ -2690,56 +2698,94 @@ function renderSuccess(){
   };
 }
 
+/* The real logo is fetched once and cached as a data URL so jsPDF can embed it
+   with addImage (a bare <img> src can't be drawn into a PDF canvas directly). */
+let __logoDataUrlPromise=null;
+function loadLogoDataUrl(){
+  if(!__logoDataUrlPromise){
+    __logoDataUrlPromise=fetch('/static/img/icon.jpeg')
+      .then(r=>r.blob())
+      .then(blob=>new Promise((resolve,reject)=>{
+        const reader=new FileReader();
+        reader.onload=()=>resolve(reader.result);
+        reader.onerror=reject;
+        reader.readAsDataURL(blob);
+      }))
+      .catch(()=>null);
+  }
+  return __logoDataUrlPromise;
+}
+
 /* Unified PDF export: devis + technical/contract offer, matching the on-screen
    v47DocumentStage dossier (the server-generated PDF behind "Envoyer par e-mail"
    only covers the devis, so this client-side export is what produces the full
    contract dossier as a downloadable file). */
-function downloadUnifiedPdf(){
+async function downloadUnifiedPdf(){
   if(!window.jspdf){alert('Le module PDF se charge. Réessayez dans un instant.');return}
   const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'a4'});
   const rows=quoteRows(),c=st.client||{};
-  const teal=[18,126,143],cyan=[221,241,244],cyan2=[157,208,218];
+  const teal=[18,126,143],cyan=[221,241,244],cyan2=[157,208,218],red=[173,38,38];
+  const logoDataUrl=await loadLogoDataUrl();
 
-  function pageHeader(subtitle){
-    doc.setFillColor(231,238,229);doc.rect(0,0,210,48,'F');
+  /* Letterhead only (company details + logo) — fixed 44mm-tall band, never
+     shares a line with any other text, so nothing can overlap it. */
+  function letterhead(){
+    doc.setFillColor(231,238,229);doc.rect(0,0,172,44,'F');
     doc.setTextColor(72,77,75);doc.setFont('helvetica','bold');doc.setFontSize(12);
-    doc.text(COMPANY.name,15,13);
+    doc.text(COMPANY.name,15,12);
     doc.setFontSize(7);doc.setTextColor(75,83,81);
-    doc.text(`R.I.B N°: ${COMPANY.rib}`,15,19);
+
+    doc.setFont('helvetica','bold');doc.text('R.I.B N°:',15,18);
+    doc.setFont('helvetica','normal');doc.text(doc.splitTextToSize(COMPANY.rib,72),32,18,{lineHeightFactor:1.3});
     doc.setFont('helvetica','bold');doc.text('RC N° :',15,24);doc.setFont('helvetica','normal');doc.text(COMPANY.rc,29,24);
     doc.setFont('helvetica','bold');doc.text('MAIL:',95,24);doc.setFont('helvetica','normal');doc.text(COMPANY.mail,105,24);
     doc.setFont('helvetica','bold');doc.text('NIS N°:',15,29);doc.setFont('helvetica','normal');doc.text(COMPANY.nis,29,29);
     doc.setFont('helvetica','bold');doc.text('MOBILE :',95,29);doc.setFont('helvetica','normal');doc.text(COMPANY.mobile,111,29);
     doc.setFont('helvetica','bold');doc.text('NIF :',15,34);doc.setFont('helvetica','normal');doc.text(COMPANY.nif,25,34);
-    doc.setFont('helvetica','bold');doc.text('ADRESSE :',95,34);doc.setFont('helvetica','normal');doc.text(COMPANY.address,113,34);
+    doc.setFont('helvetica','bold');doc.text('ADRESSE :',95,34);doc.setFont('helvetica','normal');
+    doc.text(doc.splitTextToSize(COMPANY.address,55),113,34,{lineHeightFactor:1.3});
     doc.setFont('helvetica','bold');doc.text('N ART :',15,39);doc.setFont('helvetica','normal');doc.text(COMPANY.nart,29,39);
-    doc.setDrawColor(244,184,95);doc.setLineWidth(.8);doc.rect(178,6,20,18);
-    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text('LOFT',188,13,{align:'center'});
-    doc.setFontSize(6);doc.text('DESIGN',188,19,{align:'center'});
-    doc.setFontSize(11);doc.setTextColor(40);doc.text(`DOSSIER ${st.ref}`,150,29,{align:'right'});
-    doc.setFontSize(7.5);doc.setTextColor(90);doc.text(subtitle,150,35,{align:'right'});
+
+    if(logoDataUrl){
+      try{doc.addImage(logoDataUrl,'JPEG',177,10,26,20)}catch(_){}
+    }else{
+      doc.setDrawColor(244,184,95);doc.setLineWidth(.8);doc.rect(177,10,26,20);
+      doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(150,120,40);doc.text('LOFT',190,18,{align:'center'});
+      doc.setFontSize(6);doc.text('DESIGN',190,24,{align:'center'});
+    }
+  }
+
+  /* Section title, drawn below the letterhead — never overlaps it. */
+  function sectionTitle(title,subtitle){
+    doc.setFontSize(12);doc.setTextColor(40);doc.setFont('helvetica','bold');doc.text(title,15,52);
+    if(subtitle){doc.setFontSize(8);doc.setTextColor(100);doc.setFont('helvetica','normal');doc.text(subtitle,15,58)}
   }
 
   /* Page 1+: devis */
-  pageHeader('DEVIS · OFFRE FINANCIÈRE');
-  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(60);
-  doc.text(`CLIENT : ${clientLabel(c)}`,15,58);
-  doc.text(`PROJET : ${projectLabel()}`,15,64);
-  doc.setFont('helvetica','normal');
-  doc.text(`ADRESSE : ${clientAddress(c)}`,15,70);
-  doc.text(`DATE : ${new Date().toLocaleDateString('fr-DZ')}`,150,58);
+  function drawDevisHeader(data){
+    letterhead();
+    sectionTitle(`DOSSIER ${st.ref}`,data.pageNumber>1?'DEVIS · OFFRE FINANCIÈRE (suite)':'DEVIS · OFFRE FINANCIÈRE');
+    if(data.pageNumber===1){
+      doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(60);
+      doc.text(`CLIENT : ${clientLabel(c)}`,15,66);
+      doc.text(`PROJET : ${projectLabel()}`,15,72);
+      doc.setFont('helvetica','normal');
+      doc.text(`ADRESSE : ${clientAddress(c)}`,15,78);
+      doc.text(`DATE : ${new Date().toLocaleDateString('fr-DZ')}`,150,66);
+    }
+  }
 
   doc.autoTable({
-    startY:76,margin:{left:15,right:15,top:50,bottom:20},
+    startY:84,margin:{left:15,right:15,top:64,bottom:20},
     head:[['DÉSIGNATION','PU HT','UNITÉ','QTÉ','MONTANT HT']],
     body:rows.map(r=>[r.designation,typeof r.pu==='number'?money(r.pu):r.pu,r.unit,String(r.qty),money(r.total)]),
     headStyles:{fillColor:teal,textColor:255,fontSize:8},
     styles:{fontSize:8,cellPadding:3,textColor:[62,69,67]},
-    didDrawPage:(data)=>{if(data.pageNumber>1)pageHeader('DEVIS · OFFRE FINANCIÈRE (suite)')}
+    didDrawPage:drawDevisHeader
   });
 
   let y=doc.lastAutoTable.finalY+6;
-  if(y>255){doc.addPage();pageHeader('DEVIS · OFFRE FINANCIÈRE (suite)');y=58}
+  if(y>255){doc.addPage();drawDevisHeader({pageNumber:2});y=66}
   doc.setFillColor(...cyan);doc.rect(115,y,80,9,'F');
   doc.setFont('helvetica','bold');doc.setTextColor(50);doc.setFontSize(9.5);
   doc.text('TOTAL HT',120,y+6);doc.text(money(totalHT()),190,y+6,{align:'right'});
@@ -2750,11 +2796,14 @@ function downloadUnifiedPdf(){
     doc.text('TOTAL TTC',120,y+6);doc.text(money(totalFinal()),190,y+6,{align:'right'});
   }
 
-  /* Contract, rendered as a single-column autoTable so pagination is automatic. */
+  /* Contract, rendered as a single-column autoTable so pagination is automatic.
+     Each service's own "Non inclus dans cette prestation" stays under that
+     service (in red) — exclusions are never merged into one global block. */
   const clauseRows=[];
   const addTitle=t=>clauseRows.push([{content:t,styles:{fontStyle:'bold',textColor:teal,fontSize:9,cellPadding:{top:5,bottom:2,left:0,right:0}}}]);
   const addText=t=>clauseRows.push([{content:t,styles:{fontSize:8,textColor:[70,78,75],cellPadding:{top:0,bottom:3,left:0,right:0}}}]);
-  const addList=items=>items.forEach(it=>clauseRows.push([{content:`•  ${it}`,styles:{fontSize:7.6,textColor:[70,78,75],cellPadding:{top:.5,bottom:.5,left:4,right:0}}}]));
+  const addSub=(t,color)=>clauseRows.push([{content:t,styles:{fontStyle:'bold',textColor:color,fontSize:7.6,cellPadding:{top:3,bottom:1,left:2,right:0}}}]);
+  const addList=(items,color=[70,78,75])=>items.forEach(it=>clauseRows.push([{content:`•  ${it}`,styles:{fontSize:7.4,textColor:color,cellPadding:{top:.5,bottom:.5,left:6,right:0}}}]));
 
   addTitle('Entre');
   addText(`${COMPANY.name} (« Loft Design ») et ${clientLabel(c)} (« le Client »). Projet : ${projectLabel()}. Référence : ${st.ref}.`);
@@ -2764,12 +2813,22 @@ function downloadUnifiedPdf(){
   addText(`Le devis financier ${st.ref} fait partie intégrante du contrat. Montant total HT : ${money(totalHT())}.${st.clientType==='professional'?` TVA 19 % : ${money(tva())}. Total TTC : ${money(totalFinal())}.`:''} Toute prestation supplémentaire nécessite un accord écrit.`);
   addTitle('3. Offre technique intégrée au contrat');
   selectedServiceObjects().forEach((s,i)=>{
-    addTitle(`${String(i+1).padStart(2,'0')} · ${s.name}`);
+    addTitle(`${String(i+1).padStart(2,'0')} · ${s.name} — ${serviceTarifTag(s)}`);
     addText(s.detailed_description||serviceDesc(s)||'Prestation exécutée conformément au périmètre validé.');
-    addList(serviceIncludedItems(s).length?serviceIncludedItems(s):['Périmètre décrit dans la prestation.']);
+    addSub('Ce qui est inclus',[38,111,82]);
+    addList(serviceIncludedItems(s).length?serviceIncludedItems(s):['Périmètre décrit dans la prestation.'],[70,78,75]);
+    const excl=serviceExclusionsFor(s);
+    if(excl.length){
+      addSub('Non inclus dans cette prestation',red);
+      addList(excl,red);
+    }
   });
-  const exclusions=selectedExclusions();
-  if(exclusions.length){addTitle('4. NB · Éléments et missions non inclus');addList(exclusions)}
+  const optional=optionalFollowupServices();
+  if(optional.length){
+    addTitle('4. NB · Prestations d’accompagnement non sélectionnées');
+    addText('Les prestations suivantes peuvent être ajoutées au devis selon les besoins du client.');
+    optional.forEach(s=>addList([`${s.name} — ${servicePricingLabel(s)}`]));
+  }
   addTitle('5. Obligations de Loft Design');addList(loftObligations());
   addTitle('6. Obligations du Client');addList(clientObligations());
   addTitle('7. Validations, modifications et prestations supplémentaires');
@@ -2782,14 +2841,18 @@ function downloadUnifiedPdf(){
   addText('L’offre est valable 30 jours sauf indication contraire. La signature du contrat vaut acceptation du devis, de l’offre technique intégrée, des éléments non inclus et des obligations respectives.');
 
   doc.addPage();
+  function drawContractHeader(data){
+    letterhead();
+    sectionTitle(`DOSSIER ${st.ref}`,data.pageNumber>1?'CONTRAT — SUITE':'CONTRAT PERSONNALISÉ · OFFRE TECHNIQUE INTÉGRÉE');
+  }
   doc.autoTable({
-    startY:50,margin:{left:15,right:15,top:50,bottom:20},
+    startY:64,margin:{left:15,right:15,top:64,bottom:20},
     theme:'plain',showHead:false,body:clauseRows,
-    didDrawPage:()=>pageHeader('CONTRAT PERSONNALISÉ DE PRESTATIONS')
+    didDrawPage:drawContractHeader
   });
 
   let sy=doc.lastAutoTable.finalY+10;
-  if(sy>250){doc.addPage();pageHeader('CONTRAT — SIGNATURES');sy=58}
+  if(sy>250){doc.addPage();drawContractHeader({pageNumber:2});sy=66}
   doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(60);
   doc.text('Pour Loft Design',15,sy);
   doc.text('Le Client',110,sy);
