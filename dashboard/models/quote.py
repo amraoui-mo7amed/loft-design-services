@@ -117,6 +117,18 @@ class Quote(models.Model):
         default=Decimal("0.00"),
         verbose_name=_("Total Surface (m²)"),
     )
+    surface_interior = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        verbose_name=_("Surface Intérieure (m²)"),
+    )
+    surface_exterior = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        verbose_name=_("Surface Extérieure (m²)"),
+    )
     estimated_total_project_cost = models.DecimalField(
         max_digits=14,
         decimal_places=2,
