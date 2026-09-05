@@ -588,6 +588,104 @@ def quote_send(request, pk):
 
 
 # ──────────────────────────────────────────────
+# Edit Quote in the live composer
+# ──────────────────────────────────────────────
+
+def _build_composer_state_from_quote(quote):
+    """Reconstruct a composer-resumable state from this quote's own DB
+    records, for quotes that were never saved/sent from the composer (so
+    composer_state was never populated there)."""
+    dr = quote.design_request
+    services_ids = []
+    selected_services = {}
+
+    if dr:
+        pricing_type_map = {
+            "area": "PRICE_PER_M2", "PRICE_PER_M2": "PRICE_PER_M2",
+            "hourly": "HOURLY", "HOURLY": "HOURLY",
+            "percent_project_cost": "PERCENTAGE", "PERCENTAGE": "PERCENTAGE",
+        }
+        for opt in dr.options.select_related("service").all():
+            if not opt.service_id:
+                continue
+            sid = str(opt.service_id)
+            services_ids.append(sid)
+            selected_services[sid] = {
+                "serviceId": sid,
+                "pricingType": pricing_type_map.get(opt.pricing_type, "FIXED_UNIT"),
+                "useInterior": bool(opt.use_interior),
+                "useExterior": bool(opt.use_exterior),
+                "hours": float(opt.hours or 0),
+                "quantity": float(opt.quantity or 1),
+                "referenceAmount": float(opt.reference_amount or 0),
+            }
+    else:
+        for item in quote.items.select_related("service").all():
+            if item.service_id:
+                services_ids.append(str(item.service_id))
+
+    # Derive interior/exterior from the actual floor breakdown, matching the
+    # composer's own isExteriorLevel() keyword rule — the Quote-level
+    # surface_interior/surface_exterior fields are unreliable on quotes
+    # created before those fields existed.
+    exterior_keywords = ("terrasse", "jardin", "ext", "piscine", "cour")
+    levels, surfaces = [], {}
+    surface_interior = surface_exterior = Decimal("0")
+    if dr:
+        for f in dr.floors.all().order_by("order"):
+            levels.append(f.name)
+            surfaces[f.name] = float(f.surface or 0)
+            if any(kw in f.name.lower() for kw in exterior_keywords):
+                surface_exterior += f.surface or Decimal("0")
+            else:
+                surface_interior += f.surface or Decimal("0")
+    if not levels:
+        levels = ["RDC · niveau principal"]
+        surface_interior = quote.surface_interior or Decimal("0")
+        surface_exterior = quote.surface_exterior or Decimal("0")
+        surfaces = {"RDC · niveau principal": float(surface_interior)}
+
+    return {
+        "mode": (dr.mode if dr else "custom") or "custom",
+        "projectType": quote.project_type.name if quote.project_type else "",
+        "surfaceInterior": float(surface_interior),
+        "surfaceExterior": float(surface_exterior),
+        "levels": levels,
+        "surfaces": surfaces,
+        "spaces": [str(s.space_id) for s in quote.spaces.all() if s.space_id],
+        "services": services_ids,
+        "selectedServices": selected_services,
+        "clientType": quote.client_type,
+        "client": {
+            "firstName": quote.first_name,
+            "lastName": quote.last_name,
+            "company": quote.company_name,
+            "phone": quote.phone,
+            "email": quote.email,
+            "wilaya": quote.wilaya,
+            "wilayaName": quote.wilaya,
+            "commune": quote.commune,
+        },
+        "ref": quote.quote_number,
+        "estimatedProjectCost": float(quote.estimated_total_project_cost or 0),
+    }
+
+
+@admin_required
+def quote_edit_redirect(request, pk):
+    """Send the admin into the live composer, prefilled with this quote's
+    project, so they can add/remove services and re-save it from there —
+    same "resume" mechanism the client-facing dossier link uses."""
+    quote = get_object_or_404(Quote.objects.select_related("design_request", "project_type"), pk=pk)
+
+    if not quote.composer_state:
+        quote.composer_state = _build_composer_state_from_quote(quote)
+        quote.save(update_fields=["composer_state"])
+
+    return redirect(f"/?resume={quote.uuid}#composer")
+
+
+# ──────────────────────────────────────────────
 # Download Quote PDF
 # ──────────────────────────────────────────────
 

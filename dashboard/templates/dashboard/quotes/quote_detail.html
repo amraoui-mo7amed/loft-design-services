@@ -225,6 +225,9 @@
                 <a href="{% url 'dash:quote_download_pdf' quote.pk %}" class="btn btn-outline-danger rounded-3 px-3 py-2 fw-bold shadow-sm btn-sm" title="{% trans 'Download PDF' %}">
                     <i class="fas fa-file-pdf me-1"></i> {% trans "PDF" %}
                 </a>
+                <a href="{% url 'dash:quote_edit_redirect' quote.pk %}" target="_blank" rel="noopener" class="btn btn-outline-light rounded-3 px-3 py-2 fw-bold shadow-sm btn-sm" title="{% trans 'Modify this quote in the composer' %}">
+                    <i class="fas fa-pen me-1"></i> {% trans "Modifier" %}
+                </a>
                 <button type="button" class="btn btn-outline-secondary rounded-3 px-3 py-2 btn-sm text-danger" id="btnDeleteQuote" data-url="{% url 'dash:quote_delete' quote.pk %}">
                     <i class="fas fa-trash"></i>
                 </button>

@@ -14,6 +14,7 @@ urlpatterns = [
     path("quotes/<int:pk>/send/", quotes.quote_send, name="quote_send"),
     path("quotes/<int:pk>/delete/", quotes.quote_delete, name="quote_delete"),
     path("quotes/<int:pk>/download-pdf/", quotes.quote_download_pdf, name="quote_download_pdf"),
+    path("quotes/<int:pk>/edit/", quotes.quote_edit_redirect, name="quote_edit_redirect"),
     path("quote/<uuid:uuid>/", quotes.customer_quote_view, name="customer_quote_view"),
     # Dashboard
     path("home/", dashboard.dash_home, name="dash_home"),
